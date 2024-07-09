@@ -3,6 +3,7 @@ Scriptname SLSF_FameMaintenance extends Quest
 SLSF_Configuration Property Config Auto
 SLSF_Utility Property SLSFUtility Auto
 SexLabFramework Property SexLab Auto
+SLSF_Monitor Property Monitor Auto
 
 Actor Property PlayerRef Auto
 Spell Property Counter_Per Auto
@@ -807,9 +808,21 @@ Function FamePeriodicIncrease()
 					EndIf
 				EndIf
 				
-				If IncMax[4] < 100
-					If PlayerRef.HasMagicEffect(SumSur1Sight) || PlayerRef.HasMagicEffect(SumSur3Sight) || PlayerRef.HasMagicEffect(SumSur5Sight) || PlayerRef.HasMagicEffect(Naked) ||  PlayerRef.HasMagicEffect(OtherSur9)
+				If Monitor.AND_Installed == True
+					If PlayerRef.HasMagicEffect(SumSur1Sight) || PlayerRef.HasMagicEffect(SumSur3Sight) || PlayerRef.HasMagicEffect(SumSur5Sight) || PlayerRef.GetFactionRank(Monitor.AND_Factions[0]) == 1 ||  PlayerRef.HasMagicEffect(OtherSur9)
 						IncMax[4] = 100
+					ElseIf PlayerRef.GetFactionRank(Monitor.AND_Factions[1]) == 1 || PlayerRef.GetFactionRank(Monitor.AND_Factions[2]) == 1
+						IncMax[4] = 75
+					ElseIf PlayerRef.GetFactionRank(Monitor.AND_Factions[4]) == 1 || PlayerRef.GetFactionRank(Monitor.AND_Factions[6]) == 1
+						IncMax[4] = 50
+					ElseIf PlayerRef.GetFactionRank(Monitor.AND_Factions[3]) == 1 || PlayerRef.GetFactionRank(Monitor.AND_Factions[5]) == 1 || PlayerRef.GetFactionRank(Monitor.AND_Factions[7]) == 1
+						IncMax[4] = 25
+					EndIf
+				Else
+					If IncMax[4] < 100
+						If PlayerRef.HasMagicEffect(SumSur1Sight) || PlayerRef.HasMagicEffect(SumSur3Sight) || PlayerRef.HasMagicEffect(SumSur5Sight) || PlayerRef.HasMagicEffect(Naked) ||  PlayerRef.HasMagicEffect(OtherSur9)
+							IncMax[4] = 100
+						EndIf
 					EndIf
 				EndIf
 				

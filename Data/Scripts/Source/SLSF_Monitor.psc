@@ -27,6 +27,10 @@ Keyword Property CumVaginalStacked Auto
 FormList Property SlaExcluded Auto
 Faction Property SlANaked Auto
 
+;Advanced Nudity Detection
+Faction[] Property AND_Factions Auto
+Bool Property AND_Installed Auto
+
 Event OnInit()
 	Utility.Wait(2.0)
 	If !PlayerRef.IsChild()
@@ -41,6 +45,21 @@ Event OnPlayerLoadGame()
 	If !PlayerRef.IsChild()
 		SLSFUtility.CheckPapyrusLocationsConsistence()
 		Maintenance()
+	EndIf
+	
+	If Game.GetModByName("Advanced Nudity Detection.esp" != 255)
+		AND_Installed = True
+		AND_Factions = new Faction[8]
+			AND_Factions[0] = Game.GetFormFromFile(0x831, "Advanced Nudity Detection.esp") as Faction ;Nude
+			AND_Factions[1] = Game.GetFormFromFile(0x832, "Advanced Nudity Detection.esp") as Faction ;Topless
+			AND_Factions[2] = Game.GetFormFromFile(0x833, "Advanced Nudity Detection.esp") as Faction ;Bottomless
+			AND_Factions[3] = Game.GetFormFromFile(0x834, "Advanced Nudity Detection.esp") as Faction ;Showing Bra
+			AND_Factions[4] = Game.GetFormFromFile(0x82F, "Advanced Nudity Detection.esp") as Faction ;Showing Chest
+			AND_Factions[5] = Game.GetFormFromFile(0x835, "Advanced Nudity Detection.esp") as Faction ;Showing Underwear
+			AND_Factions[6] = Game.GetFormFromFile(0x830, "Advanced Nudity Detection.esp") as Faction ;Showing Genitals
+			AND_Factions[7] = Game.GetFormFromFile(0x82E, "Advanced Nudity Detection.esp") as Faction ;Showing Ass
+	Else
+		AND_Installed = False
 	EndIf
 EndEvent
 
@@ -354,9 +373,17 @@ Function CheckSurFaces5_7And9()
 						EndIf
 					EndIf
 					
-					If (Equipped.HasKeyword(Config.ClothingKeyword[6]) || Equipped.HasKeyword(Config.ClothingKeyword[7])) && !Found
-						Found = !SLSFUtility.CheckIfExcluded(Config.ExcludedBody, Equipped)
-						PlayerRef.SetFactionRank(EquipSurfaceBody[7], Found as Int)
+					If AND_Installed == True
+						If PlayerRef.GetFactionRank(AND_Factions[0]) == 1
+							PlayerRef.SetFactionRank(EquipSurfaceBody[7], 0)
+						Else
+							PlayerRef.SetFactionRank(EquipSurfaceBody[7], 1)
+						EndIf
+					Else
+						If (Equipped.HasKeyword(Config.ClothingKeyword[6]) || Equipped.HasKeyword(Config.ClothingKeyword[7])) && !Found
+							Found = !SLSFUtility.CheckIfExcluded(Config.ExcludedBody, Equipped)
+							PlayerRef.SetFactionRank(EquipSurfaceBody[7], Found as Int)
+						EndIf
 					EndIf
 					;Found = False
 				EndIf
