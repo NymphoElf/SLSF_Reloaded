@@ -4,8 +4,11 @@ Import JsonUtil
 
 SLSF_Reloaded_FameManager Property FameManager Auto
 SLSF_Reloaded_LocationManager Property LocationManager Auto
+SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
+
+String[] Property ExternalFlagMods Auto
 
 Event OnInit()
 	RegisterExternalEvents()
@@ -63,6 +66,30 @@ Function RegisterExternalEvents()
 	RegisterForModEvent("SLSF_Reloaded_SendLocationRegisterByName", "OnExternalLocationRegisterByName")
 	RegisterForModEvent("SLSF_Reloaded_SendLocationUnregister", "OnExternalLocationUnregister")
 	RegisterForModEvent("SLSF_Reloaded_SendLocationUnregisterByName", "OnExternalLocationUnregisterByName")
+	
+	;FLAG LISTENERS
+	RegisterForModEvent("SLSF_Reloaded_SetSlutFlag", "OnExternalSlutFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetWhoreFlag", "OnExternalWhoreFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetExhibitionistFlag", "OnExternalExhibitionistFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetOralFlag", "OnExternalOralFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetAnalFlag", "OnExternalAnalFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetNastyFlag", "OnExternalNastyFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetPregnantFlag", "OnExternalPregnantFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetDominantFlag", "OnExternalDominantFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetSubmissiveFlag", "OnExternalSubmissiveFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetSadistFlag", "OnExternalSadistFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetMasochistFlag", "OnExternalMasochistFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetGentleFlag", "OnExternalGentleFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetLikesMenFlag", "OnExternalLikesMenFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetLikesWomenFlag", "OnExternalLikesWomenFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetLikesOrcFlag", "OnExternalLikesOrcFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetLikesKhajiitFlag", "OnExternalLikesKhajiitFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetLikesArgonianFlag", "OnExternalLikesArgonianFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetBestialityFlag", "OnExternalBestialityFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetGroupFlag", "OnExternalGroupFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetBoundFlag", "OnExternalBoundFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetTattooFlag", "OnExternalTattooFlag")
+	RegisterForModEvent("SLSF_Reloaded_SetCumDumpFlag", "OnExternalCumDumpFlag")
 EndFunction
 
 ;/
@@ -803,4 +830,192 @@ Event OnExternalLocationUnregisterByName(String LocationToUnregister = "NULL")
 	Else
 		LocationManager.UnregisterCustomLocationExternal(LocationToUnregister)
 	EndIf
+EndEvent
+
+;/
+==============================
+========FLAG LISTENERS========
+==============================
+These listeners allow you to manually set Fame flags, which will enable the periodic check
+to increase fame based on your mod's internal state.
+In order to prevent conflicts, these flags are held in a json file and filtered by mod name.
+Therefore, you must send the MOD NAME string and the BOOLEAN for that category.
+TRUE means that you want your mod to enable fame gains for that category
+FALSE means you want to disable fame gains for that category (this will NOT overrule this mod's internal conditions, if they apply).
+/;
+
+Event OnExternalSlutFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Slut Flag", Flag as String)
+EndEvent
+
+Event OnExternalWhoreFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Whore Flag", Flag as String)
+EndEvent
+
+Event OnExternalExhibitionistFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Exhibitionist Flag", Flag as String)
+EndEvent
+
+Event OnExternalOralFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Oral Flag", Flag as String)
+EndEvent
+
+Event OnExternalAnalFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Anal Flag", Flag as String)
+EndEvent
+
+Event OnExternalNastyFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Nasty Flag", Flag as String)
+EndEvent
+
+Event OnExternalPregnantFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Pregnant Flag", Flag as String)
+EndEvent
+
+Event OnExternalDominantFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Dominant Flag", Flag as String)
+EndEvent
+
+Event OnExternalSubmissiveFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Submissive Flag", Flag as String)
+EndEvent
+
+Event OnExternalSadistFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Sadist Flag", Flag as String)
+EndEvent
+
+Event OnExternalMasochistFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Masochist Flag", Flag as String)
+EndEvent
+
+Event OnExternalGentleFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Gentle Flag", Flag as String)
+EndEvent
+
+Event OnExternalLikesMenFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Men Flag", Flag as String)
+EndEvent
+
+Event OnExternalLikesWomenFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Women Flag", Flag as String)
+EndEvent
+
+Event OnExternalLikesOrcFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Orc Flag", Flag as String)
+EndEvent
+
+Event OnExternalLikesKhajiitFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Khajiit Flag", Flag as String)
+EndEvent
+
+Event OnExternalLikesArgonianFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Argonian Flag", Flag as String)
+EndEvent
+
+Event OnExternalBestialityFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Bestiality Flag", Flag as String)
+EndEvent
+
+Event OnExternalGroupFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Group Flag", Flag as String)
+EndEvent
+
+Event OnExternalBoundFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Bound Flag", Flag as String)
+EndEvent
+
+Event OnExternalTattooFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Tattoo Flag", Flag as String)
+EndEvent
+
+Event OnExternalCumDumpFlag(String ModName, Bool Flag)
+	If ExternalFlagMods.Find(ModName) == -1
+		Int EmptyIndex = ExternalFlagMods.Find(None)
+		ExternalFlagMods[EmptyIndex] = ModName
+	EndIf
+	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Cum Dump Flag", Flag as String)
 EndEvent

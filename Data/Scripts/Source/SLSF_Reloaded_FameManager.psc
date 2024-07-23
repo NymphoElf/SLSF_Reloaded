@@ -6,6 +6,7 @@ SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_PlayerScript Property PlayerScript Auto
+SLSF_Reloaded_ModEventListener Property ExternalListener Auto
 SLSF_Reloaded_MCM Property Config Auto
 SexlabFramework Property Sexlab Auto
 
@@ -37,6 +38,29 @@ Keyword Property SLSF_Reloaded_VaginalPiercing Auto
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 
 Actor Property PlayerRef Auto ;= PlayerScript.PlayerRef
+
+Bool Property ExternalWhoreFlag Auto Hidden
+Bool Property ExternalSlutFlag Auto Hidden
+Bool Property ExternalExhibitionistFlag Auto Hidden
+Bool Property ExternalOralFlag Auto Hidden
+Bool Property ExternalAnalFlag Auto Hidden
+Bool Property ExternalNastyFlag Auto Hidden
+Bool Property ExternalPregnantFlag Auto Hidden
+Bool Property ExternalDominantFlag Auto Hidden
+Bool Property ExternalSubmissiveFlag Auto Hidden
+Bool Property ExternalSadistFlag Auto Hidden
+Bool Property ExternalMasochistFlag Auto Hidden
+Bool Property ExternalGentleFlag Auto Hidden
+Bool Property ExternalLikesMenFlag Auto Hidden
+Bool Property ExternalLikesWomenFlag Auto Hidden
+Bool Property ExternalLikesOrcFlag Auto Hidden
+Bool Property ExternalLikesKhajiitFlag Auto Hidden
+Bool Property ExternalLikesArgonianFlag Auto Hidden
+Bool Property ExternalBestialityFlag Auto Hidden
+Bool Property ExternalGroupFlag Auto Hidden
+Bool Property ExternalBoundFlag Auto Hidden
+Bool Property ExternalTattooFlag Auto Hidden
+Bool Property ExternalCumDumpFlag Auto Hidden
 
 ;/
 NOTE TO SELF - UTILIZE ARRAY 'FIND' FUNCTION TO FURTHER OPTIMIZE CODE?
@@ -238,6 +262,121 @@ Function NameChangeHandler(String NewPlayerName)
 	EndIf
 	FamePaused = False
 	Debug.Notification("SLSF Reloaded - Name Change Finished. Fame is Unpaused.")
+EndFunction
+
+Function CheckExternalFlags()
+	If ExternalListener.ExternalFlagMods.Length > 0
+		Int ModIndex = 0
+		Int FameIndex = 0
+		Bool FameFlag = False
+		Int TrueCount = 0
+		While FameIndex < FameType.Length
+			While ModIndex < ExternalListener.ExternalFlagMods.Length
+				If GetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ExternalListener.ExternalFlagMods[ModIndex] + " " + FameType[FameIndex] + " Flag") == "true"
+					TrueCount += 1
+				EndIf
+				ModIndex += 1
+			EndWhile
+			
+			If TrueCount > 0
+				If FameType[FameIndex] == "Whore"
+					ExternalWhoreFlag = True
+				ElseIf FameType[FameIndex] == "Slut"
+					ExternalSlutFlag = True
+				ElseIf FameType[FameIndex] == "Exhibitionist"
+					ExternalExhibitionistFlag = True
+				ElseIf FameType[FameIndex] == "Oral"
+					ExternalOralFlag = True
+				ElseIf FameType[FameIndex] == "Anal"
+					ExternalAnalFlag = True
+				ElseIf FameType[FameIndex] == "Nasty"
+					ExternalNastyFlag = True
+				ElseIf FameType[FameIndex] == "Pregnant"
+					ExternalPregnantFlag = True
+				ElseIf FameType[FameIndex] == "Dominant"
+					ExternalDominantFlag = True
+				ElseIf FameType[FameIndex] == "Submissive"
+					ExternalSubmissiveFlag = True
+				ElseIf FameType[FameIndex] == "Sadist"
+					ExternalSadistFlag = True
+				ElseIf FameType[FameIndex] == "Masochist"
+					ExternalMasochistFlag = True
+				ElseIf FameType[FameIndex] == "Gentle"
+					ExternalGentleFlag = True
+				ElseIf FameType[FameIndex] == "Likes Men"
+					ExternalLikesMenFlag = True
+				ElseIf FameType[FameIndex] == "Likes Women"
+					ExternalLikesWomenFlag = True
+				ElseIf FameType[FameIndex] == "Likes Orc"
+					ExternalLikesOrcFlag = True
+				ElseIf FameType[FameIndex] == "Likes Khajiit"
+					ExternalLikesKhajiitFlag = True
+				ElseIf FameType[FameIndex] == "Likes Argonian"
+					ExternalLikesArgonianFlag = True
+				ElseIf FameType[FameIndex] == "Bestiality"
+					ExternalBestialityFlag = True
+				ElseIf FameType[FameIndex] == "Group"
+					ExternalGroupFlag = True
+				ElseIf FameType[FameIndex] == "Bound"
+					ExternalBoundFlag = True
+				ElseIf FameType[FameIndex] == "Tattoo"
+					ExternalTattooFlag = True
+				ElseIf FameType[FameIndex] == "Cum Dump"
+					ExternalCumDumpFlag = True
+				EndIf
+			Else
+				If FameType[FameIndex] == "Whore"
+					ExternalWhoreFlag = False
+				ElseIf FameType[FameIndex] == "Slut"
+					ExternalSlutFlag = False
+				ElseIf FameType[FameIndex] == "Exhibitionist"
+					ExternalExhibitionistFlag = False
+				ElseIf FameType[FameIndex] == "Oral"
+					ExternalOralFlag = False
+				ElseIf FameType[FameIndex] == "Anal"
+					ExternalAnalFlag = False
+				ElseIf FameType[FameIndex] == "Nasty"
+					ExternalNastyFlag = False
+				ElseIf FameType[FameIndex] == "Pregnant"
+					ExternalPregnantFlag = False
+				ElseIf FameType[FameIndex] == "Dominant"
+					ExternalDominantFlag = False
+				ElseIf FameType[FameIndex] == "Submissive"
+					ExternalSubmissiveFlag = False
+				ElseIf FameType[FameIndex] == "Sadist"
+					ExternalSadistFlag = False
+				ElseIf FameType[FameIndex] == "Masochist"
+					ExternalMasochistFlag = False
+				ElseIf FameType[FameIndex] == "Gentle"
+					ExternalGentleFlag = False
+				ElseIf FameType[FameIndex] == "Likes Men"
+					ExternalLikesMenFlag = False
+				ElseIf FameType[FameIndex] == "Likes Women"
+					ExternalLikesWomenFlag = False
+				ElseIf FameType[FameIndex] == "Likes Orc"
+					ExternalLikesOrcFlag = False
+				ElseIf FameType[FameIndex] == "Likes Khajiit"
+					ExternalLikesKhajiitFlag = False
+				ElseIf FameType[FameIndex] == "Likes Argonian"
+					ExternalLikesArgonianFlag = False
+				ElseIf FameType[FameIndex] == "Bestiality"
+					ExternalBestialityFlag = False
+				ElseIf FameType[FameIndex] == "Group"
+					ExternalGroupFlag = False
+				ElseIf FameType[FameIndex] == "Bound"
+					ExternalBoundFlag = False
+				ElseIf FameType[FameIndex] == "Tattoo"
+					ExternalTattooFlag = False
+				ElseIf FameType[FameIndex] == "Cum Dump"
+					ExternalCumDumpFlag = False
+				EndIf
+			EndIf
+			
+			TrueCount = 0
+			ModIndex = 0
+			FameIndex += 1
+		EndWhile
+	EndIf
 EndFunction
 
 Bool Function CanGainWhoreFame()
@@ -508,112 +647,114 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	Int PossibleFameCount = 0
 	PossibleFameArray = New String[22]
 	
-	If CanGainAnalFame(FameLocation) == True || CheckTattooExtraFame("Anal") == True
+	CheckExternalFlags()
+	
+	If CanGainAnalFame(FameLocation) == True || CheckTattooExtraFame("Anal") == True || ExternalAnalFlag == True
 		PossibleFameArray[PossibleFameCount] = "Anal"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainBoundFame() == True || CheckTattooExtraFame("Bound") == True
+	If CanGainBoundFame() == True || CheckTattooExtraFame("Bound") == True || ExternalBoundFlag == True
 		PossibleFameArray[PossibleFameCount] = "Bound"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainCumDumpFame() == True || CheckTattooExtraFame("Cum Dump") == True
+	If CanGainCumDumpFame() == True || CheckTattooExtraFame("Cum Dump") == True || ExternalCumDumpFlag == True
 		PossibleFameArray[PossibleFameCount] = "Cum Dump"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainExhibitionistFame(FameLocation) == True || CheckTattooExtraFame("Exhibitionist") == True
+	If CanGainExhibitionistFame(FameLocation) == True || CheckTattooExtraFame("Exhibitionist") == True || ExternalExhibitionistFlag == True
 		PossibleFameArray[PossibleFameCount] = "Exhibitionist"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainNastyFame(FameLocation) == True || CheckTattooExtraFame("Nasty") == True
+	If CanGainNastyFame(FameLocation) == True || CheckTattooExtraFame("Nasty") == True || ExternalNastyFlag == True
 		PossibleFameArray[PossibleFameCount] = "Nasty"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainOralFame(FameLocation) == True || CheckTattooExtraFame("Oral") == True
+	If CanGainOralFame(FameLocation) == True || CheckTattooExtraFame("Oral") == True || ExternalOralFlag == True
 		PossibleFameArray[PossibleFameCount] = "Oral"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainPregnantFame() == True || CheckTattooExtraFame("Pregnant") == True
+	If CanGainPregnantFame() == True || CheckTattooExtraFame("Pregnant") == True || ExternalPregnantFlag == True
 		PossibleFameArray[PossibleFameCount] = "Pregnant"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainSlutFame(FameLocation) == True || CheckTattooExtraFame("Slut") == True
+	If CanGainSlutFame(FameLocation) == True || CheckTattooExtraFame("Slut") == True || ExternalSlutFlag == True
 		PossibleFameArray[PossibleFameCount] = "Slut"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainTattooFame(FameLocation) == True
+	If CanGainTattooFame(FameLocation) == True || ExternalTattooFlag == True
 		PossibleFameArray[PossibleFameCount] = "Tattoo"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainWhoreFame() == True || CheckTattooExtraFame("Whore") == True
+	If CanGainWhoreFame() == True || CheckTattooExtraFame("Whore") == True || ExternalWhoreFlag == True
 		PossibleFameArray[PossibleFameCount] = "Whore"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Dominant") == True
+	If CheckTattooExtraFame("Dominant") == True || ExternalDominantFlag == True
 		PossibleFameArray[PossibleFameCount] = "Dominant"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Submissive") == True
+	If CheckTattooExtraFame("Submissive") == True || ExternalSubmissiveFlag == True
 		PossibleFameArray[PossibleFameCount] = "Submissive"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Sadist") == True
+	If CheckTattooExtraFame("Sadist") == True || ExternalSadistFlag == True
 		PossibleFameArray[PossibleFameCount] = "Sadist"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Masochist") == True
+	If CheckTattooExtraFame("Masochist") == True || ExternalMasochistFlag == True
 		PossibleFameArray[PossibleFameCount] = "Masochist"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Gentle") == True
+	If CheckTattooExtraFame("Gentle") == True || ExternalGentleFlag == True
 		PossibleFameArray[PossibleFameCount] = "Gentle"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Likes Men") == True
+	If CheckTattooExtraFame("Likes Men") == True || ExternalLikesMenFlag == True
 		PossibleFameArray[PossibleFameCount] = "Likes Men"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Likes Women") == True
+	If CheckTattooExtraFame("Likes Women") == True || ExternalLikesWomenFlag == True
 		PossibleFameArray[PossibleFameCount] = "Likes Women"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Likes Orc") == True
+	If CheckTattooExtraFame("Likes Orc") == True || ExternalLikesOrcFlag == True
 		PossibleFameArray[PossibleFameCount] = "Likes Orc"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Likes Khajiit") == True
+	If CheckTattooExtraFame("Likes Khajiit") == True || ExternalLikesKhajiitFlag == True
 		PossibleFameArray[PossibleFameCount] = "Likes Khajiit"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Likes Argonian") == True
+	If CheckTattooExtraFame("Likes Argonian") == True || ExternalLikesArgonianFlag == True
 		PossibleFameArray[PossibleFameCount] = "Likes Argonian"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Bestiality") == True
+	If CheckTattooExtraFame("Bestiality") == True || ExternalBestialityFlag == True
 		PossibleFameArray[PossibleFameCount] = "Bestiality"
 		PossibleFameCount += 1
 	EndIf
 	
-	If CheckTattooExtraFame("Group") == True
+	If CheckTattooExtraFame("Group") == True || ExternalGroupFlag == True
 		PossibleFameArray[PossibleFameCount] = "Group"
 		PossibleFameCount += 1
 	EndIf
@@ -675,6 +816,11 @@ Function GainFame(String Category, String LocationName)
 	If FamePaused == True
 		Debug.Trace("SLSF Reloaded - GainFame Function - Fame is Paused")
 		return
+	EndIf
+	
+	;Check for existing JSON, in case file was deleted while the game was running. If it doesn't exist, generate a new one.
+	If !JsonExists(JsonFileString)
+		CreateNewFameList()
 	EndIf
 	
 	String FameTypeAndLocation = Category + " Fame: " + LocationName
@@ -742,6 +888,10 @@ Function GainFame(String Category, String LocationName)
 EndFunction
 
 Function DecayFame()
+	If !JsonExists(JsonFileString)
+		CreateNewFameList()
+		return
+	EndIf
 	Int FameDecay = 0
 	Int LocationIndex = 0
 	Int TypeIndex = 0
@@ -895,6 +1045,11 @@ Function SpreadFameRoll()
 EndFunction
 
 Function SpreadFame(String SpreadFromLocation)
+	If !JsonExists(JsonFileString)
+		CreateNewFameList()
+		return
+	EndIf
+
 	;Grab all fame values above the configured threshold from the source Location. If none exist, cancel fame spread operation
 	String FameTypeAndLocation = ""
 	Int PossibleFameSpreadCategories = 0

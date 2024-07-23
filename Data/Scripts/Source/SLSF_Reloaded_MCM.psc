@@ -19,6 +19,8 @@ Bool Property RegisterLocationTrigger Auto
 Bool Property RegisterLocationConfirm Auto
 Bool Property UnregisterLocationTrigger Auto
 Bool Property UnregisterLocationConfirm Auto
+Bool Property ClearAllFameTrigger Auto
+Bool Property ClearAllFameConfirm Auto
 
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
@@ -167,6 +169,9 @@ Function SetDefaults()
 	UnregisterLocationConfirm = False
 	
 	UnregisterLocationSelection = "NONE"
+	
+	ClearAllFameConfirm = False
+	ClearAllFameTrigger = False
 EndFunction
 
 Event OnConfigOpen()
@@ -335,6 +340,10 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "Neutral Fame Chance", FameChanceByNeutral, 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "Friend Fame Chance", FameChanceByFriend, 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "Lover Fame Chance", FameChanceByLover, 0)
+		
+		AddHeaderOption("Reset Fame")
+		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "Clear All Fame", ClearAllFameTrigger, 0)
+		AddToggleOptionST("SLSF_Reloaded_ClearAllFameConfirmState", "Confirm Clear All Fame", ClearAllFameConfirm, GetDisabledOptionFlagIf(ClearAllFameTrigger == False))
 		
 		SetCursorPosition(1)
 		AddHeaderOption("Notification Toggles")
@@ -2389,6 +2398,36 @@ State SLSF_Reloaded_UnregisterLocationConfirmState
 			LocationManager.UnregisterCustomLocation(UnregisterLocationIndex)
 			UnregisterLocationTrigger = False
 			UnregisterLocationConfirm = False
+			ForcePageReset()
+		EndIf
+	EndEvent
+EndState
+
+State SLSF_Reloaded_ClearAllFameState
+	Event OnSelectST()
+		If ClearAllFameTrigger == False
+			ClearAllFameTrigger = True
+		Else
+			ClearAllFameTrigger = False
+		EndIf
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_ClearAllFameConfirmState
+	Event OnSelectST()
+		If ClearAllFameConfirm == False
+			ClearAllFameConfirm = True
+		Else
+			ClearAllFameConfirm = False
+		EndIf
+		
+		Utility.WaitMenuMode(3.0)
+		
+		If ClearAllFameConfirm == True
+			FameManager.ClearAllFame()
+			ClearAllFameConfirm = False
+			ClearAllFameTrigger = False
 			ForcePageReset()
 		EndIf
 	EndEvent
