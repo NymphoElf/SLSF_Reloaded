@@ -5,7 +5,6 @@ Bool Property IsDDInstalled Auto Hidden
 Bool Property IsECInstalled Auto Hidden
 Bool Property IsESInstalled Auto Hidden
 Bool Property IsPWInstalled Auto Hidden
-Bool Property IsSGOInstalled Auto Hidden
 Bool Property IsFMInstalled Auto Hidden
 Bool Property IsFHUInstalled Auto Hidden
 Bool Property IsSlaveTatsInstalled Auto Hidden
@@ -61,13 +60,13 @@ Function CheckInstalledMods()
 	
 	If Game.GetModByName("Devious Devices - Assets.esm" != 255)
 		IsDDInstalled = True
-		DD_Lockable = Game.GetFormFromFile(0x3894, "Devious Devices - Assets.esm")
-		DD_Collar = Game.GetFormFromFile(0x3DF7, "Devious Devices - Assets.esm")
-		DD_NipplePiercing = Game.GetFormFromFile(0xCA39, "Devious Devices - Assets.esm")
-		DD_VaginalPiercing = Game.GetFormFromFile(0x23E70, "Devious Devices - Assets.esm")
-		DD_VaginalPlug = Game.GetFormFromFile(0x1DD7C, "Devious Devices - Assets.esm")
-		DD_AnalPlug = Game.GetFormFromFile(0x1DD7D, "Devious Devices - Assets.esm")
-		DD_Hood = Game.GetFormFromFile(0x2AFA2, "Devious Devices - Assets.esm")
+		DD_Lockable = Game.GetFormFromFile(0x3894, "Devious Devices - Assets.esm") as Keyword
+		DD_Collar = Game.GetFormFromFile(0x3DF7, "Devious Devices - Assets.esm") as Keyword
+		DD_NipplePiercing = Game.GetFormFromFile(0xCA39, "Devious Devices - Assets.esm") as Keyword
+		DD_VaginalPiercing = Game.GetFormFromFile(0x23E70, "Devious Devices - Assets.esm") as Keyword
+		DD_VaginalPlug = Game.GetFormFromFile(0x1DD7C, "Devious Devices - Assets.esm") as Keyword
+		DD_AnalPlug = Game.GetFormFromFile(0x1DD7D, "Devious Devices - Assets.esm") as Keyword
+		DD_Hood = Game.GetFormFromFile(0x2AFA2, "Devious Devices - Assets.esm") as Keyword
 	Else
 		IsDDInstalled = False
 		DD_Lockable = None
@@ -78,7 +77,7 @@ Function CheckInstalledMods()
 		DD_AnalPlug = None
 	EndIf
 	
-	If GetModByName("EstrusChaurus.esp" != 255)
+	If Game.GetModByName("EstrusChaurus.esp" != 255)
 		IsECInstalled = True
 		ChaurusBreeder = Game.GetFormFromFile(0x160A9, "EstrusChaurus.esp") as Faction
 	Else
@@ -86,7 +85,7 @@ Function CheckInstalledMods()
 		ChaurusBreeder = None
 	EndIf
 	
-	If GetModByName("EstrusSpider.esp" != 255)
+	If Game.GetModByName("EstrusSpider.esp" != 255)
 		IsESInstalled = True
 		SpiderBreeder = Game.GetFormFromFile(0x4E258, "EstrusSpider.esp") as Faction
 	Else
@@ -98,12 +97,6 @@ Function CheckInstalledMods()
 		IsPWInstalled = True
 	Else
 		IsPWInstalled = False
-	EndIf
-	
-	If Game.GetModByName("dse-soulgem-oven.esp" != 255)
-		IsSGOInstalled = True
-	Else
-		IsSGOInstalled = False
 	EndIf
 	
 	If Game.GetModByName("Fertility Mode.esm" != 255)
@@ -137,24 +130,12 @@ Function CheckInstalledMods()
 	EndIf
 EndFunction
 
-dse_sgo_QuestDatabase_main Function GetSGOData() Global
-	return Game.GetFormFromFile(0x182A, "dse-soulgem-oven.esp") as dse_sgo_QuestDatabase_main
-EndFunction
-
 sr_InflateQuest Function GetFHUData() Global
 	return Game.GetFormFromFile(0xD63, "sr_FillherUp.esp") as sr_InflateQuest
 EndFunction
 
 PW_MainLoopScript Function GetPWData() Global
 	return Game.GetFormFromFile(0xD63, "Public Whore.esp") as PW_MainLoopScript
-EndFunction
-
-Bool Function IsSGOPregnant(Actor actorRef)
-	dse_sgo_QuestDatabase_main SoulGemOven = GetSGOData()
-	If IsSGOInstalled == True && SoulGemOven.ActorGemCount(actorRef) > 0
-		return True
-	EndIf
-	return False
 EndFunction
 
 Bool Function IsFMPregnant(Actor actorRef)

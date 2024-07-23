@@ -7,8 +7,9 @@ SLSF_Reloaded_MCM Property Config Auto
 Actor Property PlayerRef Auto
 
 Event OnEffectStart(Actor akTarget, Actor akCaster)
+	String CurrentLocation = ""
 	If LocationManager.CurrentLocation != None
-		String CurrentLocation = LocationManager.CurrentLocationName()
+		CurrentLocation = LocationManager.CurrentLocationName()
 	Else
 		return
 	EndIf

@@ -32,6 +32,10 @@ Int Property MaximumSpreadCategories Auto
 Int Property MaximumSpreadPercentage Auto
 Int Property DecayTimeNeeded Auto
 Int Property SpreadTimeNeeded Auto
+Int Property FameChanceByEnemy Auto
+Int Property FameChanceByNeutral Auto
+Int Property FameChanceByFriend Auto
+Int Property FameChanceByLover Auto
 
 Int[] Property DefaultLocationSpreadChance Auto
 Int[] Property CustomLocationSpreadChance Auto
@@ -326,21 +330,25 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, GetDisabledOptionFlagIf(ReduceFameAtNight == False))
 		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "Fame Change Multiplier:", FameChangeMultiplier, 0)
 		
+		AddHeaderOption("Fame Gain Settings")
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByEnemyState", "Enemy Fame Chance", FameChanceByEnemy, 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "Neutral Fame Chance", FameChanceByNeutral, 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "Friend Fame Chance", FameChanceByFriend, 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "Lover Fame Chance", FameChanceByLover, 0)
+		
 		SetCursorPosition(1)
 		AddHeaderOption("Notification Toggles")
 		AddToggleOptionST("SLSF_Reloaded_NotifyFameIncreaseState", "Notify on Fame Increase", NotifyFameIncrease, 0)
 		AddToggleOptionST("SLSF_Reloaded_NotifyFameDecayState", "Notify on Fame Decay", NotifyFameDecay, 0)
 		AddToggleOptionST("SLSF_Reloaded_NotifyFameSpreadState", "Notify on Fame Spread", NotifyFameSpread, 0)
 		
-		SetCursorPosition(16)
 		AddHeaderOption("Fame Decay Settings")
 		AddSliderOptionST("SLSF_Reloaded_DecayTimeNeededState", "Time Between Decays (Hours):", (DecayTimeNeeded / 2), 0)
 		
-		SetCursorPosition(9)
 		AddHeaderOption("Fame Spread Settings")
 		AddSliderOptionST("SLSF_Reloaded_SpreadTimeNeededState", "Time Between Spreads (Hours):", (SpreadTimeNeeded / 2), 0)
 		AddSliderOptionST("SLSF_Reloaded_FailedSpreadIncreaseState", "Spread Chance Increase on Spread Fail:", FailedSpreadIncrease, 0)
-		AddSliderOptionST("SLSF_Reloaded_SuccessfulSpreadDecreaseState", "Spread Chance Decrease on Spread Succeed:" SuccessfulSpreadReduction, 0)
+		AddSliderOptionST("SLSF_Reloaded_SuccessfulSpreadDecreaseState", "Spread Chance Decrease on Spread Succeed:", SuccessfulSpreadReduction, 0)
 		AddSliderOptionST("SLSF_Reloaded_MinimumFameToSpreadState", "Minimum Fame to Spread:", MinimumFameToSpread, 0)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadCategoriesState", "Maximum Spread Categories:", MaximumSpreadCategories, 0)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadPercentageState", "Maximum Spread Percentage:", MaximumSpreadPercentage, 0)
@@ -385,7 +393,6 @@ Event OnPageReset(String page)
 		AddTextOption("Estrus Chaurus", Mods.IsECInstalled as String)
 		AddTextOption("Estrus Spider", Mods.IsESInstalled as String)
 		AddTextOption("Public Whore", Mods.IsPWInstalled as String)
-		AddTextOption("Soul Gem Oven", Mods.IsSGOInstalled as String)
 		AddTextOption("Fertility Mode", Mods.IsFMInstalled as String)
 		AddTextOption("Fill Her Up", Mods.IsFHUInstalled as String)
 		AddTextOption("Slave Tats", Mods.IsSlaveTatsInstalled as String)
@@ -397,7 +404,6 @@ Event OnPageReset(String page)
 		AddTextOption("Player is EC Pregnant:", Mods.IsECPregnant(PlayerScript.PlayerRef) as String)
 		AddTextOption("Player is ES Pregnant:", Mods.IsESPregnant(PlayerScript.PlayerRef) as String)
 		AddTextOption("Player is FM Pregnant:", Mods.IsFMPregnant(PlayerScript.PlayerRef) as String)
-		AddTextOption("Player is SGO Pregnant:", Mods.IsSGOPregnant(PlayerScript.PlayerRef) as String)
 		AddTextOption("Player is Public Whore:", Mods.IsPublicWhore(PlayerScript.PlayerRef) as String)
 		AddTextOption("Player's FHU Inflation:", Mods.GetFHUInflation(PlayerScript.PlayerRef) as String)
 		AddTextOption("Total Visible Tattoos:", VisibilityManager.CountVisibleTattoos() as String)
@@ -1044,8 +1050,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameGain")
-		ModEvent.PushString(EventHandle, Category = ManualFameGainCategory)
-		ModEvent.PushInt(EventHandle, MinIncrease = 10)
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushString(EventHandle, ManualFameGainCategory)
+		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Manual Fame Gain All In Location"
 		Debug.Notification("Manual Fame Gain All In Location Event Armed!")
@@ -1059,7 +1066,7 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Gain All In Location Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameGainAllInLocation")
-		ModEvent.PushInt(EventHandle, MinIncrease = 10)
+		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Manual Fame Gain ALL"
 		Debug.Notification("Manual Fame Gain ALL Event Armed!")
@@ -1073,7 +1080,7 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Gain ALL Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameGainAll")
-		ModEvent.PushInt(EventHandle, MinIncrease = 10)
+		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Fame Decay"
 		Debug.Notification("Fame Decay Event Armed!")
@@ -1100,8 +1107,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Decay Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameDecay")
-		ModEvent.PushString(EventHandle, ManualFameDecayCategory)
-		ModEvent.PushInt(EventHandle, MinDecay = 10)
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName()) ;EventLocation
+		ModEvent.PushString(EventHandle, ManualFameDecayCategory) ;Category
+		ModEvent.PushInt(EventHandle, 10) ;MinDecay
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Manual Fame Decay All In Location"
 		Debug.Notification("Manual Fame Decay All In Location Event Armed!")
@@ -1115,7 +1123,7 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Decay All In Location Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameDecayAllInLocation")
-		ModEvent.PushInt(EventHandle, MinDecay = 10)
+		ModEvent.PushInt(EventHandle, 10) ;MinDecay
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Manual Fame Decay ALL"
 		Debug.Notification("Manual Fame Decay ALL Event Armed!")
@@ -1129,7 +1137,7 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Decay ALL Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameDecayAll")
-		ModEvent.PushInt(EventHandle, MinDecay = 10)
+		ModEvent.PushInt(EventHandle, 10) ;MinDecay
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Fame Spread Roll"
 		Debug.Notification("Fame Spread Roll Event Armed!")
@@ -1156,10 +1164,10 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Spread Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameSpread")
-		ModEvent.PushString(EventHandle, SpreadFromLocation = SendSpreadFromLocation)
-		ModEvent.PushString(EventHandle, SpreadToLocation = SendSpreadToLocation)
-		ModEvent.PushString(EventHandle, Category = SpreadFameCategory)
-		ModEvent.PushInt(EventHandle, PercentToSpread = 30)
+		ModEvent.PushString(EventHandle, SendSpreadFromLocation) ;SpreadFromLocation
+		ModEvent.PushString(EventHandle, SendSpreadToLocation) ;SpreadToLocation
+		ModEvent.PushString(EventHandle, SpreadFameCategory) ;Category
+		ModEvent.PushInt(EventHandle, 30) ;PercentToSpread
 		ModEvent.Send(EventHandle)
 	EndIf
 EndFunction
@@ -1603,9 +1611,8 @@ State SLSF_Reloaded_SendManualFameGainState
 EndState
 
 State SLSF_Reloaded_SendManualFameGainCategoryState
-	String[] Texts = New String[22]
-	
 	Event OnMenuOpenST()
+		String[] Texts = New String[22]
 		Int StartIndex = 0
 		
 		Texts[0] = "Whore"
@@ -1637,6 +1644,31 @@ State SLSF_Reloaded_SendManualFameGainCategoryState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
+		String[] Texts = New String[22]
+		
+		Texts[0] = "Whore"
+		Texts[1] = "Slut"
+		Texts[2] = "Exhibitionist"
+		Texts[3] = "Oral"
+		Texts[4] = "Anal"
+		Texts[5] = "Nasty"
+		Texts[6] = "Pregnant"
+		Texts[7] = "Dominant"
+		Texts[8] = "Submissive"
+		Texts[9] = "Sadist"
+		Texts[10] = "Masochist"
+		Texts[11] = "Gentle"
+		Texts[12] = "Likes Men"
+		Texts[13] = "Likes Women"
+		Texts[14] = "Likes Orc"
+		Texts[15] = "Likes Khajiit"
+		Texts[16] = "Likes Argonian"
+		Texts[17] = "Bestiality"
+		Texts[18] = "Group"
+		Texts[19] = "Bound"
+		Texts[20] = "Tattoo"
+		Texts[21] = "Cum Dump"
+		
 		ManualFameGainCategory = Texts[AcceptedIndex]
 		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_SendManualFameGainCategoryState")
 	EndEvent
@@ -1715,9 +1747,8 @@ State SLSF_Reloaded_SendManualFameDecayState
 EndState
 
 State SLSF_Reloaded_SendManualFameDecayCategoryState
-	String[] Texts = New String[22]
-	
 	Event OnMenuOpenST()
+		String[] Texts = New String[22]
 		Int StartIndex = 0
 		
 		Texts[0] = "Whore"
@@ -1749,6 +1780,31 @@ State SLSF_Reloaded_SendManualFameDecayCategoryState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
+		String[] Texts = New String[22]
+		
+		Texts[0] = "Whore"
+		Texts[1] = "Slut"
+		Texts[2] = "Exhibitionist"
+		Texts[3] = "Oral"
+		Texts[4] = "Anal"
+		Texts[5] = "Nasty"
+		Texts[6] = "Pregnant"
+		Texts[7] = "Dominant"
+		Texts[8] = "Submissive"
+		Texts[9] = "Sadist"
+		Texts[10] = "Masochist"
+		Texts[11] = "Gentle"
+		Texts[12] = "Likes Men"
+		Texts[13] = "Likes Women"
+		Texts[14] = "Likes Orc"
+		Texts[15] = "Likes Khajiit"
+		Texts[16] = "Likes Argonian"
+		Texts[17] = "Bestiality"
+		Texts[18] = "Group"
+		Texts[19] = "Bound"
+		Texts[20] = "Tattoo"
+		Texts[21] = "Cum Dump"
+		
 		ManualFameGainCategory = Texts[AcceptedIndex]
 		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_SendManualFameGainCategoryState")
 	EndEvent
@@ -1827,9 +1883,8 @@ State SLSF_Reloaded_SendManualFameSpreadState
 EndState
 
 State SLSF_Reloaded_SendManualFameSpreadCategoryState
-	String[] Texts = New String[22]
-	
 	Event OnMenuOpenST()
+		String[] Texts = New String[22]
 		Int StartIndex = 0
 		
 		Texts[0] = "Whore"
@@ -1861,6 +1916,31 @@ State SLSF_Reloaded_SendManualFameSpreadCategoryState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
+		String[] Texts = New String[22]
+		
+		Texts[0] = "Whore"
+		Texts[1] = "Slut"
+		Texts[2] = "Exhibitionist"
+		Texts[3] = "Oral"
+		Texts[4] = "Anal"
+		Texts[5] = "Nasty"
+		Texts[6] = "Pregnant"
+		Texts[7] = "Dominant"
+		Texts[8] = "Submissive"
+		Texts[9] = "Sadist"
+		Texts[10] = "Masochist"
+		Texts[11] = "Gentle"
+		Texts[12] = "Likes Men"
+		Texts[13] = "Likes Women"
+		Texts[14] = "Likes Orc"
+		Texts[15] = "Likes Khajiit"
+		Texts[16] = "Likes Argonian"
+		Texts[17] = "Bestiality"
+		Texts[18] = "Group"
+		Texts[19] = "Bound"
+		Texts[20] = "Tattoo"
+		Texts[21] = "Cum Dump"
+		
 		ManualFameGainCategory = Texts[AcceptedIndex]
 		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_SendManualFameGainCategoryState")
 	EndEvent
@@ -1873,10 +1953,10 @@ END DEBUG EXTERNAL EVENTS FUNCTIONS
 /;
 
 State SLSF_Reloaded_LocationDetailsState
-	Int TotalLocations = (LocationManager.DefaultLocation.Length + SLSF_Reloaded_CustomLocationCount.GetValue()) as Int
-	String[] Texts = New String[TotalLocations]
-	
 	Event OnMenuOpenST()
+		Int TotalLocations = (LocationManager.DefaultLocation.Length + SLSF_Reloaded_CustomLocationCount.GetValue()) as Int
+		String[] Texts = Utility.CreateStringArray(TotalLocations)
+		
 		Int StartIndex = 0
 		Int FillIndex = 0
 		
@@ -1894,6 +1974,19 @@ State SLSF_Reloaded_LocationDetailsState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
+		Int TotalLocations = (LocationManager.DefaultLocation.Length + SLSF_Reloaded_CustomLocationCount.GetValue()) as Int
+		String[] Texts = Utility.CreateStringArray(TotalLocations)
+		
+		Int FillIndex = 0
+		
+		While FillIndex < TotalLocations
+			If FillIndex < LocationManager.DefaultLocation.Length
+				Texts[FillIndex] = LocationManager.DefaultLocation[FillIndex]
+			Else
+				Texts[FillIndex] = LocationManager.CustomLocation[(FillIndex - LocationManager.DefaultLocation.Length)]
+			EndIf
+		EndWhile
+		
 		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_LocationDetailsState")
 		LocationDetailsSelected = Texts[AcceptedIndex]
 		ForcePageReset()
@@ -1906,7 +1999,7 @@ State SLSF_Reloaded_PlayerAnonymousState
 			AnonymityEnabled = True
 		Else
 			AnonymityEnabled = False
-		EndEvent
+		EndIf
 		SetToggleOptionValueST(AnonymityEnabled, False, "SLSF_Reloaded_PlayerAnonymousState")
 	EndEvent
 EndState
@@ -1950,7 +2043,7 @@ State SLSF_Reloaded_NightStartState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		NightStart = value
+		NightStart = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_NightStartState")
 	EndEvent
 	
@@ -1969,7 +2062,7 @@ State SLSF_Reloaded_NightEndState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		NightEnd = value
+		NightEnd = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_NightEndState")
 	EndEvent
 	
@@ -1988,7 +2081,7 @@ State SLSF_Reloaded_FailedSpreadIncreaseState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		FailedSpreadIncrease = value
+		FailedSpreadIncrease = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_FailedSpreadIncreaseState")
 	EndEvent
 	
@@ -2007,7 +2100,7 @@ State SLSF_Reloaded_SuccessfulSpreadDecreaseState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		SuccessfulSpreadReduction = value
+		SuccessfulSpreadReduction = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_SuccessfulSpreadDecreaseState")
 	EndEvent
 	
@@ -2026,7 +2119,7 @@ State SLSF_Reloaded_MinimumFameToSpreadState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		MinimumFameToSpread = value
+		MinimumFameToSpread = value as Int
 		SetSliderOptionValueST(value, "{0%}", False, "SLSF_Reloaded_MinimumFameToSpreadState")
 	EndEvent
 	
@@ -2045,7 +2138,7 @@ State SLSF_Reloaded_MaximumSpreadCategoriesState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		MaximumSpreadCategories = value
+		MaximumSpreadCategories = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_MaximumSpreadCategoriesState")
 	EndEvent
 	
@@ -2064,7 +2157,7 @@ State SLSF_Reloaded_MaximumSpreadPercentageState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		MaximumSpreadPercentage = value
+		MaximumSpreadPercentage = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_MaximumSpreadPercentageState")
 	EndEvent
 	
@@ -2083,7 +2176,7 @@ State SLSF_Reloaded_DecayTimeNeededState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		DecayTimeNeeded = value * 2
+		DecayTimeNeeded = (value * 2) as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_DecayTimeNeededState")
 	EndEvent
 	
@@ -2102,7 +2195,7 @@ State SLSF_Reloaded_SpreadTimeNeededState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		SpreadTimeNeeded = value * 2
+		SpreadTimeNeeded = (value * 2) as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_SpreadTimeNeededState")
 	EndEvent
 	
@@ -2131,13 +2224,89 @@ State SLSF_Reloaded_FameChangeMultiplierState
 	EndEvent
 EndState
 
+State SLSF_Reloaded_FameChanceByEnemyState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameChanceByEnemy)
+		SetSliderDialogDefaultValue(100)
+		SetSliderDialogRange(0,100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameChanceByEnemy = value as Int
+		SetSliderOptionValueST(value, "{0%}", False, "SLSF_Reloaded_FameChanceByEnemyState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameChanceByEnemy = 100
+		SetSliderOptionValueST(100, "{0%}", False, "SLSF_Reloaded_FameChanceByEnemyState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_FameChanceByNeutralState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameChanceByNeutral)
+		SetSliderDialogDefaultValue(75)
+		SetSliderDialogRange(0,100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameChanceByNeutral = value as Int
+		SetSliderOptionValueST(value, "{0%}", False, "SLSF_Reloaded_FameChanceByNeutralState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameChanceByNeutral = 75
+		SetSliderOptionValueST(75, "{0%}", False, "SLSF_Reloaded_FameChanceByNeutralState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_FameChanceByFriendState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameChanceByFriend)
+		SetSliderDialogDefaultValue(50)
+		SetSliderDialogRange(0,100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameChanceByFriend = value as Int
+		SetSliderOptionValueST(value, "{0%}", False, "SLSF_Reloaded_FameChanceByFriendState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameChanceByFriend = 50
+		SetSliderOptionValueST(50, "{0%}", False, "SLSF_Reloaded_FameChanceByFriendState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_FameChanceByLoverState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameChanceByLover)
+		SetSliderDialogDefaultValue(25)
+		SetSliderDialogRange(0,100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameChanceByLover = value as Int
+		SetSliderOptionValueST(value, "{0%}", False, "SLSF_Reloaded_FameChanceByLoverState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameChanceByLover = 25
+		SetSliderOptionValueST(25, "{0%}", False, "SLSF_Reloaded_FameChanceByLoverState")
+	EndEvent
+EndState
+
 State SLSF_Reloaded_RegisterLocationState
 	Event OnSelectST()
 		If RegisterLocationTrigger == False
 			RegisterLocationTrigger = True
 		Else
 			RegisterLocationTrigger = False
-		EndEvent
+		EndIf
 		
 		ForcePageReset()
 	EndEvent
@@ -2165,6 +2334,7 @@ EndState
 
 State SLSF_Reloaded_UnregisterLocationSelectState
 	Event OnMenuOpenST()
+		String[] Texts = Utility.CreateStringArray(LocationManager.CustomLocation.Length)
 		Int StartIndex = 0
 		Int FillIndex = 0
 		
@@ -2178,6 +2348,13 @@ State SLSF_Reloaded_UnregisterLocationSelectState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
+		String[] Texts = Utility.CreateStringArray(LocationManager.CustomLocation.Length)
+		Int FillIndex = 0
+		
+		While FillIndex < LocationManager.CustomLocation.Length
+			Texts[FillIndex] = LocationManager.CustomLocation[FillIndex]
+		EndWhile
+		
 		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_LocationDetailsState")
 		UnregisterLocationSelection = Texts[AcceptedIndex]
 		UnregisterLocationIndex = AcceptedIndex

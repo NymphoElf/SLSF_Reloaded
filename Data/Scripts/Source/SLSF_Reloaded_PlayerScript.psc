@@ -8,6 +8,8 @@ SexlabFramework Property Sexlab Auto
 
 Actor Property PlayerRef Auto
 
+Spell Property NPCScanSpell Auto
+
 Race[] Property OrcRace Auto
 Race[] Property KhajiitRace Auto
 Race[] Property ArgonianRace Auto
@@ -16,7 +18,7 @@ String Property OldPlayerName Auto Hidden
 String Property NewPlayerName Auto Hidden
 
 Event OnInit()
-	RegisterForMenu(RACESEX_MENU)
+	RegisterForMenu("RACESEX_MENU")
 	RegisterForUpdateGameTime(0.5)
 	;RegisterForModEvent("AnimationEnd", "OnSexlabAnimationEnd")
 	RegisterForModEvent("AnimationStart", "OnSexlabAnimationStart")
@@ -81,9 +83,8 @@ Event OnSexlabAnimationStart()
 		If PlayerController.Animation.HasTag("Creature") || PlayerController.Animation.HasTag("Bestiality")
 			FameManager.GainFame("Bestiality", PlayerLocation)
 		EndIf
-		
-		If (!Sexlab.IsVictim(PlayerThread, PlayerRef) && !Sexlab.IsAggressor(PlayerThread, PlayerRef))\ 
-		&& (PlayerController.Animation.HasTag("Loving") || PlayerController.Animation.HasTag("Hugging") || PlayerController.Animation.HasTag("Cuddling") || PlayerController.Animation.HasTag("Kissing"))
+
+		If (!Sexlab.IsVictim(PlayerThread, PlayerRef) && !Sexlab.IsAggressor(PlayerThread, PlayerRef)) && (PlayerController.Animation.HasTag("Loving") || PlayerController.Animation.HasTag("Hugging") || PlayerController.Animation.HasTag("Cuddling") || PlayerController.Animation.HasTag("Kissing"))
 			FameManager.GainFame("Gentle", PlayerLocation)
 		EndIf
 		
@@ -104,7 +105,7 @@ Event OnSexlabAnimationStart()
 EndEvent
 
 Event OnMenuClose(String MenuName)
-	If MenuName == RACESEX_MENU
+	If MenuName == "RACESEX_MENU"
 		String PlayerName = PlayerRef.GetActorBase().GetName()
 		
 		If (OldPlayerName != NewPlayerName) && (NewPlayerName != PlayerName) ;Is name actually changing? If so, rotate previous "New" name to Old name.
@@ -122,7 +123,7 @@ Event OnMenuClose(String MenuName)
 		FameManager.SetJsonFileString(NewPlayerName)
 	
 		If !JsonExists(FameManager.JsonFileString)
-			CreateNewFameList()
+			FameManager.CreateNewFameList()
 		EndIf
 	EndIf
 EndEvent
@@ -132,10 +133,10 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 EndEvent
 
 Event OnUpdateGameTime()
-	PlayerRef.AddSpell("SLSF_Reloaded_NPCScanEffect")
+	PlayerRef.AddSpell(NPCScanSpell)
 	
 	FameManager.RegisterForSingleUpdate(0.1)
 	
 	Utility.Wait(1.0) ;Add slight delay to let the previous events process before removing spell
-	PlayerRef.RemoveSpell("SLSF_Reloaded_NPCScanEffect")
+	PlayerRef.RemoveSpell(NPCScanSpell)
 EndEvent

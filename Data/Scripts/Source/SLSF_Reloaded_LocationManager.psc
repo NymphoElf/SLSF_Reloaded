@@ -134,7 +134,7 @@ Function RegisterCustomLocation()
 	
 	If LocationCanBeRegistered(LocationToRegister) == False
 		return
-	EndWhile
+	EndIf
 	
 	While EmptyIndexFound == False && CustomLocationsFull == False
 		If CustomLocation[LocationIndex] == "-EMPTY-"
@@ -201,7 +201,7 @@ EndFunction
 Function UnregisterCustomLocationExternal(String LocationToUnregister)
 	Bool LocationFound = False
 	Int LocationIndex = 0
-	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue()
+	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	While LocationIndex < CustomLocations && LocationFound == False
 		If LocationToUnregister == CustomLocation[LocationIndex]
 			LocationFound = True

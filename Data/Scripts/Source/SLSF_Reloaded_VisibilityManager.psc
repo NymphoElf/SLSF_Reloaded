@@ -1,12 +1,11 @@
 ScriptName SLSF_Reloaded_VisibilityManager extends Quest
 
-SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_MCM Property Config Auto
 
 SexlabFramework Property Sexlab Auto
 
-SlaveTats Property SlaveTatsScript Auto
+;SlaveTats Property SlaveTatsScript Auto
 
 Bool[] Property BodyTattooApplied Auto Hidden
 Bool[] Property FaceTattooApplied Auto Hidden
@@ -23,7 +22,7 @@ Keyword Property SLSF_Reloaded_HidesIdentity Auto
 Keyword Property SLSF_Reloaded_CoversHands Auto
 Keyword Property SLSF_Reloaded_CoversFeet Auto
 
-Actor Player = PlayerScript.PlayerRef
+Actor Property PlayerRef Auto ; = PlayerScript.PlayerRef
 
 Event OnInit()
 	BodyTattooApplied = New Bool[6]
@@ -37,19 +36,19 @@ Bool Function IsPlayerAnonymous()
 		return False
 	EndIf
 
-	If Player.WornHasKeyword(SLSF_Reloaded_HidesIdentity)
+	If PlayerRef.WornHasKeyword(SLSF_Reloaded_HidesIdentity)
 		return True
 	EndIf
 	
 	If Mods.IsDDInstalled == True
-		If Player.WornHasKeyword(Mods.DD_Hood)
+		If PlayerRef.WornHasKeyword(Mods.DD_Hood)
 			return True
 		EndIf
 	EndIf
 	
-	If Player.GetEquippedArmorInSlot(31).HasKeyword(Mods.SLS_BikiniArmor)
+	If PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(Mods.SLS_BikiniArmor)
 		return False
-	ElseIf Player.GetEquippedArmorInSlot(31) != None
+	ElseIf PlayerRef.GetEquippedArmorInSlot(31) != None
 		return True
 	EndIf
 	return False
@@ -60,7 +59,7 @@ Int Function CountAppliedTattoos(String TattooArea)
 	Int CountedSlot = 1
 	
 	While CountedSlot <= 6
-		If SlaveTatsScript.get_applied_tattoo_in_slot(Player, TattooArea, CountedSlot) != 0
+		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, TattooArea, CountedSlot) != 0
 			If TattooArea == "Body"
 				BodyTattooApplied[CountedSlot - 1] = True
 			ElseIf TattooArea == "Face"
@@ -120,26 +119,26 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 	
 	If Mods.IsSLSInstalled == True && Mods.IsANDInstalled == True
 		If BodyTattooSubcategory[SlotNumber] == "None"
-			If Player.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
+			If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
 				return True
 			EndIf
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Chest"
-			If Player.GetFactionRank(Mods.AND_Chest) == 1 || Player.GetFactionRank(Mods.AND_Bra) == 1
+			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
 				return True
 			EndIf
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Pelvis"
-			If Player.GetFactionRank(Mods.AND_Genitals) == 1 || Player.GetFactionRank(Mods.AND_Underwear) == 1
+			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
 				return True
 			EndIf
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Ass"
-			If Player.GetFactionRank(Mods.AND_Ass) == 1
+			If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
 				return True
 			EndIf
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Back"
-			If Player.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || Player.GetFactionRank(Mods.AND_Chest) == 1 || Player.GetFactionRank(Mods.AND_Bra) == 1
-				If Player.GetEquippedArmorInSlot(46).HasKeyword(Mods.SLS_BikiniArmor) && Player.GetEquippedArmorInSlot(47) == None
+			If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
+				If PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(Mods.SLS_BikiniArmor) && PlayerRef.GetEquippedArmorInSlot(47) == None
 					return True
-				ElseIf Player.GetEquippedArmorInSlot(46) == None && Player.GetEquippedArmorInSlot(47) == None
+				ElseIf PlayerRef.GetEquippedArmorInSlot(46) == None && PlayerRef.GetEquippedArmorInSlot(47) == None
 					return True
 				EndIf
 			EndIf
@@ -148,20 +147,20 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 		EndIf
 	ElseIf Mods.IsSLSInstalled == False && Mods.IsANDInstalled == True
 		If BodyTattooSubcategory[SlotNumber] == "None" || BodyTattooSubcategory[SlotNumber] == "Chest"
-			If Player.GetFactionRank(Mods.AND_Chest) == 1 || Player.GetFactionRank(Mods.AND_Bra) == 1
+			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
 				return True
 			EndIf
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Pelvis"
-			If Player.GetFactionRank(Mods.AND_Genitals) == 1 || Player.GetFactionRank(Mods.AND_Underwear) == 1
+			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
 				return True
 			EndIf
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Ass"
-			If Player.GetFactionRank(Mods.AND_Ass) == 1
+			If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
 				return True
 			EndIf
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Back"
-			If Player.GetFactionRank(Mods.AND_Chest) == 1 || Player.GetFactionRank(Mods.AND_Bra) == 1
-				If Player.GetEquippedArmorInSlot(46) == None && Player.GetEquippedArmorInSlot(47) == None
+			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
+				If PlayerRef.GetEquippedArmorInSlot(46) == None && PlayerRef.GetEquippedArmorInSlot(47) == None
 					return True
 				EndIf
 			EndIf
@@ -169,13 +168,13 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 			Debug.MessageBox("SLSF Reloaded - ERROR: Body Tattoo Subcategory is invalid.")
 		EndIf
 	ElseIf Mods.IsSLSInstalled == True && Mods.IsANDInstalled == False
-		If Player.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || Player.GetEquippedArmorInSlot(32) == None
-			If (Player.GetEquippedArmorInSlot(46).HasKeyword(Mods.SLS_BikiniArmor) || Player.GetEquippedArmorInSlot(46) == None) && Player.GetEquippedArmorInSlot(47) == None
+		If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(32) == None
+			If (PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(46) == None) && PlayerRef.GetEquippedArmorInSlot(47) == None
 				return True
 			EndIf
 		EndIf
 	Else
-		If Player.GetEquippedArmorInSlot(32) == None
+		If PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	EndIf
@@ -193,15 +192,15 @@ Bool Function IsChestTattooVisible(Int SlotNumber)
 	EndIf
 	
 	If Mods.IsANDInstalled == True
-		If Player.GetFactionRank(Mods.AND_Chest) == 1 || Player.GetFactionRank(Mods.AND_Bra) == 1
+		If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
 			return True
 		EndIf
 	ElseIf Mods.IsSLSInstalled == True
-		If Player.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || Player.GetEquippedArmorInSlot(32) == None
+		If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	Else
-		If Player.GetEquippedArmorInSlot(32) == None
+		If PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	EndIf
@@ -219,15 +218,15 @@ Bool Function IsPelvicTattooVisible(Int SlotNumber)
 	EndIf
 	
 	If Mods.IsANDInstalled == True
-		If Player.GetFactionRank(Mods.AND_Genitals) == 1 || Player.GetFactionRank(Mods.AND_Underwear) == 1
+		If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
 			return True
 		EndIf
 	ElseIf Mods.IsSLSInstalled == True
-		If Player.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || Player.GetEquippedArmorInSlot(32) == None
+		If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	Else
-		If Player.GetEquippedArmorInSlot(32) == None
+		If PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	EndIf
@@ -245,15 +244,15 @@ Bool Function IsAssTattooVisible(Int SlotNumber)
 	EndIf
 	
 	If Mods.IsANDInstalled == True
-		If Player.GetFactionRank(Mods.AND_Ass) == 1
+		If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
 			return True
 		EndIf
 	ElseIf Mods.IsSLSInstalled == True
-		If Player.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || Player.GetEquippedArmorInSlot(32) == None
+		If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	Else
-		If Player.GetEquippedArmorInSlot(32) == None
+		If PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	EndIf
@@ -275,7 +274,7 @@ Bool Function IsHandTattooVisible(Int SlotNumber)
 	If Mods.IsSlaveTatsInstalled == False
 		return False
 	Else
-		If CountAppliedTattoos("Hands") == 0 || HandTattooApplied[SlotNumber] == False || Player.WornHasKeyword(SLSF_Reloaded_CoversHands) || Player.GetEquippedArmorInSlot(33) != None
+		If CountAppliedTattoos("Hands") == 0 || HandTattooApplied[SlotNumber] == False || PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversHands) || PlayerRef.GetEquippedArmorInSlot(33) != None
 			return False
 		EndIf
 	EndIf
@@ -285,19 +284,19 @@ Bool Function IsFootTattooVisible(Int SlotNumber)
 	If Mods.IsSlaveTatsInstalled == False
 		return False
 	Else
-		If CountAppliedTattoos("Feet") == 0 || FootTattooApplied[SlotNumber] == False || Player.WornHasKeyword(SLSF_Reloaded_CoversFeet) || Player.GetEquippedArmorInSlot(37) != None
+		If CountAppliedTattoos("Feet") == 0 || FootTattooApplied[SlotNumber] == False || PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversFeet) || PlayerRef.GetEquippedArmorInSlot(37) != None
 			return False
 		EndIf
 	EndIf
 EndFunction
 
 Bool Function IsAssCumVisible()
-	If Sexlab.CountCumAnal() > 0
-		If Mods.IsANDInstalled == True && Player.GetFactionRank(Mods.AND_Ass) == 1
+	If Sexlab.CountCumAnal(PlayerRef) > 0
+		If Mods.IsANDInstalled == True && PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
 			return True
-		ElseIf Mods.IsSLSInstalled == True && Player.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
+		ElseIf Mods.IsSLSInstalled == True && PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
 			return True
-		ElseIf Player.GetEquippedArmorInSlot(32) == None
+		ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	EndIf
@@ -306,10 +305,10 @@ Bool Function IsAssCumVisible()
 EndFunction
 
 Bool Function IsVaginalCumVisible()
-	If Sexlab.CountCumVagina() > 0
-		If Mods.IsANDInstalled == True && Player.GetFactionRank(Mods.AND_Genitals) == 1
+	If Sexlab.CountCumVaginal(PlayerRef) > 0
+		If Mods.IsANDInstalled == True && PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
 			return True
-		ElseIf Player.GetEquippedArmorInSlot(32) == None
+		ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	EndIf
@@ -318,7 +317,7 @@ Bool Function IsVaginalCumVisible()
 EndFunction
 
 Bool Function IsOralCumVisible()
-	If Sexlab.CountCumOral() > 0 && IsPlayerAnonymous() == False
+	If Sexlab.CountCumOral(PlayerRef) > 0 && IsPlayerAnonymous() == False
 		return True
 	EndIf
 	

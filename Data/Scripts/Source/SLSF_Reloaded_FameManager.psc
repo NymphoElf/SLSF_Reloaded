@@ -36,15 +36,11 @@ Keyword Property SLSF_Reloaded_VaginalPiercing Auto
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 
-Actor Player = PlayerScript.PlayerRef
+Actor Property PlayerRef Auto ;= PlayerScript.PlayerRef
 
 ;/
-
 NOTE TO SELF - UTILIZE ARRAY 'FIND' FUNCTION TO FURTHER OPTIMIZE CODE?
-
 /;
-
-
 
 ;/
 ---Originals---
@@ -120,7 +116,7 @@ Event OnUpdate()
 	EndIf
 	
 	If SpreadCountdown <= 0
-		SpreadFameRoll(LocationManager.CurrentLocationName())
+		SpreadFameRoll()
 		SpreadCountdown = 48
 	EndIf
 	
@@ -128,7 +124,7 @@ Event OnUpdate()
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationDecayPauseTimer[LocationIndex] > 0 && DefaultLocationCanDecay[LocationIndex] == False
-			DefaultLocationDecayPauseTimer[LocationIndex] -= 1
+			DefaultLocationDecayPauseTimer[LocationIndex] = DefaultLocationDecayPauseTimer[LocationIndex] - 1 ;Apparently arrays do not like operators (+=, -=, etc). Can only assign with "=" and math afterwards
 		EndIf
 		If DefaultLocationDecayPauseTimer[LocationIndex] == 0
 			DefaultLocationCanDecay[LocationIndex] = True
@@ -140,7 +136,7 @@ Event OnUpdate()
 	
 	While LocationIndex < CustomLocations
 		If CustomLocationDecayPauseTimer[LocationIndex] > 0 && CustomLocationCanDecay[LocationIndex] == False
-			CustomLocationDecayPauseTimer[LocationIndex] -= 1
+			CustomLocationDecayPauseTimer[LocationIndex] = CustomLocationDecayPauseTimer[LocationIndex] - 1
 		EndIf
 		If CustomLocationDecayPauseTimer[LocationIndex] == 0
 			CustomLocationCanDecay[LocationIndex] = True
@@ -153,7 +149,7 @@ Event OnUpdate()
 	;Update Individual Spread Pause Timers
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationSpreadPauseTimer[LocationIndex] > 0 && DefaultLocationCanSpread[LocationIndex] == False
-			DefaultLocationSpreadPauseTimer[LocationIndex] -= 1
+			DefaultLocationSpreadPauseTimer[LocationIndex] = DefaultLocationSpreadPauseTimer[LocationIndex] - 1
 		EndIf
 		If DefaultLocationSpreadPauseTimer[LocationIndex] == 0
 			DefaultLocationCanSpread[LocationIndex] = True
@@ -165,7 +161,7 @@ Event OnUpdate()
 	
 	While LocationIndex < CustomLocations
 		If CustomLocationSpreadPauseTimer[LocationIndex] > 0 && CustomLocationCanSpread[LocationIndex] == False
-			CustomLocationSpreadPauseTimer[LocationIndex] -= 1
+			CustomLocationSpreadPauseTimer[LocationIndex] = CustomLocationSpreadPauseTimer[LocationIndex] - 1
 		EndIf
 		If CustomLocationSpreadPauseTimer[LocationIndex] == 0
 			CustomLocationCanSpread[LocationIndex] = True
@@ -246,7 +242,7 @@ EndFunction
 
 Bool Function CanGainWhoreFame()
 	;Check Whore Fame
-	If Mods.IsPublicWhore(Player)
+	If Mods.IsPublicWhore(PlayerRef)
 		return True
 	EndIf
 	return False
@@ -255,35 +251,35 @@ EndFunction
 Bool Function CanGainSlutFame(String FameLocation)
 	;Check Slut Fame
 	If Mods.IsDDInstalled == True && Mods.IsANDInstalled == False
-		If Player.WornHasKeyword(Mods.DD_NipplePiercing) || Player.WornHasKeyword(Mods.DD_VaginalPiercing) || Player.WornHasKeyword(SLSF_Reloaded_NipplePiercing) || Player.WornHasKeyword(SLSF_Reloaded_VaginalPiercing)
-			If Player.GetEquippedArmorInSlot(32) == None
+		If PlayerRef.WornHasKeyword(Mods.DD_NipplePiercing) || PlayerRef.WornHasKeyword(Mods.DD_VaginalPiercing) || PlayerRef.WornHasKeyword(SLSF_Reloaded_NipplePiercing) || PlayerRef.WornHasKeyword(SLSF_Reloaded_VaginalPiercing)
+			If PlayerRef.GetEquippedArmorInSlot(32) == None
 				return True
 			EndIf
 		EndIf
 	ElseIf Mods.IsDDInstalled == True && Mods.IsANDInstalled == True
-		If Player.WornHasKeyword(Mods.DD_NipplePiercing) || Player.WornHasKeyword(SLSF_Reloaded_NipplePiercing)
-			If Player.GetFactionRank(Mods.AND_Chest) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 50
+		If PlayerRef.WornHasKeyword(Mods.DD_NipplePiercing) || PlayerRef.WornHasKeyword(SLSF_Reloaded_NipplePiercing)
+			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 50
 				return True
 			EndIf
-		ElseIf Player.WornHasKeyword(Mods.DD_VaginalPiercing) || Player.WornHasKeyword(SLSF_Reloaded_VaginalPiercing)
-			If Player.GetFactionRank(Mods.AND_Genitals) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 75
+		ElseIf PlayerRef.WornHasKeyword(Mods.DD_VaginalPiercing) || PlayerRef.WornHasKeyword(SLSF_Reloaded_VaginalPiercing)
+			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 75
 				return True
 			EndIf
 		EndIf
 	ElseIf Mods.IsDDInstalled == False && Mods.IsANDInstalled == True
-		If Player.WornHasKeyword(SLSF_Reloaded_NipplePiercing) && Player.GetFactionRank(Mods.AND_Chest) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 50
+		If PlayerRef.WornHasKeyword(SLSF_Reloaded_NipplePiercing) && PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 50
 			return True
-		ElseIf Player.WornHasKeyword(SLSF_Reloaded_VaginalPiercing) && Player.GetFactionRank(Mods.AND_Genitals) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 75
+		ElseIf PlayerRef.WornHasKeyword(SLSF_Reloaded_VaginalPiercing) && PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 75
 			return True
 		EndIf
 	EndIf
 	
 	If VisibilityManager.IsVaginalCumVisible() == True
-		If Sexlab.CountCumVaginal(Player) > 2
+		If Sexlab.CountCumVaginal(PlayerRef) > 2
 			return True
-		ElseIf Sexlab.CountCumVaginal(Player) > 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 100
+		ElseIf Sexlab.CountCumVaginal(PlayerRef) > 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 100
 			return True
-		ElseIf Sexlab.CountCumVaginal(Player) > 0 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 50
+		ElseIf Sexlab.CountCumVaginal(PlayerRef) > 0 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 50
 			return True
 		EndIf
 	EndIf
@@ -293,27 +289,27 @@ EndFunction
 Bool Function CanGainExhibitionistFame(String FameLocation)
 	;Check Exhibitionist Fame
 	If Mods.IsANDInstalled == True
-		If Player.GetFactionRank(Mods.AND_Nude) == 1
+		If PlayerRef.GetFactionRank(Mods.AND_Nude) == 1
 			return True
-		ElseIf Player.GetFactionRank(Mods.AND_Topless) == 1 || Player.GetFactionRank(Mods.AND_Bottomless) == 1
+		ElseIf PlayerRef.GetFactionRank(Mods.AND_Topless) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bottomless) == 1
 			If GetIntValue(JsonFileString, "Exhibitionist Fame: " + FameLocation) < 100
 				return True
 			EndIf
-		ElseIf Player.GetFactionRank(Mods.AND_Chest) == 1 || Player.GetFactionRank(Mods.AND_Genitals) == 1
+		ElseIf PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
 			If GetIntValue(JsonFileString, "Exhibitionist Fame: " + FameLocation) < 75
 				return True
 			EndIf
-		ElseIf Player.GetFactionRank(Mods.AND_Ass) == 1
+		ElseIf PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
 			If GetIntValue(JsonFileString, "Exhibitionist Fame: " + FameLocation) < 50
 				return True
 			EndIf
-		ElseIf Player.GetFactionRank(Mods.AND_Bra) == 1 || player.GetFactionRank(Mods.AND_Underwear)  == 1
+		ElseIf PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear)  == 1
 			If GetIntValue(JsonFileString, "Exhibitionist Fame: " + FameLocation) < 25
 				return True
 			EndIf
 		EndIf
 	Else
-		If Player.GetEquippedArmorInSlot(32) == None
+		If PlayerRef.GetEquippedArmorInSlot(32) == None
 			return True
 		EndIf
 	EndIf
@@ -326,7 +322,7 @@ Bool Function CanGainOralFame(String FameLocation)
 		return False
 	EndIf
 	
-	Int OralCumCount = Sexlab.CountCumOral(Player)
+	Int OralCumCount = Sexlab.CountCumOral(PlayerRef)
 	If OralCumCount > 0
 		If OralCumCount > 2
 			return True
@@ -345,7 +341,7 @@ Bool Function CanGainAnalFame(String FameLocation)
 		return False
 	EndIf
 	
-	Int AssCumCount = Sexlab.CountCumAnal(Player)
+	Int AssCumCount = Sexlab.CountCumAnal(PlayerRef)
 	If AssCumCount > 0
 		If AssCumCount > 2
 			return True
@@ -364,7 +360,7 @@ Bool Function CanGainNastyFame(String FameLocation)
 		return False
 	EndIf
 	
-	Int CumCount = Sexlab.CountCum(Player)
+	Int CumCount = Sexlab.CountCum(PlayerRef)
 	If CumCount > 3
 		return True
 	ElseIf CumCount > 1 && GetIntValue(JsonFileString, "Nasty Fame: " + FameLocation) < 75
@@ -375,7 +371,7 @@ EndFunction
 
 Bool Function CanGainPregnantFame()
 	;Check Pregnant Fame
-	If Mods.IsFMPregnant(Player) || Mods.IsECPregnant(Player) || Mods.IsESPregnant(Player) || Mods.IsSGOPregnant(Player)
+	If Mods.IsFMPregnant(PlayerRef) || Mods.IsECPregnant(PlayerRef) || Mods.IsESPregnant(PlayerRef)
 		return True
 	EndIf
 	return False
@@ -383,36 +379,36 @@ EndFunction
 	
 Bool Function CanGainBoundFame()
 	;Check Bound Fame
-	If Mods.IsDDInstalled = True && Player.WornHasKeyword(Mods.DD_Lockable)
+	If Mods.IsDDInstalled == True && PlayerRef.WornHasKeyword(Mods.DD_Lockable)
 		ArmorSlots = New Armor[28]
-			ArmorSlots[0] = Player.GetEquippedArmorInSlot(31)
-			ArmorSlots[1] = Player.GetEquippedArmorInSlot(32)
-			ArmorSlots[2] = Player.GetEquippedArmorInSlot(33)
-			ArmorSlots[3] = Player.GetEquippedArmorInSlot(34)
-			ArmorSlots[4] = Player.GetEquippedArmorInSlot(35)
-			ArmorSlots[5] = Player.GetEquippedArmorInSlot(36)
-			ArmorSlots[6] = Player.GetEquippedArmorInSlot(37)
-			ArmorSlots[7] = Player.GetEquippedArmorInSlot(38)
-			ArmorSlots[8] = Player.GetEquippedArmorInSlot(39)
-			ArmorSlots[9] = Player.GetEquippedArmorInSlot(40)
-			ArmorSlots[10] = Player.GetEquippedArmorInSlot(41)
-			ArmorSlots[11] = Player.GetEquippedArmorInSlot(42)
-			ArmorSlots[12] = Player.GetEquippedArmorInSlot(43)
-			ArmorSlots[13] = Player.GetEquippedArmorInSlot(44)
-			ArmorSlots[14] = Player.GetEquippedArmorInSlot(45)
-			ArmorSlots[15] = Player.GetEquippedArmorInSlot(46)
-			ArmorSlots[16] = Player.GetEquippedArmorInSlot(47)
-			ArmorSlots[17] = Player.GetEquippedArmorInSlot(48)
-			ArmorSlots[18] = Player.GetEquippedArmorInSlot(49)
-			ArmorSlots[19] = Player.GetEquippedArmorInSlot(52)
-			ArmorSlots[20] = Player.GetEquippedArmorInSlot(53)
-			ArmorSlots[21] = Player.GetEquippedArmorInSlot(54)
-			ArmorSlots[22] = Player.GetEquippedArmorInSlot(55)
-			ArmorSlots[23] = Player.GetEquippedArmorInSlot(56)
-			ArmorSlots[24] = Player.GetEquippedArmorInSlot(57)
-			ArmorSlots[25] = Player.GetEquippedArmorInSlot(58)
-			ArmorSlots[26] = Player.GetEquippedArmorInSlot(59)
-			ArmorSlots[27] = Player.GetEquippedArmorInSlot(60)
+			ArmorSlots[0] = PlayerRef.GetEquippedArmorInSlot(31)
+			ArmorSlots[1] = PlayerRef.GetEquippedArmorInSlot(32)
+			ArmorSlots[2] = PlayerRef.GetEquippedArmorInSlot(33)
+			ArmorSlots[3] = PlayerRef.GetEquippedArmorInSlot(34)
+			ArmorSlots[4] = PlayerRef.GetEquippedArmorInSlot(35)
+			ArmorSlots[5] = PlayerRef.GetEquippedArmorInSlot(36)
+			ArmorSlots[6] = PlayerRef.GetEquippedArmorInSlot(37)
+			ArmorSlots[7] = PlayerRef.GetEquippedArmorInSlot(38)
+			ArmorSlots[8] = PlayerRef.GetEquippedArmorInSlot(39)
+			ArmorSlots[9] = PlayerRef.GetEquippedArmorInSlot(40)
+			ArmorSlots[10] = PlayerRef.GetEquippedArmorInSlot(41)
+			ArmorSlots[11] = PlayerRef.GetEquippedArmorInSlot(42)
+			ArmorSlots[12] = PlayerRef.GetEquippedArmorInSlot(43)
+			ArmorSlots[13] = PlayerRef.GetEquippedArmorInSlot(44)
+			ArmorSlots[14] = PlayerRef.GetEquippedArmorInSlot(45)
+			ArmorSlots[15] = PlayerRef.GetEquippedArmorInSlot(46)
+			ArmorSlots[16] = PlayerRef.GetEquippedArmorInSlot(47)
+			ArmorSlots[17] = PlayerRef.GetEquippedArmorInSlot(48)
+			ArmorSlots[18] = PlayerRef.GetEquippedArmorInSlot(49)
+			ArmorSlots[19] = PlayerRef.GetEquippedArmorInSlot(52)
+			ArmorSlots[20] = PlayerRef.GetEquippedArmorInSlot(53)
+			ArmorSlots[21] = PlayerRef.GetEquippedArmorInSlot(54)
+			ArmorSlots[22] = PlayerRef.GetEquippedArmorInSlot(55)
+			ArmorSlots[23] = PlayerRef.GetEquippedArmorInSlot(56)
+			ArmorSlots[24] = PlayerRef.GetEquippedArmorInSlot(57)
+			ArmorSlots[25] = PlayerRef.GetEquippedArmorInSlot(58)
+			ArmorSlots[26] = PlayerRef.GetEquippedArmorInSlot(59)
+			ArmorSlots[27] = PlayerRef.GetEquippedArmorInSlot(60)
 		
 		DD_Keywords = New Keyword[5]
 			DD_Keywords[0] = Mods.DD_Collar
@@ -421,8 +417,8 @@ Bool Function CanGainBoundFame()
 			DD_Keywords[3] = Mods.DD_VaginalPlug
 			DD_Keywords[4] = Mods.DD_AnalPlug
 		
-		SlotIndex = 0
-		KeywordIndex = 0
+		Int SlotIndex = 0
+		Int KeywordIndex = 0
 		While SlotIndex < ArmorSlots.Length
 			While KeywordIndex < DD_Keywords.Length
 				If ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable) && !ArmorSlots[SlotIndex].HasKeyword(DD_Keywords[KeywordIndex])
@@ -442,15 +438,15 @@ Bool Function CanGainTattooFame(String FameLocation)
 	If Mods.IsSlaveTatsInstalled == True
 		If VisibilityManager.CountVisibleTattoos() > 10
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos > 8 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 120
+		ElseIf VisibilityManager.CountVisibleTattoos() > 8 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 120
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos > 6 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 90
+		ElseIf VisibilityManager.CountVisibleTattoos() > 6 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 90
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos > 4 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 60
+		ElseIf VisibilityManager.CountVisibleTattoos() > 4 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 60
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos > 2 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 30
+		ElseIf VisibilityManager.CountVisibleTattoos() > 2 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 30
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos > 0 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 15
+		ElseIf VisibilityManager.CountVisibleTattoos() > 0 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 15
 			return True
 		EndIf
 	EndIf
@@ -460,7 +456,7 @@ EndFunction
 
 Bool Function CanGainCumDumpFame()
 	;Check Cum Dump Fame
-	If Mods.GetFHUInflation(Player) > 2
+	If Mods.GetFHUInflation(PlayerRef) > 2
 		return True
 	EndIf
 	return False
@@ -641,12 +637,11 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 		While AppliedFameCount < GainedFameCount
 			GainFame(PossibleFameArray[AppliedFameCount], FameLocation)
 			AppliedFameCount += 1
-		EndFunction
+		EndWhile
 		return ;end function after applying all fame
 	EndIf
 	
-	
-	String[] RolledCategory = New String[GainedFameCount] ;Store which fame categories we roll and check against them to prevent duplicates
+	String[] RolledCategory = Utility.CreateStringArray(GainedFameCount) ;Store which fame categories we roll and check against them to prevent duplicates
 	Int CategoryRoll = 0
 	Int TimesRolled = 0
 	Int PreviousRoll = 0
@@ -691,6 +686,8 @@ Function GainFame(String Category, String LocationName)
 		FameMultiplier = FameMultiplier / 2 ;Half Fame Gains at night
 	EndIf
 	
+	Int PreviousFame = GetIntValue(JsonFileString, FameTypeAndLocation)
+	
 	If PreviousFame >= 100
 		FameGained = Utility.RandomInt(1,2)
 	ElseIf PreviousFame >= 75
@@ -725,7 +722,7 @@ Function GainFame(String Category, String LocationName)
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	
 	While LocationFound == False && LocationIndex < CustomLocations
-		If LocationFound == False && LocationIndex < LocationManager.FetchCustomLocationCount()
+		If LocationFound == False && LocationIndex < SLSF_Reloaded_CustomLocationCount.GetValue()
 			If LocationName == LocationManager.CustomLocation[LocationIndex]
 				LocationFound = True
 				CustomLocationCanDecay[LocationIndex] = False
@@ -835,19 +832,19 @@ Function SpreadFameRoll()
 		If DefaultLocationCanSpread[LocationIndex] == True
 			SpreadChance = Config.DefaultLocationSpreadChance[LocationIndex]
 			If SpreadChance == 0
-				Config.DefaultLocationSpreadChance[LocationIndex] += Config.FailedSpreadIncrease
+				Config.DefaultLocationSpreadChance[LocationIndex] = Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease
 			ElseIf SpreadChance == 100
 				SpreadFame(LocationManager.DefaultLocation[LocationIndex])
-				Config.DefaultLocationSpreadChance[LocationIndex] -= Config.SuccessfulSpreadReduction
+				Config.DefaultLocationSpreadChance[LocationIndex] = Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction
 			ElseIf SpreadChance > 100 || SpreadChance < 0
 				Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is not valid!")
 			Else
 				FameSpreadRoll = Utility.RandomInt(1, 100)
 				If FameSpreadRoll <= SpreadChance
 					SpreadFame(LocationManager.DefaultLocation[LocationIndex])
-					Config.DefaultLocationSpreadChance[LocationIndex] -= Config.SuccessfulSpreadReduction
+					Config.DefaultLocationSpreadChance[LocationIndex] = Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction
 				Else
-					Config.DefaultLocationSpreadChance[LocationIndex] += Config.FailedSpreadIncrease
+					Config.DefaultLocationSpreadChance[LocationIndex] = Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease
 				EndIf
 			EndIf
 			
@@ -869,19 +866,19 @@ Function SpreadFameRoll()
 		If CustomLocationCanSpread[LocationIndex] == True
 			SpreadChance = Config.CustomLocationSpreadChance[LocationIndex]
 			If SpreadChance == 0
-				Config.CustomLocationSpreadChance[LocationIndex] += Config.FailedSpreadIncrease
+				Config.CustomLocationSpreadChance[LocationIndex] = Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease
 			ElseIf SpreadChance == 100
 				SpreadFame(LocationManager.CustomLocation[LocationIndex])
-				Config.CustomLocationSpreadChance[LocationIndex] -= Config.SuccessfulSpreadReduction
+				Config.CustomLocationSpreadChance[LocationIndex] = Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction
 			ElseIf SpreadChance > 100 || SpreadChance < 0
 				Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is not valid!")
 			Else
 				FameSpreadRoll = Utility.RandomInt(1, 100)
 				If FameSpreadRoll <= SpreadChance
 					SpreadFame(LocationManager.CustomLocation[LocationIndex])
-					Config.CustomLocationSpreadChance[LocationIndex] -= Config.SuccessfulSpreadReduction
+					Config.CustomLocationSpreadChance[LocationIndex] = Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction
 				Else
-					Config.CustomLocationSpreadChance[LocationIndex] += Config.FailedSpreadIncrease
+					Config.CustomLocationSpreadChance[LocationIndex] = Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease
 				EndIf
 			EndIf
 			
@@ -928,7 +925,7 @@ Function SpreadFame(String SpreadFromLocation)
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	Int TotalLocations = DefaultLocations + CustomLocations
 	
-	PossibleSpreadTargets = New String[TotalLocations]
+	PossibleSpreadTargets = Utility.CreateStringArray(TotalLocations)
 	
 	;Fill array with possible targets
 	Int PossibleLocationIndex = 0
@@ -973,6 +970,8 @@ Function SpreadFame(String SpreadFromLocation)
 	Int FameSpreadValue = 0
 	Int SuccessfulFameSpreads = 0
 	Int CategoryRoll = 0
+	String OriginalFameTypeAndLocation = ""
+	String TargetFameTypeAndLocation = ""
 	
 	If PossibleFameSpreadCategories == 1
 		OriginalFameTypeAndLocation = PossibleSpreadCategories[0] + " Fame: " + SpreadFromLocation
@@ -1015,7 +1014,7 @@ Function SpreadFame(String SpreadFromLocation)
 		Int TimesRolled = 0
 		Int PreviousRoll = 0
 		Bool DuplicateFameRolls = False
-		String[] RolledCategory = New String[NumberOfCategoriesToSpread]
+		String[] RolledCategory = Utility.CreateStringArray(NumberOfCategoriesToSpread)
 		
 		While SuccessfulFameSpreads < NumberOfCategoriesToSpread
 			CategoryRoll = Utility.RandomInt(0, (PossibleFameSpreadCategories - 1))
