@@ -17,6 +17,8 @@ Race[] Property ArgonianRace Auto
 String Property OldPlayerName Auto Hidden
 String Property NewPlayerName Auto Hidden
 
+GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
+
 Event OnInit()
 	RegisterForMenu("RACESEX_MENU")
 	RegisterForUpdateGameTime(0.5)
@@ -104,36 +106,13 @@ Event OnSexlabAnimationStart()
 	EndIf
 EndEvent
 
-Event OnMenuClose(String MenuName)
-	If MenuName == "RACESEX_MENU"
-		String PlayerName = PlayerRef.GetActorBase().GetName()
-		
-		If (OldPlayerName != NewPlayerName) && (NewPlayerName != PlayerName) ;Is name actually changing? If so, rotate previous "New" name to Old name.
-			OldPlayerName = NewPlayerName
-		EndIf
-		
-		If NewPlayerName != PlayerName ;If not using previous name, update New name.
-			NewPlayerName = PlayerName
-		EndIf
-		
-		If JsonExists(FameManager.JsonFileString)
-			FameManager.NameChangeHandler(NewPlayerName)
-		EndIf
-		
-		FameManager.SetJsonFileString(NewPlayerName)
-	
-		If !JsonExists(FameManager.JsonFileString)
-			FameManager.CreateNewFameList()
-		EndIf
-	EndIf
-EndEvent
-
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	LocationManager.CurrentLocation = akNewLoc
 EndEvent
 
 Event OnUpdateGameTime()
-	PlayerRef.AddSpell(NPCScanSpell)
+	SLSF_Reloaded_NPCScanSucess.SetValue(0)
+	PlayerRef.AddSpell(NPCScanSpell, True) ;Second parameter is "Verbose" boolean. If true, get a notification. If false, don't. True for Beta.
 	
 	FameManager.RegisterForSingleUpdate(0.1)
 	

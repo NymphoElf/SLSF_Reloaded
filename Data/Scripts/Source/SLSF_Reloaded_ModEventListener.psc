@@ -1,14 +1,11 @@
 ScriptName SLSF_Reloaded_ModEventListener extends Quest
 
-Import JsonUtil
-
 SLSF_Reloaded_FameManager Property FameManager Auto
 SLSF_Reloaded_LocationManager Property LocationManager Auto
+SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
-
-String[] Property ExternalFlagMods Auto
 
 Event OnInit()
 	RegisterExternalEvents()
@@ -132,133 +129,175 @@ EndEvent
 Event OnExternalSlutGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Slut Gain Event Location is Invalid")
-	ElseIf GetIntValue(FameManager.JsonFileString, "Slut Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Slut Fame: " + EventLocation) < MaxFame
+	ElseIf Data.GetFameValue(EventLocation, "Slut") >= MinFame && Data.GetFameValue(EventLocation, "Slut") < MaxFame
 		FameManager.GainFame("Slut", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalWhoreGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Whore Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Whore Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Whore Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Whore") >= MinFame && Data.GetFameValue(EventLocation, "Whore") < MaxFame
 		FameManager.GainFame("Whore", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalExhibitionistGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Exhibitionist Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Exhibitionist Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Exhibitionist Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Exhibitionist") >= MinFame && Data.GetFameValue(EventLocation, "Exhibitionist") < MaxFame
 		FameManager.GainFame("Exhibitionist", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalOralGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Oral Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Oral Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Oral Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Oral") >= MinFame && Data.GetFameValue(EventLocation, "Oral") < MaxFame
 		FameManager.GainFame("Oral", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalAnalGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Anal Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Anal Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Anal Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Anal") >= MinFame && Data.GetFameValue(EventLocation, "Anal") < MaxFame
 		FameManager.GainFame("Anal", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalNastyGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Nasty Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Nasty Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Nasty Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Nasty") >= MinFame && Data.GetFameValue(EventLocation, "Nasty") < MaxFame
 		FameManager.GainFame("Nasty", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalPregnantGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Pregnant Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Pregnant Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Pregnant Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Pregnant") >= MinFame && Data.GetFameValue(EventLocation, "Pregnant") < MaxFame
 		FameManager.GainFame("Pregnant", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalDominantGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Dominant Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Dominant Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Dominant Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Dominant") >= MinFame && Data.GetFameValue(EventLocation, "Dominant") < MaxFame
 		FameManager.GainFame("Dominant", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalSubmissiveGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Submissive Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Submissive Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Submissive Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Submissive") >= MinFame && Data.GetFameValue(EventLocation, "Submissive") < MaxFame
 		FameManager.GainFame("Submissive", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalSadistGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Sadist Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Sadist Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Sadist Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Sadist") >= MinFame && Data.GetFameValue(EventLocation, "Sadist") < MaxFame
 		FameManager.GainFame("Sadist", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalMasochistGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Masochist Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Masochist Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Masochist Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Masochist") >= MinFame && Data.GetFameValue(EventLocation, "Masochist") < MaxFame
 		FameManager.GainFame("Masochist", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalGentleGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Gentle Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Gentle Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Gentle Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Gentle") >= MinFame && Data.GetFameValue(EventLocation, "Gentle") < MaxFame
 		FameManager.GainFame("Gentle", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalLikesMenGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Likes Men Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Likes Men Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Likes Men Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Likes Men") >= MinFame && Data.GetFameValue(EventLocation, "Likes Men") < MaxFame
 		FameManager.GainFame("Likes Men", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalLikesWomenGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Likes Women Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Likes Women Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Likes Women Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Likes Women") >= MinFame && Data.GetFameValue(EventLocation, "Likes Women") < MaxFame
 		FameManager.GainFame("Likes Women", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalLikesOrcGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Likes Orc Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Likes Orc Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Likes Orc Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Likes Orc") >= MinFame && Data.GetFameValue(EventLocation, "Likes Orc") < MaxFame
 		FameManager.GainFame("Likes Orc", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalLikesKhajiitGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Likes Khajiit Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Likes Khajiit Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Likes Khajiit Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Likes Khajiit") >= MinFame && Data.GetFameValue(EventLocation, "Likes Khajiit") < MaxFame
 		FameManager.GainFame("Likes Khajiit", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalLikesArgonianGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Likes Argonian Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Likes Argonian Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Likes Argonian Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Likes Argonian") >= MinFame && Data.GetFameValue(EventLocation, "Likes Argonian") < MaxFame
 		FameManager.GainFame("Likes Argonian", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalBestialityGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Bestiality Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Bestiality Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Bestiality Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Bestiality") >= MinFame && Data.GetFameValue(EventLocation, "Bestiality") < MaxFame
 		FameManager.GainFame("Bestiality", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalGroupGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Group Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Group Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Group Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Group") >= MinFame && Data.GetFameValue(EventLocation, "Group") < MaxFame
 		FameManager.GainFame("Group", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalBoundGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Bound Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Bound Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Bound Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Bound") >= MinFame && Data.GetFameValue(EventLocation, "Bound") < MaxFame
 		FameManager.GainFame("Bound", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalTattooGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Tattoo Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Tattoo Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Tattoo Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Tattoo") >= MinFame && Data.GetFameValue(EventLocation, "Tattoo") < MaxFame
 		FameManager.GainFame("Tattoo", EventLocation)
 	EndIf
 EndEvent
 
 Event OnExternalCumDumpGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
-	If GetIntValue(FameManager.JsonFileString, "Cum Dump Fame: " + EventLocation) >= MinFame && GetIntValue(FameManager.JsonFileString, "Cum Dump Fame: " + EventLocation) < MaxFame
+	If LocationManager.IsLocationValid(EventLocation) == False
+		Debug.Trace("External Cum Dump Gain Event Location is Invalid")
+	ElseIf Data.GetFameValue(EventLocation, "Cum Dump") >= MinFame && Data.GetFameValue(EventLocation, "Cum Dump") < MaxFame
 		FameManager.GainFame("Cum Dump", EventLocation)
 	EndIf
 EndEvent
@@ -322,6 +361,7 @@ Event OnExternalManualFameGain(String EventLocation, String Category = "NULL", I
 		return
 	EndIf
 	
+	Int PreviousFame = Data.GetFameValue(EventLocation, Category)
 	Int IncreaseValue = 0
 	If MinIncrease >= MaxIncrease
 		IncreaseValue = MinIncrease
@@ -329,12 +369,11 @@ Event OnExternalManualFameGain(String EventLocation, String Category = "NULL", I
 		IncreaseValue = Utility.RandomInt(MinIncrease, MaxIncrease)
 	EndIf
 	
-	If GetIntValue(FameManager.JsonFileString, Category + " Fame: " + EventLocation) < 150
-		AdjustIntValue(FameManager.JsonFileString, Category + " Fame: " + EventLocation, IncreaseValue)
-	EndIf
-	
-	If GetIntValue(FameManager.JsonFileString, Category + " Fame: " + EventLocation) > 150
-		SetIntValue(FameManager.JsonFileString, Category + " Fame: " + EventLocation, 150)
+	Int NewFame = PreviousFame + IncreaseValue
+	If NewFame < 150
+		Data.SetFameValue(EventLocation, Category, NewFame)
+	Else
+		Data.SetFameValue(EventLocation, Category, 150)
 	EndIf
 EndEvent
 
@@ -372,18 +411,21 @@ Event OnExternalManualFameGainAllInLocation(String EventLocation, Int MinIncreas
 		return
 	EndIf
 	
+	Int PreviousFame = 0
+	Int NewFame = 0
 	Int FameIndex = 0
 	While FameIndex < FameManager.FameType.Length
+		PreviousFame = Data.GetFameValue(EventLocation, FameManager.FameType[FameIndex])
 		If RandomizeIncreaseValue == True
 			IncreaseValue = Utility.RandomInt(MinIncrease, MaxIncrease)
 		EndIf
 		
-		If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + EventLocation) < 150
-			AdjustIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + EventLocation, IncreaseValue)
-		EndIf
+		NewFame = PreviousFame + IncreaseValue
 		
-		If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + EventLocation) > 150
-			SetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + EventLocation, 150)
+		If NewFame < 150
+			Data.SetFameValue(EventLocation, FameManager.FameType[FameIndex], NewFame)
+		Else
+			Data.SetFameValue(EventLocation, FameManager.FameType[FameIndex], 150)
 		EndIf
 		
 		FameIndex += 1
@@ -420,20 +462,23 @@ Event OnExternalManualFameGainAll(Int MinIncrease = 1, Int MaxIncrease = 1)
 		return
 	EndIf
 	
+	Int PreviousFame = 0
+	Int NewFame = 0
 	Int FameIndex = 0
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		While FameIndex < FameManager.FameType.Length
+			PreviousFame = Data.GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[FameIndex])
 			If RandomizeIncreaseValue == True
 				IncreaseValue = Utility.RandomInt(MinIncrease, MaxIncrease)
 			EndIf
 			
-			If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex]) < 150
-				AdjustIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex], IncreaseValue)
-			EndIf
+			NewFame = PreviousFame + IncreaseValue
 			
-			If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex]) > 150
-				SetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex], 150)
+			If NewFame < 150
+				Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[FameIndex], NewFame)
+			Else
+				Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[FameIndex], 150)
 			EndIf
 			
 			FameIndex += 1
@@ -448,16 +493,17 @@ Event OnExternalManualFameGainAll(Int MinIncrease = 1, Int MaxIncrease = 1)
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	While LocationIndex < CustomLocations
 		While FameIndex < FameManager.FameType.Length
+			PreviousFame = Data.GetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[FameIndex])
 			If RandomizeIncreaseValue == True
 				IncreaseValue = Utility.RandomInt(MinIncrease, MaxIncrease)
 			EndIf
 			
-			If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex]) < 150
-				AdjustIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex], IncreaseValue)
-			EndIf
+			NewFame = PreviousFame + IncreaseValue
 			
-			If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex]) > 150
-				SetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex], 150)
+			If NewFame < 150
+				Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[FameIndex], NewFame)
+			Else
+				Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[FameIndex], 150)
 			EndIf
 			
 			FameIndex += 1
@@ -544,12 +590,13 @@ Event OnExternalManualFameDecay(String EventLocation, String Category = "NULL", 
 		DecayValue = Utility.RandomInt(MinDecay, MaxDecay)
 	EndIf
 	
-	If GetIntValue(FameManager.JsonFileString, Category + " Fame: " + EventLocation) > 0
-		AdjustIntValue(FameManager.JsonFileString, Category + " Fame: " + EventLocation, -DecayValue)
-	EndIf
+	Int PreviousFame = Data.GetFameValue(EventLocation, Category)
+	Int NewFame = PreviousFame - DecayValue
 	
-	If GetIntValue(FameManager.JsonFileString, Category + " Fame: " + EventLocation) < 0
-		SetIntValue(FameManager.JsonFileString, Category + " Fame: " + EventLocation, 0)
+	If NewFame > 0
+		Data.SetFameValue(EventLocation, Category, NewFame)
+	Else
+		Data.SetFameValue(EventLocation, Category, 0)
 	EndIf
 EndEvent
 
@@ -587,18 +634,21 @@ Event OnExternalManualFameDecayAllInLocation(String EventLocation, Int MinDecay 
 		return
 	EndIf
 	
+	Int PreviousFame = 0
+	Int NewFame = 0
 	Int FameIndex = 0
 	While FameIndex < FameManager.FameType.Length
+		PreviousFame = Data.GetFameValue(EventLocation, FameManager.FameType[FameIndex])
 		If RandomizeDecayValue == True
 			DecayValue = Utility.RandomInt(MinDecay, MaxDecay)
 		EndIf
 		
-		If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + EventLocation) > 0
-			AdjustIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + EventLocation, -DecayValue)
-		EndIf
+		NewFame = PreviousFame - DecayValue
 		
-		If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + EventLocation) < 0
-			SetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + EventLocation, 0)
+		If NewFame > 0
+			Data.SetFameValue(EventLocation, FameManager.FameType[FameIndex], NewFame)
+		Else
+			Data.SetFameValue(EventLocation, FameManager.FameType[FameIndex], 0)
 		EndIf
 		
 		FameIndex += 1
@@ -635,20 +685,23 @@ Event OnExternalManualFameDecayAll(Int MinDecay = 1, Int MaxDecay = 1)
 		return
 	EndIf
 	
+	Int PreviousFame = 0
+	Int NewFame = 0
 	Int FameIndex = 0
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		While FameIndex < FameManager.FameType.Length
+			PreviousFame = Data.GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[FameIndex])
 			If RandomizeDecayValue == True
 				DecayValue = Utility.RandomInt(MinDecay, MaxDecay)
 			EndIf
 			
-			If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex]) > 0
-				AdjustIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex], -DecayValue)
-			EndIf
+			NewFame = PreviousFame - DecayValue
 			
-			If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex]) < 0
-				SetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex], 0)
+			If NewFame > 0
+				Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[FameIndex], NewFame)
+			Else
+				Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[FameIndex], 0)
 			EndIf
 			
 			FameIndex += 1
@@ -663,16 +716,17 @@ Event OnExternalManualFameDecayAll(Int MinDecay = 1, Int MaxDecay = 1)
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	While LocationIndex < CustomLocations
 		While FameIndex < FameManager.FameType.Length
+			PreviousFame = Data.GetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[FameIndex])
 			If RandomizeDecayValue == True
 				DecayValue = Utility.RandomInt(MinDecay, MaxDecay)
 			EndIf
 			
-			If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex]) > 0
-				AdjustIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex], -DecayValue)
-			EndIf
+			NewFame = PreviousFame - DecayValue
 			
-			If GetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex]) < 0
-				SetIntValue(FameManager.JsonFileString, FameManager.FameType[FameIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex], 0)
+			If NewFame > 0
+				Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[FameIndex], NewFame)
+			Else
+				Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[FameIndex], 0)
 			EndIf
 			
 			FameIndex += 1
@@ -754,7 +808,7 @@ Event OnExternalManualFameSpread(String SpreadFromLocation, String SpreadToLocat
 		return
 	EndIf
 	
-	If GetIntValue(FameManager.JsonFileString, Category + " Fame: " + SpreadFromLocation) < 10
+	If Data.GetFameValue(SpreadFromLocation, Category) < 10
 		Debug.Trace("SLSF Reloaded - ExternalManualFameSpread - Fame Value is too low. Cannot Spread Fame.")
 		return
 	EndIf
@@ -767,11 +821,14 @@ Event OnExternalManualFameSpread(String SpreadFromLocation, String SpreadToLocat
 		PercentToSpread = 100
 	EndIf
 	
-	Int FameSpreadValue = (GetIntValue(FameManager.JsonFileString, Category + " Fame: " + SpreadFromLocation) * (PercentToSpread / 100)) as Int
-	AdjustIntValue(FameManager.JsonFileString, Category + " Fame: " + SpreadToLocation, FameSpreadValue)
+	Int PreviousFame = Data.GetFameValue(SpreadToLocation, Category)
+	Int FameSpreadValue = (Data.GetFameValue(SpreadFromLocation, Category) * (PercentToSpread / 100)) as Int
+	Int NewFame = PreviousFame + FameSpreadValue
 	
-	If GetIntValue(FameManager.JsonFileString, Category + " Fame: " + SpreadToLocation) > 150
-		SetIntValue(FameManager.JsonFileString, Category + " Fame: " + SpreadToLocation, 150)
+	If NewFame < 150
+		Data.SetFameValue(SpreadToLocation, Category, NewFame)
+	Else
+		Data.SetFameValue(SpreadToLocation, Category, 150)
 	EndIf
 EndEvent
 
@@ -845,177 +902,89 @@ FALSE means you want to disable fame gains for that category (this will NOT over
 /;
 
 Event OnExternalSlutFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Slut Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Slut", Flag)
 EndEvent
 
 Event OnExternalWhoreFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Whore Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Whore", Flag)
 EndEvent
 
 Event OnExternalExhibitionistFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Exhibitionist Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Exhibitionist", Flag)
 EndEvent
 
 Event OnExternalOralFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Oral Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Oral", Flag)
 EndEvent
 
 Event OnExternalAnalFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Anal Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Anal", Flag)
 EndEvent
 
 Event OnExternalNastyFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Nasty Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Nasty", Flag)
 EndEvent
 
 Event OnExternalPregnantFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Pregnant Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Pregnant", Flag)
 EndEvent
 
 Event OnExternalDominantFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Dominant Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Dominant", Flag)
 EndEvent
 
 Event OnExternalSubmissiveFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Submissive Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Submissive", Flag)
 EndEvent
 
 Event OnExternalSadistFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Sadist Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Sadist", Flag)
 EndEvent
 
 Event OnExternalMasochistFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Masochist Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Masochist", Flag)
 EndEvent
 
 Event OnExternalGentleFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Gentle Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Gentle", Flag)
 EndEvent
 
 Event OnExternalLikesMenFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Men Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Likes Men", Flag)
 EndEvent
 
 Event OnExternalLikesWomenFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Women Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Likes Women", Flag)
 EndEvent
 
 Event OnExternalLikesOrcFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Orc Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Likes Orc", Flag)
 EndEvent
 
 Event OnExternalLikesKhajiitFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Khajiit Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Likes Khajiit", Flag)
 EndEvent
 
 Event OnExternalLikesArgonianFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Likes Argonian Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Likes Argonian", Flag)
 EndEvent
 
 Event OnExternalBestialityFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Bestiality Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Bestiality", Flag)
 EndEvent
 
 Event OnExternalGroupFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Group Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Group", Flag)
 EndEvent
 
 Event OnExternalBoundFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Bound Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Bound", Flag)
 EndEvent
 
 Event OnExternalTattooFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Tattoo Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Tattoo", Flag)
 EndEvent
 
 Event OnExternalCumDumpFlag(String ModName, Bool Flag)
-	If ExternalFlagMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalFlagMods.Find(None)
-		ExternalFlagMods[EmptyIndex] = ModName
-	EndIf
-	SetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ModName + " Cum Dump Flag", Flag as String)
+	Data.SetExternalFlags(ModName, "Cum Dump", Flag)
 EndEvent

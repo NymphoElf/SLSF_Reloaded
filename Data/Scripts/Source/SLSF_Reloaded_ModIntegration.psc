@@ -35,6 +35,14 @@ Faction Property SpiderBreeder Auto Hidden
 MagicEffect Property FM_2ndTrimester Auto Hidden
 MagicEffect Property FM_3rdTrimester Auto Hidden
 
+Event OnInit()
+	CheckInstalledMods()
+EndEvent
+
+Event OnPlayerLoadGame()
+	CheckInstalledMods()
+EndEvent
+
 Function CheckInstalledMods()
 	If Game.GetModByName("Advanced Nudity Detection.esp" != 255)
 		IsANDInstalled = True

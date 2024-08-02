@@ -1,12 +1,11 @@
 ScriptName SLSF_Reloaded_FameManager extends Quest
 
-Import JsonUtil
-
 SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 SLSF_Reloaded_ModEventListener Property ExternalListener Auto
+SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_MCM Property Config Auto
 SexlabFramework Property Sexlab Auto
 
@@ -16,7 +15,6 @@ Bool[] Property CustomLocationCanSpread Auto
 Bool[] Property DefaultLocationCanDecay Auto 
 Bool[] Property CustomLocationCanDecay Auto 
 
-String Property JsonFileString Auto Hidden
 String[] Property FameType Auto
 String[] Property PossibleFameArray Auto Hidden
 String[] Property PossibleSpreadTargets Auto Hidden
@@ -105,7 +103,7 @@ Function Startup()
 	FamePaused = False
 	
 	Int LocationIndex = 0
-	While LocationIndex < LocationManager.DefaultLocation[LocationIndex]
+	While LocationIndex < LocationManager.DefaultLocation.Length
 		DefaultLocationCanSpread[LocationIndex] = True
 		DefaultLocationCanDecay[LocationIndex] = True
 		DefaultLocationSpreadPauseTimer[LocationIndex] = 0
@@ -194,188 +192,137 @@ Event OnUpdate()
 	EndWhile
 EndEvent
 
-Function SetJsonFileString(String PlayerName)
-	JsonFileString = "../SLSF Reloaded/" + PlayerName + " Fame List"
-EndFunction
-
-Function CreateNewFameList()
-	FamePaused = True
-	Int LocationIndex = 0
-	Int TypeIndex = 0
-	Debug.Notification("SLSF Reloaded - Creating New Fame List. Please Wait.")
-	While LocationIndex < LocationManager.DefaultLocation.Length
-		While TypeIndex < FameType.Length
-			SetIntValue(JsonFileString, FameType[TypeIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex], 0)
-			TypeIndex += 1
-		EndWhile
-		TypeIndex = 0
-		LocationIndex += 1
-	EndWhile
-	FamePaused = False
-	Debug.Notification("New Fame List Finished!")
-EndFunction
-
-Function AddCustomLocation(String CustomLocationName)
-	Int TypeIndex = 0
-	While TypeIndex < FameType.Length
-		SetIntValue(JsonFileString, FameType[TypeIndex] + " Fame: " + CustomLocationName, 0)
-		TypeIndex += 1
-	EndWhile
-	Debug.Notification("Fame List added for " + CustomLocationName)
-EndFunction
-
-Function NameChangeHandler(String NewPlayerName)
-	FamePaused = True
-	Int LocationIndex = 0
-	Int TypeIndex = 0
-	String FameTypeAndLocation = ""
-	String NewJsonPath = "../SLSF Reloaded/" + NewPlayerName + " Fame List" ;Build string once instead of multiple times
-	
-	Debug.Notification("SLSF Reloaded - Name Change Detected. Fame is Paused.")
-	If JsonExists(NewJsonPath)
-		Debug.Notification("SLSF Reloaded - Switched to " + NewPlayerName + " Fame List.")
-	Else
-		Debug.Notification("SLSF Reloaded - Transferring Fame to New List.")
-		While LocationIndex < LocationManager.DefaultLocation.Length
-			While TypeIndex < FameType.Length
-				FameTypeAndLocation = FameType[TypeIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex] ;Build string once instead of multiple times
-				SetIntValue(NewJsonPath, FameTypeAndLocation, GetIntValue(JsonFileString, FameTypeAndLocation))
-				TypeIndex += 1
-			EndWhile
-			TypeIndex = 0
-			LocationIndex += 1
-		EndWhile
-		
-		LocationIndex = 0
-		TypeIndex = 0
-		Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
-		
-		While LocationIndex < CustomLocations
-			While TypeIndex < FameType.Length
-				FameTypeAndLocation = FameType[TypeIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex]
-				SetIntValue(NewJsonPath, FameTypeAndLocation, GetIntValue(JsonFileString, FameTypeAndLocation))
-				TypeIndex += 1
-			EndWhile
-			TypeIndex = 0
-			LocationIndex += 1
-		EndWhile
-	EndIf
-	FamePaused = False
-	Debug.Notification("SLSF Reloaded - Name Change Finished. Fame is Unpaused.")
-EndFunction
-
 Function CheckExternalFlags()
-	If ExternalListener.ExternalFlagMods.Length > 0
-		Int ModIndex = 0
-		Int FameIndex = 0
-		Bool FameFlag = False
-		Int TrueCount = 0
-		While FameIndex < FameType.Length
-			While ModIndex < ExternalListener.ExternalFlagMods.Length
-				If GetStringValue("../SLSF Reloaded/" + PlayerScript.NewPlayerName + " External Fame Flags", ExternalListener.ExternalFlagMods[ModIndex] + " " + FameType[FameIndex] + " Flag") == "true"
-					TrueCount += 1
-				EndIf
-				ModIndex += 1
-			EndWhile
-			
-			If TrueCount > 0
-				If FameType[FameIndex] == "Whore"
-					ExternalWhoreFlag = True
-				ElseIf FameType[FameIndex] == "Slut"
-					ExternalSlutFlag = True
-				ElseIf FameType[FameIndex] == "Exhibitionist"
-					ExternalExhibitionistFlag = True
-				ElseIf FameType[FameIndex] == "Oral"
-					ExternalOralFlag = True
-				ElseIf FameType[FameIndex] == "Anal"
-					ExternalAnalFlag = True
-				ElseIf FameType[FameIndex] == "Nasty"
-					ExternalNastyFlag = True
-				ElseIf FameType[FameIndex] == "Pregnant"
-					ExternalPregnantFlag = True
-				ElseIf FameType[FameIndex] == "Dominant"
-					ExternalDominantFlag = True
-				ElseIf FameType[FameIndex] == "Submissive"
-					ExternalSubmissiveFlag = True
-				ElseIf FameType[FameIndex] == "Sadist"
-					ExternalSadistFlag = True
-				ElseIf FameType[FameIndex] == "Masochist"
-					ExternalMasochistFlag = True
-				ElseIf FameType[FameIndex] == "Gentle"
-					ExternalGentleFlag = True
-				ElseIf FameType[FameIndex] == "Likes Men"
-					ExternalLikesMenFlag = True
-				ElseIf FameType[FameIndex] == "Likes Women"
-					ExternalLikesWomenFlag = True
-				ElseIf FameType[FameIndex] == "Likes Orc"
-					ExternalLikesOrcFlag = True
-				ElseIf FameType[FameIndex] == "Likes Khajiit"
-					ExternalLikesKhajiitFlag = True
-				ElseIf FameType[FameIndex] == "Likes Argonian"
-					ExternalLikesArgonianFlag = True
-				ElseIf FameType[FameIndex] == "Bestiality"
-					ExternalBestialityFlag = True
-				ElseIf FameType[FameIndex] == "Group"
-					ExternalGroupFlag = True
-				ElseIf FameType[FameIndex] == "Bound"
-					ExternalBoundFlag = True
-				ElseIf FameType[FameIndex] == "Tattoo"
-					ExternalTattooFlag = True
-				ElseIf FameType[FameIndex] == "Cum Dump"
-					ExternalCumDumpFlag = True
-				EndIf
-			Else
-				If FameType[FameIndex] == "Whore"
-					ExternalWhoreFlag = False
-				ElseIf FameType[FameIndex] == "Slut"
-					ExternalSlutFlag = False
-				ElseIf FameType[FameIndex] == "Exhibitionist"
-					ExternalExhibitionistFlag = False
-				ElseIf FameType[FameIndex] == "Oral"
-					ExternalOralFlag = False
-				ElseIf FameType[FameIndex] == "Anal"
-					ExternalAnalFlag = False
-				ElseIf FameType[FameIndex] == "Nasty"
-					ExternalNastyFlag = False
-				ElseIf FameType[FameIndex] == "Pregnant"
-					ExternalPregnantFlag = False
-				ElseIf FameType[FameIndex] == "Dominant"
-					ExternalDominantFlag = False
-				ElseIf FameType[FameIndex] == "Submissive"
-					ExternalSubmissiveFlag = False
-				ElseIf FameType[FameIndex] == "Sadist"
-					ExternalSadistFlag = False
-				ElseIf FameType[FameIndex] == "Masochist"
-					ExternalMasochistFlag = False
-				ElseIf FameType[FameIndex] == "Gentle"
-					ExternalGentleFlag = False
-				ElseIf FameType[FameIndex] == "Likes Men"
-					ExternalLikesMenFlag = False
-				ElseIf FameType[FameIndex] == "Likes Women"
-					ExternalLikesWomenFlag = False
-				ElseIf FameType[FameIndex] == "Likes Orc"
-					ExternalLikesOrcFlag = False
-				ElseIf FameType[FameIndex] == "Likes Khajiit"
-					ExternalLikesKhajiitFlag = False
-				ElseIf FameType[FameIndex] == "Likes Argonian"
-					ExternalLikesArgonianFlag = False
-				ElseIf FameType[FameIndex] == "Bestiality"
-					ExternalBestialityFlag = False
-				ElseIf FameType[FameIndex] == "Group"
-					ExternalGroupFlag = False
-				ElseIf FameType[FameIndex] == "Bound"
-					ExternalBoundFlag = False
-				ElseIf FameType[FameIndex] == "Tattoo"
-					ExternalTattooFlag = False
-				ElseIf FameType[FameIndex] == "Cum Dump"
-					ExternalCumDumpFlag = False
-				EndIf
-			EndIf
-			
-			TrueCount = 0
-			ModIndex = 0
-			FameIndex += 1
-		EndWhile
+	If Data.GetExternalFlags("Whore") == True
+		ExternalWhoreFlag = True
+	Else
+		ExternalWhoreFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Slut") == True
+		ExternalSlutFlag = True
+	Else
+		ExternalSlutFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Exhibitionist") == True
+		ExternalExhibitionistFlag = True
+	Else
+		ExternalExhibitionistFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Oral") == True
+		ExternalOralFlag = True
+	Else
+		ExternalOralFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Anal") == True
+		ExternalAnalFlag = True
+	Else
+		ExternalAnalFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Nasty") == True
+		ExternalNastyFlag = True
+	Else
+		ExternalNastyFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Pregnant") == True
+		ExternalPregnantFlag = True
+	Else
+		ExternalPregnantFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Dominant") == True
+		ExternalDominantFlag = True
+	Else
+		ExternalDominantFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Submissive") == True
+		ExternalSubmissiveFlag = True
+	Else
+		ExternalSubmissiveFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Sadist") == True
+		ExternalSadistFlag = True
+	Else
+		ExternalSadistFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Masochist") == True
+		ExternalMasochistFlag = True
+	Else
+		ExternalMasochistFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Gentle") == True
+		ExternalGentleFlag = True
+	Else
+		ExternalGentleFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Likes Men") == True
+		ExternalLikesMenFlag = True
+	Else
+		ExternalLikesMenFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Likes Women") == True
+		ExternalLikesWomenFlag = True
+	Else
+		ExternalLikesWomenFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Likes Orc") == True
+		ExternalLikesOrcFlag = True
+	Else
+		ExternalLikesOrcFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Likes Khajiit")
+		ExternalLikesKhajiitFlag = True
+	Else
+		ExternalLikesKhajiitFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Likes Argonian")
+		ExternalLikesArgonianFlag = True
+	Else
+		ExternalLikesArgonianFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Bestiality") == True
+		ExternalBestialityFlag = True
+	Else
+		ExternalBestialityFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Group") == True
+		ExternalGroupFlag = True
+	Else
+		ExternalGroupFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Bound") == True
+		ExternalBoundFlag = True
+	Else
+		ExternalBoundFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Tattoo") == True
+		ExternalTattooFlag = True
+	Else
+		ExternalTattooFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Cum Dump")
+		ExternalCumDumpFlag = True
+	Else
+		ExternalCumDumpFlag = False
 	EndIf
 EndFunction
 
@@ -397,18 +344,18 @@ Bool Function CanGainSlutFame(String FameLocation)
 		EndIf
 	ElseIf Mods.IsDDInstalled == True && Mods.IsANDInstalled == True
 		If PlayerRef.WornHasKeyword(Mods.DD_NipplePiercing) || PlayerRef.WornHasKeyword(SLSF_Reloaded_NipplePiercing)
-			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 50
+			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 && Data.GetFameValue(FameLocation, "Slut") < 50
 				return True
 			EndIf
 		ElseIf PlayerRef.WornHasKeyword(Mods.DD_VaginalPiercing) || PlayerRef.WornHasKeyword(SLSF_Reloaded_VaginalPiercing)
-			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 75
+			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 && Data.GetFameValue(FameLocation, "Slut") < 75
 				return True
 			EndIf
 		EndIf
 	ElseIf Mods.IsDDInstalled == False && Mods.IsANDInstalled == True
-		If PlayerRef.WornHasKeyword(SLSF_Reloaded_NipplePiercing) && PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 50
+		If PlayerRef.WornHasKeyword(SLSF_Reloaded_NipplePiercing) && PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 && Data.GetFameValue(FameLocation, "Slut") < 50
 			return True
-		ElseIf PlayerRef.WornHasKeyword(SLSF_Reloaded_VaginalPiercing) && PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 75
+		ElseIf PlayerRef.WornHasKeyword(SLSF_Reloaded_VaginalPiercing) && PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 && Data.GetFameValue(FameLocation, "Slut") < 75
 			return True
 		EndIf
 	EndIf
@@ -416,9 +363,9 @@ Bool Function CanGainSlutFame(String FameLocation)
 	If VisibilityManager.IsVaginalCumVisible() == True
 		If Sexlab.CountCumVaginal(PlayerRef) > 2
 			return True
-		ElseIf Sexlab.CountCumVaginal(PlayerRef) > 1 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 100
+		ElseIf Sexlab.CountCumVaginal(PlayerRef) > 1 && Data.GetFameValue(FameLocation, "Slut") < 100
 			return True
-		ElseIf Sexlab.CountCumVaginal(PlayerRef) > 0 && GetIntValue(JsonFileString, "Slut Fame: " + FameLocation) < 50
+		ElseIf Sexlab.CountCumVaginal(PlayerRef) > 0 && Data.GetFameValue(FameLocation, "Slut") < 50
 			return True
 		EndIf
 	EndIf
@@ -431,19 +378,19 @@ Bool Function CanGainExhibitionistFame(String FameLocation)
 		If PlayerRef.GetFactionRank(Mods.AND_Nude) == 1
 			return True
 		ElseIf PlayerRef.GetFactionRank(Mods.AND_Topless) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bottomless) == 1
-			If GetIntValue(JsonFileString, "Exhibitionist Fame: " + FameLocation) < 100
+			If Data.GetFameValue(FameLocation, "Exhibitionist") < 100
 				return True
 			EndIf
 		ElseIf PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
-			If GetIntValue(JsonFileString, "Exhibitionist Fame: " + FameLocation) < 75
+			If Data.GetFameValue(FameLocation, "Exhibitionist") < 75
 				return True
 			EndIf
 		ElseIf PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
-			If GetIntValue(JsonFileString, "Exhibitionist Fame: " + FameLocation) < 50
+			If Data.GetFameValue(FameLocation, "Exhibitionist") < 50
 				return True
 			EndIf
 		ElseIf PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear)  == 1
-			If GetIntValue(JsonFileString, "Exhibitionist Fame: " + FameLocation) < 25
+			If Data.GetFameValue(FameLocation, "Exhibitionist") < 25
 				return True
 			EndIf
 		EndIf
@@ -465,9 +412,9 @@ Bool Function CanGainOralFame(String FameLocation)
 	If OralCumCount > 0
 		If OralCumCount > 2
 			return True
-		ElseIf OralCumCount == 2 && GetIntValue(JsonFileString, "Oral Fame: " + FameLocation) < 100
+		ElseIf OralCumCount == 2 && Data.GetFameValue(FameLocation, "Oral") < 100
 			return True
-		ElseIf GetIntValue(JsonFileString, "Oral Fame: " + FameLocation) < 50
+		ElseIf Data.GetFameValue(FameLocation, "Oral") < 50
 			return True
 		EndIf
 	EndIf
@@ -484,9 +431,9 @@ Bool Function CanGainAnalFame(String FameLocation)
 	If AssCumCount > 0
 		If AssCumCount > 2
 			return True
-		ElseIf AssCumCount == 2 && GetIntValue(JsonFileString, "Anal Fame: " + FameLocation) < 100
+		ElseIf AssCumCount == 2 && Data.GetFameValue(FameLocation, "Anal") < 100
 			return True
-		ElseIf GetIntValue(JsonFileString, "Anal Fame: " + FameLocation) < 50
+		ElseIf Data.GetFameValue(FameLocation, "Anal") < 50
 			return True
 		EndIf
 	EndIf
@@ -502,7 +449,7 @@ Bool Function CanGainNastyFame(String FameLocation)
 	Int CumCount = Sexlab.CountCum(PlayerRef)
 	If CumCount > 3
 		return True
-	ElseIf CumCount > 1 && GetIntValue(JsonFileString, "Nasty Fame: " + FameLocation) < 75
+	ElseIf CumCount > 1 && Data.GetFameValue(FameLocation, "Nasty") < 75
 		return True
 	EndIf
 	return False
@@ -575,17 +522,18 @@ EndFunction
 Bool Function CanGainTattooFame(String FameLocation)
 	;Check Tattoo Fame
 	If Mods.IsSlaveTatsInstalled == True
+		VisibilityManager.CheckAppliedTattoos()
 		If VisibilityManager.CountVisibleTattoos() > 10
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 8 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 120
+		ElseIf VisibilityManager.CountVisibleTattoos() > 8 && Data.GetFameValue(FameLocation, "Tattoo") < 120
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 6 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 90
+		ElseIf VisibilityManager.CountVisibleTattoos() > 6 && Data.GetFameValue(FameLocation, "Tattoo") < 90
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 4 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 60
+		ElseIf VisibilityManager.CountVisibleTattoos() > 4 && Data.GetFameValue(FameLocation, "Tattoo") < 60
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 2 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 30
+		ElseIf VisibilityManager.CountVisibleTattoos() > 2 && Data.GetFameValue(FameLocation, "Tattoo") < 30
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 0 && GetIntValue(JsonFileString, "Tattoo Fame: " + FameLocation) < 15
+		ElseIf VisibilityManager.CountVisibleTattoos() > 0 && Data.GetFameValue(FameLocation, "Tattoo") < 15
 			return True
 		EndIf
 	EndIf
@@ -818,12 +766,6 @@ Function GainFame(String Category, String LocationName)
 		return
 	EndIf
 	
-	;Check for existing JSON, in case file was deleted while the game was running. If it doesn't exist, generate a new one.
-	If !JsonExists(JsonFileString)
-		CreateNewFameList()
-	EndIf
-	
-	String FameTypeAndLocation = Category + " Fame: " + LocationName
 	Int FameGained = 0
 	Float FameMultiplier = Config.FameChangeMultiplier
 	Float Hour = (Utility.GetCurrentGameTime() - Math.Floor(Utility.GetCurrentGameTime())) * 24
@@ -832,25 +774,31 @@ Function GainFame(String Category, String LocationName)
 		FameMultiplier = FameMultiplier / 2 ;Half Fame Gains at night
 	EndIf
 	
-	Int PreviousFame = GetIntValue(JsonFileString, FameTypeAndLocation)
+	Int PreviousFame = Data.GetFameValue(LocationName, Category)
 	
 	If PreviousFame >= 100
-		FameGained = Utility.RandomInt(1,2)
+		FameGained = (Utility.RandomInt(1,2) * FameMultiplier) as Int
 	ElseIf PreviousFame >= 75
-		FameGained = Utility.RandomInt(1,4)
+		FameGained = (Utility.RandomInt(1,4) * FameMultiplier) as Int
 	ElseIf PreviousFame >= 50
-		FameGained = Utility.RandomInt(1,6)
+		FameGained = (Utility.RandomInt(1,6) * FameMultiplier) as Int
 	ElseIf PreviousFame >= 25
-		FameGained = Utility.RandomInt(1,8)
+		FameGained = (Utility.RandomInt(1,8) * FameMultiplier) as Int
 	Else
-		FameGained = Utility.RandomInt(1,10)
+		FameGained = (Utility.RandomInt(1,10) * FameMultiplier) as Int
 	EndIf
 	
-	AdjustIntValue(JsonFileString, FameTypeAndLocation, (FameGained * FameMultiplier) as Int)
-	
-	If GetIntValue(JsonFileString, FameTypeAndLocation) > 150
-		SetIntValue(JsonFileString, FameTypeAndLocation, 150)
+	If FameGained < 1
+		FameGained = 1
 	EndIf
+	
+	Int NewFame = PreviousFame + FameGained
+	
+	If NewFame > 150
+		NewFame = 150
+	EndIf
+	
+	Data.SetFameValue(LocationName, Category, NewFame)
 	
 	;Location Decay is paused when fame increases. Find location index, apply pause, and reset timer.
 	Int LocationIndex = 0
@@ -859,7 +807,7 @@ Function GainFame(String Category, String LocationName)
 		If LocationName == LocationManager.DefaultLocation[LocationIndex]
 			LocationFound = True
 			DefaultLocationCanDecay[LocationIndex] = False
-			DefaultLocationDecayPauseTimer[LocationIndex] = (Config.DecayTimeNeeded)
+			DefaultLocationDecayPauseTimer[LocationIndex] = (Config.DecayTimeNeeded) as Int
 		EndIf
 		LocationIndex += 1
 	EndWhile
@@ -872,7 +820,7 @@ Function GainFame(String Category, String LocationName)
 			If LocationName == LocationManager.CustomLocation[LocationIndex]
 				LocationFound = True
 				CustomLocationCanDecay[LocationIndex] = False
-				CustomLocationDecayPauseTimer[LocationIndex] = (Config.DecayTimeNeeded)
+				CustomLocationDecayPauseTimer[LocationIndex] = (Config.DecayTimeNeeded) as Int
 			EndIf
 		EndIf
 		LocationIndex += 1
@@ -888,41 +836,63 @@ Function GainFame(String Category, String LocationName)
 EndFunction
 
 Function DecayFame()
-	If !JsonExists(JsonFileString)
-		CreateNewFameList()
-		return
-	EndIf
 	Int FameDecay = 0
 	Int LocationIndex = 0
 	Int TypeIndex = 0
 	Float FameMultiplier = Config.FameChangeMultiplier
-	String FameTypeAndLocation = ""
 	Bool DecayNotificationMakesSense = False
+	Int NewFame = 0
+	Int PreviousFame = 0
 	
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationCanDecay[LocationIndex]
 			While TypeIndex < FameType.Length
-				FameTypeAndLocation = FameType[TypeIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex]
+				PreviousFame = Data.GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex])
 				
-				If GetIntValue(JsonFileString, FameTypeAndLocation) >= 100
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (-1 * FameMultiplier) as Int)
+				If PreviousFame >= 100
+					FameDecay = ((-1 * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
-				ElseIf GetIntValue(JsonFileString, FameTypeAndLocation) >= 75
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (Utility.RandomInt(-2,-1) * FameMultiplier) as Int)
+				ElseIf PreviousFame >= 75
+					FameDecay = ((Utility.RandomInt(-2,-1) * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
-				ElseIf GetIntValue(JsonFileString, FameTypeAndLocation) >= 50
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (Utility.RandomInt(-3,-1) * FameMultiplier) as Int)
+				ElseIf PreviousFame >= 50
+					FameDecay = ((Utility.RandomInt(-3,-1) * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
-				ElseIf GetIntValue(JsonFileString, FameTypeAndLocation) >= 25
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (Utility.RandomInt(-4,-1) * FameMultiplier) as Int)
+				ElseIf PreviousFame >= 25
+					FameDecay = ((Utility.RandomInt(-4,-1) * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
-				ElseIf GetIntValue(JsonFileString, FameTypeAndLocation) > 0
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (Utility.RandomInt(-5,-1) * FameMultiplier) as Int)
+				ElseIf PreviousFame > 0
+					FameDecay = ((Utility.RandomInt(-5,-1) * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
 				EndIf
 				
-				If GetIntValue(JsonFileString, FameTypeAndLocation) < 0
-					SetIntValue(JsonFileString, FameTypeAndLocation, 0)
+				If Data.GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex]) < 0
+					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], 0)
 				EndIf
 				TypeIndex += 1
 			EndWhile
@@ -938,27 +908,52 @@ Function DecayFame()
 	While LocationIndex < CustomLocations
 		If CustomLocationCanDecay[LocationIndex]
 			While TypeIndex < FameType.Length
-				FameTypeAndLocation = FameType[TypeIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex]
+				PreviousFame = Data.GetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex])
 				
-				If GetIntValue(JsonFileString, FameTypeAndLocation) >= 100
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (-1 * FameMultiplier) as Int)
+				If PreviousFame >= 100
+					FameDecay = ((-1 * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
-				ElseIf GetIntValue(JsonFileString, FameTypeAndLocation) >= 75
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (Utility.RandomInt(-2,-1) * FameMultiplier) as Int)
+				ElseIf PreviousFame >= 75
+					FameDecay = ((Utility.RandomInt(-2,-1) * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
-				ElseIf GetIntValue(JsonFileString, FameTypeAndLocation) >= 50
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (Utility.RandomInt(-3,-1) * FameMultiplier) as Int)
+				ElseIf PreviousFame >= 50
+					FameDecay = ((Utility.RandomInt(-3,-1) * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
-				ElseIf GetIntValue(JsonFileString, FameTypeAndLocation) >= 25
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (Utility.RandomInt(-4,-1) * FameMultiplier) as Int)
+				ElseIf PreviousFame >= 25
+					FameDecay = ((Utility.RandomInt(-4,-1) * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
-				ElseIf GetIntValue(JsonFileString, FameTypeAndLocation) > 0
-					AdjustIntValue(JsonFileString, FameTypeAndLocation, (Utility.RandomInt(-5,-1) * FameMultiplier) as Int)
+				ElseIf PreviousFame > 0
+					FameDecay = ((Utility.RandomInt(-5,-1) * FameMultiplier) as Int)
+					If FameDecay > -1
+						FameDecay = -1
+					EndIf
+					NewFame = PreviousFame + FameDecay
+					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
 					DecayNotificationMakesSense = True
 				EndIf
 				
-				If GetIntValue(JsonFileString, FameTypeAndLocation) < 0
-					SetIntValue(JsonFileString, FameTypeAndLocation, 0)
+				If Data.GetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex]) < 0
+					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], 0)
 				EndIf
 				TypeIndex += 1
 			EndWhile
@@ -982,19 +977,19 @@ Function SpreadFameRoll()
 		If DefaultLocationCanSpread[LocationIndex] == True
 			SpreadChance = Config.DefaultLocationSpreadChance[LocationIndex]
 			If SpreadChance == 0
-				Config.DefaultLocationSpreadChance[LocationIndex] = Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease
+				Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
 			ElseIf SpreadChance == 100
 				SpreadFame(LocationManager.DefaultLocation[LocationIndex])
-				Config.DefaultLocationSpreadChance[LocationIndex] = Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction
+				Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 			ElseIf SpreadChance > 100 || SpreadChance < 0
 				Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is not valid!")
 			Else
 				FameSpreadRoll = Utility.RandomInt(1, 100)
 				If FameSpreadRoll <= SpreadChance
 					SpreadFame(LocationManager.DefaultLocation[LocationIndex])
-					Config.DefaultLocationSpreadChance[LocationIndex] = Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction
+					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 				Else
-					Config.DefaultLocationSpreadChance[LocationIndex] = Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease
+					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
 				EndIf
 			EndIf
 			
@@ -1016,19 +1011,19 @@ Function SpreadFameRoll()
 		If CustomLocationCanSpread[LocationIndex] == True
 			SpreadChance = Config.CustomLocationSpreadChance[LocationIndex]
 			If SpreadChance == 0
-				Config.CustomLocationSpreadChance[LocationIndex] = Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease
+				Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
 			ElseIf SpreadChance == 100
 				SpreadFame(LocationManager.CustomLocation[LocationIndex])
-				Config.CustomLocationSpreadChance[LocationIndex] = Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction
+				Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 			ElseIf SpreadChance > 100 || SpreadChance < 0
 				Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is not valid!")
 			Else
 				FameSpreadRoll = Utility.RandomInt(1, 100)
 				If FameSpreadRoll <= SpreadChance
 					SpreadFame(LocationManager.CustomLocation[LocationIndex])
-					Config.CustomLocationSpreadChance[LocationIndex] = Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction
+					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 				Else
-					Config.CustomLocationSpreadChance[LocationIndex] = Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease
+					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
 				EndIf
 			EndIf
 			
@@ -1045,22 +1040,18 @@ Function SpreadFameRoll()
 EndFunction
 
 Function SpreadFame(String SpreadFromLocation)
-	If !JsonExists(JsonFileString)
-		CreateNewFameList()
-		return
-	EndIf
 
 	;Grab all fame values above the configured threshold from the source Location. If none exist, cancel fame spread operation
-	String FameTypeAndLocation = ""
+	Int SpreadableFame = 0
 	Int PossibleFameSpreadCategories = 0
 	Int PossibleFameSpreadIndex = 0
 	PossibleSpreadCategories = New String[1] ;Set Default array size to 1 | resize as necessary
 	
 	;Count possible categories & fill array
 	While PossibleFameSpreadIndex < FameType.Length
-		FameTypeAndLocation = FameType[PossibleFameSpreadIndex] + " Fame: " + SpreadFromLocation
+		SpreadableFame = Data.GetFameValue(SpreadFromLocation, FameType[PossibleFameSpreadIndex])
 		
-		If GetIntValue(JsonFileString, FameTypeAndLocation) >= Config.MinimumFameToSpread
+		If SpreadableFame >= Config.MinimumFameToSpread
 			PossibleFameSpreadCategories += 1
 			If PossibleFameSpreadCategories > 1
 				Utility.ResizeStringArray(PossibleSpreadCategories, PossibleFameSpreadCategories)
@@ -1115,7 +1106,7 @@ Function SpreadFame(String SpreadFromLocation)
 	
 	If Config.MaximumSpreadCategories > 1 && PossibleFameSpreadCategories > 1
 		If Config.MaximumSpreadCategories <= PossibleFameSpreadCategories
-			NumberOfCategoriesToSpread = Utility.RandomInt(1, Config.MaximumSpreadCategories)
+			NumberOfCategoriesToSpread = Utility.RandomInt(1, Config.MaximumSpreadCategories as Int)
 		Else
 			NumberOfCategoriesToSpread = Utility.RandomInt(1, PossibleFameSpreadCategories)
 		EndIf
@@ -1123,45 +1114,51 @@ Function SpreadFame(String SpreadFromLocation)
 	
 	;Randomly pick which valid categories are spread
 	Int FameSpreadValue = 0
+	Int PreviousFame = 0
+	Int NewFame = 0
 	Int SuccessfulFameSpreads = 0
 	Int CategoryRoll = 0
-	String OriginalFameTypeAndLocation = ""
-	String TargetFameTypeAndLocation = ""
 	
 	If PossibleFameSpreadCategories == 1
-		OriginalFameTypeAndLocation = PossibleSpreadCategories[0] + " Fame: " + SpreadFromLocation
-		TargetFameTypeAndLocation = PossibleSpreadCategories[0] + " Fame: " + PossibleSpreadTargets[TargetLocationIndex]
-		FameSpreadValue = (GetIntValue(JsonFileString, OriginalFameTypeAndLocation) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage / 10))/10)) as Int 
+		PreviousFame = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[0])
+		
+		FameSpreadValue = (Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[0]) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage as Int / 10))/10)) as Int
 		;Fame spread is in steps of 10%, which is why we divide the MaximumSpreadPercentage by 10 and then divide the RandomInt by 10 again to total the overall division by 100, which gives us a percentage
 		
-		AdjustIntValue(JsonFileString, TargetFameTypeAndLocation, FameSpreadValue)
+		NewFame = PreviousFame + FameSpreadValue
 		
-		If GetIntValue(JsonFileString, TargetFameTypeAndLocation) > 150
-			SetIntValue(JsonFileString, TargetFameTypeAndLocation, 150)
+		If NewFame > 150
+			NewFame = 150
 		EndIf
+		
+		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[0], NewFame)
 	ElseIf NumberOfCategoriesToSpread == 1
 		CategoryRoll = Utility.RandomInt(0, (PossibleFameSpreadCategories - 1))
-		OriginalFameTypeAndLocation = PossibleSpreadCategories[CategoryRoll] + " Fame: " + SpreadFromLocation
-		TargetFameTypeAndLocation = PossibleSpreadCategories[CategoryRoll] + " Fame: " + PossibleSpreadTargets[TargetLocationIndex]
-		FameSpreadValue = (GetIntValue(JsonFileString, OriginalFameTypeAndLocation) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage / 10))/10)) as Int
 		
-		AdjustIntValue(JsonFileString, TargetFameTypeAndLocation, FameSpreadValue)
+		PreviousFame = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll])
 		
-		If GetIntValue(JsonFileString, TargetFameTypeAndLocation) > 150
-			SetIntValue(JsonFileString, TargetFameTypeAndLocation, 150)
+		FameSpreadValue = (Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[0]) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage as Int / 10))/10)) as Int
+		
+		NewFame = PreviousFame + FameSpreadValue
+		
+		If NewFame > 150
+			NewFame = 150
 		EndIf
+		
+		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll], NewFame)
 	ElseIf NumberOfCategoriesToSpread == PossibleFameSpreadCategories
-		
 		While SuccessfulFameSpreads < PossibleFameSpreadCategories
-			OriginalFameTypeAndLocation = PossibleSpreadCategories[SuccessfulFameSpreads] + " Fame: " + SpreadFromLocation
-			TargetFameTypeAndLocation = PossibleSpreadCategories[SuccessfulFameSpreads] + " Fame: " + PossibleSpreadTargets[TargetLocationIndex]
-			FameSpreadValue = (GetIntValue(JsonFileString, OriginalFameTypeAndLocation) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage / 10))/10)) as Int
+			PreviousFame = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[SuccessfulFameSpreads])
 			
-			AdjustIntValue(JsonFileString, TargetFameTypeAndLocation, FameSpreadValue)
-		
-			If GetIntValue(JsonFileString, TargetFameTypeAndLocation) > 150
-				SetIntValue(JsonFileString, TargetFameTypeAndLocation, 150)
+			FameSpreadValue = (Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[SuccessfulFameSpreads]) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage as Int / 10))/10)) as Int
+			
+			NewFame = PreviousFame + FameSpreadValue
+			
+			If NewFame > 150
+				NewFame = 150
 			EndIf
+			
+			Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[SuccessfulFameSpreads], NewFame)
 			
 			SuccessfulFameSpreads += 1
 		EndWhile
@@ -1176,7 +1173,7 @@ Function SpreadFame(String SpreadFromLocation)
 			TimesRolled += 1
 			RolledCategory[SuccessfulFameSpreads] = PossibleSpreadCategories[CategoryRoll]
 			If TimesRolled > 1 ;If this isn't our first fame roll, check for duplicates
-				While PreviousRoll < TimesRolled
+				While PreviousRoll < TimesRolled && DuplicateFameRolls == False
 					If RolledCategory[SuccessfulFameSpreads] == RolledCategory[PreviousRoll] ;Check previous rolls for matching results
 						DuplicateFameRolls = True
 					EndIf
@@ -1187,15 +1184,15 @@ Function SpreadFame(String SpreadFromLocation)
 			
 			If DuplicateFameRolls == False
 				;If there are no duplicates, apply our rolled fame.
-				OriginalFameTypeAndLocation = PossibleSpreadCategories[CategoryRoll] + " Fame: " + SpreadFromLocation
-				TargetFameTypeAndLocation = PossibleSpreadCategories[CategoryRoll] + " Fame: " + PossibleSpreadTargets[TargetLocationIndex]
-				FameSpreadValue = (GetIntValue(JsonFileString, OriginalFameTypeAndLocation) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage / 10))/10)) as Int
+				PreviousFame = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll])
 				
-				AdjustIntValue(JsonFileString, TargetFameTypeAndLocation, FameSpreadValue)
-			
-				If GetIntValue(JsonFileString, TargetFameTypeAndLocation) > 150
-					SetIntValue(JsonFileString, TargetFameTypeAndLocation, 150)
+				FameSpreadValue = (Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[CategoryRoll]) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage as Int / 10))/10)) as Int
+				
+				If NewFame > 150
+					NewFame = 150
 				EndIf
+				
+				Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll], NewFame)
 				
 				SuccessfulFameSpreads += 1
 			Else
@@ -1210,10 +1207,10 @@ Function SpreadFame(String SpreadFromLocation)
 	
 	If PauseIndex < 21
 		DefaultLocationCanSpread[PauseIndex] = False
-		DefaultLocationSpreadPauseTimer[PauseIndex] = Config.SpreadTimeNeeded
+		DefaultLocationSpreadPauseTimer[PauseIndex] = Config.SpreadTimeNeeded as Int
 	Else
 		CustomLocationCanSpread[(PauseIndex - 21)] = False
-		CustomLocationSpreadPauseTimer[(PauseIndex - 21)] = Config.SpreadTimeNeeded
+		CustomLocationSpreadPauseTimer[(PauseIndex - 21)] = Config.SpreadTimeNeeded as Int
 	EndIf
 	
 	If Config.NotifyFameSpread == True
@@ -1239,7 +1236,7 @@ EndFunction
 Function ClearFame(String LocationToClear)
 	Int TypeIndex = 0
 	While TypeIndex < FameType.Length
-		SetIntValue(JsonFileString, FameType[TypeIndex] + " Fame: " + LocationToClear, 0)
+		Data.SetFameValue(LocationToClear, FameType[TypeIndex], 0)
 		TypeIndex += 1
 	EndWhile
 	Debug.MessageBox(LocationToClear + " fame has been cleared for " + PlayerScript.NewPlayerName)
@@ -1250,7 +1247,7 @@ Function ClearAllFame()
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		While TypeIndex < FameType.Length
-			SetIntValue(JsonFileString, FameType[TypeIndex] + " Fame: " + LocationManager.DefaultLocation[LocationIndex], 0)
+			Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], 0)
 			TypeIndex += 1
 		EndWhile
 		TypeIndex = 0
@@ -1263,7 +1260,7 @@ Function ClearAllFame()
 	
 	While LocationIndex < CustomLocations
 		While TypeIndex < FameType.Length
-			SetIntValue(JsonFileString, FameType[TypeIndex] + " Fame: " + LocationManager.CustomLocation[LocationIndex], 0)
+			Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], 0)
 			TypeIndex += 1
 		EndWhile
 		TypeIndex = 0

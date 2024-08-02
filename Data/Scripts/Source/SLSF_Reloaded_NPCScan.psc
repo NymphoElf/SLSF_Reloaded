@@ -5,6 +5,7 @@ SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_MCM Property Config Auto
 
 Actor Property PlayerRef Auto
+GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
 
 Event OnEffectStart(Actor akTarget, Actor akCaster)
 	String CurrentLocation = ""
@@ -24,16 +25,17 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 	Int Relationship = akTarget.GetRelationshipRank(PlayerRef)
 
 	If Relationship < 0	;Enemy
-		FameChance = Config.FameChanceByEnemy
+		FameChance = Config.FameChanceByEnemy as Int
 	ElseIf Relationship == 0 ;Neutral
-		FameChance = Config.FameChanceByNeutral
+		FameChance = Config.FameChanceByNeutral as Int
 	ElseIf Relationship >= 1 && Relationship < 4 ;Friend
-		FameChance = Config.FameChanceByFriend
+		FameChance = Config.FameChanceByFriend as Int
 	Else ;Relationship == 4 ;Lover
-		FameChance = Config.FameChanceByLover
+		FameChance = Config.FameChanceByLover as Int
 	EndIf
 	
-	If Utility.RandomInt(1, 100) <= FameChance
+	If Utility.RandomInt(1, 100) <= FameChance && SLSF_Reloaded_NPCScanSucess.GetValue() == 0
 		FameManager.FameGainRoll(CurrentLocation)
+		SLSF_Reloaded_NPCScanSucess.SetValue(1)
 	EndIf
 EndEvent
