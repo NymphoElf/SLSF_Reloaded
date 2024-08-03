@@ -35,16 +35,8 @@ Faction Property SpiderBreeder Auto Hidden
 MagicEffect Property FM_2ndTrimester Auto Hidden
 MagicEffect Property FM_3rdTrimester Auto Hidden
 
-Event OnInit()
-	CheckInstalledMods()
-EndEvent
-
-Event OnPlayerLoadGame()
-	CheckInstalledMods()
-EndEvent
-
 Function CheckInstalledMods()
-	If Game.GetModByName("Advanced Nudity Detection.esp" != 255)
+	If Game.GetModByName("Advanced Nudity Detection.esp") != 255
 		IsANDInstalled = True
 		AND_Nude = Game.GetFormFromFile(0x831, "Advanced Nudity Detection.esp") as Faction
 		AND_Topless = Game.GetFormFromFile(0x832, "Advanced Nudity Detection.esp") as Faction
@@ -66,15 +58,15 @@ Function CheckInstalledMods()
 		AND_Ass = None
 	EndIf
 	
-	If Game.GetModByName("Devious Devices - Assets.esm" != 255)
+	If Game.GetModByName("Devious Devices - Assets.esm") != 255
 		IsDDInstalled = True
-		DD_Lockable = Game.GetFormFromFile(0x3894, "Devious Devices - Assets.esm") as Keyword
-		DD_Collar = Game.GetFormFromFile(0x3DF7, "Devious Devices - Assets.esm") as Keyword
-		DD_NipplePiercing = Game.GetFormFromFile(0xCA39, "Devious Devices - Assets.esm") as Keyword
-		DD_VaginalPiercing = Game.GetFormFromFile(0x23E70, "Devious Devices - Assets.esm") as Keyword
-		DD_VaginalPlug = Game.GetFormFromFile(0x1DD7C, "Devious Devices - Assets.esm") as Keyword
-		DD_AnalPlug = Game.GetFormFromFile(0x1DD7D, "Devious Devices - Assets.esm") as Keyword
-		DD_Hood = Game.GetFormFromFile(0x2AFA2, "Devious Devices - Assets.esm") as Keyword
+		DD_Lockable = Game.GetFormFromFile(0x00003894, "Devious Devices - Assets.esm") as Keyword
+		DD_Collar = Game.GetFormFromFile(0x00003DF7, "Devious Devices - Assets.esm") as Keyword
+		DD_NipplePiercing = Game.GetFormFromFile(0x0000CA39, "Devious Devices - Assets.esm") as Keyword
+		DD_VaginalPiercing = Game.GetFormFromFile(0x00023E70, "Devious Devices - Assets.esm") as Keyword
+		DD_VaginalPlug = Game.GetFormFromFile(0x0001DD7C, "Devious Devices - Assets.esm") as Keyword
+		DD_AnalPlug = Game.GetFormFromFile(0x0001DD7D, "Devious Devices - Assets.esm") as Keyword
+		DD_Hood = Game.GetFormFromFile(0x0002AFA2, "Devious Devices - Assets.esm") as Keyword
 	Else
 		IsDDInstalled = False
 		DD_Lockable = None
@@ -85,53 +77,53 @@ Function CheckInstalledMods()
 		DD_AnalPlug = None
 	EndIf
 	
-	If Game.GetModByName("EstrusChaurus.esp" != 255)
+	If Game.GetModByName("EstrusChaurus.esp") != 255
 		IsECInstalled = True
-		ChaurusBreeder = Game.GetFormFromFile(0x160A9, "EstrusChaurus.esp") as Faction
+		ChaurusBreeder = Game.GetFormFromFile(0x000160A9, "EstrusChaurus.esp") as Faction
 	Else
 		IsECInstalled = False
 		ChaurusBreeder = None
 	EndIf
 	
-	If Game.GetModByName("EstrusSpider.esp" != 255)
+	If Game.GetModByName("EstrusSpider.esp") != 255
 		IsESInstalled = True
-		SpiderBreeder = Game.GetFormFromFile(0x4E258, "EstrusSpider.esp") as Faction
+		SpiderBreeder = Game.GetFormFromFile(0x0004E258, "EstrusSpider.esp") as Faction
 	Else
 		IsESInstalled = False
 		SpiderBreeder = None
 	EndIf
 	
-	If Game.GetModByName("Public Whore.esp" != 255)
+	If Game.GetModByName("Public Whore.esp") != 255
 		IsPWInstalled = True
 	Else
 		IsPWInstalled = False
 	EndIf
 	
-	If Game.GetModByName("Fertility Mode.esm" != 255)
+	If Game.GetModByName("Fertility Mode.esm") != 255
 		IsFMInstalled = True
-		FM_2ndTrimester = Game.GetFormFromFile(0x1B814, "Fertility Mode.esp") as MagicEffect
-		FM_3rdTrimester = Game.GetFormFromFile(0x1B815, "Fertility Mode.esp") as MagicEffect
+		FM_2ndTrimester = Game.GetFormFromFile(0x0001B814, "Fertility Mode.esm") as MagicEffect
+		FM_3rdTrimester = Game.GetFormFromFile(0x0001B815, "Fertility Mode.esm") as MagicEffect
 	Else
 		IsFMInstalled = False
 		FM_2ndTrimester = None
 		FM_3rdTrimester = None
 	EndIf
 	
-	If Game.GetModByName("sr_FillHerUp.esp" != 255)
+	If Game.GetModByName("sr_FillHerUp.esp") != 255
 		IsFHUInstalled = True
 	Else
 		IsFHUInstalled = False
 	EndIf
 	
-	If Game.GetModByName("SlaveTats.esp" != 255)
+	If Game.GetModByName("SlaveTats.esp") != 255
 		IsSlaveTatsInstalled = True
 	Else
 		IsSlaveTatsInstalled = False
 	EndIf
 	
-	If Game.GetModByName("SL Survival.esp" != 255)
+	If Game.GetModByName("SL Survival.esp") != 255
 		IsSLSInstalled = True
-		SLS_BikiniArmor = Game.GetFormFromFile(0x49867, "SL Survival.esp") as Keyword
+		SLS_BikiniArmor = Game.GetFormFromFile(0x00049867, "SL Survival.esp") as Keyword
 	Else
 		IsSLSInstalled = False
 		SLS_BikiniArmor = None

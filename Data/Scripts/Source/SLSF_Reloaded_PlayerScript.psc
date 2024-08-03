@@ -4,6 +4,8 @@ Import JsonUtil
 
 SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_FameManager Property FameManager Auto
+SLSF_Reloaded_ModIntegration Property Mods Auto
+SLSF_Reloaded_ModEventListener Property Listener Auto
 SexlabFramework Property Sexlab Auto
 
 Actor Property PlayerRef Auto
@@ -22,12 +24,16 @@ GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
 Event OnInit()
 	RegisterForMenu("RACESEX_MENU")
 	RegisterForUpdateGameTime(0.5)
+	Mods.CheckInstalledMods()
 	;RegisterForModEvent("AnimationEnd", "OnSexlabAnimationEnd")
 	RegisterForModEvent("AnimationStart", "OnSexlabAnimationStart")
 EndEvent
 
 Event OnPlayerLoadGame()
 	;RegisterForModEvent("AnimationEnd", "OnSexlabAnimationEnd")
+	Mods.CheckInstalledMods()
+	Listener.RegisterExternalEvents()
+	Debug.Notification("SLSFR - PlayerScript - OnPlayerLoadGame")
 	RegisterForModEvent("AnimationStart", "OnSexlabAnimationStart")
 EndEvent
 

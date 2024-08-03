@@ -11,10 +11,6 @@ Event OnInit()
 	RegisterExternalEvents()
 EndEvent
 
-Event OnPlayerLoadGame()
-	RegisterExternalEvents()
-EndEvent
-
 Function RegisterExternalEvents()
 	;AUTOMATED FAME INCREASE LISTENERS
 	RegisterForModEvent("SLSF_Reloaded_SendFameGainRoll", "OnExternalFameGainRoll")

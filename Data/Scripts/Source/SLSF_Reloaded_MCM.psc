@@ -474,15 +474,59 @@ Event OnPageReset(String page)
 	
 	ElseIf (page == "Beta Info - General")
 		AddHeaderOption("Detected Mods")
-		AddTextOption("Advanced Nudity Detection", Mods.IsANDInstalled as String)
-		AddTextOption("Devious Devices", Mods.IsDDInstalled as String)
-		AddTextOption("Estrus Chaurus", Mods.IsECInstalled as String)
-		AddTextOption("Estrus Spider", Mods.IsESInstalled as String)
-		AddTextOption("Public Whore", Mods.IsPWInstalled as String)
-		AddTextOption("Fertility Mode", Mods.IsFMInstalled as String)
-		AddTextOption("Fill Her Up", Mods.IsFHUInstalled as String)
-		AddTextOption("Slave Tats", Mods.IsSlaveTatsInstalled as String)
-		AddTextOption("Sexlab Survival", Mods.IsSLSInstalled as String)
+		If Game.GetModByName("Advanced Nudity Detection.esp") != 255
+			AddTextOption("Advanced Nudity Detection", "True")
+		Else
+			AddTextOption("Advanced Nudity Detection", "False")
+		EndIf
+		
+		If Game.GetModByName("Devious Devices - Assets.esm") != 255
+			AddTextOption("Devious Devices", "True")
+		Else
+			AddTextOption("Devious Devices", "False")
+		EndIf
+		
+		If Game.GetModByName("EstrusChaurus.esp") != 255
+			AddTextOption("Estrus Chaurus", "True")
+		Else
+			AddTextOption("Estrus Chaurus", "False")
+		EndIf
+		
+		If Game.GetModByName("EstrusSpider.esp") != 255
+			AddTextOption("Estrus Spider", "True")
+		Else
+			AddTextOption("Estrus Spider", "False")
+		EndIf
+		
+		If Game.GetModByName("Public Whore.esp") != 255
+			AddTextOption("Public Whore", "True")
+		Else
+			AddTextOption("Public Whore", "False")
+		EndIf
+		
+		If Game.GetModByName("Fertility Mode.esm") != 255
+			AddTextOption("Fertility Mode", "True")
+		Else
+			AddTextOption("Fertility Mode", "False")
+		EndIf
+		
+		If Game.GetModByName("sr_FillHerUp.esp") != 255
+			AddTextOption("Fill Her Up", "True")
+		Else
+			AddTextOption("Fill Her Up", "True")
+		EndIf
+		
+		If Game.GetModByName("SlaveTats.esp") != 255
+			AddTextOption("Slave Tats", "True")
+		Else
+			AddTextOption("Slave Tats", "False")
+		EndIf
+		
+		If Game.GetModByName("SL Survival.esp") != 255
+			AddTextOption("Sexlab Survival", "True")
+		Else
+			AddTextOption("Sexlab Survival", "False")
+		EndIf
 		
 		SetCursorPosition(1)
 		AddHeaderOption("Detected Conditions")

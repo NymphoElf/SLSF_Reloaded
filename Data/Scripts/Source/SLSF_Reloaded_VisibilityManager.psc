@@ -55,6 +55,9 @@ Bool Function IsPlayerAnonymous()
 EndFunction
 
 Function CheckAppliedTattoos()
+	If Mods.IsSlaveTatsInstalled == False
+		return
+	EndIf
 	Int CheckedSlot = 0
 	
 	While CheckedSlot < 6
@@ -86,6 +89,9 @@ Function CheckAppliedTattoos()
 EndFunction
 
 Int Function CountAppliedTattoos(String TattooArea)
+	If Mods.IsSlaveTatsInstalled == False
+		return 0
+	EndIf
 	Int AppliedCount = 0
 	Int CountedIndex = 0
 	
@@ -112,6 +118,9 @@ Int Function CountAppliedTattoos(String TattooArea)
 EndFunction
 
 Int Function CountVisibleTattoos()
+	If Mods.IsSlaveTatsInstalled == False
+		return 0
+	EndIf
 	Int VisibleTattoos = 0
 	Int SlotIndex = 0
 	While SlotIndex < 6
