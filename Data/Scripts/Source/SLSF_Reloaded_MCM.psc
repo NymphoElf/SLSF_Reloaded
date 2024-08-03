@@ -513,7 +513,7 @@ Event OnPageReset(String page)
 		If Game.GetModByName("sr_FillHerUp.esp") != 255
 			AddTextOption("Fill Her Up", "True")
 		Else
-			AddTextOption("Fill Her Up", "True")
+			AddTextOption("Fill Her Up", "False")
 		EndIf
 		
 		If Game.GetModByName("SlaveTats.esp") != 255
