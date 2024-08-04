@@ -997,7 +997,7 @@ EndEvent
 /;
 
 Event OnRequestFame(String LocationName, String Category)
-	Int RequestedFame = Data.GetFameValue(LocationName, Category, True)
+	Int RequestedFame = Data.GetFameValue(LocationName, Category)
 	
 	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedFame")
 	ModEvent.PushString(EventHandle, LocationName)

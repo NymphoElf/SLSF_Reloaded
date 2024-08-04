@@ -47,6 +47,20 @@ Bool Function IsLocationValid(String CheckedLocation)
 	Int LocationIndex = 0
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	
+	If CheckedLocation == "Eastmarch"
+		CheckedLocation = "Windhelm"
+	ElseIf CheckedLocation == "Haafingar"
+		CheckedLocation = "Solitude"
+	ElseIf CheckedLocation == "Hjaalmarch"
+		CheckedLocation = "Morthal"
+	ElseIf CheckedLocation == "the Reach"
+		CheckedLocation = "Markarth"
+	ElseIf CheckedLocation == "the Pale"
+		CheckedLocation = "Dawnstar"
+	ElseIf CheckedLocation == "the Rift"
+		CheckedLocation = "Riften"
+	EndIf
+	
 	;Check Location
 	While LocationIndex < DefaultLocation.Length
 		If CheckedLocation == DefaultLocation[LocationIndex]

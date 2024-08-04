@@ -24,11 +24,35 @@ Keyword Property SLSF_Reloaded_CoversFeet Auto
 
 Actor Property PlayerRef Auto ; = PlayerScript.PlayerRef
 
+GlobalVariable Property OralCumGlobal Auto
+GlobalVariable Property AnalCumGlobal Auto
+GlobalVariable Property VaginalCumGlobal Auto
+
 Event OnInit()
 	BodyTattooApplied = New Bool[6]
 	FaceTattooApplied = New Bool[6]
 	HandTattooApplied = New Bool[6]
 	FootTattooApplied = New Bool[6]
+EndEvent
+
+Event OnUpdate()
+	If IsOralCumVisible() == True
+		OralCumGlobal.SetValue(1)
+	Else
+		OralCumGlobal.SetValue(0)
+	EndIf
+	
+	If IsAssCumVisible() == True
+		AnalCumGlobal.SetValue(1)
+	Else
+		AnalCumGlobal.SetValue(0)
+	EndIf
+	
+	If IsVaginalCumVisible() == True
+		VaginalCumGlobal.SetValue(1)
+	Else
+		VaginalCumGlobal.SetValue(0)
+	EndIf
 EndEvent
 
 Bool Function IsPlayerAnonymous()

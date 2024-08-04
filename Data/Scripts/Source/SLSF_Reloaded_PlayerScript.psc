@@ -1,9 +1,8 @@
 ScriptName SLSF_Reloaded_PlayerScript extends ReferenceAlias
 
-Import JsonUtil
-
 SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_FameManager Property FameManager Auto
+SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_ModEventListener Property Listener Auto
 SexlabFramework Property Sexlab Auto
@@ -33,7 +32,6 @@ Event OnPlayerLoadGame()
 	;RegisterForModEvent("AnimationEnd", "OnSexlabAnimationEnd")
 	Mods.CheckInstalledMods()
 	Listener.RegisterExternalEvents()
-	Debug.Notification("SLSFR - PlayerScript - OnPlayerLoadGame")
 	RegisterForModEvent("AnimationStart", "OnSexlabAnimationStart")
 EndEvent
 
@@ -114,6 +112,7 @@ EndEvent
 
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	LocationManager.CurrentLocation = akNewLoc
+	FameManager.UpdateGlobals()
 EndEvent
 
 Event OnUpdateGameTime()
@@ -125,4 +124,20 @@ Event OnUpdateGameTime()
 	
 	Utility.Wait(1.0) ;Add slight delay to let the previous events process before removing spell
 	PlayerRef.RemoveSpell(NPCScanSpell)
+EndEvent
+
+Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
+	If (akBaseObject == none || akBaseObject.GetName() == "")
+		return
+	EndIf
+	
+	VisibilityManager.RegisterForSingleUpdate(0.1)
+EndEvent
+
+Event OnObjectUnequipped(Form akBaseObject, ObjectReference akReference)
+	If (akBaseObject == none || akBaseObject.GetName() == "")
+		return
+	EndIf
+	
+	VisibilityManager.RegisterForSingleUpdate(0.1)
 EndEvent

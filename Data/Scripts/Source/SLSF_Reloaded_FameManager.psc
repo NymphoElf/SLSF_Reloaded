@@ -9,7 +9,6 @@ SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_MCM Property Config Auto
 SexlabFramework Property Sexlab Auto
 
-Bool Property FamePaused Auto
 Bool[] Property DefaultLocationCanSpread Auto 
 Bool[] Property CustomLocationCanSpread Auto 
 Bool[] Property DefaultLocationCanDecay Auto 
@@ -24,8 +23,8 @@ Int[] Property DefaultLocationSpreadPauseTimer Auto
 Int[] Property CustomLocationSpreadPauseTimer Auto
 Int[] Property DefaultLocationDecayPauseTimer Auto 
 Int[] Property CustomLocationDecayPauseTimer Auto 
-Int Property DecayCountdown Auto 
-Int Property SpreadCountdown Auto 
+Int Property DecayCountdown Auto Hidden
+Int Property SpreadCountdown Auto Hidden
 
 Armor[] Property ArmorSlots Auto Hidden
 
@@ -60,6 +59,34 @@ Bool Property ExternalBoundFlag Auto Hidden
 Bool Property ExternalTattooFlag Auto Hidden
 Bool Property ExternalCumDumpFlag Auto Hidden
 
+;Globals for SLSF Fame Comments
+GlobalVariable Property SlutGlobal Auto
+GlobalVariable Property WhoreGlobal Auto
+GlobalVariable Property ExhibGlobal Auto
+GlobalVariable Property OralGlobal Auto
+GlobalVariable Property AnalGlobal Auto
+GlobalVariable Property NastyGlobal Auto
+GlobalVariable Property PregGlobal Auto
+GlobalVariable Property DomGlobal Auto
+GlobalVariable Property SubGlobal Auto
+GlobalVariable Property SadistGlobal Auto
+GlobalVariable Property MasochistGlobal Auto
+GlobalVariable Property GentleGlobal Auto
+GlobalVariable Property MenGlobal Auto
+GlobalVariable Property WomenGlobal Auto
+GlobalVariable Property KhajiitGlobal Auto
+GlobalVariable Property OrcGlobal Auto
+GlobalVariable Property ArgonianGlobal Auto
+GlobalVariable Property BeastGlobal Auto
+GlobalVariable Property GroupGlobal Auto
+GlobalVariable Property BoundGlobal Auto
+GlobalVariable Property TattooGlobal Auto
+GlobalVariable Property CumDumpGlobal Auto
+GlobalVariable Property CheatGlobal Auto
+GlobalVariable Property CuckGlobal Auto
+
+Bool Property SLSFCFameTypesCleared Auto Hidden
+
 ;/
 NOTE TO SELF - UTILIZE ARRAY 'FIND' FUNCTION TO FURTHER OPTIMIZE CODE?
 /;
@@ -93,6 +120,8 @@ NOTE TO SELF - UTILIZE ARRAY 'FIND' FUNCTION TO FURTHER OPTIMIZE CODE?
 [19] Bound
 [20] Tattoo
 [21] Cum Dump
+[22] Unfaithful
+[23] Cuck
 /;
 
 Event OnInit()
@@ -100,8 +129,6 @@ Event OnInit()
 EndEvent
 
 Function Startup()
-	FamePaused = False
-	
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		DefaultLocationCanSpread[LocationIndex] = True
@@ -190,6 +217,26 @@ Event OnUpdate()
 		EndIf
 		LocationIndex += 1
 	EndWhile
+	
+	If Mods.IsFameCommentsInstalled == False && SLSFCFameTypesCleared == False
+		LocationIndex = 0
+		While LocationIndex < LocationManager.DefaultLocation.Length
+			Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Unfaithful", 0)
+			Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Cuck", 0)
+			LocationIndex += 1
+		EndWhile
+		
+		LocationIndex = 0
+		
+		While LocationIndex < CustomLocations
+			Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Unfaithful", 0)
+			Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Cuck", 0)
+			LocationIndex += 1
+		EndWhile
+		SLSFCFameTypesCleared = True
+	Else
+		SLSFCFameTypesCleared = False
+	EndIf
 EndEvent
 
 Function CheckExternalFlags()
@@ -507,7 +554,9 @@ Bool Function CanGainBoundFame()
 		Int KeywordIndex = 0
 		While SlotIndex < ArmorSlots.Length
 			While KeywordIndex < DD_Keywords.Length
-				If ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable) && !ArmorSlots[SlotIndex].HasKeyword(DD_Keywords[KeywordIndex])
+				If ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable) && ArmorSlots[SlotIndex].HasKeyword(DD_Keywords[KeywordIndex])
+					;DoNothing
+				ElseIf ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable)
 					return True
 				EndIf
 				KeywordIndex += 1
@@ -584,11 +633,6 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	
 	If VisibilityManager.IsPlayerAnonymous() == True
 		Debug.Trace("SLSF Reloaded - FameGainRoll Function - Player is Anonymous")
-		return
-	EndIf
-	
-	If FamePaused == True
-		Debug.Trace("SLSF Reloaded - FameGainRoll Function - Fame is Paused")
 		return
 	EndIf
 	
@@ -761,9 +805,18 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 EndFunction
 
 Function GainFame(String Category, String LocationName)
-	If FamePaused == True
-		Debug.Trace("SLSF Reloaded - GainFame Function - Fame is Paused")
-		return
+	If LocationName == "Eastmarch"
+		LocationName = "Windhelm"
+	ElseIf LocationName == "Haafingar"
+		LocationName = "Solitude"
+	ElseIf LocationName == "Hjaalmarch"
+		LocationName = "Morthal"
+	ElseIf LocationName == "the Reach"
+		LocationName = "Markarth"
+	ElseIf LocationName == "the Pale"
+		LocationName = "Dawnstar"
+	ElseIf LocationName == "the Rift"
+		LocationName = "Riften"
 	EndIf
 	
 	Int FameGained = 0
@@ -1205,11 +1258,11 @@ Function SpreadFame(String SpreadFromLocation)
 	;Enable Spread Pause for Location
 	Int PauseIndex = PossibleSpreadTargets.Find(SpreadFromLocation)
 	
-	If PauseIndex < 21
+	If PauseIndex < LocationManager.DefaultLocation.Length
 		DefaultLocationCanSpread[PauseIndex] = False
 		DefaultLocationSpreadPauseTimer[PauseIndex] = Config.SpreadTimeNeeded as Int
 	Else
-		CustomLocationCanSpread[(PauseIndex - 21)] = False
+		CustomLocationCanSpread[(PauseIndex - (LocationManager.DefaultLocation.Length))] = False
 		CustomLocationSpreadPauseTimer[(PauseIndex - 21)] = Config.SpreadTimeNeeded as Int
 	EndIf
 	
@@ -1267,4 +1320,33 @@ Function ClearAllFame()
 		LocationIndex += 1
 	EndWhile
 	Debug.MessageBox("All fame has been cleared for " + PlayerScript.NewPlayerName)
+EndFunction
+
+Function UpdateGlobals()
+	String LocationName = LocationManager.CurrentLocationName()
+	
+	WhoreGlobal.SetValue(Data.GetFameValue(LocationName, "Whore"))
+	SlutGlobal.SetValue(Data.GetFameValue(LocationName, "Slut"))
+	ExhibGlobal.SetValue(Data.GetFameValue(LocationName, "Exhibitionist"))
+	OralGlobal.SetValue(Data.GetFameValue(LocationName, "Oral"))
+	AnalGlobal.SetValue(Data.GetFameValue(LocationName, "Anal"))
+	NastyGlobal.SetValue(Data.GetFameValue(LocationName, "Nasty"))
+	PregGlobal.SetValue(Data.GetFameValue(LocationName, "Pregnant"))
+	DomGlobal.SetValue(Data.GetFameValue(LocationName, "Dominant"))
+	SubGlobal.SetValue(Data.GetFameValue(LocationName, "Submissive"))
+	SadistGlobal.SetValue(Data.GetFameValue(LocationName, "Sadist"))
+	MasochistGlobal.SetValue(Data.GetFameValue(LocationName, "Masochist"))
+	GentleGlobal.SetValue(Data.GetFameValue(LocationName, "Gentle"))
+	MenGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Men"))
+	WomenGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Women"))
+	KhajiitGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Khajiit"))
+	OrcGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Orc"))
+	ArgonianGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Argonian"))
+	BeastGlobal.SetValue(Data.GetFameValue(LocationName, "Bestiality"))
+	GroupGlobal.SetValue(Data.GetFameValue(LocationName, "Group"))
+	BoundGlobal.SetValue(Data.GetFameValue(LocationName, "Bound"))
+	TattooGlobal.SetValue(Data.GetFameValue(LocationName, "Tattoo"))
+	CumDumpGlobal.SetValue(Data.GetFameValue(LocationName, "Cum Dump"))
+	CheatGlobal.SetValue(Data.GetFameValue(LocationName, "Unfaithful"))
+	CuckGlobal.SetValue(Data.GetFameValue(LocationName, "Cuck"))
 EndFunction

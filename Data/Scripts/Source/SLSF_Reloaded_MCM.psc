@@ -344,6 +344,10 @@ Event OnPageReset(String page)
 		AddTextOption("Sadist Fame: ", Data.GetFameValue(LocationDetailsSelected, "Sadist") as String)
 		AddTextOption("Masochist Fame: ", Data.GetFameValue(LocationDetailsSelected, "Masochist") as String)
 		
+		If Mods.IsFameCommentsInstalled == True
+			AddTextOption("Unfaithful Fame:", Data.GetFameValue(LocationDetailsSelected, "Unfaithful") as String)
+		EndIf
+		
 		SetCursorPosition(9)
 		AddTextOption("Gentle Fame: ", Data.GetFameValue(LocationDetailsSelected, "Gentle") as String)
 		AddTextOption("Likes Men Fame: ", Data.GetFameValue(LocationDetailsSelected, "Likes Men") as String)
@@ -356,6 +360,10 @@ Event OnPageReset(String page)
 		AddTextOption("Bound Fame: ", Data.GetFameValue(LocationDetailsSelected, "Bound") as String)
 		AddTextOption("Tattoo Fame: ", Data.GetFameValue(LocationDetailsSelected, "Tattoo") as String)
 		AddTextOption("Cum Dump Fame: ", Data.GetFameValue(LocationDetailsSelected, "Cum Dump") as String)
+		
+		If Mods.IsFameCommentsInstalled == True
+			AddTextOption("Cuck Fame:", Data.GetFameValue(LocationDetailsSelected, "Cuck") as String)
+		EndIf
 	
 	ElseIf (page == "Settings")
 		AddHeaderOption("General Settings")
@@ -475,58 +483,64 @@ Event OnPageReset(String page)
 	
 	ElseIf (page == "Beta Info - General")
 		AddHeaderOption("Detected Mods")
-		If Game.GetModByName("Advanced Nudity Detection.esp") != 255
+		If Mods.IsANDInstalled == True
 			AddTextOption("Advanced Nudity Detection", "True")
 		Else
 			AddTextOption("Advanced Nudity Detection", "False")
 		EndIf
 		
-		If Game.GetModByName("Devious Devices - Assets.esm") != 255
+		If Mods.IsDDInstalled == True
 			AddTextOption("Devious Devices", "True")
 		Else
 			AddTextOption("Devious Devices", "False")
 		EndIf
 		
-		If Game.GetModByName("EstrusChaurus.esp") != 255
+		If Mods.IsECInstalled == True
 			AddTextOption("Estrus Chaurus", "True")
 		Else
 			AddTextOption("Estrus Chaurus", "False")
 		EndIf
 		
-		If Game.GetModByName("EstrusSpider.esp") != 255
+		If Mods.IsESInstalled == True
 			AddTextOption("Estrus Spider", "True")
 		Else
 			AddTextOption("Estrus Spider", "False")
 		EndIf
 		
-		If Game.GetModByName("Public Whore.esp") != 255
+		If Mods.IsPWInstalled == True
 			AddTextOption("Public Whore", "True")
 		Else
 			AddTextOption("Public Whore", "False")
 		EndIf
 		
-		If Game.GetModByName("Fertility Mode.esm") != 255
+		If Mods.IsFMInstalled == True
 			AddTextOption("Fertility Mode", "True")
 		Else
 			AddTextOption("Fertility Mode", "False")
 		EndIf
 		
-		If Game.GetModByName("sr_FillHerUp.esp") != 255
+		If Mods.IsFHUInstalled == True
 			AddTextOption("Fill Her Up", "True")
 		Else
 			AddTextOption("Fill Her Up", "False")
 		EndIf
 		
-		If Game.GetModByName("SlaveTats.esp") != 255
+		If Mods.IsSlaveTatsInstalled == True
 			AddTextOption("Slave Tats", "True")
 		Else
 			AddTextOption("Slave Tats", "False")
 		EndIf
 		
-		If Game.GetModByName("SL Survival.esp") != 255
+		If Mods.IsSLSInstalled == True
 			AddTextOption("Sexlab Survival", "True")
 		Else
 			AddTextOption("Sexlab Survival", "False")
+		EndIf
+		
+		If Mods.IsFameCommentsInstalled == True
+			AddTextOption("SLSF Fame Comments", "True")
+		Else
+			AddTextOption("SLSF Fame Comments", "False")
 		EndIf
 		
 		SetCursorPosition(1)

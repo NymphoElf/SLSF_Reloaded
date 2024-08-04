@@ -48,30 +48,30 @@ Int[] Property CustomLocation20Fame Auto
 
 Bool[] Property ExternalFlags Auto
 
-String[] Property ExternalMods Auto
+String[] Property ExternalMods Auto Hidden
 
-Bool[] Property SlutFlags Auto
-Bool[] Property WhoreFlags Auto
-Bool[] Property ExhibitionistFlags Auto
-Bool[] Property OralFlags Auto
-Bool[] Property AnalFlags Auto
-Bool[] Property NastyFlags Auto
-Bool[] Property PregnantFlags Auto
-Bool[] Property DominantFlags Auto
-Bool[] Property SubmissiveFlags Auto
-Bool[] Property SadistFlags Auto
-Bool[] Property MasochistFlags Auto
-Bool[] Property GentleFlags Auto
-Bool[] Property LikesMenFlags Auto
-Bool[] Property LikesWomenFlags Auto
-Bool[] Property LikesOrcFlags Auto
-Bool[] Property LikesKhajiitFlags Auto
-Bool[] Property LikesArgonianFlags Auto
-Bool[] Property BestialityFlags Auto
-Bool[] Property GroupFlags Auto
-Bool[] Property BoundFlags Auto
-Bool[] Property TattooFlags Auto
-Bool[] Property CumDumpFlags Auto
+Bool[] Property SlutFlags Auto Hidden
+Bool[] Property WhoreFlags Auto Hidden
+Bool[] Property ExhibitionistFlags Auto Hidden
+Bool[] Property OralFlags Auto Hidden
+Bool[] Property AnalFlags Auto Hidden
+Bool[] Property NastyFlags Auto Hidden
+Bool[] Property PregnantFlags Auto Hidden
+Bool[] Property DominantFlags Auto Hidden
+Bool[] Property SubmissiveFlags Auto Hidden
+Bool[] Property SadistFlags Auto Hidden
+Bool[] Property MasochistFlags Auto Hidden
+Bool[] Property GentleFlags Auto Hidden
+Bool[] Property LikesMenFlags Auto Hidden
+Bool[] Property LikesWomenFlags Auto Hidden
+Bool[] Property LikesOrcFlags Auto Hidden
+Bool[] Property LikesKhajiitFlags Auto Hidden
+Bool[] Property LikesArgonianFlags Auto Hidden
+Bool[] Property BestialityFlags Auto Hidden
+Bool[] Property GroupFlags Auto Hidden
+Bool[] Property BoundFlags Auto Hidden
+Bool[] Property TattooFlags Auto Hidden
+Bool[] Property CumDumpFlags Auto Hidden
 
 Event OnInit()
 	Utility.ResizeStringArray(ExternalMods, 128)
@@ -99,34 +99,30 @@ Event OnInit()
 	Utility.ResizeBoolArray(CumDumpFlags, 128)
 EndEvent
 
-Int Function GetFameValue(String LocationName, String FameCategory, Bool ExternalRequest = False)
+Int Function GetFameValue(String LocationName, String FameCategory)
 	Int CustomLocationIndex = 0
 	Int FameIndex = FameManager.FameType.Find(FameCategory)
 	
 	If FameIndex < 0 || FameIndex > FameManager.FameType.Length
-		If ExternalRequest == False
-			Debug.MessageBox("SLSF Reloaded - Error: Fame Category " + FameCategory + " is not valid!")
-		Else
-			Debug.MessageBox("SLSF Reloaded - Error: External Fame Request Category invalid")
-		EndIf
+		Debug.MessageBox("SLSF Reloaded - Error: Fame Category " + FameCategory + " invalid")
 		return 0
 	EndIf
 	
 	If LocationName == "Whiterun"
 		return WhiterunFame[FameIndex]
-	ElseIf LocationName == "Windhelm"
+	ElseIf LocationName == "Windhelm" || LocationName == "Eastmarch"
 		return WindhelmFame[FameIndex]
 	ElseIf LocationName == "Winterhold"
 		return WinterholdFame[FameIndex]
-	ElseIf LocationName == "Solitude"
+	ElseIf LocationName == "Solitude" || LocationName == "Haafingar"
 		return SolitudeFame[FameIndex]
-	ElseIf LocationName == "Riften"
+	ElseIf LocationName == "Riften" || LocationName == "the Rift"
 		return RiftenFame[FameIndex]
-	ElseIf LocationName == "Markarth"
+	ElseIf LocationName == "Markarth" || LocationName == "the Reach"
 		return MarkarthFame[FameIndex]
-	ElseIf LocationName == "Morthal"
+	ElseIf LocationName == "Morthal" || LocationName == "Hjaalmarch"
 		return MorthalFame[FameIndex]
-	ElseIf LocationName == "Dawnstar"
+	ElseIf LocationName == "Dawnstar" || LocationName == "the Pale"
 		return DawnstarFame[FameIndex]
 	ElseIf LocationName == "Falkreath"
 		return FalkreathFame[FameIndex]
@@ -138,7 +134,7 @@ Int Function GetFameValue(String LocationName, String FameCategory, Bool Externa
 		return RoriksteadFame[FameIndex]
 	ElseIf LocationName == "Ivarstead"
 		return IvarsteadFame[FameIndex]
-	ElseIf LocationName == "Shors Stone"
+	ElseIf LocationName == "Shor's Stone"
 		return ShorsStoneFame[FameIndex]
 	ElseIf LocationName == "Dragon Bridge"
 		return DragonBridgeFame[FameIndex]
@@ -197,11 +193,7 @@ Int Function GetFameValue(String LocationName, String FameCategory, Bool Externa
 		ElseIf CustomLocationIndex == 19
 			return CustomLocation20Fame[FameIndex]
 		Else
-			If ExternalRequest == False
-				Debug.MessageBox("SLSF Reloaded - ERROR: Fame Value for " + LocationName + " not found!")
-			Else
-				Debug.MessageBox("SLSF Reloaded - ERROR: External Fame Request Location " + LocationName + " not found!")
-			EndIf
+			Debug.MessageBox("SLSF Reloaded - ERROR: Fame Value for " + LocationName + " not found!")
 		EndIf
 	EndIf
 	return 0
@@ -212,19 +204,19 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 	Int FameIndex = FameManager.FameType.Find(FameCategory)
 	If LocationName == "Whiterun"
 		WhiterunFame[FameIndex] = FameValue
-	ElseIf LocationName == "Windhelm"
+	ElseIf LocationName == "Windhelm" || LocationName == "Eastmarch"
 		WindhelmFame[FameIndex] = FameValue
 	ElseIf LocationName == "Winterhold"
 		WinterholdFame[FameIndex] = FameValue
-	ElseIf LocationName == "Solitude"
+	ElseIf LocationName == "Solitude" || LocationName == "Haafingar"
 		SolitudeFame[FameIndex] = FameValue
-	ElseIf LocationName == "Riften"
+	ElseIf LocationName == "Riften" || LocationName == "the Rift"
 		RiftenFame[FameIndex] = FameValue
-	ElseIf LocationName == "Markarth"
+	ElseIf LocationName == "Markarth" || LocationName == "the Reach"
 		MarkarthFame[FameIndex] = FameValue
-	ElseIf LocationName == "Morthal"
+	ElseIf LocationName == "Morthal" || LocationName == "Hjaalmarch"
 		MorthalFame[FameIndex] = FameValue
-	ElseIf LocationName == "Dawnstar"
+	ElseIf LocationName == "Dawnstar" || LocationName == "the Pale"
 		DawnstarFame[FameIndex] = FameValue
 	ElseIf LocationName == "Falkreath"
 		FalkreathFame[FameIndex] = FameValue
@@ -236,7 +228,7 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		RoriksteadFame[FameIndex] = FameValue
 	ElseIf LocationName == "Ivarstead"
 		IvarsteadFame[FameIndex] = FameValue
-	ElseIf LocationName == "Shors Stone"
+	ElseIf LocationName == "Shor's Stone"
 		ShorsStoneFame[FameIndex] = FameValue
 	ElseIf LocationName == "Dragon Bridge"
 		DragonBridgeFame[FameIndex] = FameValue
