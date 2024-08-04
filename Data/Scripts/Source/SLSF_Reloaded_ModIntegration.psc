@@ -9,6 +9,7 @@ Bool Property IsFMInstalled Auto Hidden
 Bool Property IsFHUInstalled Auto Hidden
 Bool Property IsSlaveTatsInstalled Auto Hidden
 Bool Property IsSLSInstalled Auto Hidden
+Bool Property IsFameCommentsInstalled Auto Hidden
 
 Keyword Property DD_Lockable Auto Hidden
 Keyword Property DD_Collar Auto Hidden
@@ -127,6 +128,12 @@ Function CheckInstalledMods()
 	Else
 		IsSLSInstalled = False
 		SLS_BikiniArmor = None
+	EndIf
+	
+	If Game.GetModByName("SLSFFameComments.esp") != 255
+		IsFameCommentsInstalled = True
+	Else
+		IsFameCommentsInstalled = False
 	EndIf
 EndFunction
 

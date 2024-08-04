@@ -2,6 +2,7 @@ ScriptName SLSF_Reloaded_ModEventListener extends Quest
 
 SLSF_Reloaded_FameManager Property FameManager Auto
 SLSF_Reloaded_LocationManager Property LocationManager Auto
+SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 
@@ -83,6 +84,10 @@ Function RegisterExternalEvents()
 	RegisterForModEvent("SLSF_Reloaded_SetBoundFlag", "OnExternalBoundFlag")
 	RegisterForModEvent("SLSF_Reloaded_SetTattooFlag", "OnExternalTattooFlag")
 	RegisterForModEvent("SLSF_Reloaded_SetCumDumpFlag", "OnExternalCumDumpFlag")
+	
+	;DATA LISTENER
+	RegisterForModEvent("SLSF_Reloaded_RequestFame", "OnRequestFame")
+	RegisterForModEvent("SLSF_Reloaded_RequestCumVisibility", "OnRequestCumVisibility")
 EndFunction
 
 ;/
@@ -983,4 +988,50 @@ EndEvent
 
 Event OnExternalCumDumpFlag(String ModName, Bool Flag)
 	Data.SetExternalFlags(ModName, "Cum Dump", Flag)
+EndEvent
+
+;/
+==============================
+========DATA LISTENERS========
+==============================
+/;
+
+Event OnRequestFame(String LocationName, String Category)
+	Int RequestedFame = Data.GetFameValue(LocationName, Category, True)
+	
+	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedFame")
+	ModEvent.PushString(EventHandle, LocationName)
+	ModEvent.PushString(EventHandle, Category)
+	ModEvent.PushInt(EventHandle, RequestedFame)
+	ModEvent.Send(EventHandle)
+EndEvent
+
+Event OnRequestCumVisibility(String CumLocation = "Any")
+	Bool OralVisible = VisibilityManager.IsOralCumVisible()
+	Bool AnalVisible = VisibilityManager.IsAssCumVisible()
+	Bool VaginalVisible = VisibilityManager.IsVaginalCumVisible()
+	
+	If CumLocation == "Oral"
+		Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
+		ModEvent.PushBool(EventHandle, OralVisible)
+		ModEvent.Send(EventHandle)
+	ElseIf CumLocation == "Anal"
+		Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
+		ModEvent.PushBool(EventHandle, AnalVisible)
+		ModEvent.Send(EventHandle)
+	ElseIf CumLocation == "Vaginal"
+		Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
+		ModEvent.PushBool(EventHandle, VaginalVisible)
+		ModEvent.Send(EventHandle)
+	Else
+		If OralVisible == True || AnalVisible == True || VaginalVisible == True
+			Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
+			ModEvent.PushBool(EventHandle, True)
+			ModEvent.Send(EventHandle)
+		Else
+			Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
+			ModEvent.PushBool(EventHandle, False)
+			ModEvent.Send(EventHandle)
+		EndIf
+	EndIf
 EndEvent

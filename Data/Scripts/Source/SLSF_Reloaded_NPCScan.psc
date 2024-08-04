@@ -35,7 +35,7 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 	EndIf
 	
 	If Utility.RandomInt(1, 100) <= FameChance && SLSF_Reloaded_NPCScanSucess.GetValue() == 0
-		FameManager.FameGainRoll(CurrentLocation)
 		SLSF_Reloaded_NPCScanSucess.SetValue(1)
+		FameManager.FameGainRoll(CurrentLocation)
 	EndIf
 EndEvent

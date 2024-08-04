@@ -2,28 +2,30 @@ ScriptName SLSF_Reloaded_LocationManager extends Quest
 
 SLSF_Reloaded_FameManager Property FameManager Auto
 
-Location Property CurrentLocation Auto
+Location Property CurrentLocation Auto Hidden
+Location[] Property MajorLocations Auto
+Location[] Property MinorLocations Auto
 String[] Property DefaultLocation Auto ;Size 21
 String[] Property CustomLocation Auto ;Size 20 | "-EMPTY-" by Default
 
-Bool Property CustomLocationsFull Auto
+Bool Property CustomLocationsFull Auto Hidden
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 
 ;/
 Locations:
 
---Holds--
+--Holds (Major Locations)--
 Whiterun
 Winterhold
-Windhelm
-Solitude
-Riften
-Markarth
-Morthal
-Dawnstar
+Windhelm (Eastmarch)
+Solitude (Haafingar)
+Riften (Rift)
+Markarth (Reach)
+Morthal (Hjaalmarch)
+Dawnstar (Pale)
 Falkreath
-Raven Rock
+Raven Rock (DLC2)
 
 --Minor Locations--
 Riverwood
@@ -34,7 +36,7 @@ Dragon Bridge
 Karthwasten
 Skaal Village
 
---Orc Encampments--
+--Orc Encampments (Minor Locations)--
 Largashbur
 Dushnikh Yal
 Mor Khazgur
@@ -118,7 +120,40 @@ String Function FetchLocationName(Location LocationRef)
 EndFunction
 
 String Function CurrentLocationName()
+	String LocationParent = CurrentLocationParent(CurrentLocation)
+	
+	If LocationParent != "Custom" && LocationParent != "Null"
+		return LocationParent
+	EndIf
+	
 	return CurrentLocation.GetName()
+EndFunction
+
+String Function CurrentLocationParent(Location LocationRef)
+	String sLocation = LocationRef.GetName()
+	
+	If CustomLocation.Find(sLocation) >= 0 && CustomLocation.Find(sLocation) < 20
+		return "Custom"
+	EndIf
+	
+	Int LocationIndex = 0
+	;Check Minor Locations first, because Major Locations have some Minor Locations as a Child Location as well.
+	While LocationIndex < MinorLocations.Length
+		If MinorLocations[LocationIndex].IsChild(LocationRef)
+			return MinorLocations[LocationIndex].GetName()
+		EndIf
+		LocationIndex += 1
+	EndWhile
+	
+	LocationIndex = 0
+	
+	While LocationIndex < MajorLocations.Length
+		If MajorLocations[LocationIndex].IsChild(LocationRef)
+			return MajorLocations[LocationIndex].GetName()
+		EndIf
+		LocationIndex += 1
+	EndWhile
+	return "Null"
 EndFunction
 
 Function RegisterCustomLocation()

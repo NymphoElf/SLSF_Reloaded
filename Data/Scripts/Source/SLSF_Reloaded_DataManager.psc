@@ -99,12 +99,16 @@ Event OnInit()
 	Utility.ResizeBoolArray(CumDumpFlags, 128)
 EndEvent
 
-Int Function GetFameValue(String LocationName, String FameCategory)
+Int Function GetFameValue(String LocationName, String FameCategory, Bool ExternalRequest = False)
 	Int CustomLocationIndex = 0
 	Int FameIndex = FameManager.FameType.Find(FameCategory)
 	
-	If FameIndex == -1
-		Debug.MessageBox("SLSF Reloaded - Error: Fame Category " + FameCategory + " is not valid!")
+	If FameIndex < 0 || FameIndex > FameManager.FameType.Length
+		If ExternalRequest == False
+			Debug.MessageBox("SLSF Reloaded - Error: Fame Category " + FameCategory + " is not valid!")
+		Else
+			Debug.MessageBox("SLSF Reloaded - Error: External Fame Request Category invalid")
+		EndIf
 		return 0
 	EndIf
 	
@@ -193,9 +197,14 @@ Int Function GetFameValue(String LocationName, String FameCategory)
 		ElseIf CustomLocationIndex == 19
 			return CustomLocation20Fame[FameIndex]
 		Else
-			Debug.MessageBox("SLSF Reloaded - ERROR: Fame Value for " + LocationName + " Not Found!")
+			If ExternalRequest == False
+				Debug.MessageBox("SLSF Reloaded - ERROR: Fame Value for " + LocationName + " not found!")
+			Else
+				Debug.MessageBox("SLSF Reloaded - ERROR: External Fame Request Location " + LocationName + " not found!")
+			EndIf
 		EndIf
 	EndIf
+	return 0
 EndFunction
 
 Function SetFameValue(String LocationName, String FameCategory, Int FameValue)

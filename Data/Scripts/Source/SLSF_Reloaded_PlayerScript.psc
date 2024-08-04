@@ -119,6 +119,7 @@ EndEvent
 Event OnUpdateGameTime()
 	SLSF_Reloaded_NPCScanSucess.SetValue(0)
 	PlayerRef.AddSpell(NPCScanSpell, True) ;Second parameter is "Verbose" boolean. If true, get a notification. If false, don't. True for Beta.
+	NPCScanSpell.Cast(PlayerRef)
 	
 	FameManager.RegisterForSingleUpdate(0.1)
 	
