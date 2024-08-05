@@ -102,8 +102,13 @@ Function CheckInstalledMods()
 	
 	If Game.GetModByName("Fertility Mode.esm") != 255
 		IsFMInstalled = True
-		FM_2ndTrimester = Game.GetFormFromFile(0x0001B814, "Fertility Mode.esm") as MagicEffect
-		FM_3rdTrimester = Game.GetFormFromFile(0x0001B815, "Fertility Mode.esm") as MagicEffect
+		If Game.GetModByName("Fertility Mode 3 Fixes and Updates.esp") != 255
+			FM_2ndTrimester = Game.GetFormFromFile(0x826, "Fertility Mode 3 Fixes and Updates.esp") as MagicEffect
+			FM_3rdTrimester = Game.GetFormFromFile(0x827, "Fertility Mode 3 Fixes and Updates.esp") as MagicEffect
+		Else
+			FM_2ndTrimester = Game.GetFormFromFile(0x0001B814, "Fertility Mode.esm") as MagicEffect
+			FM_3rdTrimester = Game.GetFormFromFile(0x0001B815, "Fertility Mode.esm") as MagicEffect
+		EndIf
 	Else
 		IsFMInstalled = False
 		FM_2ndTrimester = None

@@ -502,9 +502,11 @@ Bool Function CanGainNastyFame(String FameLocation)
 	return False
 EndFunction
 
-Bool Function CanGainPregnantFame()
+Bool Function CanGainPregnantFame(String FameLocation)
 	;Check Pregnant Fame
-	If Mods.IsFMPregnant(PlayerRef) || Mods.IsECPregnant(PlayerRef) || Mods.IsESPregnant(PlayerRef)
+	If PlayerRef.HasMagicEffect(Mods.FM_2ndTrimester) && Data.GetFameValue(FameLocation, "Pregnant") < 50
+		return True
+	ElseIf PlayerRef.HasMagicEffect(Mods.FM_3rdTrimester) || Mods.IsECPregnant(PlayerRef) || Mods.IsESPregnant(PlayerRef)
 		return True
 	EndIf
 	return False
@@ -554,10 +556,12 @@ Bool Function CanGainBoundFame()
 		Int KeywordIndex = 0
 		While SlotIndex < ArmorSlots.Length
 			While KeywordIndex < DD_Keywords.Length
-				If ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable) && ArmorSlots[SlotIndex].HasKeyword(DD_Keywords[KeywordIndex])
-					;DoNothing
-				ElseIf ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable)
-					return True
+				If ArmorSlots[SlotIndex] != None
+					If ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable) && ArmorSlots[SlotIndex].HasKeyword(DD_Keywords[KeywordIndex])
+						;DoNothing
+					ElseIf ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable)
+						return True
+					EndIf
 				EndIf
 				KeywordIndex += 1
 			EndWhile
@@ -671,7 +675,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainPregnantFame() == True || CheckTattooExtraFame("Pregnant") == True || ExternalPregnantFlag == True
+	If CanGainPregnantFame(FameLocation) == True || CheckTattooExtraFame("Pregnant") == True || ExternalPregnantFlag == True
 		PossibleFameArray[PossibleFameCount] = "Pregnant"
 		PossibleFameCount += 1
 	EndIf
@@ -1028,30 +1032,32 @@ Function SpreadFameRoll()
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationCanSpread[LocationIndex] == True
-			SpreadChance = Config.DefaultLocationSpreadChance[LocationIndex]
-			If SpreadChance == 0
-				Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
-			ElseIf SpreadChance == 100
-				SpreadFame(LocationManager.DefaultLocation[LocationIndex])
-				Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
-			ElseIf SpreadChance > 100 || SpreadChance < 0
-				Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is not valid!")
-			Else
-				FameSpreadRoll = Utility.RandomInt(1, 100)
-				If FameSpreadRoll <= SpreadChance
+			If Config.HasFameAtDefaultLocation[LocationIndex] == True
+				SpreadChance = Config.DefaultLocationSpreadChance[LocationIndex]
+				If SpreadChance == 0
+					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
+				ElseIf SpreadChance == 100
 					SpreadFame(LocationManager.DefaultLocation[LocationIndex])
 					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
+				ElseIf SpreadChance > 100 || SpreadChance < 0
+					Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is not valid!")
 				Else
-					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
+					FameSpreadRoll = Utility.RandomInt(1, 100)
+					If FameSpreadRoll <= SpreadChance
+						SpreadFame(LocationManager.DefaultLocation[LocationIndex])
+						Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
+					Else
+						Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
+					EndIf
 				EndIf
-			EndIf
-			
-			If Config.DefaultLocationSpreadChance[LocationIndex] < 0
-				Config.DefaultLocationSpreadChance[LocationIndex] = 0
-			EndIf
-			
-			If Config.DefaultLocationSpreadChance[LocationIndex] > 100
-				Config.DefaultLocationSpreadChance[LocationIndex] = 100
+				
+				If Config.DefaultLocationSpreadChance[LocationIndex] < 0
+					Config.DefaultLocationSpreadChance[LocationIndex] = 0
+				EndIf
+				
+				If Config.DefaultLocationSpreadChance[LocationIndex] > 100
+					Config.DefaultLocationSpreadChance[LocationIndex] = 100
+				EndIf
 			EndIf
 		EndIf
 		LocationIndex += 1
@@ -1062,30 +1068,32 @@ Function SpreadFameRoll()
 	
 	While LocationIndex < CustomLocations
 		If CustomLocationCanSpread[LocationIndex] == True
-			SpreadChance = Config.CustomLocationSpreadChance[LocationIndex]
-			If SpreadChance == 0
-				Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
-			ElseIf SpreadChance == 100
-				SpreadFame(LocationManager.CustomLocation[LocationIndex])
-				Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
-			ElseIf SpreadChance > 100 || SpreadChance < 0
-				Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is not valid!")
-			Else
-				FameSpreadRoll = Utility.RandomInt(1, 100)
-				If FameSpreadRoll <= SpreadChance
+			If Config.HasFameAtCustomLocation[LocationIndex] == True
+				SpreadChance = Config.CustomLocationSpreadChance[LocationIndex]
+				If SpreadChance == 0
+					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
+				ElseIf SpreadChance == 100
 					SpreadFame(LocationManager.CustomLocation[LocationIndex])
 					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
+				ElseIf SpreadChance > 100 || SpreadChance < 0
+					Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is not valid!")
 				Else
-					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
+					FameSpreadRoll = Utility.RandomInt(1, 100)
+					If FameSpreadRoll <= SpreadChance
+						SpreadFame(LocationManager.CustomLocation[LocationIndex])
+						Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
+					Else
+						Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
+					EndIf
 				EndIf
-			EndIf
-			
-			If Config.CustomLocationSpreadChance[LocationIndex] < 0
-				Config.CustomLocationSpreadChance[LocationIndex] = 0
-			EndIf
-			
-			If Config.CustomLocationSpreadChance[LocationIndex] > 100
-				Config.CustomLocationSpreadChance[LocationIndex] = 100
+				
+				If Config.CustomLocationSpreadChance[LocationIndex] < 0
+					Config.CustomLocationSpreadChance[LocationIndex] = 0
+				EndIf
+				
+				If Config.CustomLocationSpreadChance[LocationIndex] > 100
+					Config.CustomLocationSpreadChance[LocationIndex] = 100
+				EndIf
 			EndIf
 		EndIf
 		LocationIndex += 1

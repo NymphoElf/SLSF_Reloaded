@@ -181,17 +181,16 @@ Function RegisterCustomLocation()
 		return
 	EndIf
 	
-	If LocationCanBeRegistered(LocationToRegister) == False
+	If LocationCanBeRegistered(LocationToRegister, False) == False
 		return
 	EndIf
 	
-	While EmptyIndexFound == False && CustomLocationsFull == False
+	While LocationIndex < CustomLocation.Length && EmptyIndexFound == False && CustomLocationsFull == False
 		If CustomLocation[LocationIndex] == "-EMPTY-"
 			EmptyIndexFound == True
 			CustomLocation[LocationIndex] = LocationToRegister
-		Else
-			LocationIndex += 1
 		EndIf
+		LocationIndex += 1
 	EndWhile
 	
 	Debug.Notification("Location " + LocationToRegister + " registered!")
@@ -233,13 +232,12 @@ Function RegisterCustomLocationExternal(String LocationToRegister)
 		return
 	EndIf
 	
-	While EmptyIndexFound == False && CustomLocationsFull == False
+	While LocationIndex < CustomLocation.Length && EmptyIndexFound == False && CustomLocationsFull == False
 		If CustomLocation[LocationIndex] == "-EMPTY-"
 			EmptyIndexFound == True
 			CustomLocation[LocationIndex] = LocationToRegister
-		Else
-			LocationIndex += 1
 		EndIf
+		LocationIndex += 1
 	EndWhile
 	
 	Debug.Notification("Location " + LocationToRegister + " registered!")

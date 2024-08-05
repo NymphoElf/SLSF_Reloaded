@@ -894,6 +894,7 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Fame Gain Roll Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendFameGainRoll")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Slut Fame Gain"
 		Debug.Notification("Slut Fame Gain Event Armed!")
@@ -907,6 +908,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Slut Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendSlutFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Whore Fame Gain"
 		Debug.Notification("Whore Fame Gain Event Armed!")
@@ -920,6 +924,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Whore Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendWhoreFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Exhibitionist Fame Gain"
 		Debug.Notification("Exhibitionist Fame Gain Event Armed!")
@@ -933,6 +940,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Exhibitionist Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendExhibitionistFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Oral Fame Gain"
 		Debug.Notification("Oral Fame Gain Event Armed!")
@@ -946,6 +956,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Oral Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendOralFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Anal Fame Gain"
 		Debug.Notification("Anal Fame Gain Event Armed!")
@@ -959,6 +972,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Anal Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendAnalFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Nasty Fame Gain"
 		Debug.Notification("Nasty Fame Gain Event Armed!")
@@ -972,6 +988,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Nasty Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendNastyFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Pregnant Fame Gain"
 		Debug.Notification("Pregnant Fame Gain Event Armed!")
@@ -985,6 +1004,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Pregnant Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendPregnantFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Dominant Fame Gain"
 		Debug.Notification("Dominant Fame Gain Event Armed!")
@@ -998,6 +1020,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Dominant Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendDominantFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Submissive Fame Gain"
 		Debug.Notification("Submissive Fame Gain Event Armed!")
@@ -1011,6 +1036,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Submissive Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendSubmissiveFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Sadist Fame Gain"
 		Debug.Notification("Sadist Fame Gain Event Armed!")
@@ -1024,6 +1052,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Sadist Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendSadistFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Masochist Fame Gain"
 		Debug.Notification("Masochist Fame Gain Event Armed!")
@@ -1037,6 +1068,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Masochist Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendMasochistFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Gentle Fame Gain"
 		Debug.Notification("Gentle Fame Gain Event Armed!")
@@ -1050,6 +1084,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Gentle Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendGentleFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Likes Men Fame Gain"
 		Debug.Notification("Likes Men Fame Gain Event Armed!")
@@ -1063,6 +1100,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Likes Men Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesMenFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Likes Women Fame Gain"
 		Debug.Notification("Likes Women Fame Gain Event Armed!")
@@ -1076,6 +1116,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Likes Women Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesWomenFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Likes Orc Fame Gain"
 		Debug.Notification("Likes Orc Fame Gain Event Armed!")
@@ -1089,6 +1132,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Likes Orc Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesOrcFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Likes Khajiit Fame Gain"
 		Debug.Notification("Likes Khajiit Fame Gain Event Armed!")
@@ -1102,6 +1148,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Likes Khajiit Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesKhajiitFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Likes Argonian Fame Gain"
 		Debug.Notification("Likes Argonian Fame Gain Event Armed!")
@@ -1115,6 +1164,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Likes Argonian Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesArgonianFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Bestiality Fame Gain"
 		Debug.Notification("Bestiality Fame Gain Event Armed!")
@@ -1128,6 +1180,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Bestiality Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendBestialityFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Group Fame Gain"
 		Debug.Notification("Group Fame Gain Event Armed!")
@@ -1141,6 +1196,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Group Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendGroupFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Bound Fame Gain"
 		Debug.Notification("Bound Fame Gain Event Armed!")
@@ -1154,6 +1212,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Bound Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendBoundFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Tattoo Fame Gain"
 		Debug.Notification("Tattoo Fame Gain Event Armed!")
@@ -1167,6 +1228,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Tattoo Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendTattooFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Cum Dump Fame Gain"
 		Debug.Notification("Cum Dump Fame Gain Event Armed!")
@@ -1180,6 +1244,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Cum Dump Fame Gain Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendCumDumpFameGain")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 0)
+		ModEvent.PushInt(EventHandle, 150)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Manual Fame Gain"
 		Debug.Notification("Manual Fame Gain Event Armed!")
@@ -1196,6 +1263,7 @@ Function SendExternalModEventTest(String EventTest)
 		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
 		ModEvent.PushString(EventHandle, ManualFameGainCategory)
 		ModEvent.PushInt(EventHandle, 10)
+		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Manual Fame Gain All In Location"
 		Debug.Notification("Manual Fame Gain All In Location Event Armed!")
@@ -1209,6 +1277,8 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Gain All In Location Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameGainAllInLocation")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
+		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Manual Fame Gain ALL"
@@ -1223,6 +1293,7 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Gain ALL Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameGainAll")
+		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Fame Decay"
@@ -1253,6 +1324,7 @@ Function SendExternalModEventTest(String EventTest)
 		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName()) ;EventLocation
 		ModEvent.PushString(EventHandle, ManualFameDecayCategory) ;Category
 		ModEvent.PushInt(EventHandle, 10) ;MinDecay
+		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Manual Fame Decay All In Location"
 		Debug.Notification("Manual Fame Decay All In Location Event Armed!")
@@ -1266,7 +1338,9 @@ Function SendExternalModEventTest(String EventTest)
 		Debug.Notification("Manual Fame Decay All In Location Event Fired!")
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameDecayAllInLocation")
+		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
 		ModEvent.PushInt(EventHandle, 10) ;MinDecay
+		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Manual Fame Decay ALL"
 		Debug.Notification("Manual Fame Decay ALL Event Armed!")
@@ -1281,6 +1355,7 @@ Function SendExternalModEventTest(String EventTest)
 		
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameDecayAll")
 		ModEvent.PushInt(EventHandle, 10) ;MinDecay
+		ModEvent.PushInt(EventHandle, 10)
 		ModEvent.Send(EventHandle)
 	ElseIf EventTest == "Fame Spread Roll"
 		Debug.Notification("Fame Spread Roll Event Armed!")
@@ -1921,7 +1996,7 @@ State SLSF_Reloaded_SendManualFameSpreadState
 			Debug.MessageBox("External Manual Fame Spread Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
 			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
 			If SendManualFameSpread == True
-				SendExternalModEventTest("Fame Spread Roll")
+				SendExternalModEventTest("Manual Fame Spread")
 			EndIf
 		EndIf
 	EndEvent

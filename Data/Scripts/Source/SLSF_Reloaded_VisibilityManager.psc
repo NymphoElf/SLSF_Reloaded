@@ -19,6 +19,7 @@ String[] Property HandTattooExtraFameType Auto
 String[] Property FootTattooExtraFameType Auto
 
 Keyword Property SLSF_Reloaded_HidesIdentity Auto
+Keyword Property SLSF_Reloaded_DoesNotHideIdentity Auto
 Keyword Property SLSF_Reloaded_CoversHands Auto
 Keyword Property SLSF_Reloaded_CoversFeet Auto
 
@@ -70,10 +71,10 @@ Bool Function IsPlayerAnonymous()
 		EndIf
 	EndIf
 	
-	If PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(Mods.SLS_BikiniArmor)
-		return False
-	ElseIf PlayerRef.GetEquippedArmorInSlot(31) != None
-		return True
+	If PlayerRef.GetEquippedArmorInSlot(31) != None
+		If PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(SLSF_Reloaded_DoesNotHideIdentity)
+			return False
+		EndIf
 	EndIf
 	return False
 EndFunction

@@ -127,7 +127,7 @@ Event OnExternalFameGainRoll(String EventLocation)
 	FameManager.FameGainRoll(EventLocation, True)
 EndEvent
 
-Event OnExternalSlutGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalSlutGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Slut Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Slut") >= MinFame && Data.GetFameValue(EventLocation, "Slut") < MaxFame
@@ -135,7 +135,7 @@ Event OnExternalSlutGain(String EventLocation, Int MinFame = 0, Int MaxFame = 15
 	EndIf
 EndEvent
 
-Event OnExternalWhoreGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalWhoreGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Whore Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Whore") >= MinFame && Data.GetFameValue(EventLocation, "Whore") < MaxFame
@@ -143,7 +143,7 @@ Event OnExternalWhoreGain(String EventLocation, Int MinFame = 0, Int MaxFame = 1
 	EndIf
 EndEvent
 
-Event OnExternalExhibitionistGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalExhibitionistGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Exhibitionist Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Exhibitionist") >= MinFame && Data.GetFameValue(EventLocation, "Exhibitionist") < MaxFame
@@ -151,7 +151,7 @@ Event OnExternalExhibitionistGain(String EventLocation, Int MinFame = 0, Int Max
 	EndIf
 EndEvent
 
-Event OnExternalOralGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalOralGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Oral Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Oral") >= MinFame && Data.GetFameValue(EventLocation, "Oral") < MaxFame
@@ -159,7 +159,7 @@ Event OnExternalOralGain(String EventLocation, Int MinFame = 0, Int MaxFame = 15
 	EndIf
 EndEvent
 
-Event OnExternalAnalGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalAnalGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Anal Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Anal") >= MinFame && Data.GetFameValue(EventLocation, "Anal") < MaxFame
@@ -167,7 +167,7 @@ Event OnExternalAnalGain(String EventLocation, Int MinFame = 0, Int MaxFame = 15
 	EndIf
 EndEvent
 
-Event OnExternalNastyGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalNastyGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Nasty Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Nasty") >= MinFame && Data.GetFameValue(EventLocation, "Nasty") < MaxFame
@@ -175,7 +175,7 @@ Event OnExternalNastyGain(String EventLocation, Int MinFame = 0, Int MaxFame = 1
 	EndIf
 EndEvent
 
-Event OnExternalPregnantGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalPregnantGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Pregnant Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Pregnant") >= MinFame && Data.GetFameValue(EventLocation, "Pregnant") < MaxFame
@@ -183,7 +183,7 @@ Event OnExternalPregnantGain(String EventLocation, Int MinFame = 0, Int MaxFame 
 	EndIf
 EndEvent
 
-Event OnExternalDominantGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalDominantGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Dominant Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Dominant") >= MinFame && Data.GetFameValue(EventLocation, "Dominant") < MaxFame
@@ -191,7 +191,7 @@ Event OnExternalDominantGain(String EventLocation, Int MinFame = 0, Int MaxFame 
 	EndIf
 EndEvent
 
-Event OnExternalSubmissiveGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalSubmissiveGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Submissive Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Submissive") >= MinFame && Data.GetFameValue(EventLocation, "Submissive") < MaxFame
@@ -199,7 +199,7 @@ Event OnExternalSubmissiveGain(String EventLocation, Int MinFame = 0, Int MaxFam
 	EndIf
 EndEvent
 
-Event OnExternalSadistGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalSadistGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Sadist Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Sadist") >= MinFame && Data.GetFameValue(EventLocation, "Sadist") < MaxFame
@@ -207,7 +207,7 @@ Event OnExternalSadistGain(String EventLocation, Int MinFame = 0, Int MaxFame = 
 	EndIf
 EndEvent
 
-Event OnExternalMasochistGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalMasochistGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Masochist Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Masochist") >= MinFame && Data.GetFameValue(EventLocation, "Masochist") < MaxFame
@@ -215,7 +215,7 @@ Event OnExternalMasochistGain(String EventLocation, Int MinFame = 0, Int MaxFame
 	EndIf
 EndEvent
 
-Event OnExternalGentleGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalGentleGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Gentle Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Gentle") >= MinFame && Data.GetFameValue(EventLocation, "Gentle") < MaxFame
@@ -223,7 +223,7 @@ Event OnExternalGentleGain(String EventLocation, Int MinFame = 0, Int MaxFame = 
 	EndIf
 EndEvent
 
-Event OnExternalLikesMenGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalLikesMenGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Likes Men Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Likes Men") >= MinFame && Data.GetFameValue(EventLocation, "Likes Men") < MaxFame
@@ -231,7 +231,7 @@ Event OnExternalLikesMenGain(String EventLocation, Int MinFame = 0, Int MaxFame 
 	EndIf
 EndEvent
 
-Event OnExternalLikesWomenGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalLikesWomenGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Likes Women Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Likes Women") >= MinFame && Data.GetFameValue(EventLocation, "Likes Women") < MaxFame
@@ -239,7 +239,7 @@ Event OnExternalLikesWomenGain(String EventLocation, Int MinFame = 0, Int MaxFam
 	EndIf
 EndEvent
 
-Event OnExternalLikesOrcGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalLikesOrcGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Likes Orc Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Likes Orc") >= MinFame && Data.GetFameValue(EventLocation, "Likes Orc") < MaxFame
@@ -247,7 +247,7 @@ Event OnExternalLikesOrcGain(String EventLocation, Int MinFame = 0, Int MaxFame 
 	EndIf
 EndEvent
 
-Event OnExternalLikesKhajiitGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalLikesKhajiitGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Likes Khajiit Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Likes Khajiit") >= MinFame && Data.GetFameValue(EventLocation, "Likes Khajiit") < MaxFame
@@ -255,7 +255,7 @@ Event OnExternalLikesKhajiitGain(String EventLocation, Int MinFame = 0, Int MaxF
 	EndIf
 EndEvent
 
-Event OnExternalLikesArgonianGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalLikesArgonianGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Likes Argonian Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Likes Argonian") >= MinFame && Data.GetFameValue(EventLocation, "Likes Argonian") < MaxFame
@@ -263,7 +263,7 @@ Event OnExternalLikesArgonianGain(String EventLocation, Int MinFame = 0, Int Max
 	EndIf
 EndEvent
 
-Event OnExternalBestialityGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalBestialityGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Bestiality Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Bestiality") >= MinFame && Data.GetFameValue(EventLocation, "Bestiality") < MaxFame
@@ -271,7 +271,7 @@ Event OnExternalBestialityGain(String EventLocation, Int MinFame = 0, Int MaxFam
 	EndIf
 EndEvent
 
-Event OnExternalGroupGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalGroupGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Group Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Group") >= MinFame && Data.GetFameValue(EventLocation, "Group") < MaxFame
@@ -279,7 +279,7 @@ Event OnExternalGroupGain(String EventLocation, Int MinFame = 0, Int MaxFame = 1
 	EndIf
 EndEvent
 
-Event OnExternalBoundGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalBoundGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Bound Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Bound") >= MinFame && Data.GetFameValue(EventLocation, "Bound") < MaxFame
@@ -287,7 +287,7 @@ Event OnExternalBoundGain(String EventLocation, Int MinFame = 0, Int MaxFame = 1
 	EndIf
 EndEvent
 
-Event OnExternalTattooGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalTattooGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Tattoo Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Tattoo") >= MinFame && Data.GetFameValue(EventLocation, "Tattoo") < MaxFame
@@ -295,7 +295,7 @@ Event OnExternalTattooGain(String EventLocation, Int MinFame = 0, Int MaxFame = 
 	EndIf
 EndEvent
 
-Event OnExternalCumDumpGain(String EventLocation, Int MinFame = 0, Int MaxFame = 150)
+Event OnExternalCumDumpGain(String EventLocation, Int MinFame, Int MaxFame)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("External Cum Dump Gain Event Location is Invalid")
 	ElseIf Data.GetFameValue(EventLocation, "Cum Dump") >= MinFame && Data.GetFameValue(EventLocation, "Cum Dump") < MaxFame
@@ -320,29 +320,24 @@ If either are below 0, they will set to 0. If either are above 150, they will se
 If the Minimum and Maximums are different, it will randomly pick a number between those values to increase.
 /;
 
-Event OnExternalManualFameGain(String EventLocation, String Category = "NULL", Int MinIncrease = 1, Int MaxIncrease = 1)
+Event OnExternalManualFameGain(String EventLocation, String Category, Int MinIncrease, Int MaxIncrease)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Fame Location " + EventLocation + " is Invalid.")
 		return
 	EndIf
 	
-	If Category == "NULL"
-		Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Category is NULL")
-		return
-	Else
-		Int CategoryIndex = 0
-		Bool ValidCategoryFound = False
-		While CategoryIndex < FameManager.FameType.Length && ValidCategoryFound == False
-			If Category == FameManager.FameType[CategoryIndex]
-				ValidCategoryFound = True
-			EndIf
-			CategoryIndex += 1
-		EndWhile
-		
-		If ValidCategoryFound == False
-			Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Fame Category " + Category + " is Invalid.")
-			return
+	Int CategoryIndex = 0
+	Bool ValidCategoryFound = False
+	While CategoryIndex < FameManager.FameType.Length && ValidCategoryFound == False
+		If Category == FameManager.FameType[CategoryIndex]
+			ValidCategoryFound = True
 		EndIf
+		CategoryIndex += 1
+	EndWhile
+	
+	If ValidCategoryFound == False
+		Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Fame Category " + Category + " is Invalid.")
+		return
 	EndIf
 	
 	If MinIncrease < 0
@@ -382,7 +377,7 @@ EndEvent
 This event will increase all fame categories in a specific location. Functions similarly to the above event.
 /;
 
-Event OnExternalManualFameGainAllInLocation(String EventLocation, Int MinIncrease = 1, Int MaxIncrease = 1)
+Event OnExternalManualFameGainAllInLocation(String EventLocation, Int MinIncrease, Int MaxIncrease)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("SLSF Reloaded - OnExternalManualFameGainAllInLocation - Fame Location " + EventLocation + " is Invalid.")
 		return
@@ -438,7 +433,7 @@ This event will increase all fame categories in ALL registered locations. Functi
 MAKE SURE YOU KNOW WHAT YOU'RE DOING HERE! THIS COULD SKYROCKET A CHARACTER'S FAME AND MAKE IT HARD TO DECREASE!
 /;
 
-Event OnExternalManualFameGainAll(Int MinIncrease = 1, Int MaxIncrease = 1)
+Event OnExternalManualFameGainAll(Int MinIncrease, Int MaxIncrease)
 	If MinIncrease < 0
 		MinIncrease = 0
 	ElseIf MinIncrease > 150
@@ -542,29 +537,24 @@ If either are below 0, they will set to 0. If either are above 150, they will se
 If the Minimum and Maximums are different, it will randomly pick a number between those values to decay.
 /;
 
-Event OnExternalManualFameDecay(String EventLocation, String Category = "NULL", Int MinDecay = 1, Int MaxDecay = 1)
+Event OnExternalManualFameDecay(String EventLocation, String Category, Int MinDecay, Int MaxDecay)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Fame Location " + EventLocation + " is Invalid.")
 		return
 	EndIf
 	
-	If Category == "NULL"
-		Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Category is NULL")
-		return
-	Else
-		Int CategoryIndex = 0
-		Bool ValidCategoryFound = False
-		While CategoryIndex < FameManager.FameType.Length && ValidCategoryFound == False
-			If Category == FameManager.FameType[CategoryIndex]
-				ValidCategoryFound = True
-			EndIf
-			CategoryIndex += 1
-		EndWhile
-		
-		If ValidCategoryFound == False
-			Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Fame Category " + Category + " is Invalid.")
-			return
+	Int CategoryIndex = 0
+	Bool ValidCategoryFound = False
+	While CategoryIndex < FameManager.FameType.Length && ValidCategoryFound == False
+		If Category == FameManager.FameType[CategoryIndex]
+			ValidCategoryFound = True
 		EndIf
+		CategoryIndex += 1
+	EndWhile
+	
+	If ValidCategoryFound == False
+		Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Fame Category " + Category + " is Invalid.")
+		return
 	EndIf
 	
 	If MinDecay < 0
@@ -605,7 +595,7 @@ EndEvent
 This event will decay all fame categories in a specific location. Functions similarly to the above event.
 /;
 
-Event OnExternalManualFameDecayAllInLocation(String EventLocation, Int MinDecay = 1, Int MaxDecay = 1)
+Event OnExternalManualFameDecayAllInLocation(String EventLocation, Int MinDecay, Int MaxDecay)
 	If LocationManager.IsLocationValid(EventLocation) == False
 		Debug.Trace("SLSF Reloaded - ExternalManualFameDecayAllInLocation - Fame Location " + EventLocation + " is Invalid.")
 		return
@@ -661,7 +651,7 @@ This event will decay all fame categories in ALL registered locations. Functions
 MAKE SURE YOU KNOW WHAT YOU'RE DOING HERE! THIS COULD EFFECTIVELY WIPE ALL FAME FOR A CHARACTER!
 /;
 
-Event OnExternalManualFameDecayAll(Int MinDecay = 1, Int MaxDecay = 1)
+Event OnExternalManualFameDecayAll(Int MinDecay, Int MaxDecay)
 	If MinDecay < 0
 		MinDecay = 0
 	ElseIf MinDecay > 150
@@ -751,7 +741,7 @@ Event OnExternalFameSpreadRoll()
 EndEvent
 
 ;This event forces a fame spread from the defined location, as long as the location is valid
-Event OnExternalFameSpread(Location SpreadFromLocation = None)
+Event OnExternalFameSpread(Location SpreadFromLocation)
 	If SpreadFromLocation == None
 		Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is None.")
 		return
@@ -765,8 +755,8 @@ Event OnExternalFameSpread(Location SpreadFromLocation = None)
 	EndIf
 EndEvent
 
-Event OnExternalFameSpreadByName(String SpreadFromLocation = "NULL")
-	If SpreadFromLocation == "NULL" || SpreadFromLocation == "-EMPTY-"
+Event OnExternalFameSpreadByName(String SpreadFromLocation)
+	If SpreadFromLocation == "NULL" || SpreadFromLocation == "-EMPTY-" || SpreadFromLocation == ""
 		Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is None.")
 		return
 	EndIf
@@ -845,7 +835,7 @@ THE INTERNAL FUNCTIONS ASSUME THE CUSTOM LOCATION ARRAY IS LIMITED TO 20!
 /;
 
 ;Pass a Location value to this event
-Event OnExternalLocationRegister(Location LocationToRegister = None)
+Event OnExternalLocationRegister(Location LocationToRegister)
 	If LocationToRegister == None
 		Debug.Trace("SLSF Reloaded - ExternalLocationRegister - Location is NONE.")
 		return
@@ -859,8 +849,8 @@ EndEvent
 
 ;Pass a String value to this event. Please be careful! Misspelled locations will successfully register but will be effectively useless.
 ;Please use this event responsibly.
-Event OnExternalLocationRegisterByName(String LocationToRegister = "NULL")
-	If LocationToRegister == "NULL" || LocationToRegister == "-EMPTY-"
+Event OnExternalLocationRegisterByName(String LocationToRegister)
+	If LocationToRegister == "NULL" || LocationToRegister == "-EMPTY-" || LocationToRegister == ""
 		Debug.Trace("SLSF Reloaded - ExternalLocationRegisterByName - Location is NULL.")
 		return
 	Else
@@ -871,7 +861,7 @@ Event OnExternalLocationRegisterByName(String LocationToRegister = "NULL")
 EndEvent
 
 ;The following events are similar to above, but remove the location instead
-Event OnExternalLocationUnregister(Location LocationToUnregister = None)
+Event OnExternalLocationUnregister(Location LocationToUnregister)
 	If LocationToUnregister == None
 		Debug.Trace("SLSF Reloaded - ExternalLocationUnregister - Location is NONE.")
 		return
@@ -881,8 +871,8 @@ Event OnExternalLocationUnregister(Location LocationToUnregister = None)
 	EndIf
 EndEvent
 
-Event OnExternalLocationUnregisterByName(String LocationToUnregister = "NULL")
-	If LocationToUnregister == "NULL" || LocationToUnregister == "-EMPTY-"
+Event OnExternalLocationUnregisterByName(String LocationToUnregister)
+	If LocationToUnregister == "NULL" || LocationToUnregister == "-EMPTY-" || LocationToUnregister == ""
 		Debug.Trace("SLSF Reloaded - ExternalLocationUnregisterByName - Location is NULL.")
 		return
 	Else
@@ -1006,7 +996,7 @@ Event OnRequestFame(String LocationName, String Category)
 	ModEvent.Send(EventHandle)
 EndEvent
 
-Event OnRequestCumVisibility(String CumLocation = "Any")
+Event OnRequestCumVisibility(String CumLocation)
 	Bool OralVisible = VisibilityManager.IsOralCumVisible()
 	Bool AnalVisible = VisibilityManager.IsAssCumVisible()
 	Bool VaginalVisible = VisibilityManager.IsVaginalCumVisible()
@@ -1023,7 +1013,7 @@ Event OnRequestCumVisibility(String CumLocation = "Any")
 		Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
 		ModEvent.PushBool(EventHandle, VaginalVisible)
 		ModEvent.Send(EventHandle)
-	Else
+	ElseIf CumLocation == "Any"
 		If OralVisible == True || AnalVisible == True || VaginalVisible == True
 			Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
 			ModEvent.PushBool(EventHandle, True)
