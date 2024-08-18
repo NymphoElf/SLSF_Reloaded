@@ -33,8 +33,7 @@ Faction Property AND_Underwear Auto Hidden
 Faction Property ChaurusBreeder Auto Hidden
 Faction Property SpiderBreeder Auto Hidden
 
-MagicEffect Property FM_2ndTrimester Auto Hidden
-MagicEffect Property FM_3rdTrimester Auto Hidden
+Faction Property FertilityFaction Auto Hidden
 
 Function CheckInstalledMods()
 	If Game.GetModByName("Advanced Nudity Detection.esp") != 255
@@ -100,19 +99,12 @@ Function CheckInstalledMods()
 		IsPWInstalled = False
 	EndIf
 	
-	If Game.GetModByName("Fertility Mode.esm") != 255
+	If Game.GetModByName("Fertility Mode 3 Fixes and Updates.esp") != 255
 		IsFMInstalled = True
-		If Game.GetModByName("Fertility Mode 3 Fixes and Updates.esp") != 255
-			FM_2ndTrimester = Game.GetFormFromFile(0x826, "Fertility Mode 3 Fixes and Updates.esp") as MagicEffect
-			FM_3rdTrimester = Game.GetFormFromFile(0x827, "Fertility Mode 3 Fixes and Updates.esp") as MagicEffect
-		Else
-			FM_2ndTrimester = Game.GetFormFromFile(0x0001B814, "Fertility Mode.esm") as MagicEffect
-			FM_3rdTrimester = Game.GetFormFromFile(0x0001B815, "Fertility Mode.esm") as MagicEffect
-		EndIf
+		FertilityFaction = Game.GetFormFromFile(0x862, "Fertility Mode 3 Fixes and Updates.esp") as Faction
 	Else
 		IsFMInstalled = False
-		FM_2ndTrimester = None
-		FM_3rdTrimester = None
+		FertilityFaction = None
 	EndIf
 	
 	If Game.GetModByName("sr_FillHerUp.esp") != 255
@@ -151,7 +143,7 @@ PW_MainLoopScript Function GetPWData() Global
 EndFunction
 
 Bool Function IsFMPregnant(Actor actorRef)
-	If actorRef.HasMagicEffect(FM_2ndTrimester) || actorRef.HasMagicEffect(FM_3rdTrimester)
+	If actorRef.GetFactionRank(FertilityFaction) > 30
 		return True
 	EndIf
 	return False

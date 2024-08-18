@@ -26,6 +26,8 @@ Int[] Property CustomLocationDecayPauseTimer Auto
 Int Property DecayCountdown Auto Hidden
 Int Property SpreadCountdown Auto Hidden
 
+Float Property LastCheckedTime Auto Hidden
+
 Armor[] Property ArmorSlots Auto Hidden
 
 Keyword[] Property DD_Keywords Auto Hidden
@@ -150,32 +152,62 @@ Function Startup()
 	
 	DecayCountdown = 24
 	SpreadCountdown = 48
+	LastCheckedTime = Utility.GetCurrentGameTime()
 EndFunction
 
 Event OnUpdate()
+	Float Time = Utility.GetCurrentGameTime()
+	Int CountdownChange = ((Time - LastCheckedTime) * 48) as Int
+	Int DecayIterations = (CountdownChange/24) as Int
+	Int SpreadIterations = (CountdownChange/48) as Int
+	
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	
-	;Update 'global' timers
-	DecayCountdown -= 1
-	SpreadCountdown -= 1
+	If CountdownChange < 1
+		CountdownChange = 1
+	EndIf
+	Debug.Trace("SLSF Realoaded Fame Manager - Countdown Change = " + CountdownChange)
 	
-	If DecayCountdown <= 0 ;Minor sanity check in case it somehow goes below 0.
-		DecayFame()
-		DecayCountdown = 24
+	;Update 'global' timers
+	DecayCountdown -= CountdownChange
+	SpreadCountdown -= CountdownChange
+	
+	;Always perform at least one iteration if triggered. Perform multiple if long time passes between checks (repeated Sleep/Wait).
+	If DecayIterations < 1
+		DecayIterations = 1
+	EndIf
+	If SpreadIterations < 1
+		SpreadIterations = 1
+	EndIf
+	Debug.Trace("SLSF Realoaded Fame Manager - Decay Iterations = " + DecayIterations)
+	Debug.Trace("SLSF Realoaded Fame Manager - Spread Iterations = " + SpreadIterations)
+	
+	If DecayCountdown <= 0
+		While DecayIterations > 0
+			DecayFame()
+			DecayIterations -= 1
+		EndWhile
+		DecayCountdown = (Config.DecayTimeNeeded) as Int
 	EndIf
 	
 	If SpreadCountdown <= 0
-		SpreadFameRoll()
-		SpreadCountdown = 48
+		While SpreadIterations > 0
+			SpreadFameRoll()
+			SpreadIterations -= 1
+		EndWhile
+		SpreadCountdown = (Config.SpreadTimeNeeded) as Int
 	EndIf
 	
 	;Update Individual Decay Pause Timers
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationDecayPauseTimer[LocationIndex] > 0 && DefaultLocationCanDecay[LocationIndex] == False
-			DefaultLocationDecayPauseTimer[LocationIndex] = DefaultLocationDecayPauseTimer[LocationIndex] - 1 ;Apparently arrays do not like operators (+=, -=, etc). Can only assign with "=" and math afterwards
+			Int CurrentDecayTimer = DefaultLocationDecayPauseTimer[LocationIndex]
+			Int NewDecayTimer = (CurrentDecayTimer - CountdownChange)
+			DefaultLocationDecayPauseTimer[LocationIndex] = NewDecayTimer
 		EndIf
-		If DefaultLocationDecayPauseTimer[LocationIndex] == 0
+		If DefaultLocationDecayPauseTimer[LocationIndex] <= 0
+			DefaultLocationDecayPauseTimer[LocationIndex] = 0
 			DefaultLocationCanDecay[LocationIndex] = True
 		EndIf
 		LocationIndex += 1
@@ -185,9 +217,12 @@ Event OnUpdate()
 	
 	While LocationIndex < CustomLocations
 		If CustomLocationDecayPauseTimer[LocationIndex] > 0 && CustomLocationCanDecay[LocationIndex] == False
-			CustomLocationDecayPauseTimer[LocationIndex] = CustomLocationDecayPauseTimer[LocationIndex] - 1
+			Int CurrentDecayTimer = CustomLocationDecayPauseTimer[LocationIndex]
+			Int NewDecayTimer = (CurrentDecayTimer - CountdownChange)
+			CustomLocationDecayPauseTimer[LocationIndex] = NewDecayTimer
 		EndIf
-		If CustomLocationDecayPauseTimer[LocationIndex] == 0
+		If CustomLocationDecayPauseTimer[LocationIndex] <= 0
+			CustomLocationDecayPauseTimer[LocationIndex] = 0
 			CustomLocationCanDecay[LocationIndex] = True
 		EndIf
 		LocationIndex += 1
@@ -198,9 +233,12 @@ Event OnUpdate()
 	;Update Individual Spread Pause Timers
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationSpreadPauseTimer[LocationIndex] > 0 && DefaultLocationCanSpread[LocationIndex] == False
-			DefaultLocationSpreadPauseTimer[LocationIndex] = DefaultLocationSpreadPauseTimer[LocationIndex] - 1
+			Int CurrentSpreadTimer = DefaultLocationSpreadPauseTimer[LocationIndex]
+			Int NewSpreadTimer = (CurrentSpreadTimer - CountdownChange)
+			DefaultLocationSpreadPauseTimer[LocationIndex] = NewSpreadTimer
 		EndIf
-		If DefaultLocationSpreadPauseTimer[LocationIndex] == 0
+		If DefaultLocationSpreadPauseTimer[LocationIndex] <= 0
+			DefaultLocationSpreadPauseTimer[LocationIndex] = 0
 			DefaultLocationCanSpread[LocationIndex] = True
 		EndIf
 		LocationIndex += 1
@@ -210,13 +248,18 @@ Event OnUpdate()
 	
 	While LocationIndex < CustomLocations
 		If CustomLocationSpreadPauseTimer[LocationIndex] > 0 && CustomLocationCanSpread[LocationIndex] == False
-			CustomLocationSpreadPauseTimer[LocationIndex] = CustomLocationSpreadPauseTimer[LocationIndex] - 1
+			Int CurrentSpreadTimer = CustomLocationSpreadPauseTimer[LocationIndex]
+			Int NewSpreadTimer = (CurrentSpreadTimer - CountdownChange)
+			CustomLocationSpreadPauseTimer[LocationIndex] = NewSpreadTimer
 		EndIf
-		If CustomLocationSpreadPauseTimer[LocationIndex] == 0
+		If CustomLocationSpreadPauseTimer[LocationIndex] <= 0
+			CustomLocationSpreadPauseTimer[LocationIndex] = 0
 			CustomLocationCanSpread[LocationIndex] = True
 		EndIf
 		LocationIndex += 1
 	EndWhile
+	
+	LastCheckedTime = Time
 	
 	If Mods.IsFameCommentsInstalled == False && SLSFCFameTypesCleared == False
 		LocationIndex = 0
@@ -237,6 +280,12 @@ Event OnUpdate()
 	Else
 		SLSFCFameTypesCleared = False
 	EndIf
+	
+	While CountdownChange > 0
+		Debug.Trace("SLSF Realoaded Fame Manager - RunNPCDetect iterations remaining: " + CountdownChange)
+		PlayerScript.RunNPCDetect()
+		CountdownChange -= 1
+	EndWhile
 EndEvent
 
 Function CheckExternalFlags()
@@ -384,7 +433,7 @@ EndFunction
 Bool Function CanGainSlutFame(String FameLocation)
 	;Check Slut Fame
 	If Mods.IsDDInstalled == True && Mods.IsANDInstalled == False
-		If PlayerRef.WornHasKeyword(Mods.DD_NipplePiercing) || PlayerRef.WornHasKeyword(Mods.DD_VaginalPiercing) || PlayerRef.WornHasKeyword(SLSF_Reloaded_NipplePiercing) || PlayerRef.WornHasKeyword(SLSF_Reloaded_VaginalPiercing)
+		If PlayerRef.WornHasKeyword(Mods.DD_NipplePiercing) || PlayerRef.WornHasKeyword(Mods.DD_VaginalPiercing) || PlayerRef.WornHasKeyword(Mods.DD_VaginalPlug) || PlayerRef.WornHasKeyword(SLSF_Reloaded_NipplePiercing) || PlayerRef.WornHasKeyword(SLSF_Reloaded_VaginalPiercing)
 			If PlayerRef.GetEquippedArmorInSlot(32) == None
 				return True
 			EndIf
@@ -470,6 +519,17 @@ EndFunction
 
 Bool Function CanGainAnalFame(String FameLocation)
 	;Check Anal Fame
+	
+	If Mods.IsANDInstalled == True
+		If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1 && PlayerRef.WornHasKeyword(Mods.DD_AnalPlug)
+			return True
+		EndIf
+	Else
+		If PlayerRef.GetEquippedArmorInSlot(32) == None && PlayerRef.WornHasKeyword(Mods.DD_AnalPlug)
+			return True
+		EndIf
+	EndIf
+	
 	If VisibilityManager.IsAssCumVisible() == False
 		return False
 	EndIf
@@ -504,9 +564,9 @@ EndFunction
 
 Bool Function CanGainPregnantFame(String FameLocation)
 	;Check Pregnant Fame
-	If PlayerRef.HasMagicEffect(Mods.FM_2ndTrimester) && Data.GetFameValue(FameLocation, "Pregnant") < 50
+	If PlayerRef.GetFactionRank(Mods.FertilityFaction) > 30  && Data.GetFameValue(FameLocation, "Pregnant") < 50
 		return True
-	ElseIf PlayerRef.HasMagicEffect(Mods.FM_3rdTrimester) || Mods.IsECPregnant(PlayerRef) || Mods.IsESPregnant(PlayerRef)
+	ElseIf PlayerRef.GetFactionRank(Mods.FertilityFaction) > 60 || Mods.IsECPregnant(PlayerRef) || Mods.IsESPregnant(PlayerRef)
 		return True
 	EndIf
 	return False
@@ -554,17 +614,25 @@ Bool Function CanGainBoundFame()
 		
 		Int SlotIndex = 0
 		Int KeywordIndex = 0
+		Bool InvalidatingKeyword = False
 		While SlotIndex < ArmorSlots.Length
+			
 			While KeywordIndex < DD_Keywords.Length
 				If ArmorSlots[SlotIndex] != None
 					If ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable) && ArmorSlots[SlotIndex].HasKeyword(DD_Keywords[KeywordIndex])
-						;DoNothing
-					ElseIf ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable)
-						return True
+						InvalidatingKeyword = True
 					EndIf
 				EndIf
 				KeywordIndex += 1
 			EndWhile
+			
+			If ArmorSlots[SlotIndex] != None
+				If ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable) && InvalidatingKeyword == False
+					return True
+				EndIf
+			EndIf
+			
+			InvalidatingKeyword = False ;Reset for next slot check
 			KeywordIndex = 0
 			SlotIndex += 1
 		EndWhile
@@ -576,17 +644,22 @@ Bool Function CanGainTattooFame(String FameLocation)
 	;Check Tattoo Fame
 	If Mods.IsSlaveTatsInstalled == True
 		VisibilityManager.CheckAppliedTattoos()
-		If VisibilityManager.CountVisibleTattoos() > 10
+		
+		Int TattooFame = Data.GetFameValue(FameLocation, "Tattoo")
+		Int TotalTattoos = VisibilityManager.CountVisibleTattoos()
+		Int BodyTattoos = VisibilityManager.VisibleBodyTats
+		
+		If TotalTattoos > 10 || BodyTattoos == 6
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 8 && Data.GetFameValue(FameLocation, "Tattoo") < 120
+		ElseIf (TotalTattoos > 8 || BodyTattoos == 5) && TattooFame < 125
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 6 && Data.GetFameValue(FameLocation, "Tattoo") < 90
+		ElseIf (TotalTattoos > 6 || BodyTattoos == 4) && TattooFame < 100
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 4 && Data.GetFameValue(FameLocation, "Tattoo") < 60
+		ElseIf (TotalTattoos > 4 || BodyTattoos == 3) && TattooFame < 75
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 2 && Data.GetFameValue(FameLocation, "Tattoo") < 30
+		ElseIf (TotalTattoos > 2 || BodyTattoos == 2) && TattooFame < 50
 			return True
-		ElseIf VisibilityManager.CountVisibleTattoos() > 0 && Data.GetFameValue(FameLocation, "Tattoo") < 15
+		ElseIf TotalTattoos > 0 && TattooFame < 25
 			return True
 		EndIf
 	EndIf
@@ -603,8 +676,8 @@ Bool Function CanGainCumDumpFame()
 EndFunction
 
 Bool Function CheckTattooExtraFame(String ExtraFame)
-	Int TattooSlot = 1
-	While TattooSlot <= 6
+	Int TattooSlot = 0
+	While TattooSlot < 6
 		If VisibilityManager.IsBodyTattooVisible(TattooSlot) == True && VisibilityManager.BodyTattooExtraFameType[TattooSlot] == ExtraFame
 			return True
 		EndIf
@@ -641,7 +714,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	EndIf
 	
 	Int PossibleFameCount = 0
-	PossibleFameArray = New String[22]
+	PossibleFameArray = New String[24]
 	
 	CheckExternalFlags()
 	
@@ -755,6 +828,18 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 		PossibleFameCount += 1
 	EndIf
 	
+	If Mods.IsFameCommentsInstalled == True
+		If CheckTattooExtraFame("Unfaithful") == True
+			PossibleFameArray[PossibleFameCount] = "Unfaithful"
+			PossibleFameCount += 1
+		EndIf
+		
+		If CheckTattooExtraFame("Cuck") == True
+			PossibleFameArray[PossibleFameCount] = "Cuck"
+			PossibleFameCount += 1
+		EndIf
+	EndIf
+	
 	If PossibleFameCount == 0
 		Debug.Trace("SLSF Reloaded - FameGainRoll Function - PossibleFameCount is Zero")
 		return ;If none of the above categories are possible, end function
@@ -764,7 +849,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	If PossibleFameCount > 1
 		GainedFameCount = Utility.RandomInt(1, PossibleFameCount) ;Randomly Determine how many fame categories are increased
 	Else
-		GainFame(PossibleFameArray[0], FameLocation) ;If there is only one fame category to gain, apply it and end function
+		GainFame(PossibleFameArray[0], FameLocation, False) ;If there is only one fame category to gain, apply it and end function
 		return
 	EndIf
 	
@@ -772,7 +857,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	Int AppliedFameCount = 0
 	If GainedFameCount == PossibleFameCount ;If we gain fame in every possible category, send all increases
 		While AppliedFameCount < GainedFameCount
-			GainFame(PossibleFameArray[AppliedFameCount], FameLocation)
+			GainFame(PossibleFameArray[AppliedFameCount], FameLocation, False)
 			AppliedFameCount += 1
 		EndWhile
 		return ;end function after applying all fame
@@ -799,7 +884,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 		
 		If DuplicateFameRolls == False
 			;If there are no duplicates, apply our rolled fame.
-			GainFame(RolledCategory[AppliedFameCount], FameLocation)
+			GainFame(RolledCategory[AppliedFameCount], FameLocation, False)
 			AppliedFameCount += 1
 		Else
 			TimesRolled -= 1 ;If there is a duplicate, reduce roll to prevent run-away index checks
@@ -808,7 +893,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	EndWhile
 EndFunction
 
-Function GainFame(String Category, String LocationName)
+Function GainFame(String Category, String LocationName, Bool IsForeplay)
 	If LocationName == "Eastmarch"
 		LocationName = "Windhelm"
 	ElseIf LocationName == "Haafingar"
@@ -827,7 +912,7 @@ Function GainFame(String Category, String LocationName)
 	Float FameMultiplier = Config.FameChangeMultiplier
 	Float Hour = (Utility.GetCurrentGameTime() - Math.Floor(Utility.GetCurrentGameTime())) * 24
 	
-	If (Hour > Config.NightStart || Hour < Config.NightEnd) && Config.ReduceFameAtNight == True
+	If ((Hour > Config.NightStart || Hour < Config.NightEnd) && Config.ReduceFameAtNight == True) || IsForeplay == True
 		FameMultiplier = FameMultiplier / 2 ;Half Fame Gains at night
 	EndIf
 	
@@ -902,50 +987,51 @@ Function DecayFame()
 	Int PreviousFame = 0
 	
 	While LocationIndex < LocationManager.DefaultLocation.Length
-		If DefaultLocationCanDecay[LocationIndex]
+		If DefaultLocationCanDecay[LocationIndex] == True
 			While TypeIndex < FameType.Length
 				PreviousFame = Data.GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex])
-				
-				If PreviousFame >= 100
-					FameDecay = ((-1 * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
+				If PreviousFame > 0
+					If PreviousFame >= 100
+						FameDecay = ((-1 * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
+					ElseIf PreviousFame >= 75
+						FameDecay = ((Utility.RandomInt(-2,-1) * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
+					ElseIf PreviousFame >= 50
+						FameDecay = ((Utility.RandomInt(-3,-1) * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
+					ElseIf PreviousFame >= 25
+						FameDecay = ((Utility.RandomInt(-4,-1) * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
+					Else
+						FameDecay = ((Utility.RandomInt(-5,-1) * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
 					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
-				ElseIf PreviousFame >= 75
-					FameDecay = ((Utility.RandomInt(-2,-1) * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
-					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
-				ElseIf PreviousFame >= 50
-					FameDecay = ((Utility.RandomInt(-3,-1) * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
-					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
-				ElseIf PreviousFame >= 25
-					FameDecay = ((Utility.RandomInt(-4,-1) * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
-					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
-				ElseIf PreviousFame > 0
-					FameDecay = ((Utility.RandomInt(-5,-1) * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
-					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
 				EndIf
 				
 				If Data.GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex]) < 0
@@ -963,50 +1049,51 @@ Function DecayFame()
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	
 	While LocationIndex < CustomLocations
-		If CustomLocationCanDecay[LocationIndex]
+		If CustomLocationCanDecay[LocationIndex] == True
 			While TypeIndex < FameType.Length
 				PreviousFame = Data.GetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex])
-				
-				If PreviousFame >= 100
-					FameDecay = ((-1 * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
+				If PreviousFame > 0
+					If PreviousFame >= 100
+						FameDecay = ((-1 * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
+					ElseIf PreviousFame >= 75
+						FameDecay = ((Utility.RandomInt(-2,-1) * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
+					ElseIf PreviousFame >= 50
+						FameDecay = ((Utility.RandomInt(-3,-1) * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
+					ElseIf PreviousFame >= 25
+						FameDecay = ((Utility.RandomInt(-4,-1) * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
+					Else
+						FameDecay = ((Utility.RandomInt(-5,-1) * FameMultiplier) as Int)
+						If FameDecay > -1
+							FameDecay = -1
+						EndIf
+						NewFame = PreviousFame + FameDecay
+						Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
+						DecayNotificationMakesSense = True
 					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
-				ElseIf PreviousFame >= 75
-					FameDecay = ((Utility.RandomInt(-2,-1) * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
-					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
-				ElseIf PreviousFame >= 50
-					FameDecay = ((Utility.RandomInt(-3,-1) * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
-					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
-				ElseIf PreviousFame >= 25
-					FameDecay = ((Utility.RandomInt(-4,-1) * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
-					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
-				ElseIf PreviousFame > 0
-					FameDecay = ((Utility.RandomInt(-5,-1) * FameMultiplier) as Int)
-					If FameDecay > -1
-						FameDecay = -1
-					EndIf
-					NewFame = PreviousFame + FameDecay
-					Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
-					DecayNotificationMakesSense = True
 				EndIf
 				
 				If Data.GetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex]) < 0
@@ -1150,16 +1237,18 @@ Function SpreadFame(String SpreadFromLocation)
 		PossibleLocationIndex += 1
 	EndWhile
 	
-	;Roll Target location index based on number of total locations, and ensure we are not trying to spread to the original location
+	;Roll Target location index based on number of total locations
 	Int TargetLocationIndex = 0
 	Bool TargetLocationValid = False
 	
 	While TargetLocationValid == False
-		TargetLocationIndex = Utility.RandomInt(0, (TotalLocations - 1)) ;Must reduce total locations by 1 in randomizer because Indexes start at 0
-		If SpreadFromLocation != PossibleSpreadTargets[TargetLocationIndex]
+		TargetLocationIndex = Utility.RandomInt(0, TotalLocations)
+		If SpreadFromLocation != PossibleSpreadTargets[TargetLocationIndex] ;ensure we are not trying to spread to the original location
 			TargetLocationValid = True
 		EndIf
 	EndWhile
+	
+	Debug.Trace("Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
 	
 	;When valid target is found, randomize how many fame categories are spread and by how much, based on config values.
 	Int NumberOfCategoriesToSpread = 0
@@ -1167,26 +1256,28 @@ Function SpreadFame(String SpreadFromLocation)
 	
 	If Config.MaximumSpreadCategories > 1 && PossibleFameSpreadCategories > 1
 		If Config.MaximumSpreadCategories <= PossibleFameSpreadCategories
-			NumberOfCategoriesToSpread = Utility.RandomInt(1, Config.MaximumSpreadCategories as Int)
+			NumberOfCategoriesToSpread = Utility.RandomInt(1, (Config.MaximumSpreadCategories as Int))
 		Else
 			NumberOfCategoriesToSpread = Utility.RandomInt(1, PossibleFameSpreadCategories)
 		EndIf
+	Else
+		NumberOfCategoriesToSpread = 1
 	EndIf
 	
 	;Randomly pick which valid categories are spread
-	Int FameSpreadValue = 0
-	Int PreviousFame = 0
+	Int TargetFameValue = 0
+	Int FromFameValue = 0
 	Int NewFame = 0
 	Int SuccessfulFameSpreads = 0
 	Int CategoryRoll = 0
 	
 	If PossibleFameSpreadCategories == 1
-		PreviousFame = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[0])
+		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[0])
 		
-		FameSpreadValue = (Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[0]) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage as Int / 10))/10)) as Int
+		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[0])
 		;Fame spread is in steps of 10%, which is why we divide the MaximumSpreadPercentage by 10 and then divide the RandomInt by 10 again to total the overall division by 100, which gives us a percentage
 		
-		NewFame = PreviousFame + FameSpreadValue
+		NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
 		
 		If NewFame > 150
 			NewFame = 150
@@ -1196,11 +1287,11 @@ Function SpreadFame(String SpreadFromLocation)
 	ElseIf NumberOfCategoriesToSpread == 1
 		CategoryRoll = Utility.RandomInt(0, (PossibleFameSpreadCategories - 1))
 		
-		PreviousFame = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll])
+		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll])
 		
-		FameSpreadValue = (Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[0]) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage as Int / 10))/10)) as Int
+		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[0])
 		
-		NewFame = PreviousFame + FameSpreadValue
+		NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
 		
 		If NewFame > 150
 			NewFame = 150
@@ -1209,11 +1300,11 @@ Function SpreadFame(String SpreadFromLocation)
 		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll], NewFame)
 	ElseIf NumberOfCategoriesToSpread == PossibleFameSpreadCategories
 		While SuccessfulFameSpreads < PossibleFameSpreadCategories
-			PreviousFame = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[SuccessfulFameSpreads])
+			TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[SuccessfulFameSpreads])
 			
-			FameSpreadValue = (Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[SuccessfulFameSpreads]) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage as Int / 10))/10)) as Int
+			FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[SuccessfulFameSpreads])
 			
-			NewFame = PreviousFame + FameSpreadValue
+			NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
 			
 			If NewFame > 150
 				NewFame = 150
@@ -1245,9 +1336,11 @@ Function SpreadFame(String SpreadFromLocation)
 			
 			If DuplicateFameRolls == False
 				;If there are no duplicates, apply our rolled fame.
-				PreviousFame = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll])
+				TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll])
 				
-				FameSpreadValue = (Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[CategoryRoll]) * (Utility.RandomInt(1, (Config.MaximumSpreadPercentage as Int / 10))/10)) as Int
+				FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[CategoryRoll])
+				
+				NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
 				
 				If NewFame > 150
 					NewFame = 150
@@ -1289,6 +1382,22 @@ Function FameDecayNotification()
 	Debug.Notification("SLSF Realoaded - Your fame has decayed")
 EndFunction
 
+Int Function CalculateFameSpread(Int FromFame, Int TargetFame)
+	Int MaxRoll = (Config.MaximumSpreadPercentage as Int) / 10 ;Result should be 1, 2, 3, 4, or 5
+	Float SpreadRoll = 1.0
+	
+	If MaxRoll > 1 ;If MaxRoll is 1, then roll doesn't matter
+		SpreadRoll = Utility.RandomInt(1, MaxRoll) as Float
+	EndIf
+	
+	Float fPrevious = FromFame as Float
+	Float fPercentage = (SpreadRoll / 10) as Float ;Result should be 0.1, 0.2, 0.3, 0.4, or 0.5 (10%, 20%, 30%, 40%, or 50%) based on roll
+	Float fSpreadValue = fPrevious * fPercentage ;Result should be a percentage of fame from the spreading location, minimum being 1
+	Int FinalFame = (TargetFame + fSpreadValue) as Int
+	
+	return FinalFame
+EndFunction
+
 Function FameSpreadNotification()
 	;Placeholder - Will be refined after testing
 	Debug.Notification("SLSF Realoaded - Your fame has spread")
@@ -1327,34 +1436,87 @@ Function ClearAllFame()
 		TypeIndex = 0
 		LocationIndex += 1
 	EndWhile
-	Debug.MessageBox("All fame has been cleared for " + PlayerScript.NewPlayerName)
+	
+	WhoreGlobal.SetValue(0)
+	SlutGlobal.SetValue(0)
+	ExhibGlobal.SetValue(0)
+	OralGlobal.SetValue(0)
+	AnalGlobal.SetValue(0)
+	NastyGlobal.SetValue(0)
+	PregGlobal.SetValue(0)
+	DomGlobal.SetValue(0)
+	SubGlobal.SetValue(0)
+	SadistGlobal.SetValue(0)
+	MasochistGlobal.SetValue(0)
+	GentleGlobal.SetValue(0)
+	MenGlobal.SetValue(0)
+	WomenGlobal.SetValue(0)
+	KhajiitGlobal.SetValue(0)
+	OrcGlobal.SetValue(0)
+	ArgonianGlobal.SetValue(0)
+	BeastGlobal.SetValue(0)
+	GroupGlobal.SetValue(0)
+	BoundGlobal.SetValue(0)
+	TattooGlobal.SetValue(0)
+	CumDumpGlobal.SetValue(0)
+	CheatGlobal.SetValue(0)
+	CuckGlobal.SetValue(0)
+	
+	Debug.MessageBox("All fame has been cleared.")
 EndFunction
 
 Function UpdateGlobals()
 	String LocationName = LocationManager.CurrentLocationName()
 	
-	WhoreGlobal.SetValue(Data.GetFameValue(LocationName, "Whore"))
-	SlutGlobal.SetValue(Data.GetFameValue(LocationName, "Slut"))
-	ExhibGlobal.SetValue(Data.GetFameValue(LocationName, "Exhibitionist"))
-	OralGlobal.SetValue(Data.GetFameValue(LocationName, "Oral"))
-	AnalGlobal.SetValue(Data.GetFameValue(LocationName, "Anal"))
-	NastyGlobal.SetValue(Data.GetFameValue(LocationName, "Nasty"))
-	PregGlobal.SetValue(Data.GetFameValue(LocationName, "Pregnant"))
-	DomGlobal.SetValue(Data.GetFameValue(LocationName, "Dominant"))
-	SubGlobal.SetValue(Data.GetFameValue(LocationName, "Submissive"))
-	SadistGlobal.SetValue(Data.GetFameValue(LocationName, "Sadist"))
-	MasochistGlobal.SetValue(Data.GetFameValue(LocationName, "Masochist"))
-	GentleGlobal.SetValue(Data.GetFameValue(LocationName, "Gentle"))
-	MenGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Men"))
-	WomenGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Women"))
-	KhajiitGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Khajiit"))
-	OrcGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Orc"))
-	ArgonianGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Argonian"))
-	BeastGlobal.SetValue(Data.GetFameValue(LocationName, "Bestiality"))
-	GroupGlobal.SetValue(Data.GetFameValue(LocationName, "Group"))
-	BoundGlobal.SetValue(Data.GetFameValue(LocationName, "Bound"))
-	TattooGlobal.SetValue(Data.GetFameValue(LocationName, "Tattoo"))
-	CumDumpGlobal.SetValue(Data.GetFameValue(LocationName, "Cum Dump"))
-	CheatGlobal.SetValue(Data.GetFameValue(LocationName, "Unfaithful"))
-	CuckGlobal.SetValue(Data.GetFameValue(LocationName, "Cuck"))
+	If LocationName == "-NONE-"
+		WhoreGlobal.SetValue(0)
+		SlutGlobal.SetValue(0)
+		ExhibGlobal.SetValue(0)
+		OralGlobal.SetValue(0)
+		AnalGlobal.SetValue(0)
+		NastyGlobal.SetValue(0)
+		PregGlobal.SetValue(0)
+		DomGlobal.SetValue(0)
+		SubGlobal.SetValue(0)
+		SadistGlobal.SetValue(0)
+		MasochistGlobal.SetValue(0)
+		GentleGlobal.SetValue(0)
+		MenGlobal.SetValue(0)
+		WomenGlobal.SetValue(0)
+		KhajiitGlobal.SetValue(0)
+		OrcGlobal.SetValue(0)
+		ArgonianGlobal.SetValue(0)
+		BeastGlobal.SetValue(0)
+		GroupGlobal.SetValue(0)
+		BoundGlobal.SetValue(0)
+		TattooGlobal.SetValue(0)
+		CumDumpGlobal.SetValue(0)
+		CheatGlobal.SetValue(0)
+		CuckGlobal.SetValue(0)
+	Else
+		WhoreGlobal.SetValue(Data.GetFameValue(LocationName, "Whore"))
+		SlutGlobal.SetValue(Data.GetFameValue(LocationName, "Slut"))
+		ExhibGlobal.SetValue(Data.GetFameValue(LocationName, "Exhibitionist"))
+		OralGlobal.SetValue(Data.GetFameValue(LocationName, "Oral"))
+		AnalGlobal.SetValue(Data.GetFameValue(LocationName, "Anal"))
+		NastyGlobal.SetValue(Data.GetFameValue(LocationName, "Nasty"))
+		PregGlobal.SetValue(Data.GetFameValue(LocationName, "Pregnant"))
+		DomGlobal.SetValue(Data.GetFameValue(LocationName, "Dominant"))
+		SubGlobal.SetValue(Data.GetFameValue(LocationName, "Submissive"))
+		SadistGlobal.SetValue(Data.GetFameValue(LocationName, "Sadist"))
+		MasochistGlobal.SetValue(Data.GetFameValue(LocationName, "Masochist"))
+		GentleGlobal.SetValue(Data.GetFameValue(LocationName, "Gentle"))
+		MenGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Men"))
+		WomenGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Women"))
+		KhajiitGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Khajiit"))
+		OrcGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Orc"))
+		ArgonianGlobal.SetValue(Data.GetFameValue(LocationName, "Likes Argonian"))
+		BeastGlobal.SetValue(Data.GetFameValue(LocationName, "Bestiality"))
+		GroupGlobal.SetValue(Data.GetFameValue(LocationName, "Group"))
+		BoundGlobal.SetValue(Data.GetFameValue(LocationName, "Bound"))
+		TattooGlobal.SetValue(Data.GetFameValue(LocationName, "Tattoo"))
+		CumDumpGlobal.SetValue(Data.GetFameValue(LocationName, "Cum Dump"))
+		CheatGlobal.SetValue(Data.GetFameValue(LocationName, "Unfaithful"))
+		CuckGlobal.SetValue(Data.GetFameValue(LocationName, "Cuck"))
+	EndIf
 EndFunction

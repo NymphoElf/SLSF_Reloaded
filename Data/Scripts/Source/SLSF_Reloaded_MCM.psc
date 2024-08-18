@@ -20,6 +20,9 @@ Bool Property UnregisterLocationTrigger Auto
 Bool Property UnregisterLocationConfirm Auto
 Bool Property ClearAllFameTrigger Auto
 Bool Property ClearAllFameConfirm Auto
+Bool Property AllowForeplayFame Auto
+Bool Property SubmissiveDefault Auto
+Bool Property DominantDefault Auto
 
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
@@ -118,16 +121,15 @@ EndEvent
 
 Function InstallMCM()
 	ModName = "SLSF Reloaded"
-	Pages = New String[9]
+	Pages = New String[8]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
 	Pages[2] = "Settings"
 	Pages[3] = "Tattoos"
 	Pages[4] = "Custom Locations"
-	Pages[5] = "Beta Info - General"
-	Pages[6] = "Beta Info - Decay"
-	Pages[7] = "Beta Info - Spread"
-	Pages[8] = "External Mod Events"
+	Pages[5] = "General Info"
+	Pages[6] = "Decay Info"
+	Pages[7] = "Spread Info"
 EndFunction
 
 Function SetDefaults()
@@ -181,6 +183,7 @@ Function SetDefaults()
 	ClearAllFameTrigger = False
 	
 	LocationDetailsSelected = "Whiterun"
+	AllowForeplayFame = True
 EndFunction
 
 Function FameOverviewCheck()
@@ -212,7 +215,7 @@ Function FameOverviewCheck()
 	HasFameInLocation = False
 	
 	While LocationIndex < LocationManager.CustomLocation.Length
-		Debug.Trace("FameOverviewCheck - Location: " + LocationManager.DefaultLocation[LocationIndex])
+		Debug.Trace("FameOverviewCheck - Location: " + LocationManager.CustomLocation[LocationIndex])
 		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
 			Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
 			If Data.GetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
@@ -244,17 +247,22 @@ Int Function PullFameSpreadChance(String LocationName)
 EndFunction
 
 Event OnConfigOpen()
-	Pages = New String[9]
+	Pages = New String[8]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
 	Pages[2] = "Settings"
 	Pages[3] = "Tattoos"
 	Pages[4] = "Custom Locations"
-	Pages[5] = "Beta Info - General"
-	Pages[6] = "Beta Info - Decay"
-	Pages[7] = "Beta Info - Spread"
-	Pages[8] = "External Mod Events"
-	VisibilityManager.CheckAppliedTattoos()
+	Pages[5] = "General Info"
+	Pages[6] = "Decay Info"
+	Pages[7] = "Spread Info"
+	VisibilityManager.RegisterForSingleUpdate(0.1)
+	If Mods.IsFameCommentsInstalled == False
+		If MaximumSpreadCategories > 22
+			MaximumSpreadCategories = 22
+		EndIf
+	EndIf
+	FameOverviewCheck()
 EndEvent
 
 Event OnConfigClose()
@@ -268,8 +276,13 @@ EndEvent
 Event OnPageReset(String page)
 	SetCursorFillMode(TOP_TO_BOTTOM)
 	SetCursorPosition(0)
-	If (page == "" || page == "Fame Overview")
-		FameOverviewCheck()
+	If (page == "")
+		;LoadCustomContent("SLSF Reloaded/Sexlab Sexual Fame Reloaded Logo.dds", 226, -2)
+	Else
+		;UnloadCustomContent()
+	EndIf
+	
+	If (page == "Fame Overview")
 		
 		AddHeaderOption("Default Locations With Fame")
 		AddTextOption(LocationManager.DefaultLocation[0], HasFameAtDefaultLocation[0] as String)
@@ -316,9 +329,14 @@ Event OnPageReset(String page)
 		AddTextOption(LocationManager.CustomLocation[17], HasFameAtCustomLocation[17] as String)
 		AddTextOption(LocationManager.CustomLocation[18], HasFameAtCustomLocation[18] as String)
 		AddTextOption(LocationManager.CustomLocation[19], HasFameAtCustomLocation[19] as String)
+		AddTextOption(LocationManager.CustomLocation[20], HasFameAtCustomLocation[20] as String)
 	ElseIf (page == "Detailed Fame View")
 		AddHeaderOption("Current Location")
-		AddTextOption("Detected Location:", LocationManager.CurrentLocation.GetName())
+		If LocationManager.CurrentLocation != None
+			AddTextOption("Detected Location:", LocationManager.CurrentLocation.GetName())
+		Else
+			AddTextOption("Detected Location:", "-NONE-")
+		EndIf
 		AddTextOption("Fame Location:", LocationManager.CurrentLocationName())
 		
 		SetCursorPosition(1)
@@ -376,10 +394,15 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "Fame Change Multiplier:", FameChangeMultiplier, "{1}", 0)
 		
 		AddHeaderOption("Fame Gain Settings")
+		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame", AllowForeplayFame, 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByEnemyState", "Enemy Fame Chance", FameChanceByEnemy, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "Neutral Fame Chance", FameChanceByNeutral, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "Friend Fame Chance", FameChanceByFriend, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "Lover Fame Chance", FameChanceByLover, "{0}%", 0)
+		
+		AddHeaderOption("Dom/Sub Defaults")
+		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Default to Submissive", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True))
+		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Default to Dominant", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True))
 		
 		AddHeaderOption("Reset Fame")
 		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "Clear All Fame", ClearAllFameTrigger, 0)
@@ -398,7 +421,7 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_SpreadTimeNeededState", "Time Between Spreads (Hours):", (SpreadTimeNeeded / 2), "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_FailedSpreadIncreaseState", "Chance Increase on Fail:", FailedSpreadIncrease, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_SuccessfulSpreadDecreaseState", "Chance Decrease on Success:", SuccessfulSpreadReduction, "{0}%", 0)
-		AddSliderOptionST("SLSF_Reloaded_MinimumFameToSpreadState", "Minimum Fame to Spread:", MinimumFameToSpread, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MinimumFameToSpreadState", "Minimum Category Fame:", MinimumFameToSpread, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadCategoriesState", "Maximum Spread Categories:", MaximumSpreadCategories, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadPercentageState", "Maximum Spread Percentage:", MaximumSpreadPercentage, "{0}%", 0)
 	
@@ -447,10 +470,13 @@ Event OnPageReset(String page)
 		AddMenuOptionST("SLSF_Reloaded_FootSlot5FameState", "Slot 5 Fame Type: ", VisibilityManager.FootTattooExtraFameType[4], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[4] == False))
 		AddMenuOptionST("SLSF_Reloaded_FootSlot6FameState", "Slot 6 Fame Type: ", VisibilityManager.FootTattooExtraFameType[5], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[5] == False))
 		
-		
 	ElseIf (page == "Custom Locations")
 		AddHeaderOption("Register Location")
-		AddTextOption("Current Location:", LocationManager.CurrentLocationName())
+		If LocationManager.CurrentLocation != None
+			AddTextOption("Detected Location:", LocationManager.CurrentLocation.GetName())
+		Else
+			AddTextOption("Detected Location:", "-NONE-")
+		EndIf
 		AddToggleOptionST("SLSF_Reloaded_RegisterLocationState", "Register Location", RegisterLocationTrigger, 0)
 		AddToggleOptionST("SLSF_Reloaded_RegisterLocationConfirmState", "Confirm Location Register", RegisterLocationConfirm, GetDisabledOptionFlagIf(RegisterLocationTrigger == False))
 		AddHeaderOption("Unregister Location")
@@ -480,8 +506,9 @@ Event OnPageReset(String page)
 		AddTextOption("Slot 18:", LocationManager.CustomLocation[17])
 		AddTextOption("Slot 19:", LocationManager.CustomLocation[18])
 		AddTextOption("Slot 20:", LocationManager.CustomLocation[19])
+		AddTextOption("Slot 21:", LocationManager.CustomLocation[20])
 	
-	ElseIf (page == "Beta Info - General")
+	ElseIf (page == "General Info")
 		AddHeaderOption("Detected Mods")
 		If Mods.IsANDInstalled == True
 			AddTextOption("Advanced Nudity Detection", "True")
@@ -552,6 +579,9 @@ Event OnPageReset(String page)
 		AddTextOption("Player is Public Whore:", Mods.IsPublicWhore(PlayerScript.PlayerRef) as String)
 		AddTextOption("Player's FHU Inflation:", Mods.GetFHUInflation(PlayerScript.PlayerRef) as String)
 		AddTextOption("Total Visible Tattoos:", VisibilityManager.CountVisibleTattoos() as String)
+		AddHeaderOption("Decay & Spread Timers")
+		AddTextOption("Time Until Decay:", (FameManager.DecayCountdown/2) as Int + " Hours")
+		AddTextOption("Time Until Spread:", (FameManager.SpreadCountdown/2) as Int + " Hours")
 		
 		SetCursorPosition(22)
 		AddHeaderOption("Body Tattoo Status")
@@ -637,233 +667,187 @@ Event OnPageReset(String page)
 		AddTextOption("Slot 6 Applied:", VisibilityManager.FootTattooApplied[5] as String)
 		AddTextOption("Slot 6 Visible:", VisibilityManager.IsFootTattooVisible(5) as String)
 	
-	ElseIf (page == "Beta Info - Decay")
+	ElseIf (page == "Decay Info")
 		AddTextOption("Decay Countdown:", FameManager.DecayCountdown as String)
 		AddHeaderOption("Default Locations")
 		AddTextOption(LocationManager.DefaultLocation[0] + " Can Decay:", FameManager.DefaultLocationCanDecay[0] as String)
-		AddTextOption(LocationManager.DefaultLocation[0] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[0] as String)
+		;AddTextOption(LocationManager.DefaultLocation[0] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[0] as String)
 		AddTextOption(LocationManager.DefaultLocation[1] + " Can Decay:", FameManager.DefaultLocationCanDecay[1] as String)
-		AddTextOption(LocationManager.DefaultLocation[1] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[1] as String)
+		;AddTextOption(LocationManager.DefaultLocation[1] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[1] as String)
 		AddTextOption(LocationManager.DefaultLocation[2] + " Can Decay:", FameManager.DefaultLocationCanDecay[2] as String)
-		AddTextOption(LocationManager.DefaultLocation[2] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[2] as String)
+		;AddTextOption(LocationManager.DefaultLocation[2] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[2] as String)
 		AddTextOption(LocationManager.DefaultLocation[3] + " Can Decay:", FameManager.DefaultLocationCanDecay[3] as String)
-		AddTextOption(LocationManager.DefaultLocation[3] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[3] as String)
+		;AddTextOption(LocationManager.DefaultLocation[3] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[3] as String)
 		AddTextOption(LocationManager.DefaultLocation[4] + " Can Decay:", FameManager.DefaultLocationCanDecay[4] as String)
-		AddTextOption(LocationManager.DefaultLocation[4] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[4] as String)
+		;AddTextOption(LocationManager.DefaultLocation[4] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[4] as String)
 		AddTextOption(LocationManager.DefaultLocation[5] + " Can Decay:", FameManager.DefaultLocationCanDecay[5] as String)
-		AddTextOption(LocationManager.DefaultLocation[5] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[5] as String)
+		;AddTextOption(LocationManager.DefaultLocation[5] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[5] as String)
 		AddTextOption(LocationManager.DefaultLocation[6] + " Can Decay:", FameManager.DefaultLocationCanDecay[6] as String)
-		AddTextOption(LocationManager.DefaultLocation[6] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[6] as String)
+		;AddTextOption(LocationManager.DefaultLocation[6] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[6] as String)
 		AddTextOption(LocationManager.DefaultLocation[7] + " Can Decay:", FameManager.DefaultLocationCanDecay[7] as String)
-		AddTextOption(LocationManager.DefaultLocation[7] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[7] as String)
+		;AddTextOption(LocationManager.DefaultLocation[7] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[7] as String)
 		AddTextOption(LocationManager.DefaultLocation[8] + " Can Decay:", FameManager.DefaultLocationCanDecay[8] as String)
-		AddTextOption(LocationManager.DefaultLocation[8] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[8] as String)
+		;AddTextOption(LocationManager.DefaultLocation[8] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[8] as String)
 		AddTextOption(LocationManager.DefaultLocation[9] + " Can Decay:", FameManager.DefaultLocationCanDecay[9] as String)
-		AddTextOption(LocationManager.DefaultLocation[9] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[9] as String)
+		;AddTextOption(LocationManager.DefaultLocation[9] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[9] as String)
 		AddTextOption(LocationManager.DefaultLocation[10] + " Can Decay:", FameManager.DefaultLocationCanDecay[10] as String)
-		AddTextOption(LocationManager.DefaultLocation[10] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[10] as String)
+		;AddTextOption(LocationManager.DefaultLocation[10] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[10] as String)
 		AddTextOption(LocationManager.DefaultLocation[11] + " Can Decay:", FameManager.DefaultLocationCanDecay[11] as String)
-		AddTextOption(LocationManager.DefaultLocation[11] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[11] as String)
+		;AddTextOption(LocationManager.DefaultLocation[11] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[11] as String)
 		AddTextOption(LocationManager.DefaultLocation[12] + " Can Decay:", FameManager.DefaultLocationCanDecay[12] as String)
-		AddTextOption(LocationManager.DefaultLocation[12] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[12] as String)
+		;AddTextOption(LocationManager.DefaultLocation[12] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[12] as String)
 		AddTextOption(LocationManager.DefaultLocation[13] + " Can Decay:", FameManager.DefaultLocationCanDecay[13] as String)
-		AddTextOption(LocationManager.DefaultLocation[13] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[13] as String)
+		;AddTextOption(LocationManager.DefaultLocation[13] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[13] as String)
 		AddTextOption(LocationManager.DefaultLocation[14] + " Can Decay:", FameManager.DefaultLocationCanDecay[14] as String)
-		AddTextOption(LocationManager.DefaultLocation[14] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[14] as String)
+		;AddTextOption(LocationManager.DefaultLocation[14] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[14] as String)
 		AddTextOption(LocationManager.DefaultLocation[15] + " Can Decay:", FameManager.DefaultLocationCanDecay[15] as String)
-		AddTextOption(LocationManager.DefaultLocation[15] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[15] as String)
+		;AddTextOption(LocationManager.DefaultLocation[15] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[15] as String)
 		AddTextOption(LocationManager.DefaultLocation[16] + " Can Decay:", FameManager.DefaultLocationCanDecay[16] as String)
-		AddTextOption(LocationManager.DefaultLocation[16] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[16] as String)
+		;AddTextOption(LocationManager.DefaultLocation[16] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[16] as String)
 		AddTextOption(LocationManager.DefaultLocation[17] + " Can Decay:", FameManager.DefaultLocationCanDecay[17] as String)
-		AddTextOption(LocationManager.DefaultLocation[17] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[17] as String)
+		;AddTextOption(LocationManager.DefaultLocation[17] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[17] as String)
 		AddTextOption(LocationManager.DefaultLocation[18] + " Can Decay:", FameManager.DefaultLocationCanDecay[18] as String)
-		AddTextOption(LocationManager.DefaultLocation[18] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[18] as String)
+		;AddTextOption(LocationManager.DefaultLocation[18] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[18] as String)
 		AddTextOption(LocationManager.DefaultLocation[19] + " Can Decay:", FameManager.DefaultLocationCanDecay[19] as String)
-		AddTextOption(LocationManager.DefaultLocation[19] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[19] as String)
+		;AddTextOption(LocationManager.DefaultLocation[19] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[19] as String)
 		AddTextOption(LocationManager.DefaultLocation[20] + " Can Decay:", FameManager.DefaultLocationCanDecay[20] as String)
-		AddTextOption(LocationManager.DefaultLocation[20] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[20] as String)
+		;AddTextOption(LocationManager.DefaultLocation[20] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[20] as String)
 		
 		SetCursorPosition(5)
 		AddHeaderOption("Custom Locations")
 		AddTextOption(LocationManager.CustomLocation[0] + " Can Decay:", FameManager.CustomLocationCanDecay[0] as String)
-		AddTextOption(LocationManager.CustomLocation[0] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[0] as String)
+		;AddTextOption(LocationManager.CustomLocation[0] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[0] as String)
 		AddTextOption(LocationManager.CustomLocation[1] + " Can Decay:", FameManager.CustomLocationCanDecay[1] as String)
-		AddTextOption(LocationManager.CustomLocation[1] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[1] as String)
+		;AddTextOption(LocationManager.CustomLocation[1] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[1] as String)
 		AddTextOption(LocationManager.CustomLocation[2] + " Can Decay:", FameManager.CustomLocationCanDecay[2] as String)
-		AddTextOption(LocationManager.CustomLocation[2] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[2] as String)
+		;AddTextOption(LocationManager.CustomLocation[2] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[2] as String)
 		AddTextOption(LocationManager.CustomLocation[3] + " Can Decay:", FameManager.CustomLocationCanDecay[3] as String)
-		AddTextOption(LocationManager.CustomLocation[3] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[3] as String)
+		;AddTextOption(LocationManager.CustomLocation[3] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[3] as String)
 		AddTextOption(LocationManager.CustomLocation[4] + " Can Decay:", FameManager.CustomLocationCanDecay[4] as String)
-		AddTextOption(LocationManager.CustomLocation[4] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[4] as String)
+		;AddTextOption(LocationManager.CustomLocation[4] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[4] as String)
 		AddTextOption(LocationManager.CustomLocation[5] + " Can Decay:", FameManager.CustomLocationCanDecay[5] as String)
-		AddTextOption(LocationManager.CustomLocation[5] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[5] as String)
+		;AddTextOption(LocationManager.CustomLocation[5] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[5] as String)
 		AddTextOption(LocationManager.CustomLocation[6] + " Can Decay:", FameManager.CustomLocationCanDecay[6] as String)
-		AddTextOption(LocationManager.CustomLocation[6] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[6] as String)
+		;AddTextOption(LocationManager.CustomLocation[6] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[6] as String)
 		AddTextOption(LocationManager.CustomLocation[7] + " Can Decay:", FameManager.CustomLocationCanDecay[7] as String)
-		AddTextOption(LocationManager.CustomLocation[7] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[7] as String)
+		;AddTextOption(LocationManager.CustomLocation[7] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[7] as String)
 		AddTextOption(LocationManager.CustomLocation[8] + " Can Decay:", FameManager.CustomLocationCanDecay[8] as String)
-		AddTextOption(LocationManager.CustomLocation[8] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[8] as String)
+		;AddTextOption(LocationManager.CustomLocation[8] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[8] as String)
 		AddTextOption(LocationManager.CustomLocation[9] + " Can Decay:", FameManager.CustomLocationCanDecay[9] as String)
-		AddTextOption(LocationManager.CustomLocation[9] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[9] as String)
+		;AddTextOption(LocationManager.CustomLocation[9] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[9] as String)
 		AddTextOption(LocationManager.CustomLocation[10] + " Can Decay:", FameManager.CustomLocationCanDecay[10] as String)
-		AddTextOption(LocationManager.CustomLocation[10] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[10] as String)
+		;AddTextOption(LocationManager.CustomLocation[10] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[10] as String)
 		AddTextOption(LocationManager.CustomLocation[11] + " Can Decay:", FameManager.CustomLocationCanDecay[11] as String)
-		AddTextOption(LocationManager.CustomLocation[11] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[11] as String)
+		;AddTextOption(LocationManager.CustomLocation[11] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[11] as String)
 		AddTextOption(LocationManager.CustomLocation[12] + " Can Decay:", FameManager.CustomLocationCanDecay[12] as String)
-		AddTextOption(LocationManager.CustomLocation[12] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[12] as String)
+		;AddTextOption(LocationManager.CustomLocation[12] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[12] as String)
 		AddTextOption(LocationManager.CustomLocation[13] + " Can Decay:", FameManager.CustomLocationCanDecay[13] as String)
-		AddTextOption(LocationManager.CustomLocation[13] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[13] as String)
+		;AddTextOption(LocationManager.CustomLocation[13] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[13] as String)
 		AddTextOption(LocationManager.CustomLocation[14] + " Can Decay:", FameManager.CustomLocationCanDecay[14] as String)
-		AddTextOption(LocationManager.CustomLocation[14] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[14] as String)
+		;AddTextOption(LocationManager.CustomLocation[14] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[14] as String)
 		AddTextOption(LocationManager.CustomLocation[15] + " Can Decay:", FameManager.CustomLocationCanDecay[15] as String)
-		AddTextOption(LocationManager.CustomLocation[15] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[15] as String)
+		;AddTextOption(LocationManager.CustomLocation[15] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[15] as String)
 		AddTextOption(LocationManager.CustomLocation[16] + " Can Decay:", FameManager.CustomLocationCanDecay[16] as String)
-		AddTextOption(LocationManager.CustomLocation[16] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[16] as String)
+		;AddTextOption(LocationManager.CustomLocation[16] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[16] as String)
 		AddTextOption(LocationManager.CustomLocation[17] + " Can Decay:", FameManager.CustomLocationCanDecay[17] as String)
-		AddTextOption(LocationManager.CustomLocation[17] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[17] as String)
+		;AddTextOption(LocationManager.CustomLocation[17] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[17] as String)
 		AddTextOption(LocationManager.CustomLocation[18] + " Can Decay:", FameManager.CustomLocationCanDecay[18] as String)
-		AddTextOption(LocationManager.CustomLocation[18] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[18] as String)
+		;AddTextOption(LocationManager.CustomLocation[18] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[18] as String)
 		AddTextOption(LocationManager.CustomLocation[19] + " Can Decay:", FameManager.CustomLocationCanDecay[19] as String)
-		AddTextOption(LocationManager.CustomLocation[19] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[19] as String)
+		;AddTextOption(LocationManager.CustomLocation[19] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[19] as String)
+		AddTextOption(LocationManager.CustomLocation[20] + " Can Decay:", FameManager.CustomLocationCanDecay[20] as String)
+		;AddTextOption(LocationManager.CustomLocation[20] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[20] as String)
 		
-		
-	ElseIf (page == "Beta Info - Spread")
+	ElseIf (page == "Spread Info")
 		AddTextOption("Spread Countdown:", FameManager.SpreadCountdown as String)
 		AddHeaderOption("Default Locations")
 		AddTextOption(LocationManager.DefaultLocation[0] + " Can Spread:", FameManager.DefaultLocationCanSpread[0] as String)
-		AddTextOption(LocationManager.DefaultLocation[0] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[0] as String)
+		;AddTextOption(LocationManager.DefaultLocation[0] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[0] as String)
 		AddTextOption(LocationManager.DefaultLocation[1] + " Can Spread:", FameManager.DefaultLocationCanSpread[1] as String)
-		AddTextOption(LocationManager.DefaultLocation[1] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[1] as String)
+		;AddTextOption(LocationManager.DefaultLocation[1] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[1] as String)
 		AddTextOption(LocationManager.DefaultLocation[2] + " Can Spread:", FameManager.DefaultLocationCanSpread[2] as String)
-		AddTextOption(LocationManager.DefaultLocation[2] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[2] as String)
+		;AddTextOption(LocationManager.DefaultLocation[2] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[2] as String)
 		AddTextOption(LocationManager.DefaultLocation[3] + " Can Spread:", FameManager.DefaultLocationCanSpread[3] as String)
-		AddTextOption(LocationManager.DefaultLocation[3] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[3] as String)
+		;AddTextOption(LocationManager.DefaultLocation[3] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[3] as String)
 		AddTextOption(LocationManager.DefaultLocation[4] + " Can Spread:", FameManager.DefaultLocationCanSpread[4] as String)
-		AddTextOption(LocationManager.DefaultLocation[4] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[4] as String)
+		;AddTextOption(LocationManager.DefaultLocation[4] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[4] as String)
 		AddTextOption(LocationManager.DefaultLocation[5] + " Can Spread:", FameManager.DefaultLocationCanSpread[5] as String)
-		AddTextOption(LocationManager.DefaultLocation[5] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[5] as String)
+		;AddTextOption(LocationManager.DefaultLocation[5] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[5] as String)
 		AddTextOption(LocationManager.DefaultLocation[6] + " Can Spread:", FameManager.DefaultLocationCanSpread[6] as String)
-		AddTextOption(LocationManager.DefaultLocation[6] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[6] as String)
+		;AddTextOption(LocationManager.DefaultLocation[6] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[6] as String)
 		AddTextOption(LocationManager.DefaultLocation[7] + " Can Spread:", FameManager.DefaultLocationCanSpread[7] as String)
-		AddTextOption(LocationManager.DefaultLocation[7] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[7] as String)
+		;AddTextOption(LocationManager.DefaultLocation[7] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[7] as String)
 		AddTextOption(LocationManager.DefaultLocation[8] + " Can Spread:", FameManager.DefaultLocationCanSpread[8] as String)
-		AddTextOption(LocationManager.DefaultLocation[8] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[8] as String)
+		;AddTextOption(LocationManager.DefaultLocation[8] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[8] as String)
 		AddTextOption(LocationManager.DefaultLocation[9] + " Can Spread:", FameManager.DefaultLocationCanSpread[9] as String)
-		AddTextOption(LocationManager.DefaultLocation[9] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[9] as String)
+		;AddTextOption(LocationManager.DefaultLocation[9] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[9] as String)
 		AddTextOption(LocationManager.DefaultLocation[10] + " Can Spread:", FameManager.DefaultLocationCanSpread[10] as String)
-		AddTextOption(LocationManager.DefaultLocation[10] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[10] as String)
+		;AddTextOption(LocationManager.DefaultLocation[10] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[10] as String)
 		AddTextOption(LocationManager.DefaultLocation[11] + " Can Spread:", FameManager.DefaultLocationCanSpread[11] as String)
-		AddTextOption(LocationManager.DefaultLocation[11] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[11] as String)
+		;AddTextOption(LocationManager.DefaultLocation[11] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[11] as String)
 		AddTextOption(LocationManager.DefaultLocation[12] + " Can Spread:", FameManager.DefaultLocationCanSpread[12] as String)
-		AddTextOption(LocationManager.DefaultLocation[12] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[12] as String)
+		;AddTextOption(LocationManager.DefaultLocation[12] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[12] as String)
 		AddTextOption(LocationManager.DefaultLocation[13] + " Can Spread:", FameManager.DefaultLocationCanSpread[13] as String)
-		AddTextOption(LocationManager.DefaultLocation[13] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[13] as String)
+		;AddTextOption(LocationManager.DefaultLocation[13] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[13] as String)
 		AddTextOption(LocationManager.DefaultLocation[14] + " Can Spread:", FameManager.DefaultLocationCanSpread[14] as String)
-		AddTextOption(LocationManager.DefaultLocation[14] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[14] as String)
+		;AddTextOption(LocationManager.DefaultLocation[14] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[14] as String)
 		AddTextOption(LocationManager.DefaultLocation[15] + " Can Spread:", FameManager.DefaultLocationCanSpread[15] as String)
-		AddTextOption(LocationManager.DefaultLocation[15] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[15] as String)
+		;AddTextOption(LocationManager.DefaultLocation[15] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[15] as String)
 		AddTextOption(LocationManager.DefaultLocation[16] + " Can Spread:", FameManager.DefaultLocationCanSpread[16] as String)
-		AddTextOption(LocationManager.DefaultLocation[16] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[16] as String)
+		;AddTextOption(LocationManager.DefaultLocation[16] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[16] as String)
 		AddTextOption(LocationManager.DefaultLocation[17] + " Can Spread:", FameManager.DefaultLocationCanSpread[17] as String)
-		AddTextOption(LocationManager.DefaultLocation[17] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[17] as String)
+		;AddTextOption(LocationManager.DefaultLocation[17] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[17] as String)
 		AddTextOption(LocationManager.DefaultLocation[18] + " Can Spread:", FameManager.DefaultLocationCanSpread[18] as String)
-		AddTextOption(LocationManager.DefaultLocation[18] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[18] as String)
+		;AddTextOption(LocationManager.DefaultLocation[18] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[18] as String)
 		AddTextOption(LocationManager.DefaultLocation[19] + " Can Spread:", FameManager.DefaultLocationCanSpread[19] as String)
-		AddTextOption(LocationManager.DefaultLocation[19] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[19] as String)
+		;AddTextOption(LocationManager.DefaultLocation[19] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[19] as String)
 		AddTextOption(LocationManager.DefaultLocation[20] + " Can Spread:", FameManager.DefaultLocationCanSpread[20] as String)
-		AddTextOption(LocationManager.DefaultLocation[20] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[20] as String)
+		;AddTextOption(LocationManager.DefaultLocation[20] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[20] as String)
 		
 		SetCursorPosition(5)
 		AddHeaderOption("Custom Locations")
 		AddTextOption(LocationManager.CustomLocation[0] + " Can Spread:", FameManager.CustomLocationCanSpread[0] as String)
-		AddTextOption(LocationManager.CustomLocation[0] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[0] as String)
+		;AddTextOption(LocationManager.CustomLocation[0] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[0] as String)
 		AddTextOption(LocationManager.CustomLocation[1] + " Can Spread:", FameManager.CustomLocationCanSpread[1] as String)
-		AddTextOption(LocationManager.CustomLocation[1] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[1] as String)
+		;AddTextOption(LocationManager.CustomLocation[1] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[1] as String)
 		AddTextOption(LocationManager.CustomLocation[2] + " Can Spread:", FameManager.CustomLocationCanSpread[2] as String)
-		AddTextOption(LocationManager.CustomLocation[2] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[2] as String)
+		;AddTextOption(LocationManager.CustomLocation[2] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[2] as String)
 		AddTextOption(LocationManager.CustomLocation[3] + " Can Spread:", FameManager.CustomLocationCanSpread[3] as String)
-		AddTextOption(LocationManager.CustomLocation[3] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[3] as String)
+		;AddTextOption(LocationManager.CustomLocation[3] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[3] as String)
 		AddTextOption(LocationManager.CustomLocation[4] + " Can Spread:", FameManager.CustomLocationCanSpread[4] as String)
-		AddTextOption(LocationManager.CustomLocation[4] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[4] as String)
+		;AddTextOption(LocationManager.CustomLocation[4] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[4] as String)
 		AddTextOption(LocationManager.CustomLocation[5] + " Can Spread:", FameManager.CustomLocationCanSpread[5] as String)
-		AddTextOption(LocationManager.CustomLocation[5] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[5] as String)
+		;AddTextOption(LocationManager.CustomLocation[5] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[5] as String)
 		AddTextOption(LocationManager.CustomLocation[6] + " Can Spread:", FameManager.CustomLocationCanSpread[6] as String)
-		AddTextOption(LocationManager.CustomLocation[6] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[6] as String)
+		;AddTextOption(LocationManager.CustomLocation[6] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[6] as String)
 		AddTextOption(LocationManager.CustomLocation[7] + " Can Spread:", FameManager.CustomLocationCanSpread[7] as String)
-		AddTextOption(LocationManager.CustomLocation[7] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[7] as String)
+		;AddTextOption(LocationManager.CustomLocation[7] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[7] as String)
 		AddTextOption(LocationManager.CustomLocation[8] + " Can Spread:", FameManager.CustomLocationCanSpread[8] as String)
-		AddTextOption(LocationManager.CustomLocation[8] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[8] as String)
+		;AddTextOption(LocationManager.CustomLocation[8] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[8] as String)
 		AddTextOption(LocationManager.CustomLocation[9] + " Can Spread:", FameManager.CustomLocationCanSpread[9] as String)
-		AddTextOption(LocationManager.CustomLocation[9] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[9] as String)
+		;AddTextOption(LocationManager.CustomLocation[9] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[9] as String)
 		AddTextOption(LocationManager.CustomLocation[10] + " Can Spread:", FameManager.CustomLocationCanSpread[10] as String)
-		AddTextOption(LocationManager.CustomLocation[10] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[10] as String)
+		;AddTextOption(LocationManager.CustomLocation[10] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[10] as String)
 		AddTextOption(LocationManager.CustomLocation[11] + " Can Spread:", FameManager.CustomLocationCanSpread[11] as String)
-		AddTextOption(LocationManager.CustomLocation[11] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[11] as String)
+		;AddTextOption(LocationManager.CustomLocation[11] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[11] as String)
 		AddTextOption(LocationManager.CustomLocation[12] + " Can Spread:", FameManager.CustomLocationCanSpread[12] as String)
-		AddTextOption(LocationManager.CustomLocation[12] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[12] as String)
+		;AddTextOption(LocationManager.CustomLocation[12] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[12] as String)
 		AddTextOption(LocationManager.CustomLocation[13] + " Can Spread:", FameManager.CustomLocationCanSpread[13] as String)
-		AddTextOption(LocationManager.CustomLocation[13] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[13] as String)
+		;AddTextOption(LocationManager.CustomLocation[13] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[13] as String)
 		AddTextOption(LocationManager.CustomLocation[14] + " Can Spread:", FameManager.CustomLocationCanSpread[14] as String)
-		AddTextOption(LocationManager.CustomLocation[14] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[14] as String)
+		;AddTextOption(LocationManager.CustomLocation[14] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[14] as String)
 		AddTextOption(LocationManager.CustomLocation[15] + " Can Spread:", FameManager.CustomLocationCanSpread[15] as String)
-		AddTextOption(LocationManager.CustomLocation[15] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[15] as String)
+		;AddTextOption(LocationManager.CustomLocation[15] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[15] as String)
 		AddTextOption(LocationManager.CustomLocation[16] + " Can Spread:", FameManager.CustomLocationCanSpread[16] as String)
-		AddTextOption(LocationManager.CustomLocation[16] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[16] as String)
+		;AddTextOption(LocationManager.CustomLocation[16] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[16] as String)
 		AddTextOption(LocationManager.CustomLocation[17] + " Can Spread:", FameManager.CustomLocationCanSpread[17] as String)
-		AddTextOption(LocationManager.CustomLocation[17] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[17] as String)
+		;AddTextOption(LocationManager.CustomLocation[17] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[17] as String)
 		AddTextOption(LocationManager.CustomLocation[18] + " Can Spread:", FameManager.CustomLocationCanSpread[18] as String)
-		AddTextOption(LocationManager.CustomLocation[18] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[18] as String)
+		;AddTextOption(LocationManager.CustomLocation[18] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[18] as String)
 		AddTextOption(LocationManager.CustomLocation[19] + " Can Spread:", FameManager.CustomLocationCanSpread[19] as String)
-		AddTextOption(LocationManager.CustomLocation[19] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[19] as String)
-	ElseIf (page == "External Mod Events")
-		Debug.MessageBox("IMPORTANT: These options are here to test the mod's external event listeners. They will cause preset actions to happen in SLSF Reloaded. DO NOT SPAM THEM! TEST ONE AT A TIME!")
-		
-		AddHeaderOption("Automated Fame Gain Events")
-		AddToggleOptionST("SLSF_Reloaded_SendFameGainRollState", "Fame Gain Roll", SendFameGainRoll, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendSlutFameGainState", "Slut Fame Gain", SendSlutFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendWhoreFameGainState", "Whore Fame Gain", SendWhoreFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendExhibitionistFameGainState", "Exhibitionist Fame Gain", SendExhibitionistFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendOralFameGainState", "Oral Fame Gain", SendOralFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendAnalFameGainState", "Anal Fame Gain", SendAnalFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendNastyFameGainState", "Nasty Fame Gain", SendNastyFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendPregnantFameGainState", "Pregnant Fame Gain", SendPregnantFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendDominantFameGainState", "Dominant Fame Gain", SendDominantFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendSubmissiveFameGainState", "Submissive Fame Gain", SendSubmissiveFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendSadistFameGainState", "Sadist Fame Gain", SendSadistFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendMasochistFameGainState", "Masochist Fame Gain", SendMasochistFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendGentleFameGainState", "Gentle Fame Gain", SendGentleFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendLikesMenFameGainState", "Likes Men Fame Gain", SendLikesMenFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendLikesWomenFameGainState", "Likes Women Fame Gain", SendLikesWomenFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendLikesOrcFameGainState", "Likes Orc Fame Gain", SendLikesOrcFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendLikesKhajiitFameGainState", "Likes Khajiit Fame Gain", SendLikesKhajiitFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendLikesArgonianFameGainState", "Likes Argonian Fame Gain", SendLikesArgonianFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendBestialityFameGainState", "Bestiality Fame Gain", SendBestialityFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendGroupFameGainState", "Group Fame Gain", SendGroupFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendBoundFameGainState", "Bound Fame Gain", SendBoundFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendTattooFameGainState", "Tattoo Fame Gain", SendTattooFameGain, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendCumDumpFameGainState", "Cum Dump Fame Gain", SendCumDumpFameGain, 0)
-		
-		SetCursorPosition(1)
-		AddHeaderOption("Manual Fame Gain Events")
-		AddToggleOptionST("SLSF_Reloaded_SendManualFameGainState", "Send Manual Fame Gain", SendManualFameGain, 0)
-		AddMenuOptionST("SLSF_Reloaded_SendManualFameGainCategoryState", "Manual Fame Gain Category:", ManualFameGainCategory, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendManualFameGainAllInLocationState", "Send Manual Fame Gain All In Location", SendManualFameGainAllInLocation, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendManualFameGainAllState", "Send Manual Fame Gain ALL", SendManualFameGainAll, 0)
-		
-		AddHeaderOption("Fame Decay Events")
-		AddToggleOptionST("SLSF_Reloaded_SendFameDecayState", "Send Fame Decay", SendFameDecay, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendManualFameDecayState", "Send Manual Fame Decay", SendManualFameDecay, 0)
-		AddMenuOptionST("SLSF_Reloaded_SendManualFameDecayCategoryState", "Manual Fame Decay Category:", ManualFameDecayCategory, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendManualFameDecayAllInLocationState", "Send Manual Fame Decay All In Location", SendManualFameDecayAllInLocation, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendManualFameDecayAllState", "Send Manual Fame Decay ALL", SendManualFameDecayAll, 0)
-		
-		AddHeaderOption("Fame Spread Events")
-		AddToggleOptionST("SLSF_Reloaded_SendFameSpreadRollState", "Send Fame Spread Roll", SendFameSpreadRoll, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendFameSpreadState", "Send Fame Spread", SendFameSpread, 0)
-		AddToggleOptionST("SLSF_Reloaded_SendManualFameSpreadState", "Send Manual Fame Spread", SendManualFameSpread, 0)
-		AddMenuOptionST("SLSF_Reloaded_SendManualFameSpreadCategoryState", "Manual Fame Spread Category:", SpreadFameCategory, 0)
-		AddMenuOptionST("SLSF_Reloaded_SendManualFameSpreadFromState", "Manual Fame Spread FROM:", SendSpreadFromLocation, 0)
-		AddMenuOptionST("SLSF_Reloaded_SendManualFameSpreadToState", "Manual Fame Spread TO:", SendSpreadToLocation, 0)
+		;AddTextOption(LocationManager.CustomLocation[19] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[19] as String)
+		AddTextOption(LocationManager.CustomLocation[20] + " Can Spread:", FameManager.CustomLocationCanSpread[20] as String)
+		;AddTextOption(LocationManager.CustomLocation[20] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[20] as String)
 	EndIf
 EndEvent
 
@@ -874,1184 +858,6 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 		return 0
 	EndIf
 EndFunction
-
-;/
-=====================================
-START DEBUG EXTERNAL EVENTS FUNCTIONS
-=====================================
-/;
-
-Function SendExternalModEventTest(String EventTest)
-	If EventTest == "Fame Gain Roll"
-		Debug.Notification("Fame Gain Roll Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Fame Gain Roll Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendFameGainRoll")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Slut Fame Gain"
-		Debug.Notification("Slut Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Slut Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendSlutFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Whore Fame Gain"
-		Debug.Notification("Whore Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Whore Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendWhoreFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Exhibitionist Fame Gain"
-		Debug.Notification("Exhibitionist Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Exhibitionist Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendExhibitionistFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Oral Fame Gain"
-		Debug.Notification("Oral Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Oral Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendOralFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Anal Fame Gain"
-		Debug.Notification("Anal Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Anal Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendAnalFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Nasty Fame Gain"
-		Debug.Notification("Nasty Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Nasty Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendNastyFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Pregnant Fame Gain"
-		Debug.Notification("Pregnant Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Pregnant Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendPregnantFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Dominant Fame Gain"
-		Debug.Notification("Dominant Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Dominant Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendDominantFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Submissive Fame Gain"
-		Debug.Notification("Submissive Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Submissive Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendSubmissiveFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Sadist Fame Gain"
-		Debug.Notification("Sadist Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Sadist Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendSadistFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Masochist Fame Gain"
-		Debug.Notification("Masochist Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Masochist Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendMasochistFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Gentle Fame Gain"
-		Debug.Notification("Gentle Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Gentle Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendGentleFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Likes Men Fame Gain"
-		Debug.Notification("Likes Men Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Likes Men Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesMenFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Likes Women Fame Gain"
-		Debug.Notification("Likes Women Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Likes Women Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesWomenFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Likes Orc Fame Gain"
-		Debug.Notification("Likes Orc Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Likes Orc Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesOrcFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Likes Khajiit Fame Gain"
-		Debug.Notification("Likes Khajiit Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Likes Khajiit Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesKhajiitFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Likes Argonian Fame Gain"
-		Debug.Notification("Likes Argonian Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Likes Argonian Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendLikesArgonianFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Bestiality Fame Gain"
-		Debug.Notification("Bestiality Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Bestiality Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendBestialityFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Group Fame Gain"
-		Debug.Notification("Group Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Group Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendGroupFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Bound Fame Gain"
-		Debug.Notification("Bound Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Bound Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendBoundFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Tattoo Fame Gain"
-		Debug.Notification("Tattoo Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Tattoo Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendTattooFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Cum Dump Fame Gain"
-		Debug.Notification("Cum Dump Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Cum Dump Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendCumDumpFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 0)
-		ModEvent.PushInt(EventHandle, 150)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Manual Fame Gain"
-		Debug.Notification("Manual Fame Gain Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Manual Fame Gain Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameGain")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushString(EventHandle, ManualFameGainCategory)
-		ModEvent.PushInt(EventHandle, 10)
-		ModEvent.PushInt(EventHandle, 10)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Manual Fame Gain All In Location"
-		Debug.Notification("Manual Fame Gain All In Location Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Manual Fame Gain All In Location Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameGainAllInLocation")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 10)
-		ModEvent.PushInt(EventHandle, 10)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Manual Fame Gain ALL"
-		Debug.Notification("Manual Fame Gain ALL Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Manual Fame Gain ALL Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameGainAll")
-		ModEvent.PushInt(EventHandle, 10)
-		ModEvent.PushInt(EventHandle, 10)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Fame Decay"
-		Debug.Notification("Fame Decay Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Fame Decay Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendFameDecay")
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Manual Fame Decay"
-		Debug.Notification("Manual Fame Decay Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Manual Fame Decay Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameDecay")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName()) ;EventLocation
-		ModEvent.PushString(EventHandle, ManualFameDecayCategory) ;Category
-		ModEvent.PushInt(EventHandle, 10) ;MinDecay
-		ModEvent.PushInt(EventHandle, 10)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Manual Fame Decay All In Location"
-		Debug.Notification("Manual Fame Decay All In Location Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Manual Fame Decay All In Location Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameDecayAllInLocation")
-		ModEvent.PushString(EventHandle, LocationManager.CurrentLocationName())
-		ModEvent.PushInt(EventHandle, 10) ;MinDecay
-		ModEvent.PushInt(EventHandle, 10)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Manual Fame Decay ALL"
-		Debug.Notification("Manual Fame Decay ALL Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Manual Fame Decay ALL Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameDecayAll")
-		ModEvent.PushInt(EventHandle, 10) ;MinDecay
-		ModEvent.PushInt(EventHandle, 10)
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Fame Spread Roll"
-		Debug.Notification("Fame Spread Roll Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Fame Spread Roll Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendFameSpreadRoll")
-		ModEvent.Send(EventHandle)
-	ElseIf EventTest == "Manual Fame Spread"
-		Debug.Notification("Manual Fame Spread Event Armed!")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 3...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 2...")
-		Utility.Wait(1.0)
-		Debug.Notification("Event Firing in 1...")
-		Utility.Wait(1.0)
-		Debug.Notification("Manual Fame Spread Event Fired!")
-		
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendManualFameSpread")
-		ModEvent.PushString(EventHandle, SendSpreadFromLocation) ;SpreadFromLocation
-		ModEvent.PushString(EventHandle, SendSpreadToLocation) ;SpreadToLocation
-		ModEvent.PushString(EventHandle, SpreadFameCategory) ;Category
-		ModEvent.PushInt(EventHandle, 30) ;PercentToSpread
-		ModEvent.Send(EventHandle)
-	EndIf
-EndFunction
-
-State SLSF_Reloaded_SendFameGainRollState
-	Event OnSelectST()
-		If SendFameGainRoll == False
-			SendFameGainRoll = True
-		Else
-			SendFameGainRoll = False
-		EndIf
-		
-		If SendFameGainRoll == True
-			Debug.MessageBox("External Fame Gain Roll Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendFameGainRoll == True
-				SendExternalModEventTest("Fame Gain Roll")
-				SendFameGainRoll = False
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendSlutFameGainState
-	Event OnSelectST()
-		If SendSlutFameGain == False
-			SendSlutFameGain = True
-		Else
-			SendSlutFameGain = False
-		EndIf
-		
-		If SendSlutFameGain == True
-			Debug.MessageBox("External Slut Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendSlutFameGain == True
-				SendExternalModEventTest("Slut Fame Gain")
-				SendSlutFameGain = False
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendWhoreFameGainState
-	Event OnSelectST()
-		If SendWhoreFameGain == False
-			SendWhoreFameGain = True
-		Else
-			SendWhoreFameGain = False
-		EndIf
-		
-		If SendWhoreFameGain == True
-			Debug.MessageBox("External Whore Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendWhoreFameGain == True
-				SendExternalModEventTest("Whore Fame Gain")
-				SendWhoreFameGain = False
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendExhibitionistFameGainState
-	Event OnSelectST()
-		If SendExhibitionistFameGain == False
-			SendExhibitionistFameGain = True
-		Else
-			SendExhibitionistFameGain = False
-		EndIf
-		
-		If SendExhibitionistFameGain == True
-			Debug.MessageBox("External Exhibitionist Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendExhibitionistFameGain == True
-				SendExternalModEventTest("Exhibitionist Fame Gain")
-				SendExhibitionistFameGain = False
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendOralFameGainState
-	Event OnSelectST()
-		If SendOralFameGain == False
-			SendOralFameGain = True
-		Else
-			SendOralFameGain = False
-		EndIf
-		
-		If SendOralFameGain == True
-			Debug.MessageBox("External Oral Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendOralFameGain == True
-				SendExternalModEventTest("Oral Fame Gain")
-				SendOralFameGain = False
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendAnalFameGainState
-	Event OnSelectST()
-		If SendAnalFameGain == False
-			SendAnalFameGain = True
-		Else
-			SendAnalFameGain = False
-		EndIf
-		
-		If SendAnalFameGain == True
-			Debug.MessageBox("External Anal Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendAnalFameGain == True
-				SendExternalModEventTest("Anal Fame Gain")
-				SendAnalFameGain = False
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendNastyFameGainState
-	Event OnSelectST()
-		If SendNastyFameGain == False
-			SendNastyFameGain = True
-		Else
-			SendNastyFameGain = False
-		EndIf
-		
-		If SendNastyFameGain == True
-			Debug.MessageBox("External Nasty Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendNastyFameGain == True
-				SendExternalModEventTest("Nasty Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendPregnantFameGainState
-	Event OnSelectST()
-		If SendPregnantFameGain == False
-			SendPregnantFameGain = True
-		Else
-			SendPregnantFameGain = False
-		EndIf
-		
-		If SendPregnantFameGain == True
-			Debug.MessageBox("External Pregnant Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendPregnantFameGain == True
-				SendExternalModEventTest("Pregnant Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendDominantFameGainState
-	Event OnSelectST()
-		If SendDominantFameGain == False
-			SendDominantFameGain = True
-		Else
-			SendDominantFameGain = False
-		EndIf
-		
-		If SendDominantFameGain == True
-			Debug.MessageBox("External Dominant Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendDominantFameGain == True
-				SendExternalModEventTest("Dominant Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendSubmissiveFameGainState
-	Event OnSelectST()
-		If SendSubmissiveFameGain == False
-			SendSubmissiveFameGain = True
-		Else
-			SendSubmissiveFameGain = False
-		EndIf
-		
-		If SendSubmissiveFameGain == True
-			Debug.MessageBox("External Submissive Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendSubmissiveFameGain == True
-				SendExternalModEventTest("Submissive Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendSadistFameGainState
-	Event OnSelectST()
-		If SendSadistFameGain == False
-			SendSadistFameGain = True
-		Else
-			SendSadistFameGain = False
-		EndIf
-		
-		If SendSadistFameGain == True
-			Debug.MessageBox("External Sadist Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendSadistFameGain == True
-				SendExternalModEventTest("Sadist Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendMasochistFameGainState
-	Event OnSelectST()
-		If SendMasochistFameGain == False
-			SendMasochistFameGain = True
-		Else
-			SendMasochistFameGain = False
-		EndIf
-		
-		If SendMasochistFameGain == True
-			Debug.MessageBox("External Masochist Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendMasochistFameGain == True
-				SendExternalModEventTest("Masochist Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendGentleFameGainState
-	Event OnSelectST()
-		If SendGentleFameGain == False
-			SendGentleFameGain = True
-		Else
-			SendGentleFameGain = False
-		EndIf
-		
-		If SendGentleFameGain == True
-			Debug.MessageBox("External Gentle Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendGentleFameGain == True
-				SendExternalModEventTest("Gentle Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendLikesMenFameGainState
-	Event OnSelectST()
-		If SendLikesMenFameGain == False
-			SendLikesMenFameGain = True
-		Else
-			SendLikesMenFameGain = False
-		EndIf
-		
-		If SendLikesMenFameGain == True
-			Debug.MessageBox("External Likes Men Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendLikesMenFameGain == True
-				SendExternalModEventTest("Likes Men Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendLikesWomenFameGainState
-	Event OnSelectST()
-		If SendLikesWomenFameGain == False
-			SendLikesWomenFameGain = True
-		Else
-			SendLikesWomenFameGain = False
-		EndIf
-		
-		If SendLikesWomenFameGain == True
-			Debug.MessageBox("External Likes Women Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendLikesWomenFameGain == True
-				SendExternalModEventTest("Likes Women Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendLikesOrcFameGainState
-	Event OnSelectST()
-		If SendLikesOrcFameGain == False
-			SendLikesOrcFameGain = True
-		Else
-			SendLikesOrcFameGain = False
-		EndIf
-		
-		If SendLikesOrcFameGain == True
-			Debug.MessageBox("External Likes Orc Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendLikesOrcFameGain == True
-				SendExternalModEventTest("Likes Orc Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendLikesKhajiitFameGainState
-	Event OnSelectST()
-		If SendLikesKhajiitFameGain == False
-			SendLikesKhajiitFameGain = True
-		Else
-			SendLikesKhajiitFameGain = False
-		EndIf
-		
-		If SendLikesKhajiitFameGain == True
-			Debug.MessageBox("External Likes Khajiit Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendLikesKhajiitFameGain == True
-				SendExternalModEventTest("Likes Khajiit Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendLikesArgonianFameGainState
-	Event OnSelectST()
-		If SendLikesArgonianFameGain == False
-			SendLikesArgonianFameGain = True
-		Else
-			SendLikesArgonianFameGain = False
-		EndIf
-		
-		If SendLikesArgonianFameGain == True
-			Debug.MessageBox("External Likes Argonian Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendLikesArgonianFameGain == True
-				SendExternalModEventTest("Likes Argonian Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendBestialityFameGainState
-	Event OnSelectST()
-		If SendBestialityFameGain == False
-			SendBestialityFameGain = True
-		Else
-			SendBestialityFameGain = False
-		EndIf
-		
-		If SendBestialityFameGain == True
-			Debug.MessageBox("External Bestiality Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendBestialityFameGain == True
-				SendExternalModEventTest("Bestiality Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendGroupFameGainState
-	Event OnSelectST()
-		If SendGroupFameGain == False
-			SendGroupFameGain = True
-		Else
-			SendGroupFameGain = False
-		EndIf
-		
-		If SendGroupFameGain == True
-			Debug.MessageBox("External Group Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendGroupFameGain == True
-				SendExternalModEventTest("Group Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendBoundFameGainState
-	Event OnSelectST()
-		If SendBoundFameGain == False
-			SendBoundFameGain = True
-		Else
-			SendBoundFameGain = False
-		EndIf
-		
-		If SendBoundFameGain == True
-			Debug.MessageBox("External Bound Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendBoundFameGain == True
-				SendExternalModEventTest("Bound Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendTattooFameGainState
-	Event OnSelectST()
-		If SendTattooFameGain == False
-			SendTattooFameGain = True
-		Else
-			SendTattooFameGain = False
-		EndIf
-		
-		If SendTattooFameGain == True
-			Debug.MessageBox("External Tattoo Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendTattooFameGain == True
-				SendExternalModEventTest("Tattoo Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendCumDumpFameGainState
-	Event OnSelectST()
-		If SendCumDumpFameGain == False
-			SendCumDumpFameGain = True
-		Else
-			SendCumDumpFameGain = False
-		EndIf
-		
-		If SendCumDumpFameGain == True
-			Debug.MessageBox("External Cum Dump Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendCumDumpFameGain == True
-				SendExternalModEventTest("Cum Dump Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameGainState
-	Event OnSelectST()
-		If SendManualFameGain == False
-			SendManualFameGain = True
-		Else
-			SendManualFameGain = False
-		EndIf
-		
-		If SendManualFameGain == True
-			Debug.MessageBox("External Manual Fame Gain Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendManualFameGain == True
-				SendExternalModEventTest("Manual Fame Gain")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameGainCategoryState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		ManualFameGainCategory = FameManager.FameType[AcceptedIndex]
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameGainAllInLocationState
-	Event OnSelectST()
-		If SendManualFameGainAllInLocation == False
-			SendManualFameGainAllInLocation = True
-		Else
-			SendManualFameGainAllInLocation = False
-		EndIf
-		
-		If SendManualFameGainAllInLocation == True
-			Debug.MessageBox("External Manual Fame Gain All In Location Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendManualFameGainAllInLocation == True
-				SendExternalModEventTest("Manual Fame Gain All In Location")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameGainAllState
-	Event OnSelectST()
-		If SendManualFameGainAll == False
-			SendManualFameGainAll = True
-		Else
-			SendManualFameGainAll = False
-		EndIf
-		
-		If SendManualFameGainAll == True
-			Debug.MessageBox("External Manual Fame Gain ALL Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendManualFameGainAll == True
-				SendExternalModEventTest("Manual Fame Gain ALL")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendFameDecayState
-	Event OnSelectST()
-		If SendFameDecay == False
-			SendFameDecay = True
-		Else
-			SendFameDecay = False
-		EndIf
-		
-		If SendFameDecay == True
-			Debug.MessageBox("External Fame Decay Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendFameDecay == True
-				SendExternalModEventTest("Fame Decay")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameDecayState
-	Event OnSelectST()
-		If SendManualFameDecay == False
-			SendManualFameDecay = True
-		Else
-			SendManualFameDecay = False
-		EndIf
-		
-		If SendManualFameDecay == True
-			Debug.MessageBox("External Manual Fame Decay Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendManualFameDecay == True
-				SendExternalModEventTest("Manual Fame Decay")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameDecayCategoryState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		ManualFameGainCategory = FameManager.FameType[AcceptedIndex]
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameDecayAllInLocationState
-	Event OnSelectST()
-		If SendManualFameDecayAllInLocation == False
-			SendManualFameDecayAllInLocation = True
-		Else
-			SendManualFameDecayAllInLocation = False
-		EndIf
-		
-		If SendManualFameDecayAllInLocation == True
-			Debug.MessageBox("External Manual Fame Decay All In Location Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendManualFameDecayAllInLocation == True
-				SendExternalModEventTest("Manual Fame Decay All In Location")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameDecayAllState
-	Event OnSelectST()
-		If SendManualFameDecayAll == False
-			SendManualFameDecayAll = True
-		Else
-			SendManualFameDecayAll = False
-		EndIf
-		
-		If SendManualFameDecayAll == True
-			Debug.MessageBox("External Manual Fame Decay ALL Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendManualFameDecayAll == True
-				SendExternalModEventTest("Manual Fame Decay ALL")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendFameSpreadRollState
-	Event OnSelectST()
-		If SendFameSpreadRoll == False
-			SendFameSpreadRoll = True
-		Else
-			SendFameSpreadRoll = False
-		EndIf
-		
-		If SendFameSpreadRoll == True
-			Debug.MessageBox("External Fame Spread Roll Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendFameSpreadRoll == True
-				SendExternalModEventTest("Fame Spread Roll")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameSpreadState
-	Event OnSelectST()
-		If SendManualFameSpread == False
-			SendManualFameSpread = True
-		Else
-			SendManualFameSpread = False
-		EndIf
-		
-		If SendManualFameSpread == True
-			Debug.MessageBox("External Manual Fame Spread Event is arming! If this is a mistake, you have 10 seconds to turn it off.")
-			Utility.WaitMenuMode(15.0) ;Give the reader 5 seconds to read notification, then 10 extra seconds to turn off event if needed.
-			If SendManualFameSpread == True
-				SendExternalModEventTest("Manual Fame Spread")
-			EndIf
-		EndIf
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameSpreadCategoryState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		ManualFameGainCategory = FameManager.FameType[AcceptedIndex]
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameSpreadFromState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(LocationManager.DefaultLocation)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SendSpreadFromLocation = LocationManager.DefaultLocation[AcceptedIndex]
-		SetMenuOptionValueST(LocationManager.DefaultLocation[AcceptedIndex])
-	EndEvent
-EndState
-
-State SLSF_Reloaded_SendManualFameSpreadToState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(LocationManager.DefaultLocation)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SendSpreadFromLocation = LocationManager.DefaultLocation[AcceptedIndex]
-		SetMenuOptionValueST(LocationManager.DefaultLocation[AcceptedIndex])
-	EndEvent
-EndState
-
-;/
-===================================
-END DEBUG EXTERNAL EVENTS FUNCTIONS
-===================================
-/;
 
 State SLSF_Reloaded_BodySlot1FameState
 	Event OnMenuOpenST()
@@ -2636,6 +1442,30 @@ State SLSF_Reloaded_LocationDetailsState
 	EndEvent
 EndState
 
+State SLSF_Reloaded_SubmissiveDefaultState
+	Event OnSelectST()
+		If SubmissiveDefault == False
+			SubmissiveDefault = True
+		Else
+			SubmissiveDefault = False
+		EndIf
+		SetToggleOptionValueST(SubmissiveDefault, False, "SLSF_Reloaded_SubmissiveDefaultState")
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_DominantDefaultState
+	Event OnSelectST()
+		If DominantDefault == False
+			DominantDefault = True
+		Else
+			DominantDefault = False
+		EndIf
+		SetToggleOptionValueST(DominantDefault, False, "SLSF_Reloaded_DominantDefaultState")
+		ForcePageReset()
+	EndEvent
+EndState
+
 State SLSF_Reloaded_PlayerAnonymousState
 	Event OnSelectST()
 		If AnonymityEnabled == False
@@ -2702,12 +1532,12 @@ State SLSF_Reloaded_MinimumNPCLOSDistanceState
 	
 	Event OnSliderAcceptST(float value)
 		MinimumNPCLOSDistance = value * 32 ;Need to convert to Skyrim Units, which we are doing ins steps of 32, or ~18 inches
-		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_MinimumNPCLOSDistanceState")
+		SetSliderOptionValueST(MinimumNPCLOSDistance, "{0}", False, "SLSF_Reloaded_MinimumNPCLOSDistanceState")
 	EndEvent
 	
 	Event OnDefaultST()
 		MinimumNPCLOSDistance = 160
-		SetSliderOptionValueST(5, "{0}", False, "SLSF_Reloaded_MinimumNPCLOSDistanceState")
+		SetSliderOptionValueST(MinimumNPCLOSDistance, "{0}", False, "SLSF_Reloaded_MinimumNPCLOSDistanceState")
 	EndEvent
 EndState
 
@@ -2822,7 +1652,11 @@ State SLSF_Reloaded_MaximumSpreadCategoriesState
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(MaximumSpreadCategories)
 		SetSliderDialogDefaultValue(5)
-		SetSliderDialogRange(1, 22)
+		If Mods.IsFameCommentsInstalled == False
+			SetSliderDialogRange(1, 24)
+		Else
+			SetSliderDialogRange(1, 22)
+		EndIf
 		SetSliderDialogInterval(1)
 	EndEvent
 	
@@ -2910,6 +1744,17 @@ State SLSF_Reloaded_FameChangeMultiplierState
 	Event OnDefaultST()
 		FameChangeMultiplier = 1
 		SetSliderOptionValueST(1, "{1}", False, "SLSF_Reloaded_FameChangeMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_ForeplayFameState
+	Event OnSelectST()
+		If AllowForeplayFame == False
+			AllowForeplayFame = True
+		Else
+			AllowForeplayFame = False
+		EndIf
+		SetToggleOptionValueST(AllowForeplayFame, False, "SLSF_Reloaded_ForeplayFameState")
 	EndEvent
 EndState
 

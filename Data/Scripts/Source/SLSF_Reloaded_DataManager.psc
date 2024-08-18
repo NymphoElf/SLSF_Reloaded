@@ -45,6 +45,7 @@ Int[] Property CustomLocation17Fame Auto
 Int[] Property CustomLocation18Fame Auto
 Int[] Property CustomLocation19Fame Auto
 Int[] Property CustomLocation20Fame Auto
+Int[] Property CustomLocation21Fame Auto
 
 Bool[] Property ExternalFlags Auto
 
@@ -192,6 +193,8 @@ Int Function GetFameValue(String LocationName, String FameCategory)
 			return CustomLocation19Fame[FameIndex]
 		ElseIf CustomLocationIndex == 19
 			return CustomLocation20Fame[FameIndex]
+		ElseIf CustomLocationIndex == 20
+			return CustomLocation21Fame[FameIndex]
 		Else
 			Debug.MessageBox("SLSF Reloaded - ERROR: Fame Value for " + LocationName + " not found!")
 		EndIf
@@ -286,6 +289,8 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			CustomLocation19Fame[FameIndex] = FameValue
 		ElseIf CustomLocationIndex == 19
 			CustomLocation20Fame[FameIndex] = FameValue
+		ElseIf CustomLocationIndex == 20
+			CustomLocation21Fame[FameIndex] = FameValue
 		Else
 			Debug.MessageBox("SLSF Reloaded - ERROR: Could not set Fame Value for " + LocationName + "!")
 		EndIf

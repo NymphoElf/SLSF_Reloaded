@@ -3,6 +3,7 @@ ScriptName SLSF_Reloaded_NPCScan extends ActiveMagicEffect
 SLSF_Reloaded_FameManager Property FameManager Auto
 SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_MCM Property Config Auto
+SexlabFramework Property Sexlab Auto
 
 Actor Property PlayerRef Auto
 GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
@@ -12,6 +13,14 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 	If LocationManager.CurrentLocation != None
 		CurrentLocation = LocationManager.CurrentLocationName()
 	Else
+		return
+	EndIf
+	
+	If Sexlab.IsActorActive(akTarget) == True
+		return
+	EndIf
+	
+	If LocationManager.IsLocationValid(CurrentLocation) == False
 		return
 	EndIf
 	

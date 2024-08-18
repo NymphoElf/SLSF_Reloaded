@@ -5,8 +5,9 @@ SLSF_Reloaded_FameManager Property FameManager Auto
 Location Property CurrentLocation Auto Hidden
 Location[] Property MajorLocations Auto
 Location[] Property MinorLocations Auto
+Location[] Property CustomLocationRef Auto
 String[] Property DefaultLocation Auto ;Size 21
-String[] Property CustomLocation Auto ;Size 20 | "-EMPTY-" by Default
+String[] Property CustomLocation Auto ;Size 21 | "-EMPTY-" by Default
 
 Bool Property CustomLocationsFull Auto Hidden
 
@@ -122,7 +123,7 @@ Function UpdateCustomLocationCount()
 	
 	SLSF_Reloaded_CustomLocationCount.SetValue(LocationCount)
 	
-	If SLSF_Reloaded_CustomLocationCount.GetValue() == 20
+	If SLSF_Reloaded_CustomLocationCount.GetValue() == CustomLocation.Length
 		CustomLocationsFull = True
 	Else
 		CustomLocationsFull = False
@@ -130,10 +131,17 @@ Function UpdateCustomLocationCount()
 EndFunction
 
 String Function FetchLocationName(Location LocationRef)
+	If LocationRef == None
+		return "-NONE-"
+	EndIf
 	return LocationRef.GetName()
 EndFunction
 
 String Function CurrentLocationName()
+	If CurrentLocation == None
+		return "-NONE-"
+	EndIf
+	
 	String LocationParent = CurrentLocationParent(CurrentLocation)
 	
 	If LocationParent != "Custom" && LocationParent != "Null"
@@ -144,14 +152,24 @@ String Function CurrentLocationName()
 EndFunction
 
 String Function CurrentLocationParent(Location LocationRef)
-	String sLocation = LocationRef.GetName()
-	
-	If CustomLocation.Find(sLocation) >= 0 && CustomLocation.Find(sLocation) < 20
-		return "Custom"
+	If LocationRef == None
+		return "Null"
 	EndIf
 	
+	Int CustomLocationCount = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	Int LocationIndex = 0
-	;Check Minor Locations first, because Major Locations have some Minor Locations as a Child Location as well.
+	
+	;Check Custom Locations First. Minor and Major locations may have a Custom Location as a Child Location as well.
+	While LocationIndex < CustomLocationCount
+		If CustomLocationRef[LocationIndex].IsChild(LocationRef)
+			return CustomLocation[LocationIndex]
+		EndIf
+		LocationIndex += 1
+	EndWhile
+	
+	LocationIndex = 0
+	
+	;Check Minor Locations next, because Major Locations have some Minor Locations as a Child Location as well.
 	While LocationIndex < MinorLocations.Length
 		If MinorLocations[LocationIndex].IsChild(LocationRef)
 			return MinorLocations[LocationIndex].GetName()
@@ -172,26 +190,31 @@ EndFunction
 
 Function RegisterCustomLocation()
 	Debug.Notification("Attempting to register location. Please wait...")
-	Int LocationIndex = 0
-	Bool EmptyIndexFound = False
-	String LocationToRegister = CurrentLocationName()
+	
+	If FetchLocationName(CurrentLocation) == "-NONE-"
+		Debug.MessageBox("SLSF Reloaded - Cannot Register Custom Location. Custom Location is None and therefore invalid.")
+		return
+	EndIf
 	
 	If CustomLocationsFull == True
 		Debug.MessageBox("SLSF Reloaded - Cannot Register Custom Location. Custom Location List is Full.")
 		return
 	EndIf
 	
+	String LocationToRegister = FetchLocationName(CurrentLocation)
+	
 	If LocationCanBeRegistered(LocationToRegister, False) == False
 		return
 	EndIf
 	
-	While LocationIndex < CustomLocation.Length && EmptyIndexFound == False && CustomLocationsFull == False
-		If CustomLocation[LocationIndex] == "-EMPTY-"
-			EmptyIndexFound == True
-			CustomLocation[LocationIndex] = LocationToRegister
-		EndIf
-		LocationIndex += 1
-	EndWhile
+	Int EmptyIndex = CustomLocation.Find("-EMPTY-")
+	
+	If EmptyIndex >= 0 && EmptyIndex < CustomLocation.Length
+		CustomLocation[EmptyIndex] = LocationToRegister
+		CustomLocationRef[EmptyIndex] = CurrentLocation
+	Else
+		return
+	EndIf
 	
 	Debug.Notification("Location " + LocationToRegister + " registered!")
 	
@@ -206,13 +229,19 @@ Function UnregisterCustomLocation(Int LocationIndexToUnregister)
 	FameManager.ClearFame(CustomLocation[LocationIndexToUnregister])
 	
 	CustomLocation[LocationIndexToUnregister] = "-EMPTY-"
+	CustomLocationRef[LocationIndexToUnregister] = None
 	
 	;Compact Custom Location Indexes - Required to keep other functions functional
 	Int LocationIndex = 0
-	While LocationIndex < 19 ;Stop at 19 instead of 20 because we'd check beyond the Array length otherwise
+	Int IndexLimit = (CustomLocation.Length) - 1 ;Stop 1 index below length because we'd check beyond the Array length otherwise
+	
+	While LocationIndex < IndexLimit 
 		If CustomLocation[LocationIndex] == "-EMPTY-" && CustomLocation[LocationIndex + 1] != "-EMPTY-"
 			CustomLocation[LocationIndex] = CustomLocation[LocationIndex + 1]
+			CustomLocationRef[LocationIndex] = CustomLocationRef[LocationIndex + 1]
+			
 			CustomLocation[LocationIndex + 1] = "-EMPTY-"
+			CustomLocationRef[LocationIndex + 1] = None
 		EndIf
 		LocationIndex += 1
 	EndWhile
