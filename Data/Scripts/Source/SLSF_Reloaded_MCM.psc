@@ -6,6 +6,7 @@ SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
+SLSF_Reloaded_CommentManager Property Comments Auto
 
 Bool Property NPCNeedsLOS Auto
 Bool Property ReduceFameAtNight Auto
@@ -52,60 +53,7 @@ String Property UnregisterLocationSelection Auto
 Int Property UnregisterLocationIndex Auto
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
-
-;/
-EXTERNAL MOD EVENT TESTING VARIABLES
-/;
-
-Bool SendFameGainRoll = False
-Bool SendSlutFameGain = False
-Bool SendWhoreFameGain = False
-Bool SendExhibitionistFameGain = False
-Bool SendOralFameGain = False
-Bool SendAnalFameGain = False
-Bool SendNastyFameGain = False
-Bool SendPregnantFameGain = False
-Bool SendDominantFameGain = False
-Bool SendSubmissiveFameGain = False
-Bool SendSadistFameGain = False
-Bool SendMasochistFameGain = False
-Bool SendGentleFameGain = False
-Bool SendLikesMenFameGain = False
-Bool SendLikesWomenFameGain = False
-Bool SendLikesOrcFameGain = False
-Bool SendLikesKhajiitFameGain = False
-Bool SendLikesArgonianFameGain = False
-Bool SendBestialityFameGain = False
-Bool SendGroupFameGain = False
-Bool SendBoundFameGain = False
-Bool SendTattooFameGain = False
-Bool SendCumDumpFameGain = False
-
-Bool SendManualFameGain = False
-Bool SendManualFameGainAllInLocation = False
-Bool SendManualFameGainAll = False
-String ManualFameGainCategory = "NULL"
-
-Bool SendFameDecay = False
-Bool SendManualFameDecay = False
-Bool SendManualFameDecayAllInLocation = False
-Bool SendManualFameDecayAll = False
-String ManualFameDecayCategory = "NULL"
-
-Bool SendFameSpreadRoll = False
-Bool SendFameSpread = False
-Bool SendFameSpreadByName = False
-Bool SendManualFameSpread = False
-String SpreadFameCategory = "NULL"
-String SendSpreadFromLocation = "NULL"
-String SendSpreadToLocation = "NULL"
-
-Bool SendLocationRegister = False
-Bool SendLocationRegisterByName = False
-Bool SendLocationUnregister = False
-Bool SendLocationUnregisterByName = False
-String LocationToRegisterByName = "NULL"
-String LocationToUnregisterByName = "NULL"
+GlobalVariable Property SLSF_Reloaded_CommentFrequency Auto
 
 Event OnConfigInit()
 	Utility.Wait(1.0)
@@ -184,6 +132,8 @@ Function SetDefaults()
 	
 	LocationDetailsSelected = "Whiterun"
 	AllowForeplayFame = True
+	
+	SLSF_Reloaded_CommentFrequency.SetValue(50)
 EndFunction
 
 Function FameOverviewCheck()
@@ -274,13 +224,17 @@ Event OnConfigClose()
 EndEvent
 
 Event OnPageReset(String page)
+	;/
+	LoadCustomContent("SLSF Reloaded/SexlabSexualFameReloadedLogo.dds", 184, 31)
+	If (page == "")
+		;LoadCustomContent("SexlabSexualFameReloadedLogo.dds", 226, -2)
+		return
+	Else
+		UnloadCustomContent()
+	EndIf
+	/;
 	SetCursorFillMode(TOP_TO_BOTTOM)
 	SetCursorPosition(0)
-	If (page == "")
-		;LoadCustomContent("SLSF Reloaded/Sexlab Sexual Fame Reloaded Logo.dds", 226, -2)
-	Else
-		;UnloadCustomContent()
-	EndIf
 	
 	If (page == "Fame Overview")
 		
@@ -424,6 +378,11 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_MinimumFameToSpreadState", "Minimum Category Fame:", MinimumFameToSpread, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadCategoriesState", "Maximum Spread Categories:", MaximumSpreadCategories, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadPercentageState", "Maximum Spread Percentage:", MaximumSpreadPercentage, "{0}%", 0)
+		
+		If Mods.IsFameCommentsInstalled == True
+			AddHeaderOption("Comment Settings")
+			AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance: ", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", 0)
+		EndIf
 	
 	ElseIf (page == "Tattoos")
 		AddHeaderOption("Body Tattoos")
@@ -668,7 +627,7 @@ Event OnPageReset(String page)
 		AddTextOption("Slot 6 Visible:", VisibilityManager.IsFootTattooVisible(5) as String)
 	
 	ElseIf (page == "Decay Info")
-		AddTextOption("Decay Countdown:", FameManager.DecayCountdown as String)
+		AddTextOption("Decay Countdown:", (FameManager.DecayCountdown / 2) as String + " Hours")
 		AddHeaderOption("Default Locations")
 		AddTextOption(LocationManager.DefaultLocation[0] + " Can Decay:", FameManager.DefaultLocationCanDecay[0] as String)
 		;AddTextOption(LocationManager.DefaultLocation[0] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[0] as String)
@@ -713,7 +672,7 @@ Event OnPageReset(String page)
 		AddTextOption(LocationManager.DefaultLocation[20] + " Can Decay:", FameManager.DefaultLocationCanDecay[20] as String)
 		;AddTextOption(LocationManager.DefaultLocation[20] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[20] as String)
 		
-		SetCursorPosition(5)
+		SetCursorPosition(3)
 		AddHeaderOption("Custom Locations")
 		AddTextOption(LocationManager.CustomLocation[0] + " Can Decay:", FameManager.CustomLocationCanDecay[0] as String)
 		;AddTextOption(LocationManager.CustomLocation[0] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[0] as String)
@@ -759,7 +718,7 @@ Event OnPageReset(String page)
 		;AddTextOption(LocationManager.CustomLocation[20] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[20] as String)
 		
 	ElseIf (page == "Spread Info")
-		AddTextOption("Spread Countdown:", FameManager.SpreadCountdown as String)
+		AddTextOption("Spread Countdown:", (FameManager.SpreadCountdown / 2) as String + " Hours")
 		AddHeaderOption("Default Locations")
 		AddTextOption(LocationManager.DefaultLocation[0] + " Can Spread:", FameManager.DefaultLocationCanSpread[0] as String)
 		;AddTextOption(LocationManager.DefaultLocation[0] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[0] as String)
@@ -804,7 +763,7 @@ Event OnPageReset(String page)
 		AddTextOption(LocationManager.DefaultLocation[20] + " Can Spread:", FameManager.DefaultLocationCanSpread[20] as String)
 		;AddTextOption(LocationManager.DefaultLocation[20] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[20] as String)
 		
-		SetCursorPosition(5)
+		SetCursorPosition(3)
 		AddHeaderOption("Custom Locations")
 		AddTextOption(LocationManager.CustomLocation[0] + " Can Spread:", FameManager.CustomLocationCanSpread[0] as String)
 		;AddTextOption(LocationManager.CustomLocation[0] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[0] as String)
@@ -1831,6 +1790,25 @@ State SLSF_Reloaded_FameChanceByLoverState
 	Event OnDefaultST()
 		FameChanceByLover = 25
 		SetSliderOptionValueST(25, "{0}%", False, "SLSF_Reloaded_FameChanceByLoverState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_CommentChanceState
+	Event OnSelectST()
+		SetSliderDialogStartValue(SLSF_Reloaded_CommentFrequency.GetValue() as Int)
+		SetSliderDialogDefaultValue(50)
+		SetSliderDialogRange(0,100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		SLSF_Reloaded_CommentFrequency.SetValue(value)
+		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_CommentChanceState")
+	EndEvent
+	
+	Event OnDefaultST()
+		SLSF_Reloaded_CommentFrequency.SetValue(50)
+		SetSliderOptionValueST(50, "{0}%", False, "SLSF_Reloaded_CommentChanceState")
 	EndEvent
 EndState
 
