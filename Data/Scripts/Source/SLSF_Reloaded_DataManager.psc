@@ -346,9 +346,9 @@ Bool Function GetExternalFlags(String FlagName)
 EndFunction
 
 Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
-	If ExternalMods.Find(ModName) == -1
-		Int EmptyIndex = ExternalMods.Find(None)
-		If EmptyIndex == -1 || EmptyIndex > 127
+	If ExternalMods.Find(ModName) < 0 || ExternalMods.Find(ModName) > 127
+		Int EmptyIndex = ExternalMods.Find("")
+		If EmptyIndex < 0 || EmptyIndex > 127
 			Debug.MessageBox("Cannot Add " + ModName + " to External Mod List. External Mod List full.")
 		Else
 			ExternalMods[EmptyIndex] = ModName

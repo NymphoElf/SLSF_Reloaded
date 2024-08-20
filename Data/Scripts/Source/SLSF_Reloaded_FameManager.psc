@@ -1409,7 +1409,7 @@ Function ClearFame(String LocationToClear)
 		Data.SetFameValue(LocationToClear, FameType[TypeIndex], 0)
 		TypeIndex += 1
 	EndWhile
-	Debug.MessageBox(LocationToClear + " fame has been cleared for " + PlayerScript.NewPlayerName)
+	Debug.MessageBox(LocationToClear + " fame has been cleared.")
 EndFunction
 
 Function ClearAllFame()
@@ -1468,7 +1468,7 @@ EndFunction
 Function UpdateGlobals()
 	String LocationName = LocationManager.CurrentLocationName()
 	
-	If LocationName == "-NONE-"
+	If LocationManager.IsLocationValid(LocationName) == False
 		WhoreGlobal.SetValue(0)
 		SlutGlobal.SetValue(0)
 		ExhibGlobal.SetValue(0)

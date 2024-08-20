@@ -45,6 +45,10 @@ Narzulbur
 /;
 
 Bool Function IsLocationValid(String CheckedLocation)
+	If CheckedLocation == "-NONE-"
+		return False
+	EndIf
+	
 	Int LocationIndex = 0
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	
@@ -144,7 +148,7 @@ String Function CurrentLocationName()
 	
 	String LocationParent = CurrentLocationParent(CurrentLocation)
 	
-	If LocationParent != "Custom" && LocationParent != "Null"
+	If LocationParent != "Null"
 		return LocationParent
 	EndIf
 	
@@ -152,10 +156,6 @@ String Function CurrentLocationName()
 EndFunction
 
 String Function CurrentLocationParent(Location LocationRef)
-	If LocationRef == None
-		return "Null"
-	EndIf
-	
 	Int CustomLocationCount = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	Int LocationIndex = 0
 	
