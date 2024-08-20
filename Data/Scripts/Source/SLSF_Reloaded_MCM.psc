@@ -1794,7 +1794,7 @@ State SLSF_Reloaded_FameChanceByLoverState
 EndState
 
 State SLSF_Reloaded_CommentChanceState
-	Event OnSelectST()
+	Event OnSliderOpenST()
 		SetSliderDialogStartValue(SLSF_Reloaded_CommentFrequency.GetValue() as Int)
 		SetSliderDialogDefaultValue(50)
 		SetSliderDialogRange(0,100)
