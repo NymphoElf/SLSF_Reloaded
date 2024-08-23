@@ -47,9 +47,11 @@ Int[] Property CustomLocation19Fame Auto
 Int[] Property CustomLocation20Fame Auto
 Int[] Property CustomLocation21Fame Auto
 
+Int Property ExternalModArraySize Auto
+
 Bool[] Property ExternalFlags Auto
 
-String[] Property ExternalMods Auto Hidden
+String[] Property ExternalMods Auto
 
 Bool[] Property SlutFlags Auto Hidden
 Bool[] Property WhoreFlags Auto Hidden
@@ -75,7 +77,11 @@ Bool[] Property TattooFlags Auto Hidden
 Bool[] Property CumDumpFlags Auto Hidden
 
 Event OnInit()
-	Utility.ResizeStringArray(ExternalMods, 128)
+	SetDefaults()
+EndEvent
+
+Function SetDefaults()
+	ExternalModArraySize = 1
 	Utility.ResizeBoolArray(SlutFlags, 128)
 	Utility.ResizeBoolArray(Whoreflags, 128)
 	Utility.ResizeBoolArray(ExhibitionistFlags, 128)
@@ -98,7 +104,7 @@ Event OnInit()
 	Utility.ResizeBoolArray(BoundFlags, 128)
 	Utility.ResizeBoolArray(TattooFlags, 128)
 	Utility.ResizeBoolArray(CumDumpFlags, 128)
-EndEvent
+EndFunction
 
 Int Function GetFameValue(String LocationName, String FameCategory)
 	Int CustomLocationIndex = 0
@@ -346,6 +352,24 @@ Bool Function GetExternalFlags(String FlagName)
 EndFunction
 
 Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
+	Int ModIndex = ExternalMods.Find(ModName)
+	
+	If ModIndex < 0 || ModIndex > ExternalMods.Length
+		If ExternalModArraySize == 1 && ExternalMods[0] == "-EMPTY-"
+			ModIndex = 0
+			ExternalMods[0] = ModName
+		ElseIf ExternalModArraySize < 128
+			ExternalModArraySize += 1
+			Utility.ResizeStringArray(ExternalMods, ExternalModArraySize)
+			ModIndex = (ExternalModArraySize - 1)
+			ExternalMods[ModIndex] = ModName
+		Else
+			Debug.MessageBox("Cannot Add " + ModName + " to External Mod List. External Mod List full.")
+			return
+		EndIf
+	EndIf
+	
+	;/
 	If ExternalMods.Find(ModName) < 0 || ExternalMods.Find(ModName) > 127
 		Int EmptyIndex = ExternalMods.Find("")
 		If EmptyIndex < 0 || EmptyIndex > 127
@@ -354,308 +378,189 @@ Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
 			ExternalMods[EmptyIndex] = ModName
 		EndIf
 	EndIf
-	
-	Int ModIndex = ExternalMods.Find(ModName)
+	/;
 	
 	If FlagName == "Whore"
-		WhoreFlags[ModIndex] = FlagValue as Int
+		WhoreFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Slut"
-		SlutFlags[ModIndex] = FlagValue as Int
+		SlutFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Exhibitionist"
-		ExhibitionistFlags[ModIndex] = FlagValue as Int
+		ExhibitionistFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Oral"
-		OralFlags[ModIndex] = FlagValue as Int
+		OralFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Anal"
-		AnalFlags[ModIndex] = FlagValue as Int
+		AnalFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Nasty"
-		NastyFlags[ModIndex] = FlagValue as Int
+		NastyFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Pregnant"
-		PregnantFlags[ModIndex] = FlagValue as Int
+		PregnantFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Dominant"
-		DominantFlags[ModIndex] = FlagValue as Int
+		DominantFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Submissive"
-		SubmissiveFlags[ModIndex] = FlagValue as Int
+		SubmissiveFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Sadist"
-		SadistFlags[ModIndex] = FlagValue as Int
+		SadistFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Masochist"
-		MasochistFlags[ModIndex] = FlagValue as Int
+		MasochistFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Gentle"
-		GentleFlags[ModIndex] = FlagValue as Int
+		GentleFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Likes Men"
-		LikesMenFlags[ModIndex] = FlagValue as Int
+		LikesMenFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Likes Women"
-		LikesWomenFlags[ModIndex] = FlagValue as Int
+		LikesWomenFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Likes Orc"
-		LikesOrcFlags[ModIndex] = FlagValue as Int
+		LikesOrcFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Likes Khajiit"
-		LikesKhajiitFlags[ModIndex] = FlagValue as Int
+		LikesKhajiitFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Likes Argonian"
-		LikesArgonianFlags[ModIndex] = FlagValue as Int
+		LikesArgonianFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Bestiality"
-		BestialityFlags[ModIndex] = FlagValue as Int
+		BestialityFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Group"
-		GroupFlags[ModIndex] = FlagValue as Int
+		GroupFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Bound"
-		BoundFlags[ModIndex] = FlagValue as Int
+		BoundFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Tattoo"
-		TattooFlags[ModIndex] = FlagValue as Int
+		TattooFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Cum Dump"
-		CumDumpFlags[ModIndex] = FlagValue as Int
+		CumDumpFlags[ModIndex] = FlagValue
 	Else
 		Debug.MessageBox("SLSF Reloaded - ERROR: External mod category " + FlagName + " is not valid!")
 	EndIf
 	
-	CountFlags()
+	CheckFlags()
 EndFunction
 
-Function CountFlags()
-	Int CountIndex = 0
-	
-	Int WhoreFlagCount = 0
-	Int SlutFlagCount = 0
-	Int ExhibitionistFlagCount = 0
-	Int OralFlagCount = 0
-	Int AnalFlagCount = 0
-	Int NastyFlagCount = 0
-	Int PregnantFlagCount = 0
-	Int DominantFlagCount = 0
-	Int SubmissiveFlagCount = 0
-	Int SadistFlagCount = 0
-	Int MasochistFlagCount = 0
-	Int GentleFlagCount = 0
-	Int LikesMenFlagCount = 0
-	Int LikesWomenFlagCount = 0
-	Int LikesOrcFlagCount = 0
-	Int LikesKhajiitFlagCount = 0
-	Int LikesArgonianFlagCount = 0
-	Int BestialityFlagCount = 0
-	Int GroupFlagCount = 0
-	Int BoundFlagCount = 0
-	Int TattooFlagCount = 0
-	Int CumDumpFlagCount = 0
-	
-	While CountIndex < 128
-		If WhoreFlags[CountIndex] == True
-			WhoreFlagCount += 1
-		EndIf
-		
-		If SlutFlags[CountIndex] == True
-			SlutFlagCount += 1
-		EndIf
-		
-		If ExhibitionistFlags[CountIndex] == True
-			ExhibitionistFlagCount += 1
-		EndIf
-		
-		If OralFlags[CountIndex] == True
-			OralFlagCount += 1
-		EndIf
-		
-		If AnalFlags[CountIndex] == True
-			AnalFlagCount += 1
-		EndIf
-		
-		If NastyFlags[CountIndex] == True
-			NastyFlagCount += 1
-		EndIf
-		
-		If PregnantFlags[CountIndex] == True
-			PregnantFlagCount += 1
-		EndIf
-		
-		If DominantFlags[CountIndex] == True
-			DominantFlagCount += 1
-		EndIf
-		
-		If SubmissiveFlags[CountIndex] == True
-			SubmissiveFlagCount += 1
-		EndIf
-		
-		If SadistFlags[CountIndex] == True
-			SadistFlagCount += 1
-		EndIf
-		
-		If MasochistFlags[CountIndex] == True
-			MasochistFlagCount += 1
-		EndIf
-		
-		If GentleFlags[CountIndex] == True
-			GentleFlagCount += 1
-		EndIf
-		
-		If LikesMenFlags[CountIndex] == True
-			LikesMenFlagCount += 1
-		EndIf
-		
-		If LikesWomenFlags[CountIndex] == True
-			LikesWomenFlagCount += 1
-		EndIf
-		
-		If LikesOrcFlags[CountIndex] == True
-			LikesOrcFlagCount += 1
-		EndIf
-		
-		If LikesKhajiitFlags[CountIndex] == True
-			LikesKhajiitFlagCount += 1
-		EndIf
-		
-		If LikesArgonianFlags[CountIndex] == True
-			LikesArgonianFlagCount += 1
-		EndIf
-		
-		If BestialityFlags[CountIndex] == True
-			BestialityFlagCount += 1
-		EndIf
-		
-		If GroupFlags[CountIndex] == True
-			GroupFlagCount += 1
-		EndIf
-		
-		If BoundFlags[CountIndex] == True
-			BoundFlagCount += 1
-		EndIf
-		
-		If TattooFlags[CountIndex] == True
-			TattooFlagCount += 1
-		EndIf
-		
-		If CumDumpFlags[CountIndex] == True
-			CumDumpFlagCount += 1
-		EndIf
-		
-		CountIndex += 1
-	EndWhile
-	
-	If WhoreFlagCount > 0
-		ExternalFlags[0] = True
-	Else
+Function CheckFlags()
+	If WhoreFlags.Find(True) < 0 || WhoreFlags.Find(True) > 127
 		ExternalFlags[0] = False
+	Else
+		ExternalFlags[0] = True
 	EndIf
 	
-	If SlutFlagCount > 0
-		ExternalFlags[1] = True
-	Else
+	If SlutFlags.Find(True) < 0 || SlutFlags.Find(True) > 127
 		ExternalFlags[1] = False
+	Else
+		ExternalFlags[1] = True
 	EndIf
 	
-	If ExhibitionistFlagCount > 0
-		ExternalFlags[2] = True
-	Else
+	If ExhibitionistFlags.Find(True) < 0 || ExhibitionistFlags.Find(True) > 127
 		ExternalFlags[2] = False
+	Else
+		ExternalFlags[2] = True
 	EndIf
 	
-	If OralFlagCount > 0
-		ExternalFlags[3] = True
-	Else
+	If OralFlags.Find(True) < 0 || OralFlags.Find(True) > 127
 		ExternalFlags[3] = False
+	Else
+		ExternalFlags[3] = True
 	EndIf
 	
-	If AnalFlagCount > 0
-		ExternalFlags[4] = True
-	Else
+	If AnalFlags.Find(True) < 0 || AnalFlags.Find(True) > 127
 		ExternalFlags[4] = False
+	Else
+		ExternalFlags[4] = True
 	EndIf
 	
-	If NastyFlagCount > 0
-		ExternalFlags[5] = True
-	Else
+	If NastyFlags.Find(True) < 0 || NastyFlags.Find(True) > 127
 		ExternalFlags[5] = False
+	Else
+		ExternalFlags[5] = True
 	EndIf
 	
-	If PregnantFlagCount > 0
-		ExternalFlags[6] = True
-	Else
+	If PregnantFlags.Find(True) < 0 || PregnantFlags.Find(True) > 127
 		ExternalFlags[6] = False
+	Else
+		ExternalFlags[6] = True
 	EndIf
 	
-	If DominantFlagCount > 0
-		ExternalFlags[7] = True
-	Else
+	If DominantFlags.Find(True) < 0 || DominantFlags.Find(True) > 127
 		ExternalFlags[7] = False
+	Else
+		ExternalFlags[7] = True
 	EndIf
 	
-	If SubmissiveFlagCount > 0
-		ExternalFlags[8] = True
-	Else
+	If SubmissiveFlags.Find(True) < 0 || SubmissiveFlags.Find(True) > 127
 		ExternalFlags[8] = False
+	Else
+		ExternalFlags[8] = True
 	EndIf
 	
-	If SadistFlagCount > 0
-		ExternalFlags[9] = True
-	Else
+	If SadistFlags.Find(True) < 0 || SadistFlags.Find(True) > 127
 		ExternalFlags[9] = False
+	Else
+		ExternalFlags[9] = True
 	EndIf
 	
-	If MasochistFlagCount > 0
-		ExternalFlags[10] = True
-	Else
+	If MasochistFlags.Find(True) < 0 || MasochistFlags.Find(True) > 127
 		ExternalFlags[10] = False
+	Else
+		ExternalFlags[10] = True
 	EndIf
 	
-	If GentleFlagCount > 0
-		ExternalFlags[11] = True
-	Else
+	If GentleFlags.Find(True) < 0 || GentleFlags.Find(True) > 127
 		ExternalFlags[11] = False
+	Else
+		ExternalFlags[11] = True
 	EndIf
 	
-	If LikesMenFlagCount > 0
-		ExternalFlags[12] = True
-	Else
+	If LikesMenFlags.Find(True) < 0 || LikesMenFlags.Find(True) > 127
 		ExternalFlags[12] = False
+	Else
+		ExternalFlags[12] = True
 	EndIf
 	
-	If LikesWomenFlagCount > 0
-		ExternalFlags[13] = True
-	Else
+	If LikesWomenFlags.Find(True) < 0 || LikesWomenFlags.Find(True) > 127
 		ExternalFlags[13] = False
+	Else
+		ExternalFlags[13] = True
 	EndIf
 	
-	If LikesOrcFlagCount > 0
-		ExternalFlags[14] = True
-	Else
+	If LikesOrcFlags.Find(True) < 0 || LikesOrcFlags.Find(True) > 127
 		ExternalFlags[14] = False
+	Else
+		ExternalFlags[14] = True
 	EndIf
 	
-	If LikesKhajiitFlagCount > 0
-		ExternalFlags[15] = True
-	Else
+	If LikesKhajiitFlags.Find(True) < 0 || LikesKhajiitFlags.Find(True) > 127
 		ExternalFlags[15] = False
+	Else
+		ExternalFlags[15] = True
 	EndIf
 	
-	If LikesArgonianFlagCount > 0
-		ExternalFlags[16] = True
-	Else
+	If LikesArgonianFlags.Find(True) < 0 || LikesArgonianFlags.Find(True) > 127
 		ExternalFlags[16] = False
+	Else
+		ExternalFlags[16] = True
 	EndIf
 	
-	If BestialityFlagCount > 0
-		ExternalFlags[17] = True
-	Else
+	If BestialityFlags.Find(True) < 0 || BestialityFlags.Find(True) > 127
 		ExternalFlags[17] = False
+	Else
+		ExternalFlags[17] = True
 	EndIf
 	
-	If GroupFlagCount > 0
-		ExternalFlags[18] = True
-	Else
+	If GroupFlags.Find(True) < 0 || GroupFlags.Find(True) > 127
 		ExternalFlags[18] = False
+	Else
+		ExternalFlags[18] = True
 	EndIf
 	
-	If BoundFlagCount > 0
-		ExternalFlags[19] = True
-	Else
+	If BoundFlags.Find(True) < 0 || BoundFlags.Find(True) > 127
 		ExternalFlags[19] = False
+	Else
+		ExternalFlags[19] = True
 	EndIf
 	
-	If TattooFlagCount > 0
-		ExternalFlags[20] = True
-	Else
+	If TattooFlags.Find(True) < 0 || TattooFlags.Find(True) > 127
 		ExternalFlags[20] = False
+	Else
+		ExternalFlags[20] = True
 	EndIf
 	
-	If CumDumpFlagCount > 0
-		ExternalFlags[21] = True
-	Else
+	If CumDumpFlags.Find(True) < 0 || CumDumpFlags.Find(True) > 127
 		ExternalFlags[21] = False
+	Else
+		ExternalFlags[21] = True
 	EndIf
-		
 EndFunction

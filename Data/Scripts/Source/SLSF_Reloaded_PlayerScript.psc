@@ -16,9 +16,6 @@ Race[] Property OrcRace Auto
 Race[] Property KhajiitRace Auto
 Race[] Property ArgonianRace Auto
 
-String Property OldPlayerName Auto Hidden
-String Property NewPlayerName Auto Hidden
-
 GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
 
 Event OnInit()
@@ -39,6 +36,11 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 	EndIf
 	
 	String PlayerLocation = LocationManager.CurrentLocationName()
+	
+	If LocationManager.IsLocationValid(PlayerLocation) == False
+		return
+	EndIf
+	
 	Utility.Wait(15.0) ;Give the player a short time to change the animation if needed before grabbing information about the animation. Tried to account for possible starting lag as well.
 	Bool Foreplay = False
 	
@@ -69,7 +71,11 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 			EndIf
 			
 			If !PlayerController.Animation.HasTag("Aggressive") && !Sexlab.IsVictim(PlayerThread, PlayerRef) && !Sexlab.IsAggressor(PlayerThread, PlayerRef)
-				FameManager.GainFame("Slut", PlayerLocation, Foreplay)
+				If Mods.IsPublicWhore(PlayerRef) == True
+					FameManager.GainFame("Whore", PlayerLocation, Foreplay)
+				Else
+					FameManager.GainFame("Slut", PlayerLocation, Foreplay)
+				EndIf
 			EndIf
 			
 			If PlayerController.Animation.HasTag("Aggressive")
