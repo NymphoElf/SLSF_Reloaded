@@ -35,6 +35,7 @@ Keyword Property SLSF_Reloaded_NipplePiercing Auto
 Keyword Property SLSF_Reloaded_VaginalPiercing Auto
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
+GlobalVariable Property IsVisiblyBound Auto
 
 Actor Property PlayerRef Auto ;= PlayerScript.PlayerRef
 
@@ -88,10 +89,6 @@ GlobalVariable Property CheatGlobal Auto
 GlobalVariable Property CuckGlobal Auto
 
 Bool Property SLSFCFameTypesCleared Auto Hidden
-
-;/
-NOTE TO SELF - UTILIZE ARRAY 'FIND' FUNCTION TO FURTHER OPTIMIZE CODE?
-/;
 
 ;/
 ---Originals---
@@ -574,6 +571,7 @@ EndFunction
 	
 Bool Function CanGainBoundFame()
 	;Check Bound Fame
+	;/ (Old Code)
 	If Mods.IsDDInstalled == True && PlayerRef.WornHasKeyword(Mods.DD_Lockable)
 		ArmorSlots = New Armor[28]
 			ArmorSlots[0] = PlayerRef.GetEquippedArmorInSlot(31)
@@ -637,6 +635,14 @@ Bool Function CanGainBoundFame()
 			SlotIndex += 1
 		EndWhile
 	EndIf
+	/;
+	
+	VisibilityManager.CheckBondage()
+	
+	If IsVisiblyBound.GetValue() == 1
+		return True
+	EndIf
+	
 	return False
 EndFunction
 
@@ -910,6 +916,12 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 	
 	Int FameGained = 0
 	Float FameMultiplier = Config.FameChangeMultiplier
+	
+	If Config.UseGlobalFameMultiplier == False
+		Int TypeIndex = FameType.Find(Category)
+		FameMultiplier = Config.FameCategoryMultiplier[TypeIndex]
+	EndIf
+	
 	Float Hour = (Utility.GetCurrentGameTime() - Math.Floor(Utility.GetCurrentGameTime())) * 24
 	
 	If ((Hour > Config.NightStart || Hour < Config.NightEnd) && Config.ReduceFameAtNight == True) || IsForeplay == True
@@ -990,6 +1002,11 @@ Function DecayFame()
 		If DefaultLocationCanDecay[LocationIndex] == True
 			While TypeIndex < FameType.Length
 				PreviousFame = Data.GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex])
+				
+				If Config.UseGlobalFameMultiplier == False
+					FameMultiplier = Config.FameCategoryMultiplier[TypeIndex]
+				EndIf
+				
 				If PreviousFame > 0
 					If PreviousFame >= 100
 						FameDecay = ((-1 * FameMultiplier) as Int)
@@ -1052,6 +1069,11 @@ Function DecayFame()
 		If CustomLocationCanDecay[LocationIndex] == True
 			While TypeIndex < FameType.Length
 				PreviousFame = Data.GetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex])
+				
+				If Config.UseGlobalFameMultiplier == False
+					FameMultiplier = Config.FameCategoryMultiplier[TypeIndex]
+				EndIf
+				
 				If PreviousFame > 0
 					If PreviousFame >= 100
 						FameDecay = ((-1 * FameMultiplier) as Int)

@@ -78,11 +78,21 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 				EndIf
 			EndIf
 			
-			If PlayerController.Animation.HasTag("Aggressive")
-				If PlayerRef.GetActorBase().GetSex() != 0 || FameManager.CanGainBoundFame() || Config.SubmissiveDefault == True
-					FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
-				ElseIf PlayerRef.GetActorBase().GetSex() == 0 || (PlayerRef.GetActorBase().GetSex() != 0 && Sexlab.IsUsingStrapon(PlayerThread, PlayerRef)) || Config.DominantDefault == True
-					FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
+			If Mods.IsSexlabPlusInstalled == True
+				If PlayerController.IsConsent() == True
+					If PlayerController.GetSubmissive(PlayerRef) == True
+						FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
+					Else
+						FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
+					EndIf
+				EndIf
+			Else
+				If PlayerController.Animation.HasTag("Aggressive")
+					If PlayerSex != 0 || FameManager.CanGainBoundFame() || Config.SubmissiveDefault == True
+						FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
+					ElseIf PlayerSex == 0 || (PlayerRef.GetActorBase().GetSex() != 0 && Sexlab.IsUsingStrapon(PlayerThread, PlayerRef)) || Config.DominantDefault == True
+						FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
+					EndIf
 				EndIf
 			EndIf
 			

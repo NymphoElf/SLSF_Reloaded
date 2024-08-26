@@ -1,5 +1,6 @@
 ScriptName SLSF_Reloaded_ModIntegration extends Quest
 
+Bool Property IsSexlabPlusInstalled Auto Hidden
 Bool Property IsANDInstalled Auto Hidden
 Bool Property IsDDInstalled Auto Hidden
 Bool Property IsECInstalled Auto Hidden
@@ -18,6 +19,10 @@ Keyword Property DD_NipplePiercing Auto Hidden
 Keyword Property DD_VaginalPlug Auto Hidden
 Keyword Property DD_AnalPlug Auto Hidden
 Keyword Property DD_Hood Auto Hidden
+Keyword Property DD_Harness Auto Hidden
+Keyword Property DD_Belt Auto Hidden
+Keyword Property DD_Bra Auto Hidden
+Keyword Property DD_HeavyBondage Auto Hidden
 
 Keyword Property SLS_BikiniArmor Auto Hidden
 
@@ -36,6 +41,12 @@ Faction Property SpiderBreeder Auto Hidden
 Faction Property FertilityFaction Auto Hidden
 
 Function CheckInstalledMods()
+	If SexlabUtil.GetVersion() > 20000
+		IsSexlabPlusInstalled = True
+	Else
+		IsSexlabPlusInstalled = False
+	EndIf
+	
 	If Game.GetModByName("Advanced Nudity Detection.esp") != 255
 		IsANDInstalled = True
 		AND_Nude = Game.GetFormFromFile(0x831, "Advanced Nudity Detection.esp") as Faction
@@ -67,6 +78,9 @@ Function CheckInstalledMods()
 		DD_VaginalPlug = Game.GetFormFromFile(0x0001DD7C, "Devious Devices - Assets.esm") as Keyword
 		DD_AnalPlug = Game.GetFormFromFile(0x0001DD7D, "Devious Devices - Assets.esm") as Keyword
 		DD_Hood = Game.GetFormFromFile(0x0002AFA2, "Devious Devices - Assets.esm") as Keyword
+		DD_Harness = Game.GetFormFromFile(0x00017C43, "Devious Devices - Assets.esm") as Keyword
+		DD_Belt = Game.GetFormFromFile(0x00003330, "Devious Devices - Assets.esm") as Keyword
+		DD_Bra = Game.GetFormFromFile(0x00003DFA, "Devious Devices - Assets.esm") as Keyword
 	Else
 		IsDDInstalled = False
 		DD_Lockable = None
@@ -75,6 +89,16 @@ Function CheckInstalledMods()
 		DD_VaginalPiercing = None
 		DD_VaginalPlug = None
 		DD_AnalPlug = None
+		DD_Hood = None
+		DD_Harness = None
+		DD_Belt = None
+		DD_Bra = None
+	EndIf
+	
+	If Game.GetModByName("Devious Devices - Integration.esm") != 255
+		DD_HeavyBondage = Game.GetFormFromFile(0x0005226C, "Devious Devices - Integration.esm") as Keyword
+	Else
+		DD_HeavyBondage = None
 	EndIf
 	
 	If Game.GetModByName("EstrusChaurus.esp") != 255

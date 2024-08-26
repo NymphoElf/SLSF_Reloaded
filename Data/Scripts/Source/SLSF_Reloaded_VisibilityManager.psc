@@ -31,6 +31,9 @@ Actor Property PlayerRef Auto ; = PlayerScript.PlayerRef
 GlobalVariable Property OralCumGlobal Auto
 GlobalVariable Property AnalCumGlobal Auto
 GlobalVariable Property VaginalCumGlobal Auto
+GlobalVariable Property IsVisiblyBound Auto
+GlobalVariable Property IsHeavilyBound Auto
+GlobalVariable Property IsLightlyBound Auto
 
 Event OnInit()
 	Startup()
@@ -72,6 +75,7 @@ Event OnUpdate()
 	
 	CheckAppliedTattoos()
 	CountVisibleTattoos()
+	CheckBondage()
 EndEvent
 
 Bool Function IsPlayerAnonymous()
@@ -429,4 +433,91 @@ Bool Function IsOralCumVisible()
 	EndIf
 	
 	return False
+EndFunction
+
+Function CheckBondage()
+	If Mods.IsDDInstalled == False
+		If IsVisiblyBound.GetValue() != 0
+			IsVisiblyBound.SetValue(0)
+		EndIf
+		
+		If IsLightlyBound.GetValue() != 0
+			IsLightlyBound.SetValue(0)
+		EndIf
+		
+		If IsHeavilyBound.GetValue() != 0
+			IsHeavilyBound.SetValue(0)
+		EndIf
+		
+		return
+	EndIf
+	
+	Armor BodySlot = PlayerRef.GetEquippedArmorInSlot(32)
+	Armor DD_BraSlot = PlayerRef.GetEquippedArmorInSlot(56)
+	Armor DD_BeltSlot = PlayerRef.GetEquippedArmorInSlot(49)
+	Armor DD_HarnessSlot = PlayerRef.GetEquippedArmorInSlot(58)
+	
+	Bool DD_BraVisible = False
+	Bool DD_BeltVisible = False
+	Bool DD_HarnessVisible = False
+	
+	If PlayerRef.WornHasKeyword(Mods.DD_HeavyBondage)
+		IsLightlyBound.SetValue(0)
+		IsHeavilyBound.SetValue(1)
+		IsVisiblyBound.SetValue(1)
+	ElseIf PlayerRef.WornHasKeyword(Mods.DD_Lockable) && (DD_BraSlot != None || DD_BeltSlot != None || DD_HarnessSlot != None)
+		IsLightlyBound.SetValue(1)
+		IsHeavilyBound.SetValue(0)
+		
+		;Bra Check
+		If DD_BraSlot != None
+			If DD_BraSlot.HasKeyword(Mods.DD_Bra)
+				If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1)
+					DD_BraVisible = True
+				ElseIf BodySlot == None
+					DD_BraVisible = True
+				EndIf
+			EndIf
+		EndIf
+		
+		;Belt Check
+		If DD_BeltSlot != None
+			If DD_BeltSlot.HasKeyword(Mods.DD_Belt)
+				If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1 || PlayerRef.GetFactionRank(Mods.AND_Ass) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1)
+					DD_BeltVisible = True
+				ElseIf BodySlot == None
+					DD_BeltVisible = True
+				EndIf
+			EndIf
+		EndIf
+		
+		;Harness Check
+		If DD_HarnessSlot != None
+			If DD_HarnessSlot.HasKeyword(Mods.DD_Harness)
+				If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1)
+					DD_HarnessVisible = True
+				ElseIf BodySlot == None
+					DD_HarnessVisible = True
+				EndIf
+			EndIf
+		EndIf
+		
+		If DD_BraVisible == True || DD_BeltVisible == True || DD_HarnessVisible == True
+			IsVisiblyBound.SetValue(1)
+		Else
+			IsVisiblyBound.SetValue(0)
+		EndIf
+	ElseIf PlayerRef.WornHasKeyword(Mods.DD_Hood) && Config.AnonymityEnabled == False
+		IsHeavilyBound.SetValue(0)
+		IsLightlyBound.SetValue(1)
+		IsVisiblyBound.SetValue(1)
+	Else
+		IsVisiblyBound.SetValue(0)
+		IsLightlyBound.SetValue(0)
+		IsHeavilyBound.SetValue(0)
+	EndIf
+	
+	If IsPlayerAnonymous() == True
+		IsVisiblyBound.SetValue(0)
+	EndIf
 EndFunction

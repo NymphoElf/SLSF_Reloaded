@@ -213,6 +213,7 @@ Function RegisterCustomLocation()
 		CustomLocation[EmptyIndex] = LocationToRegister
 		CustomLocationRef[EmptyIndex] = CurrentLocation
 	Else
+		Debug.MessageBox("SLSF Reloaded ERROR: Empty Location Index not found despite other checks allowing registration. Location Registration Failed.")
 		return
 	EndIf
 	
@@ -251,7 +252,7 @@ Function UnregisterCustomLocation(Int LocationIndexToUnregister)
 	Debug.Notification("Location " + UnregisteredLocation + " Unregistered.")
 EndFunction
 
-Function RegisterCustomLocationExternal(String LocationToRegister)
+Function RegisterCustomLocationExternal(String LocationToRegister, Location LocationRefToRegister)
 	Debug.Notification("Attempting to register " + LocationToRegister + ". Please wait...")
 	Int LocationIndex = 0
 	Bool EmptyIndexFound = False
@@ -261,13 +262,15 @@ Function RegisterCustomLocationExternal(String LocationToRegister)
 		return
 	EndIf
 	
-	While LocationIndex < CustomLocation.Length && EmptyIndexFound == False && CustomLocationsFull == False
-		If CustomLocation[LocationIndex] == "-EMPTY-"
-			EmptyIndexFound == True
-			CustomLocation[LocationIndex] = LocationToRegister
-		EndIf
-		LocationIndex += 1
-	EndWhile
+	Int EmptyIndex = CustomLocation.Find("-EMPTY-")
+	
+	If EmptyIndex >= 0 && EmptyIndex < CustomLocation.Length
+		CustomLocation[EmptyIndex] = LocationToRegister
+		CustomLocationRef[EmptyIndex] = LocationRefToRegister
+	Else
+		Debug.MessageBox("SLSF Reloaded (External Mod Event) ERROR: Empty Location Index not found despite other checks allowing registration. Location Registration Failed.")
+		return
+	EndIf
 	
 	Debug.Notification("Location " + LocationToRegister + " registered!")
 	

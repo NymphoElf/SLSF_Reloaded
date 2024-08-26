@@ -24,6 +24,7 @@ Bool Property ClearAllFameConfirm Auto
 Bool Property AllowForeplayFame Auto
 Bool Property SubmissiveDefault Auto
 Bool Property DominantDefault Auto
+Bool Property UseGlobalFameMultiplier Auto
 
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
@@ -41,12 +42,13 @@ Float Property FameChanceByEnemy Auto
 Float Property FameChanceByNeutral Auto
 Float Property FameChanceByFriend Auto
 Float Property FameChanceByLover Auto
+Float Property MinimumNPCLOSDistance Auto
+
+Float Property FameChangeMultiplier Auto
+Float[] Property FameCategoryMultiplier Auto
 
 Int[] Property DefaultLocationSpreadChance Auto
 Int[] Property CustomLocationSpreadChance Auto
-
-Float Property FameChangeMultiplier Auto
-Float Property MinimumNPCLOSDistance Auto
 
 String Property LocationDetailsSelected Auto
 String Property UnregisterLocationSelection Auto
@@ -69,15 +71,16 @@ EndEvent
 
 Function InstallMCM()
 	ModName = "SLSF Reloaded"
-	Pages = New String[8]
+	Pages = New String[9]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
-	Pages[2] = "Settings"
-	Pages[3] = "Tattoos"
-	Pages[4] = "Custom Locations"
-	Pages[5] = "General Info"
-	Pages[6] = "Decay Info"
-	Pages[7] = "Spread Info"
+	Pages[2] = "General Settings"
+	Pages[3] = "Fame Gain"
+	Pages[4] = "Tattoos"
+	Pages[5] = "Custom Locations"
+	Pages[6] = "General Info"
+	Pages[7] = "Decay Info"
+	Pages[8] = "Spread Info"
 EndFunction
 
 Function SetDefaults()
@@ -117,7 +120,15 @@ Function SetDefaults()
 	FameChanceByFriend = 50
 	FameChanceByLover = 25
 	
+	UseGlobalFameMultiplier = True
 	FameChangeMultiplier = 1.0
+	
+	Int TypeIndex = 0
+	While TypeIndex < FameCategoryMultiplier.Length
+		FameCategoryMultiplier[TypeIndex] = 1.0
+		TypeIndex += 1
+	EndWhile
+	
 	MinimumNPCLOSDistance = 160.0
 	
 	RegisterLocationTrigger = False
@@ -196,26 +207,65 @@ Int Function PullFameSpreadChance(String LocationName)
 	return -1
 EndFunction
 
+Function CheckClearAllFame()
+	If ClearAllFameConfirm == True
+		Utility.Wait(1.0)
+		Debug.Notification("Clearing All Fame...")
+		FameManager.ClearAllFame()
+	EndIf
+EndFunction
+
+Function CheckLocationRegister()
+	If RegisterLocationConfirm == True
+		Utility.Wait(1.0)
+		Debug.Notification("Attempting Location Registration...")
+		LocationManager.RegisterCustomLocation()
+	EndIf
+EndFunction
+
+Function CheckLocationUnregister()
+	If UnregisterLocationConfirm == True
+		Utility.Wait(1.0)
+		Debug.Notification("Attempting Location Unregistration...")
+		LocationManager.UnregisterCustomLocation(UnregisterLocationIndex)
+	EndIf
+EndFunction
+
 Event OnConfigOpen()
-	Pages = New String[8]
+	Pages = New String[9]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
-	Pages[2] = "Settings"
-	Pages[3] = "Tattoos"
-	Pages[4] = "Custom Locations"
-	Pages[5] = "General Info"
-	Pages[6] = "Decay Info"
-	Pages[7] = "Spread Info"
+	Pages[2] = "General Settings"
+	Pages[3] = "Fame Gain"
+	Pages[4] = "Tattoos"
+	Pages[5] = "Custom Locations"
+	Pages[6] = "General Info"
+	Pages[7] = "Decay Info"
+	Pages[8] = "Spread Info"
+	
 	VisibilityManager.RegisterForSingleUpdate(0.1)
+	
 	If Mods.IsFameCommentsInstalled == False
 		If MaximumSpreadCategories > 22
 			MaximumSpreadCategories = 22
 		EndIf
 	EndIf
+	
+	If Mods.IsSexlabPlusInstalled == True
+		DominantDefault = False
+		SubmissiveDefault = False
+	EndIf
+	
 	FameOverviewCheck()
 EndEvent
 
 Event OnConfigClose()
+	CheckClearAllFame()
+	CheckLocationRegister()
+	CheckLocationUnregister()
+	
+	ClearAllFameTrigger = False
+	ClearAllFameConfirm = False
 	RegisterLocationTrigger = False
 	RegisterLocationConfirm = False
 	UnregisterLocationTrigger = False
@@ -337,26 +387,19 @@ Event OnPageReset(String page)
 			AddTextOption("Cuck Fame:", Data.GetFameValue(LocationDetailsSelected, "Cuck") as String)
 		EndIf
 	
-	ElseIf (page == "Settings")
-		AddHeaderOption("General Settings")
-		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
+	ElseIf (page == "General Settings")
+		AddHeaderOption("NPC Fame Chances")
 		AddToggleOptionST("SLSF_Reloaded_NPCNeedsLOSState", "NPCs Need Line of Sight", NPCNeedsLOS, 0)
 		AddSliderOptionST("SLSF_Reloaded_MinimumNPCLOSDistanceState", "Minimum NPC Distance for LOS:", MinimumNPCLOSDistance as Int, "{0}", GetDisabledOptionFlagIf(NPCNeedsLOS == False))
-		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
-		AddSliderOptionST("SLSF_Reloaded_NightStartState", "Night Starts at:", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
-		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
-		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "Fame Change Multiplier:", FameChangeMultiplier, "{1}", 0)
-		
-		AddHeaderOption("Fame Gain Settings")
-		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame", AllowForeplayFame, 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByEnemyState", "Enemy Fame Chance", FameChanceByEnemy, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "Neutral Fame Chance", FameChanceByNeutral, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "Friend Fame Chance", FameChanceByFriend, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "Lover Fame Chance", FameChanceByLover, "{0}%", 0)
 		
 		AddHeaderOption("Dom/Sub Defaults")
-		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Default to Submissive", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True))
-		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Default to Dominant", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True))
+		AddTextOption("Sexlab P+ Installed:", (Mods.IsSexlabPlusInstalled) as String)
+		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Default to Submissive", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True || Mods.IsSexlabPlusInstalled == True))
+		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Default to Dominant", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True || Mods.IsSexlabPlusInstalled == True))
 		
 		AddHeaderOption("Reset Fame")
 		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "Clear All Fame", ClearAllFameTrigger, 0)
@@ -382,6 +425,43 @@ Event OnPageReset(String page)
 		If Mods.IsFameCommentsInstalled == True
 			AddHeaderOption("Comment Settings")
 			AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance: ", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", 0)
+		EndIf
+	ElseIf (page == "Fame Gain")
+		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
+		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame", AllowForeplayFame, 0)
+		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
+		AddSliderOptionST("SLSF_Reloaded_NightStartState", "Night Starts at:", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
+		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
+		AddToggleOptionST("SLSF_Reloaded_UseGlobalMultiplierState", "Use Global Multiplier", UseGlobalFameMultiplier, 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "Global Fame Multiplier:", FameChangeMultiplier, "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == False))
+		
+		SetCursorPosition(1)
+		AddSliderOptionST("SLSF_Reloaded_WhoreMultiplierState", "Whore Multiplier:", FameCategoryMultiplier[0], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_SlutMultiplierState", "Slut Multiplier:", FameCategoryMultiplier[1], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_ExhibitionistMultiplierState", "Exhibitionist Multiplier:", FameCategoryMultiplier[2], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_OralMultiplierState", "Oral Multiplier:", FameCategoryMultiplier[3], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_AnalMultiplierState", "Anal Multiplier:", FameCategoryMultiplier[4], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_NastyMultiplierState", "Nasty Multiplier:", FameCategoryMultiplier[5], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_PregnantMultiplierState", "Pregnant Multiplier:", FameCategoryMultiplier[6], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_DominantMultiplierState", "Dominant Multiplier:", FameCategoryMultiplier[7], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_SubmissiveMultiplierState", "Submissive Multiplier:", FameCategoryMultiplier[8], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_SadistMultiplierState", "Sadist Multiplier:", FameCategoryMultiplier[9], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_MasochistMultiplierState", "Masochist Multiplier:", FameCategoryMultiplier[10], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_GentleMultiplierState", "Gentle Multiplier:", FameCategoryMultiplier[11], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesMenMultiplierState", "Likes Men Multiplier:", FameCategoryMultiplier[12], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesWomenMultiplierState", "Likes Women Multiplier:", FameCategoryMultiplier[13], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesOrcMultiplierState", "Likes Orc Multiplier:", FameCategoryMultiplier[14], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesKhajiitMultiplierState", "Likes Khajiit Multiplier:", FameCategoryMultiplier[15], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesArgonianMultiplierState", "Likes Argonian Multiplier:", FameCategoryMultiplier[16], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_BestialityMultiplierState", "Bestiality Multiplier:", FameCategoryMultiplier[17], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_GroupMultiplierState", "Group Multiplier:", FameCategoryMultiplier[18], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_BoundMultiplierState", "Bound Multiplier:", FameCategoryMultiplier[19], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_TattooMultiplierState", "Tattoo Multiplier:", FameCategoryMultiplier[20], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_CumDumpMultiplierState", "Cum Dump Multiplier:", FameCategoryMultiplier[21], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		
+		If Mods.IsFameCommentsInstalled == True
+			AddSliderOptionST("SLSF_Reloaded_UnfaithfulMultiplierState", "Unfaithful Multiplier:", FameCategoryMultiplier[22], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+			AddSliderOptionST("SLSF_Reloaded_CuckMultiplierState", "Cuck Multiplier:", FameCategoryMultiplier[23], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		EndIf
 	
 	ElseIf (page == "Tattoos")
@@ -1611,7 +1691,7 @@ State SLSF_Reloaded_MaximumSpreadCategoriesState
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(MaximumSpreadCategories)
 		SetSliderDialogDefaultValue(5)
-		If Mods.IsFameCommentsInstalled == False
+		If Mods.IsFameCommentsInstalled == True
 			SetSliderDialogRange(1, 24)
 		Else
 			SetSliderDialogRange(1, 22)
@@ -1819,7 +1899,7 @@ State SLSF_Reloaded_RegisterLocationState
 		Else
 			RegisterLocationTrigger = False
 		EndIf
-		
+		SetToggleOptionValueST(RegisterLocationTrigger, False, "SLSF_Reloaded_RegisterLocationState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1832,14 +1912,10 @@ State SLSF_Reloaded_RegisterLocationConfirmState
 			RegisterLocationConfirm = False
 		EndIf
 		
-		Utility.WaitMenuMode(3.0)
+		SetToggleOptionValueST(RegisterLocationConfirm, False, "SLSF_Reloaded_RegisterLocationConfirmState")
 		
 		If RegisterLocationConfirm == True
-			Debug.Notification("Attempting Location Registration...")
-			LocationManager.RegisterCustomLocation()
-			RegisterLocationTrigger = False
-			RegisterLocationConfirm = False
-			ForcePageReset()
+			Debug.MessageBox("Please Exit all menus to register this location. If this is a mistake, uncheck the Confirm option.")
 		EndIf
 	EndEvent
 EndState
@@ -1883,7 +1959,7 @@ State SLSF_Reloaded_UnregisterLocationState
 		Else
 			UnregisterLocationTrigger = False
 		EndIf
-		
+		SetToggleOptionValueST(UnregisterLocationTrigger, False, "SLSF_Reloaded_UnregisterLocationState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1896,14 +1972,10 @@ State SLSF_Reloaded_UnregisterLocationConfirmState
 			UnregisterLocationConfirm = False
 		EndIf
 		
-		Utility.WaitMenuMode(3.0)
+		SetToggleOptionValueST(UnregisterLocationConfirm, False, "SLSF_Reloaded_UnregisterLocationConfirmState")
 		
 		If UnregisterLocationConfirm == True
-			Debug.Notification("Attempting Location Unregistration...")
-			LocationManager.UnregisterCustomLocation(UnregisterLocationIndex)
-			UnregisterLocationTrigger = False
-			UnregisterLocationConfirm = False
-			ForcePageReset()
+			Debug.MessageBox("Please Exit all menus to unregister the location. If this is a mistake, uncheck the Confirm option.")
 		EndIf
 	EndEvent
 EndState
@@ -1915,6 +1987,7 @@ State SLSF_Reloaded_ClearAllFameState
 		Else
 			ClearAllFameTrigger = False
 		EndIf
+		SetToggleOptionValueST(ClearAllFameTrigger, False, "SLSF_Reloaded_ClearAllFameState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1927,13 +2000,478 @@ State SLSF_Reloaded_ClearAllFameConfirmState
 			ClearAllFameConfirm = False
 		EndIf
 		
-		Utility.WaitMenuMode(3.0)
+		SetToggleOptionValueST(ClearAllFameConfirm, False, "SLSF_Reloaded_ClearAllFameConfirmState")
 		
 		If ClearAllFameConfirm == True
-			FameManager.ClearAllFame()
-			ClearAllFameConfirm = False
-			ClearAllFameTrigger = False
-			ForcePageReset()
+			Debug.MessageBox("Please Exit all menus to Clear All Fame. If this is a mistake, uncheck the Confirm option.")
 		EndIf
+	EndEvent
+EndState
+
+State SLSF_Reloaded_UseGlobalMultiplierState
+	Event OnSelectST()
+		If UseGlobalFameMultiplier == False
+			UseGlobalFameMultiplier = True
+		Else
+			UseGlobalFameMultiplier = False
+		EndIf
+		SetToggleOptionValueST(UseGlobalFameMultiplier, False, "SLSF_Reloaded_UseGlobalMultiplierState")
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_WhoreMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[0])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[0] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[0], "{1}", False, "SLSF_Reloaded_WhoreMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[0] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[0], "{1}", False, "SLSF_Reloaded_WhoreMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_SlutMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[1])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[1] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[1], "{1}", False, "SLSF_Reloaded_SlutMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[1] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[1], "{1}", False, "SLSF_Reloaded_SlutMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_ExhibitionistMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[2])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[2] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[2], "{1}", False, "SLSF_Reloaded_ExhibitionistMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[2] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[2], "{1}", False, "SLSF_Reloaded_ExhibitionistMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_OralMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[3])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[3] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[3], "{1}", False, "SLSF_Reloaded_OralMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[3] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[3], "{1}", False, "SLSF_Reloaded_OralMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_AnalMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[4])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[4] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[4], "{1}", False, "SLSF_Reloaded_AnalMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[4] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[4], "{1}", False, "SLSF_Reloaded_AnalMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_NastyMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[5])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[5] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[5], "{1}", False, "SLSF_Reloaded_NastyMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[5] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[5], "{1}", False, "SLSF_Reloaded_NastyMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_PregnantMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[6])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[6] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[6], "{1}", False, "SLSF_Reloaded_PregnantMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[6] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[6], "{1}", False, "SLSF_Reloaded_PregnantMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_DominantMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[7])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[7] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[7], "{1}", False, "SLSF_Reloaded_DominantMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[7] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[7], "{1}", False, "SLSF_Reloaded_DominantMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_SubmissiveMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[8])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[8] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[8], "{1}", False, "SLSF_Reloaded_SubmissiveMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[8] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[8], "{1}", False, "SLSF_Reloaded_SubmissiveMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_SadistMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[9])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[9] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[9], "{1}", False, "SLSF_Reloaded_SadistMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[9] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[9], "{1}", False, "SLSF_Reloaded_SadistMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MasochistMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[10])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[10] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[10], "{1}", False, "SLSF_Reloaded_MasochistMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[10] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[10], "{1}", False, "SLSF_Reloaded_MasochistMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_GentleMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[11])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[11] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[11], "{1}", False, "SLSF_Reloaded_GentleMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[11] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[11], "{1}", False, "SLSF_Reloaded_GentleMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_LikesMenMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[12])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[12] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[12], "{1}", False, "SLSF_Reloaded_LikesMenMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[12] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[12], "{1}", False, "SLSF_Reloaded_LikesMenMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_LikesWomenMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[13])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[13] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[13], "{1}", False, "SLSF_Reloaded_LikesWomenMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[13] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[13], "{1}", False, "SLSF_Reloaded_LikesWomenMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_LikesOrcMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[14])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[14] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[14], "{1}", False, "SLSF_Reloaded_LikesOrcMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[14] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[14], "{1}", False, "SLSF_Reloaded_LikesOrcMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_LikesKhajiitMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[15])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[15] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[15], "{1}", False, "SLSF_Reloaded_LikesKhajiitMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[15] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[15], "{1}", False, "SLSF_Reloaded_LikesKhajiitMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_LikesArgonianMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[16])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[16] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[16], "{1}", False, "SLSF_Reloaded_LikesArgonianMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[16] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[16], "{1}", False, "SLSF_Reloaded_LikesArgonianMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_BestialityMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[17])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[17] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[17], "{1}", False, "SLSF_Reloaded_BestialityMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[17] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[17], "{1}", False, "SLSF_Reloaded_BestialityMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_GroupMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[18])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[18] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[18], "{1}", False, "SLSF_Reloaded_GroupMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[18] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[18], "{1}", False, "SLSF_Reloaded_GroupMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_BoundMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[19])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[19] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[19], "{1}", False, "SLSF_Reloaded_BoundMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[19] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[19], "{1}", False, "SLSF_Reloaded_BoundMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_TattooMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[20])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[20] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[20], "{1}", False, "SLSF_Reloaded_TattooMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[20] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[20], "{1}", False, "SLSF_Reloaded_TattooMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_CumDumpMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[21])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[21] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[21], "{1}", False, "SLSF_Reloaded_CumDumpMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[21] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[21], "{1}", False, "SLSF_Reloaded_CumDumpMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_UnfaithfulMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[22])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[22] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[22], "{1}", False, "SLSF_Reloaded_UnfaithfulMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[22] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[22], "{1}", False, "SLSF_Reloaded_UnfaithfulMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_CuckMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[23])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[23] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[23], "{1}", False, "SLSF_Reloaded_CuckMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[23] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[23], "{1}", False, "SLSF_Reloaded_CuckMultiplierState")
 	EndEvent
 EndState

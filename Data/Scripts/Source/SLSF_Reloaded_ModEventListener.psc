@@ -57,9 +57,7 @@ Function RegisterExternalEvents()
 	
 	;LOCATION REGISTRATION LISTENERS
 	RegisterForModEvent("SLSF_Reloaded_SendLocationRegister", "OnExternalLocationRegister")
-	RegisterForModEvent("SLSF_Reloaded_SendLocationRegisterByName", "OnExternalLocationRegisterByName")
 	RegisterForModEvent("SLSF_Reloaded_SendLocationUnregister", "OnExternalLocationUnregister")
-	RegisterForModEvent("SLSF_Reloaded_SendLocationUnregisterByName", "OnExternalLocationUnregisterByName")
 	
 	;FLAG LISTENERS
 	RegisterForModEvent("SLSF_Reloaded_SetSlutFlag", "OnExternalSlutFlag")
@@ -85,7 +83,8 @@ Function RegisterExternalEvents()
 	RegisterForModEvent("SLSF_Reloaded_SetTattooFlag", "OnExternalTattooFlag")
 	RegisterForModEvent("SLSF_Reloaded_SetCumDumpFlag", "OnExternalCumDumpFlag")
 	
-	;DATA LISTENER
+	;DATA LISTENERS
+	RegisterForModEvent("SLSF_Reloaded_RequestLocation", "OnRequestLocation")
 	RegisterForModEvent("SLSF_Reloaded_RequestFame", "OnRequestFame")
 	RegisterForModEvent("SLSF_Reloaded_RequestCumVisibility", "OnRequestCumVisibility")
 EndFunction
@@ -98,24 +97,24 @@ EndFunction
 USE THESE TO PERFORM ONE-TIME FAME INCREASES VIA THE INTERNAL FUNCTIONS. USE THESE CAREFULLY SO FAME DOESN'T SPIRAL OUT OF CONTROL
 
 ==PARAMETERS/ARGUMENTS==
-EventLocation = YOU MUST MANUALLY DEFINE A LOCATION NAME, OTHERWISE THE EVENT WILL FAIL
+EventLocation = YOU MUST MANUALLY DEFINE A LOCATION NAME. THE LOCATION MUST BE VALID OTHERWISE THE EVENT WILL FAIL
 
-MinFame       = YOU MAY MANUALLY DEFINE A MINIMUM FAME VALUE THAT YOUR EVENT NEEDS BEFORE IT STARTS AFFECTING FAME. DEFAULT IS 0
+MinFame       = YOU MUST MANUALLY DEFINE A MINIMUM FAME VALUE THAT YOUR EVENT NEEDS BEFORE IT STARTS AFFECTING FAME.
 
-MaxFame       = YOU MAY MANUALLY DEFINE A MAXIMUM FAME VALUE THAT YOUR EVENT CAN REACH BEFORE IT STOPS AFFECTING FAME. DEFAULT IS 150
+MaxFame       = YOU MUST MANUALLY DEFINE A MAXIMUM FAME VALUE THAT YOUR EVENT CAN REACH BEFORE IT STOPS AFFECTING FAME.
 
 ==HOW TO WRITE YOUR MOD EVENT PROPERLY==
-Example - Sending an event with default variables:
+Example:
 
-Int Handle = ModEvent.Create("SLSF_Reloaded_SendSlutFameGain")
-ModEvent.Send(Handle)
+Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendSlutFameGain") ;This should ALWAYS be the first line for each event
+ModEvent.PushString(EventHandle, "Whiterun") ;Our Location Name
+ModEvent.PushInt(EventHandle, 0) ;The minimum fame the player should have
+ModEvent.PushInt(EventHandle, 100) ;The maximum fame the player is allowed from this event
+ModEvent.Send(EventHandle) ;Sends the data from our "ModEvent.Push" lines. This should ALWAYS be the last line for each event
 
-Example - Sending an event with one or more edited variables:
+If you send multiple mod events in one function, just remove "Int" from the first line of your next mod event:
 
-Int Handle = ModEvent.Create("SLSF_Reloaded_SendSlutFameGain")
-ModEvent.PushString(Handle, "Whiterun")
-ModEvent.PushInt(Handle, 100)
-ModEvent.Send(Handle)
+EventHandle = ModEvent.Create("WhateverModEventYouWant")
 
 NOTE: You MUST send the variables in the correct order in the 'ModEvent.Push' lines:
 Parameter 1 (left-most parameter)
@@ -830,8 +829,7 @@ EndEvent
 THESE EVENTS ALLOW YOU TO MANUALLY REGISTER OR UNREGISTER LOCATIONS VIA MOD EVENT
 PLEASE DO NOT TRY TO INCREASE THE CUSTOM LOCATION ARRAY SIZE!
 TOO MANY LOCATIONS WILL BOG DOWN THE SCRIPT!
-20 CUSTOM LOCATIONS SHOULD BE PLENTY!
-THE INTERNAL FUNCTIONS ASSUME THE CUSTOM LOCATION ARRAY IS LIMITED TO 20!
+21 CUSTOM LOCATIONS SHOULD BE PLENTY!
 /;
 
 ;Pass a Location Form value to this event
@@ -843,20 +841,7 @@ Event OnExternalLocationRegister(Form LocationToRegister)
 	Else
 		String LocationName = LocationManager.FetchLocationName(LocationForm)
 		If LocationManager.LocationCanBeRegistered(LocationName, True) == True
-			LocationManager.RegisterCustomLocationExternal(LocationName)
-		EndIf
-	EndIf
-EndEvent
-
-;Pass a String value to this event. Please be careful! Misspelled locations will successfully register but will be effectively useless.
-;Please use this event responsibly.
-Event OnExternalLocationRegisterByName(String LocationToRegister)
-	If LocationToRegister == "NULL" || LocationToRegister == "-EMPTY-" || LocationToRegister == ""
-		Debug.Trace("SLSF Reloaded - ExternalLocationRegisterByName - Location is NULL.")
-		return
-	Else
-		If LocationManager.LocationCanBeRegistered(LocationToRegister, True) == True
-			LocationManager.RegisterCustomLocationExternal(LocationToRegister)
+			LocationManager.RegisterCustomLocationExternal(LocationName, LocationForm)
 		EndIf
 	EndIf
 EndEvent
@@ -873,25 +858,19 @@ Event OnExternalLocationUnregister(Form LocationToUnregister)
 	EndIf
 EndEvent
 
-Event OnExternalLocationUnregisterByName(String LocationToUnregister)
-	If LocationToUnregister == "NULL" || LocationToUnregister == "-EMPTY-" || LocationToUnregister == ""
-		Debug.Trace("SLSF Reloaded - ExternalLocationUnregisterByName - Location is NULL.")
-		return
-	Else
-		LocationManager.UnregisterCustomLocationExternal(LocationToUnregister)
-	EndIf
-EndEvent
-
 ;/
 ==============================
 ========FLAG LISTENERS========
 ==============================
 These listeners allow you to manually set Fame flags, which will enable the periodic check
 to increase fame based on your mod's internal state.
-In order to prevent conflicts, these flags are held in a json file and filtered by mod name.
-Therefore, you must send the MOD NAME string and the BOOLEAN for that category.
-TRUE means that you want your mod to enable fame gains for that category
-FALSE means you want to disable fame gains for that category (this will NOT overrule this mod's internal conditions, if they apply).
+In order to prevent conflicts, these flags are filtered by mod name.
+Therefore, you must send the NAME of your mod in a string and the BOOLEAN for that category.
+
+TRUE means that you want to enable fame gains for that category from your mod
+
+FALSE means you want to disable fame gains for that category from your mod
+(this will NOT overrule this mod's internal conditions, and if another mod is still enabling fame gains for that category it will remain enabled)
 /;
 
 Event OnExternalSlutFlag(String ModName, Bool Flag)
@@ -986,9 +965,35 @@ EndEvent
 ==============================
 ========DATA LISTENERS========
 ==============================
+
+You can use these events to pull data from SLSF Reloaded without making it a Hard dependency
 /;
 
+Event OnRequestLocation(Bool Strict = False)
+	String LocationToReturn = ""
+	
+	If Strict == False
+		LocationToReturn = LocationManager.CurrentLocationName()
+	Else
+		LocationToReturn = LocationManager.FetchLocationName(LocationManager.CurrentLocation)
+	EndIf
+	
+	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedLocation")
+	ModEvent.PushString(EventHandle, LocationToReturn)
+	ModEvent.Send(EventHandle)
+EndEvent
+
 Event OnRequestFame(String LocationName, String Category)
+	If LocationManager.IsLocationValid(LocationName) == False
+		Debug.Trace("SLSF Reloaded - External Fame Request Location Invalid")
+		return
+	EndIf
+	
+	If FameManager.FameType.Find(Category) < 0 || FameManager.FameType.Find(Category) > FameManager.FameType.Length
+		Debug.Trace("SLSF Reloaded - External Fame Request Category Invalid")
+		return
+	EndIf
+	
 	Int RequestedFame = Data.GetFameValue(LocationName, Category)
 	
 	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedFame")
@@ -1003,27 +1008,21 @@ Event OnRequestCumVisibility(String CumLocation)
 	Bool AnalVisible = VisibilityManager.IsAssCumVisible()
 	Bool VaginalVisible = VisibilityManager.IsVaginalCumVisible()
 	
+	Bool Result = False
+	
 	If CumLocation == "Oral"
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
-		ModEvent.PushBool(EventHandle, OralVisible)
-		ModEvent.Send(EventHandle)
+		Result = OralVisible
 	ElseIf CumLocation == "Anal"
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
-		ModEvent.PushBool(EventHandle, AnalVisible)
-		ModEvent.Send(EventHandle)
+		Result = AnalVisible
 	ElseIf CumLocation == "Vaginal"
-		Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
-		ModEvent.PushBool(EventHandle, VaginalVisible)
-		ModEvent.Send(EventHandle)
+		Result = VaginalVisible
 	ElseIf CumLocation == "Any"
 		If OralVisible == True || AnalVisible == True || VaginalVisible == True
-			Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
-			ModEvent.PushBool(EventHandle, True)
-			ModEvent.Send(EventHandle)
-		Else
-			Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
-			ModEvent.PushBool(EventHandle, False)
-			ModEvent.Send(EventHandle)
+			Result = True
 		EndIf
 	EndIf
+	
+	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
+	ModEvent.PushBool(EventHandle, Result)
+	ModEvent.Send(EventHandle)
 EndEvent
