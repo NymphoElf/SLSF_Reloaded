@@ -890,7 +890,7 @@ State SLSF_Reloaded_MaxTattooSlotsState
 		SetSliderDialogStartValue(TattooSlots)
 		SetSliderDialogDefaultValue(6)
 		SetSliderDialogRange(6, 90)
-		SetSliderDialogInterval(6)
+		SetSliderDialogInterval(1)
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
