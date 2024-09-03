@@ -8,54 +8,61 @@ SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_CommentManager Property Comments Auto
 
-Bool Property NPCNeedsLOS Auto
-Bool Property ReduceFameAtNight Auto
-Bool Property NotifyFameIncrease Auto
-Bool Property NotifyFameDecay Auto
-Bool Property NotifyFameSpread Auto
-Bool Property PlayerIsAnonymous Auto
-Bool Property AnonymityEnabled Auto
-Bool Property RegisterLocationTrigger Auto
-Bool Property RegisterLocationConfirm Auto
-Bool Property UnregisterLocationTrigger Auto
-Bool Property UnregisterLocationConfirm Auto
-Bool Property ClearAllFameTrigger Auto
-Bool Property ClearAllFameConfirm Auto
-Bool Property AllowForeplayFame Auto
-Bool Property SubmissiveDefault Auto
-Bool Property DominantDefault Auto
-Bool Property UseGlobalFameMultiplier Auto
-
+Bool Property NPCNeedsLOS Auto Hidden
+Bool Property ReduceFameAtNight Auto Hidden
+Bool Property NotifyFameIncrease Auto Hidden
+Bool Property NotifyFameDecay Auto Hidden
+Bool Property NotifyFameSpread Auto Hidden
+Bool Property PlayerIsAnonymous Auto Hidden
+Bool Property AnonymityEnabled Auto Hidden
+Bool Property RegisterLocationTrigger Auto Hidden
+Bool Property RegisterLocationConfirm Auto Hidden
+Bool Property UnregisterLocationTrigger Auto Hidden
+Bool Property UnregisterLocationConfirm Auto Hidden
+Bool Property ClearAllFameTrigger Auto Hidden
+Bool Property ClearAllFameConfirm Auto Hidden
+Bool Property AllowForeplayFame Auto Hidden
+Bool Property SubmissiveDefault Auto Hidden
+Bool Property DominantDefault Auto Hidden
+Bool Property UseGlobalFameMultiplier Auto Hidden
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
 
-Float Property NightStart Auto
-Float Property NightEnd Auto
-Float Property FailedSpreadIncrease Auto
-Float Property SuccessfulSpreadReduction Auto
-Float Property MinimumFameToSpread Auto
-Float Property MaximumSpreadCategories Auto
-Float Property MaximumSpreadPercentage Auto
-Float Property DecayTimeNeeded Auto
-Float Property SpreadTimeNeeded Auto
-Float Property FameChanceByEnemy Auto
-Float Property FameChanceByNeutral Auto
-Float Property FameChanceByFriend Auto
-Float Property FameChanceByLover Auto
-Float Property MinimumNPCLOSDistance Auto
-
-Float Property FameChangeMultiplier Auto
+Float Property NightStart Auto Hidden
+Float Property NightEnd Auto Hidden
+Float Property FailedSpreadIncrease Auto Hidden
+Float Property SuccessfulSpreadReduction Auto Hidden
+Float Property MinimumFameToSpread Auto Hidden
+Float Property MaximumSpreadCategories Auto Hidden
+Float Property MaximumSpreadPercentage Auto Hidden
+Float Property DecayTimeNeeded Auto Hidden
+Float Property SpreadTimeNeeded Auto Hidden
+Float Property FameChanceByEnemy Auto Hidden
+Float Property FameChanceByNeutral Auto Hidden
+Float Property FameChanceByFriend Auto Hidden
+Float Property FameChanceByLover Auto Hidden
+Float Property MinimumNPCLOSDistance Auto Hidden
+Float Property FameChangeMultiplier Auto Hidden
 Float[] Property FameCategoryMultiplier Auto
 
+Int Property TattooSlots Auto Hidden
+Int Property BodyTattooIndex Auto Hidden
+Int Property FaceTattooIndex Auto Hidden
+Int Property HandTattooIndex Auto Hidden
+Int Property FootTattooIndex Auto Hidden
 Int[] Property DefaultLocationSpreadChance Auto
 Int[] Property CustomLocationSpreadChance Auto
 
-String Property LocationDetailsSelected Auto
-String Property UnregisterLocationSelection Auto
-Int Property UnregisterLocationIndex Auto
+String Property TattooStatusSelect Auto Hidden
+
+;Registration Variables
+String Property LocationDetailsSelected Auto Hidden
+String Property UnregisterLocationSelection Auto Hidden
+Int Property UnregisterLocationIndex Auto Hidden
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 GlobalVariable Property SLSF_Reloaded_CommentFrequency Auto
+GlobalVariable Property IsVisiblyBound Auto
 
 Event OnConfigInit()
 	Utility.Wait(1.0)
@@ -71,16 +78,17 @@ EndEvent
 
 Function InstallMCM()
 	ModName = "SLSF Reloaded"
-	Pages = New String[9]
+	Pages = New String[10]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
 	Pages[2] = "General Settings"
-	Pages[3] = "Fame Gain"
-	Pages[4] = "Tattoos"
+	Pages[3] = "Fame Settings"
+	Pages[4] = "Tattoo Settings"
 	Pages[5] = "Custom Locations"
 	Pages[6] = "General Info"
-	Pages[7] = "Decay Info"
-	Pages[8] = "Spread Info"
+	Pages[7] = "Tattoo Info"
+	Pages[8] = "Decay Info"
+	Pages[9] = "Spread Info"
 EndFunction
 
 Function SetDefaults()
@@ -91,20 +99,6 @@ Function SetDefaults()
 	NotifyFameSpread = False
 	PlayerIsAnonymous = False
 	AnonymityEnabled = True
-	
-	Int LocationIndex = 0
-	While LocationIndex < LocationManager.DefaultLocation.Length
-		HasFameAtDefaultLocation[LocationIndex] = False
-		DefaultLocationSpreadChance[LocationIndex] = 30
-		LocationIndex += 1
-	EndWhile
-	
-	LocationIndex = 0
-	While LocationIndex < LocationManager.CustomLocation.Length
-		HasFameAtCustomLocation[LocationIndex] = False
-		CustomLocationSpreadChance[LocationIndex] = 30
-		LocationIndex += 1
-	EndWhile
 	
 	NightStart = 22
 	NightEnd = 6
@@ -119,6 +113,12 @@ Function SetDefaults()
 	FameChanceByNeutral = 75
 	FameChanceByFriend = 50
 	FameChanceByLover = 25
+	TattooSlots = 6
+	TattooStatusSelect = "Body"
+	BodyTattooIndex = 0
+	FaceTattooIndex = 0
+	HandTattooIndex = 0
+	FootTattooIndex = 0
 	
 	UseGlobalFameMultiplier = True
 	FameChangeMultiplier = 1.0
@@ -145,55 +145,6 @@ Function SetDefaults()
 	AllowForeplayFame = True
 	
 	SLSF_Reloaded_CommentFrequency.SetValue(50)
-EndFunction
-
-Function FameOverviewCheck()
-	Int LocationIndex = 0
-	Int TypeIndex = 0
-	Bool HasFameInLocation = False
-	While LocationIndex < LocationManager.DefaultLocation.Length
-		Debug.Trace("FameOverviewCheck - Location: " + LocationManager.DefaultLocation[LocationIndex])
-		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
-			Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
-			If Data.GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
-				HasFameInLocation = True
-				HasFameAtDefaultLocation[LocationIndex] = True
-			EndIf
-			TypeIndex += 1
-		EndWhile
-		
-		If HasFameInLocation == False
-			HasFameAtDefaultLocation[LocationIndex] = False
-		EndIf
-		
-		HasFameInLocation = False
-		TypeIndex = 0
-		LocationIndex += 1
-	EndWhile
-	
-	LocationIndex = 0
-	TypeIndex = 0
-	HasFameInLocation = False
-	
-	While LocationIndex < LocationManager.CustomLocation.Length
-		Debug.Trace("FameOverviewCheck - Location: " + LocationManager.CustomLocation[LocationIndex])
-		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
-			Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
-			If Data.GetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
-				HasFameInLocation = True
-				HasFameAtCustomLocation[LocationIndex] = True
-			EndIf
-			TypeIndex += 1
-		EndWhile
-		
-		If HasFameInLocation == False
-			HasFameAtCustomLocation[LocationIndex] = False
-		EndIf
-		
-		HasFameInLocation = False
-		TypeIndex = 0
-		LocationIndex += 1
-	EndWhile
 EndFunction
 
 Int Function PullFameSpreadChance(String LocationName)
@@ -232,16 +183,17 @@ Function CheckLocationUnregister()
 EndFunction
 
 Event OnConfigOpen()
-	Pages = New String[9]
+	Pages = New String[10]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
 	Pages[2] = "General Settings"
-	Pages[3] = "Fame Gain"
-	Pages[4] = "Tattoos"
+	Pages[3] = "Fame Settings"
+	Pages[4] = "Tattoo Settings"
 	Pages[5] = "Custom Locations"
 	Pages[6] = "General Info"
-	Pages[7] = "Decay Info"
-	Pages[8] = "Spread Info"
+	Pages[7] = "Tattoo Info"
+	Pages[8] = "Decay Info"
+	Pages[9] = "Spread Info"
 	
 	VisibilityManager.RegisterForSingleUpdate(0.1)
 	
@@ -255,8 +207,6 @@ Event OnConfigOpen()
 		DominantDefault = False
 		SubmissiveDefault = False
 	EndIf
-	
-	FameOverviewCheck()
 EndEvent
 
 Event OnConfigClose()
@@ -287,7 +237,6 @@ Event OnPageReset(String page)
 	SetCursorPosition(0)
 	
 	If (page == "Fame Overview")
-		
 		AddHeaderOption("Default Locations With Fame")
 		AddTextOption(LocationManager.DefaultLocation[0], HasFameAtDefaultLocation[0] as String)
 		AddTextOption(LocationManager.DefaultLocation[1], HasFameAtDefaultLocation[1] as String)
@@ -334,6 +283,7 @@ Event OnPageReset(String page)
 		AddTextOption(LocationManager.CustomLocation[18], HasFameAtCustomLocation[18] as String)
 		AddTextOption(LocationManager.CustomLocation[19], HasFameAtCustomLocation[19] as String)
 		AddTextOption(LocationManager.CustomLocation[20], HasFameAtCustomLocation[20] as String)
+		
 	ElseIf (page == "Detailed Fame View")
 		AddHeaderOption("Current Location")
 		If LocationManager.CurrentLocation != None
@@ -388,6 +338,30 @@ Event OnPageReset(String page)
 		EndIf
 	
 	ElseIf (page == "General Settings")
+		AddHeaderOption("Dom/Sub Defaults")
+		AddTextOption("Sexlab P+ Installed:", (Mods.IsSexlabPlusInstalled) as String)
+		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Default to Submissive", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True || Mods.IsSexlabPlusInstalled == True))
+		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Default to Dominant", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True || Mods.IsSexlabPlusInstalled == True))
+		
+		If Mods.IsFameCommentsInstalled == True
+			AddHeaderOption("Comment Settings")
+			AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance: ", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", 0)
+		EndIf
+		
+		SetCursorPosition(1)
+		AddHeaderOption("Notification Toggles")
+		AddToggleOptionST("SLSF_Reloaded_NotifyFameIncreaseState", "Notify on Fame Increase", NotifyFameIncrease, 0)
+		AddToggleOptionST("SLSF_Reloaded_NotifyFameDecayState", "Notify on Fame Decay", NotifyFameDecay, 0)
+		AddToggleOptionST("SLSF_Reloaded_NotifyFameSpreadState", "Notify on Fame Spread", NotifyFameSpread, 0)
+		
+	ElseIf (page == "Fame Settings")
+		AddHeaderOption("Fame Gain Settings")
+		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
+		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame", AllowForeplayFame, 0)
+		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
+		AddSliderOptionST("SLSF_Reloaded_NightStartState", "Night Starts at:", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
+		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
+		
 		AddHeaderOption("NPC Fame Chances")
 		AddToggleOptionST("SLSF_Reloaded_NPCNeedsLOSState", "NPCs Need Line of Sight", NPCNeedsLOS, 0)
 		AddSliderOptionST("SLSF_Reloaded_MinimumNPCLOSDistanceState", "Minimum NPC Distance for LOS:", MinimumNPCLOSDistance as Int, "{0}", GetDisabledOptionFlagIf(NPCNeedsLOS == False))
@@ -395,21 +369,6 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "Neutral Fame Chance", FameChanceByNeutral, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "Friend Fame Chance", FameChanceByFriend, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "Lover Fame Chance", FameChanceByLover, "{0}%", 0)
-		
-		AddHeaderOption("Dom/Sub Defaults")
-		AddTextOption("Sexlab P+ Installed:", (Mods.IsSexlabPlusInstalled) as String)
-		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Default to Submissive", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True || Mods.IsSexlabPlusInstalled == True))
-		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Default to Dominant", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True || Mods.IsSexlabPlusInstalled == True))
-		
-		AddHeaderOption("Reset Fame")
-		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "Clear All Fame", ClearAllFameTrigger, 0)
-		AddToggleOptionST("SLSF_Reloaded_ClearAllFameConfirmState", "Confirm Clear All Fame", ClearAllFameConfirm, GetDisabledOptionFlagIf(ClearAllFameTrigger == False))
-		
-		SetCursorPosition(1)
-		AddHeaderOption("Notification Toggles")
-		AddToggleOptionST("SLSF_Reloaded_NotifyFameIncreaseState", "Notify on Fame Increase", NotifyFameIncrease, 0)
-		AddToggleOptionST("SLSF_Reloaded_NotifyFameDecayState", "Notify on Fame Decay", NotifyFameDecay, 0)
-		AddToggleOptionST("SLSF_Reloaded_NotifyFameSpreadState", "Notify on Fame Spread", NotifyFameSpread, 0)
 		
 		AddHeaderOption("Fame Decay Settings")
 		AddSliderOptionST("SLSF_Reloaded_DecayTimeNeededState", "Time Between Decays (Hours):", (DecayTimeNeeded / 2), "{0}", 0)
@@ -422,18 +381,13 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadCategoriesState", "Maximum Spread Categories:", MaximumSpreadCategories, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadPercentageState", "Maximum Spread Percentage:", MaximumSpreadPercentage, "{0}%", 0)
 		
-		If Mods.IsFameCommentsInstalled == True
-			AddHeaderOption("Comment Settings")
-			AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance: ", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", 0)
-		EndIf
-	ElseIf (page == "Fame Gain")
-		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
-		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame", AllowForeplayFame, 0)
-		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
-		AddSliderOptionST("SLSF_Reloaded_NightStartState", "Night Starts at:", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
-		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
+		AddHeaderOption("Multiplier Settings")
 		AddToggleOptionST("SLSF_Reloaded_UseGlobalMultiplierState", "Use Global Multiplier", UseGlobalFameMultiplier, 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "Global Fame Multiplier:", FameChangeMultiplier, "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == False))
+		
+		AddHeaderOption("Reset Fame")
+		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "Clear All Fame", ClearAllFameTrigger, 0)
+		AddToggleOptionST("SLSF_Reloaded_ClearAllFameConfirmState", "Confirm Clear All Fame", ClearAllFameConfirm, GetDisabledOptionFlagIf(ClearAllFameTrigger == False))
 		
 		SetCursorPosition(1)
 		AddSliderOptionST("SLSF_Reloaded_WhoreMultiplierState", "Whore Multiplier:", FameCategoryMultiplier[0], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
@@ -464,50 +418,91 @@ Event OnPageReset(String page)
 			AddSliderOptionST("SLSF_Reloaded_CuckMultiplierState", "Cuck Multiplier:", FameCategoryMultiplier[23], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		EndIf
 	
-	ElseIf (page == "Tattoos")
+	ElseIf (page == "Tattoo Settings")
+		AddHeaderOption("Maximum Tattoo Slots")
+		AddSliderOptionST("SLSF_Reloaded_MaxTattooSlotsState", "Number of Slots", TattooSlots, "{0}", 0)
+		
 		AddHeaderOption("Body Tattoos")
-		AddMenuOptionST("SLSF_Reloaded_BodySlot1FameState", "Slot 1 Fame Type: ", VisibilityManager.BodyTattooExtraFameType[0], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[0] == False))
-		AddMenuOptionST("SLSF_Reloaded_BodySlot1SubcategoryState", "Slot 1 Subcategory: ", VisibilityManager.BodyTattooSubcategory[0], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[0] == False))
+		AddMenuOptionST("SLSF_Reloaded_BodyTattooSlotState", "Body Tattoo Slot", (BodyTattooIndex + 1), 0)
+		AddToggleOptionST("SLSF_Reloaded_ExcludeBodySlotState", "Exclude From Fame", VisibilityManager.BodyTattooExcluded[BodyTattooIndex], 0)
+		If VisibilityManager.BodyTattooApplied[BodyTattooIndex] == True
+			AddTextOption("Slot Used:", "Yes")
+			If VisibilityManager.IsBodyTattooVisible(BodyTattooIndex) == True
+				AddTextOption("Slot Visible:", "Yes")
+			Else
+				AddTextOption("Slot Visible:", "No")
+			EndIf
+		Else
+			If VisibilityManager.BodyTattooExcluded[BodyTattooIndex] == True
+				AddTextOption("Slot Used:", "Excluded")
+			Else
+				AddTextOption("Slot Used:", "No")
+			EndIf
+			AddTextOption("Slot Visible:", "No")
+		EndIf
+		AddMenuOptionST("SLSF_Reloaded_BodySlotFameState", "Extra Fame", VisibilityManager.BodyTattooExtraFameType[BodyTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[BodyTattooIndex] == False))
+		AddMenuOptionST("SLSF_Reloaded_BodySlotSubcategoryState", "Subcategory", VisibilityManager.BodyTattooSubcategory[BodyTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[BodyTattooIndex] == False))
 		
-		AddMenuOptionST("SLSF_Reloaded_BodySlot2FameState", "Slot 2 Fame Type: ", VisibilityManager.BodyTattooExtraFameType[1], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[1] == False))
-		AddMenuOptionST("SLSF_Reloaded_BodySlot2SubcategoryState", "Slot 2 Subcategory: ", VisibilityManager.BodyTattooSubcategory[1], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[1] == False))
-		
-		AddMenuOptionST("SLSF_Reloaded_BodySlot3FameState", "Slot 3 Fame Type: ", VisibilityManager.BodyTattooExtraFameType[2], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[2] == False))
-		AddMenuOptionST("SLSF_Reloaded_BodySlot3SubcategoryState", "Slot 3 Subcategory: ", VisibilityManager.BodyTattooSubcategory[2], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[2] == False))
-		
-		AddMenuOptionST("SLSF_Reloaded_BodySlot4FameState", "Slot 4 Fame Type: ", VisibilityManager.BodyTattooExtraFameType[3], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[3] == False))
-		AddMenuOptionST("SLSF_Reloaded_BodySlot4SubcategoryState", "Slot 4 Subcategory: ", VisibilityManager.BodyTattooSubcategory[3], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[3] == False))
-		
-		AddMenuOptionST("SLSF_Reloaded_BodySlot5FameState", "Slot 5 Fame Type: ", VisibilityManager.BodyTattooExtraFameType[4], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[4] == False))
-		AddMenuOptionST("SLSF_Reloaded_BodySlot5SubcategoryState", "Slot 5 Subcategory: ", VisibilityManager.BodyTattooSubcategory[4], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[4] == False))
-		
-		AddMenuOptionST("SLSF_Reloaded_BodySlot6FameState", "Slot 6 Fame Type: ", VisibilityManager.BodyTattooExtraFameType[5], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[5] == False))
-		AddMenuOptionST("SLSF_Reloaded_BodySlot6SubcategoryState", "Slot 6 Subcategory: ", VisibilityManager.BodyTattooSubcategory[5], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[5] == False))
-		
-		AddHeaderOption("Face Tattoos")
-		AddMenuOptionST("SLSF_Reloaded_FaceSlot1FameState", "Slot 1 Fame Type: ", VisibilityManager.FaceTattooExtraFameType[0], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[0] == False))
-		AddMenuOptionST("SLSF_Reloaded_FaceSlot2FameState", "Slot 2 Fame Type: ", VisibilityManager.FaceTattooExtraFameType[1], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[1] == False))
-		AddMenuOptionST("SLSF_Reloaded_FaceSlot3FameState", "Slot 3 Fame Type: ", VisibilityManager.FaceTattooExtraFameType[2], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[2] == False))
-		AddMenuOptionST("SLSF_Reloaded_FaceSlot4FameState", "Slot 4 Fame Type: ", VisibilityManager.FaceTattooExtraFameType[3], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[3] == False))
-		AddMenuOptionST("SLSF_Reloaded_FaceSlot5FameState", "Slot 5 Fame Type: ", VisibilityManager.FaceTattooExtraFameType[4], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[4] == False))
-		AddMenuOptionST("SLSF_Reloaded_FaceSlot6FameState", "Slot 6 Fame Type: ", VisibilityManager.FaceTattooExtraFameType[5], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[5] == False))
-		
-		SetCursorPosition(1)
 		AddHeaderOption("Hand Tattoos")
-		AddMenuOptionST("SLSF_Reloaded_HandSlot1FameState", "Slot 1 Fame Type: ", VisibilityManager.HandTattooExtraFameType[0], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[0] == False))
-		AddMenuOptionST("SLSF_Reloaded_HandSlot2FameState", "Slot 2 Fame Type: ", VisibilityManager.HandTattooExtraFameType[1], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[1] == False))
-		AddMenuOptionST("SLSF_Reloaded_HandSlot3FameState", "Slot 3 Fame Type: ", VisibilityManager.HandTattooExtraFameType[2], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[2] == False))
-		AddMenuOptionST("SLSF_Reloaded_HandSlot4FameState", "Slot 4 Fame Type: ", VisibilityManager.HandTattooExtraFameType[3], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[3] == False))
-		AddMenuOptionST("SLSF_Reloaded_HandSlot5FameState", "Slot 5 Fame Type: ", VisibilityManager.HandTattooExtraFameType[4], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[4] == False))
-		AddMenuOptionST("SLSF_Reloaded_HandSlot6FameState", "Slot 6 Fame Type: ", VisibilityManager.HandTattooExtraFameType[5], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[5] == False))
+		AddMenuOptionST("SLSF_Reloaded_HandTattooSlotState", "Hand Tattoo Slot", (HandTattooIndex + 1), 0)
+		AddToggleOptionST("SLSF_Reloaded_ExcludeHandSlotState", "Exclude From Fame", VisibilityManager.HandTattooExcluded[HandTattooIndex], 0)
+		If VisibilityManager.HandTattooApplied[HandTattooIndex] == True
+			AddTextOption("Slot Used:", "Yes")
+			If VisibilityManager.IsHandTattooVisible(HandTattooIndex) == True
+				AddTextOption("Slot Visible:", "Yes")
+			Else
+				AddTextOption("Slot Visible:", "No")
+			EndIf
+		Else
+			If VisibilityManager.HandTattooExcluded[HandTattooIndex] == True
+				AddTextOption("Slot Used:", "Excluded")
+			Else
+				AddTextOption("Slot Used:", "No")
+			EndIf
+			AddTextOption("Slot Visible:", "No")
+		EndIf
+		AddMenuOptionST("SLSF_Reloaded_HandSlotFameState", "Extra Fame", VisibilityManager.HandTattooExtraFameType[HandTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[HandTattooIndex] == False))
+		
+		SetCursorPosition(5)
+		AddHeaderOption("Face Tattoos")
+		AddMenuOptionST("SLSF_ReloadedFaceTattoSlotState", "Face Tattoo Slot", (FaceTattooIndex + 1), 0)
+		AddToggleOptionST("SLSF_Reloaded_ExcludeFaceSlotState", "Exclude From Fame", VisibilityManager.FaceTattooExcluded[FaceTattooIndex], 0)
+		If VisibilityManager.FaceTattooApplied[FaceTattooIndex] == True
+			AddTextOption("Slot Used:", "Yes")
+			If VisibilityManager.IsFaceTattooVisible(FaceTattooIndex) == True
+				AddTextOption("Slot Visible:", "Yes")
+			Else
+				AddTextOption("Slot Visible:", "No")
+			EndIf
+		Else
+			If VisibilityManager.FaceTattooExcluded[FaceTattooIndex] == True
+				AddTextOption("Slot Used:", "Excluded")
+			Else
+				AddTextOption("Slot Used:", "No")
+			EndIf
+			AddTextOption("Slot Visible:", "No")
+		EndIf
+		AddMenuOptionST("SLSF_Reloaded_FaceSlotFameState", "Extra Fame", VisibilityManager.FaceTattooExtraFameType[FaceTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[FaceTattooIndex] == False))
 		
 		AddHeaderOption("Foot Tattoos")
-		AddMenuOptionST("SLSF_Reloaded_FootSlot1FameState", "Slot 1 Fame Type: ", VisibilityManager.FootTattooExtraFameType[0], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[0] == False))
-		AddMenuOptionST("SLSF_Reloaded_FootSlot2FameState", "Slot 2 Fame Type: ", VisibilityManager.FootTattooExtraFameType[1], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[1] == False))
-		AddMenuOptionST("SLSF_Reloaded_FootSlot3FameState", "Slot 3 Fame Type: ", VisibilityManager.FootTattooExtraFameType[2], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[2] == False))
-		AddMenuOptionST("SLSF_Reloaded_FootSlot4FameState", "Slot 4 Fame Type: ", VisibilityManager.FootTattooExtraFameType[3], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[3] == False))
-		AddMenuOptionST("SLSF_Reloaded_FootSlot5FameState", "Slot 5 Fame Type: ", VisibilityManager.FootTattooExtraFameType[4], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[4] == False))
-		AddMenuOptionST("SLSF_Reloaded_FootSlot6FameState", "Slot 6 Fame Type: ", VisibilityManager.FootTattooExtraFameType[5], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[5] == False))
+		AddMenuOptionST("SLSF_Reloaded_FootTattooSlotState", "Foot Tattoo Slot", (FootTattooIndex + 1), 0)
+		AddToggleOptionST("SLSF_Reloaded_ExcludeFootSlotState", "Exclude From Fame", VisibilityManager.FootTattooExcluded[FootTattooIndex], 0)
+		If VisibilityManager.FootTattooApplied[FootTattooIndex] == True
+			AddTextOption("Slot Used:", "Yes")
+			If VisibilityManager.IsFootTattooVisible(FootTattooIndex) == True
+				AddTextOption("Slot Visible:", "Yes")
+			Else
+				AddTextOption("Slot Visible:", "No")
+			EndIf
+		Else
+			If VisibilityManager.FootTattooExcluded[FootTattooIndex] == True
+				AddTextOption("Slot Used:", "Excluded")
+			Else
+				AddTextOption("Slot Used:", "No")
+			EndIf
+			AddTextOption("Slot Visible:", "No")
+		EndIf
+		AddMenuOptionST("SLSF_Reloaded_FootSlotFameState", "Extra Fame", VisibilityManager.FootTattooExtraFameType[FootTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[FootTattooIndex] == False))
 		
 	ElseIf (page == "Custom Locations")
 		AddHeaderOption("Register Location")
@@ -617,97 +612,89 @@ Event OnPageReset(String page)
 		AddTextOption("Player is FM Pregnant:", Mods.IsFMPregnant(PlayerScript.PlayerRef) as String)
 		AddTextOption("Player is Public Whore:", Mods.IsPublicWhore(PlayerScript.PlayerRef) as String)
 		AddTextOption("Player's FHU Inflation:", Mods.GetFHUInflation(PlayerScript.PlayerRef) as String)
-		AddTextOption("Total Visible Tattoos:", VisibilityManager.CountVisibleTattoos() as String)
+		AddTextOption("Total Visible Tattoos:", VisibilityManager.VisibleTattoos as String)
+		If IsVisiblyBound.GetValue() == 1
+			AddTextOption("Visibly Bound:", "Yes")
+		Else
+			AddTextOption("Visibly Bound:", "No")
+		EndIf
 		AddHeaderOption("Decay & Spread Timers")
 		AddTextOption("Time Until Decay:", (FameManager.DecayCountdown/2) as Int + " Hours")
 		AddTextOption("Time Until Spread:", (FameManager.SpreadCountdown/2) as Int + " Hours")
+	
+	ElseIf (page == "Tattoo Info")
+		AddHeaderOption("Select Tattoo Area")
+		AddMenuOptionST("SLSF_Reloaded_TattooStatusState", "Tattoo Area:", TattooStatusSelect, 0)
 		
-		SetCursorPosition(22)
-		AddHeaderOption("Body Tattoo Status")
-		AddTextOption("Slot 1 Applied:", VisibilityManager.BodyTattooApplied[0] as String)
-		AddTextOption("Slot 1 Visible:", VisibilityManager.IsBodyTattooVisible(0) as String)
-		AddTextOption("Slot 1 Subcategory:", VisibilityManager.BodyTattooSubcategory[0])
+		AddHeaderOption("Visibility Status")
+		Int TattooIndex = 0
+		Int SlotNumber = 1
+		If TattooStatusSelect == "Body"
+			While TattooIndex < TattooSlots
+				If TattooIndex == (TattooSlots / 2)
+					SetCursorPosition(7)
+				EndIf
+				
+				If VisibilityManager.BodyTattooVisible[TattooIndex] == True
+					AddTextOption("Slot " + SlotNumber, "Yes")
+				Else
+					AddTextOption("Slot " + SlotNumber, "No")
+				EndIf
+				TattooIndex += 1
+				SlotNumber += 1
+			EndWhile
+		EndIf
 		
-		AddTextOption("Slot 2 Applied:", VisibilityManager.BodyTattooApplied[1] as String)
-		AddTextOption("Slot 2 Visible:", VisibilityManager.IsBodyTattooVisible(1) as String)
-		AddTextOption("Slot 2 Subcategory:", VisibilityManager.BodyTattooSubcategory[1])
+		If TattooStatusSelect == "Face"
+			While TattooIndex < TattooSlots
+				If TattooIndex == (TattooSlots / 2)
+					SetCursorPosition(7)
+				EndIf
+				
+				If VisibilityManager.FaceTattooVisible[TattooIndex] == True
+					AddTextOption("Slot " + SlotNumber, "Yes")
+				Else
+					AddTextOption("Slot " + SlotNumber, "No")
+				EndIf
+				TattooIndex += 1
+				SlotNumber += 1
+			EndWhile
+		EndIf
 		
-		AddTextOption("Slot 3 Applied:", VisibilityManager.BodyTattooApplied[2] as String)
-		AddTextOption("Slot 3 Visible:", VisibilityManager.IsBodyTattooVisible(2) as String)
-		AddTextOption("Slot 3 Subcategory:", VisibilityManager.BodyTattooSubcategory[2])
+		If TattooStatusSelect == "Hands"
+			While TattooIndex < TattooSlots
+				If TattooIndex == (TattooSlots / 2)
+					SetCursorPosition(7)
+				EndIf
+				
+				If VisibilityManager.HandTattooVisible[TattooIndex] == True
+					AddTextOption("Slot " + SlotNumber, "Yes")
+				Else
+					AddTextOption("Slot " + SlotNumber, "No")
+				EndIf
+				TattooIndex += 1
+				SlotNumber += 1
+			EndWhile
+		EndIf
 		
-		AddTextOption("Slot 4 Applied:", VisibilityManager.BodyTattooApplied[3] as String)
-		AddTextOption("Slot 4 Visible:", VisibilityManager.IsBodyTattooVisible(3) as String)
-		AddTextOption("Slot 4 Subcategory:", VisibilityManager.BodyTattooSubcategory[3])
-		
-		AddTextOption("Slot 5 Applied:", VisibilityManager.BodyTattooApplied[4] as String)
-		AddTextOption("Slot 5 Visible:", VisibilityManager.IsBodyTattooVisible(4) as String)
-		AddTextOption("Slot 5 Subcategory:", VisibilityManager.BodyTattooSubcategory[4])
-		
-		AddTextOption("Slot 6 Applied:", VisibilityManager.BodyTattooApplied[5] as String)
-		AddTextOption("Slot 6 Visible:", VisibilityManager.IsBodyTattooVisible(5) as String)
-		AddTextOption("Slot 6 Subcategory:", VisibilityManager.BodyTattooSubcategory[5])
-		
-		AddHeaderOption("Face Tattoo Status")
-		AddTextOption("Slot 1 Applied:", VisibilityManager.FaceTattooApplied[0] as String)
-		AddTextOption("Slot 1 Visible:", VisibilityManager.IsFaceTattooVisible(0) as String)
-		
-		AddTextOption("Slot 2 Applied:", VisibilityManager.FaceTattooApplied[1] as String)
-		AddTextOption("Slot 2 Visible:", VisibilityManager.IsFaceTattooVisible(1) as String)
-		
-		AddTextOption("Slot 3 Applied:", VisibilityManager.FaceTattooApplied[2] as String)
-		AddTextOption("Slot 3 Visible:", VisibilityManager.IsFaceTattooVisible(2) as String)
-		
-		AddTextOption("Slot 4 Applied:", VisibilityManager.FaceTattooApplied[3] as String)
-		AddTextOption("Slot 4 Visible:", VisibilityManager.IsFaceTattooVisible(3) as String)
-		
-		AddTextOption("Slot 5 Applied:", VisibilityManager.FaceTattooApplied[4] as String)
-		AddTextOption("Slot 5 Visible:", VisibilityManager.IsFaceTattooVisible(4) as String)
-		
-		AddTextOption("Slot 6 Applied:", VisibilityManager.FaceTattooApplied[5] as String)
-		AddTextOption("Slot 6 Visible:", VisibilityManager.IsFaceTattooVisible(5) as String)
-		
-		SetCursorPosition(23)
-		AddHeaderOption("Hand Tattoo Status")
-		AddTextOption("Slot 1 Applied:", VisibilityManager.HandTattooApplied[0] as String)
-		AddTextOption("Slot 1 Visible:", VisibilityManager.IsHandTattooVisible(0) as String)
-		
-		AddTextOption("Slot 2 Applied:", VisibilityManager.HandTattooApplied[1] as String)
-		AddTextOption("Slot 2 Visible:", VisibilityManager.IsHandTattooVisible(1) as String)
-		
-		AddTextOption("Slot 3 Applied:", VisibilityManager.HandTattooApplied[2] as String)
-		AddTextOption("Slot 3 Visible:", VisibilityManager.IsHandTattooVisible(2) as String)
-		
-		AddTextOption("Slot 4 Applied:", VisibilityManager.HandTattooApplied[3] as String)
-		AddTextOption("Slot 4 Visible:", VisibilityManager.IsHandTattooVisible(3) as String)
-		
-		AddTextOption("Slot 5 Applied:", VisibilityManager.HandTattooApplied[4] as String)
-		AddTextOption("Slot 5 Visible:", VisibilityManager.IsHandTattooVisible(4) as String)
-		
-		AddTextOption("Slot 6 Applied:", VisibilityManager.HandTattooApplied[5] as String)
-		AddTextOption("Slot 6 Visible:", VisibilityManager.IsHandTattooVisible(5) as String)
-		
-		AddHeaderOption("Foot Tattoo Status")
-		AddTextOption("Slot 1 Applied:", VisibilityManager.FootTattooApplied[0] as String)
-		AddTextOption("Slot 1 Visible:", VisibilityManager.IsFootTattooVisible(0) as String)
-		
-		AddTextOption("Slot 2 Applied:", VisibilityManager.FootTattooApplied[1] as String)
-		AddTextOption("Slot 2 Visible:", VisibilityManager.IsFootTattooVisible(1) as String)
-		
-		AddTextOption("Slot 3 Applied:", VisibilityManager.FootTattooApplied[2] as String)
-		AddTextOption("Slot 3 Visible:", VisibilityManager.IsFootTattooVisible(2) as String)
-		
-		AddTextOption("Slot 4 Applied:", VisibilityManager.FootTattooApplied[3] as String)
-		AddTextOption("Slot 4 Visible:", VisibilityManager.IsFootTattooVisible(3) as String)
-		
-		AddTextOption("Slot 5 Applied:", VisibilityManager.FootTattooApplied[4] as String)
-		AddTextOption("Slot 5 Visible:", VisibilityManager.IsFootTattooVisible(4) as String)
-		
-		AddTextOption("Slot 6 Applied:", VisibilityManager.FootTattooApplied[5] as String)
-		AddTextOption("Slot 6 Visible:", VisibilityManager.IsFootTattooVisible(5) as String)
+		If TattooStatusSelect == "Feet"
+			While TattooIndex < TattooSlots
+				If TattooIndex == (TattooSlots / 2)
+					SetCursorPosition(7)
+				EndIf
+				
+				If VisibilityManager.FootTattooVisible[TattooIndex] == True
+					AddTextOption("Slot " + SlotNumber, "Yes")
+				Else
+					AddTextOption("Slot " + SlotNumber, "No")
+				EndIf
+				TattooIndex += 1
+				SlotNumber += 1
+			EndWhile
+		EndIf
 	
 	ElseIf (page == "Decay Info")
-		AddTextOption("Decay Countdown:", (FameManager.DecayCountdown / 2) as String + " Hours")
+		AddTextOption("Decay Countdown:", (FameManager.DecayCountdown / 2) as Int + " Hours")
 		AddHeaderOption("Default Locations")
 		AddTextOption(LocationManager.DefaultLocation[0] + " Can Decay:", FameManager.DefaultLocationCanDecay[0] as String)
 		;AddTextOption(LocationManager.DefaultLocation[0] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[0] as String)
@@ -798,7 +785,7 @@ Event OnPageReset(String page)
 		;AddTextOption(LocationManager.CustomLocation[20] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[20] as String)
 		
 	ElseIf (page == "Spread Info")
-		AddTextOption("Spread Countdown:", (FameManager.SpreadCountdown / 2) as String + " Hours")
+		AddTextOption("Spread Countdown:", (FameManager.SpreadCountdown / 2) as Int + " Hours")
 		AddHeaderOption("Default Locations")
 		AddTextOption(LocationManager.DefaultLocation[0] + " Can Spread:", FameManager.DefaultLocationCanSpread[0] as String)
 		;AddTextOption(LocationManager.DefaultLocation[0] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[0] as String)
@@ -898,7 +885,86 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 	EndIf
 EndFunction
 
-State SLSF_Reloaded_BodySlot1FameState
+State SLSF_Reloaded_MaxTattooSlotsState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(TattooSlots)
+		SetSliderDialogDefaultValue(6)
+		SetSliderDialogRange(6, 90)
+		SetSliderDialogInterval(6)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		TattooSlots = value as Int
+		SetSliderOptionValueST(TattooSlots, "{0}", False, "SLSF_Reloaded_MaxTattooSlotsState")
+	EndEvent
+	
+	Event OnDefaultST()
+		TattooSlots = 6
+		SetSliderOptionValueST(TattooSlots, "{0}", False, "SLSF_Reloaded_MaxTattooSlotsState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_TattooStatusState
+	Event OnMenuOpenST()
+		String[] TattooArea = New String[4]
+		TattooArea[0] = "Body"
+		TattooArea[1] = "Face"
+		TattooArea[2] = "Hands"
+		TattooArea[3] = "Feet"
+		
+		SetMenuDialogOptions(TattooArea)
+		SetMenuDialogStartIndex(0)
+		SetMenuDialogDefaultIndex(0)
+	EndEvent
+	
+	Event OnMenuAcceptST(Int AcceptedIndex)
+		String[] TattooArea = New String[4]
+		TattooArea[0] = "Body"
+		TattooArea[1] = "Face"
+		TattooArea[2] = "Hands"
+		TattooArea[3] = "Feet"
+		
+		SetMenuOptionValueST(TattooArea[AcceptedIndex])
+		TattooStatusSelect = TattooArea[AcceptedIndex]
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_BodyTattooSlotState
+	Event OnMenuOpenST()
+		String[] BodySlotIndex = Utility.CreateStringArray(TattooSlots)
+		
+		Int ArrayIndex = 0
+		While ArrayIndex < TattooSlots
+			BodySlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
+			ArrayIndex += 1
+		EndWhile
+		
+		SetMenuDialogOptions(BodySlotIndex)
+		SetMenuDialogStartIndex(BodyTattooIndex)
+		SetMenuDialogDefaultIndex(0)
+	EndEvent
+	
+	Event OnMenuAcceptST(Int AcceptedIndex)
+		BodyTattooIndex = AcceptedIndex
+		SetMenuOptionValueST(BodyTattooIndex + 1)
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_ExcludeBodySlotState
+	Event OnSelectST()
+		If VisibilityManager.BodyTattooExcluded[BodyTattooIndex] == False
+			VisibilityManager.BodyTattooExcluded[BodyTattooIndex] = True
+		Else
+			VisibilityManager.BodyTattooExcluded[BodyTattooIndex] = False
+		EndIf
+		SetToggleOptionValueST(VisibilityManager.BodyTattooExcluded[BodyTattooIndex])
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_BodySlotFameState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
 		
@@ -909,86 +975,11 @@ State SLSF_Reloaded_BodySlot1FameState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.BodyTattooExtraFameType[0] = FameManager.FameType[AcceptedIndex]
+		VisibilityManager.BodyTattooExtraFameType[BodyTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
 
-State SLSF_Reloaded_BodySlot2FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.BodyTattooExtraFameType[1] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_BodySlot3FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.BodyTattooExtraFameType[2] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_BodySlot4FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.BodyTattooExtraFameType[3] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_BodySlot5FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.BodyTattooExtraFameType[4] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_BodySlot6FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.BodyTattooExtraFameType[5] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_BodySlot1SubcategoryState
+State SLSF_Reloaded_BodySlotSubcategoryState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
 		String[] Texts = New String[5]
@@ -1014,161 +1005,45 @@ State SLSF_Reloaded_BodySlot1SubcategoryState
 		Texts[4] = "Back"
 		
 		SetMenuOptionValueST(Texts[AcceptedIndex])
-		VisibilityManager.BodyTattooSubcategory[0] = Texts[AcceptedIndex]
+		VisibilityManager.BodyTattooSubcategory[BodyTattooIndex] = Texts[AcceptedIndex]
 	EndEvent
 EndState
 
-State SLSF_Reloaded_BodySlot2SubcategoryState
+State SLSF_Reloaded_FaceTattooSlotState
 	Event OnMenuOpenST()
-		Int StartIndex = 0
-		String[] Texts = New String[5]
+		String[] FaceSlotIndex = Utility.CreateStringArray(TattooSlots)
 		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
+		Int ArrayIndex = 0
+		While ArrayIndex < TattooSlots
+			FaceSlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
+			ArrayIndex += 1
+		EndWhile
 		
-		SetMenuDialogOptions(Texts)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
+		SetMenuDialogOptions(FaceSlotIndex)
+		SetMenuDialogStartIndex(FaceTattooIndex)
+		SetMenuDialogDefaultIndex(0)
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		String[] Texts = New String[5]
-		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
-		
-		SetMenuOptionValueST(Texts[AcceptedIndex])
-		VisibilityManager.BodyTattooSubcategory[1] = Texts[AcceptedIndex]
+		FaceTattooIndex = AcceptedIndex
+		SetMenuOptionValueST(FaceTattooIndex + 1)
+		ForcePageReset()
 	EndEvent
 EndState
 
-State SLSF_Reloaded_BodySlot3SubcategoryState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		String[] Texts = New String[5]
-		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
-		
-		SetMenuDialogOptions(Texts)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		String[] Texts = New String[5]
-		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
-		
-		SetMenuOptionValueST(Texts[AcceptedIndex])
-		VisibilityManager.BodyTattooSubcategory[2] = Texts[AcceptedIndex]
+State SLSF_Reloaded_ExcludeFaceSlotState
+	Event OnSelectST()
+		If VisibilityManager.FaceTattooExcluded[FaceTattooIndex] == False
+			VisibilityManager.FaceTattooExcluded[FaceTattooIndex] = True
+		Else
+			VisibilityManager.FaceTattooExcluded[FaceTattooIndex] = False
+		EndIf
+		SetToggleOptionValueST(VisibilityManager.FaceTattooExcluded[FaceTattooIndex])
+		ForcePageReset()
 	EndEvent
 EndState
 
-State SLSF_Reloaded_BodySlot4SubcategoryState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		String[] Texts = New String[5]
-		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
-		
-		SetMenuDialogOptions(Texts)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		String[] Texts = New String[5]
-		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
-		
-		SetMenuOptionValueST(Texts[AcceptedIndex])
-		VisibilityManager.BodyTattooSubcategory[3] = Texts[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_BodySlot5SubcategoryState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		String[] Texts = New String[5]
-		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
-		
-		SetMenuDialogOptions(Texts)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		String[] Texts = New String[5]
-		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
-		
-		SetMenuOptionValueST(Texts[AcceptedIndex])
-		VisibilityManager.BodyTattooSubcategory[4] = Texts[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_BodySlot6SubcategoryState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		String[] Texts = New String[5]
-		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
-		
-		SetMenuDialogOptions(Texts)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		String[] Texts = New String[5]
-		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
-		
-		SetMenuOptionValueST(Texts[AcceptedIndex])
-		VisibilityManager.BodyTattooSubcategory[5] = Texts[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FaceSlot1FameState
+State SLSF_Reloaded_FaceSlotFameState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
 		
@@ -1179,11 +1054,45 @@ State SLSF_Reloaded_FaceSlot1FameState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FaceTattooExtraFameType[0] = FameManager.FameType[AcceptedIndex]
+		VisibilityManager.FaceTattooExtraFameType[FaceTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
 
-State SLSF_Reloaded_FaceSlot2FameState
+State SLSF_Reloaded_HandTattooSlotState
+	Event OnMenuOpenST()
+		String[] HandSlotIndex = Utility.CreateStringArray(TattooSlots)
+		
+		Int ArrayIndex = 0
+		While ArrayIndex < TattooSlots
+			HandSlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
+			ArrayIndex += 1
+		EndWhile
+		
+		SetMenuDialogOptions(HandSlotIndex)
+		SetMenuDialogStartIndex(HandTattooIndex)
+		SetMenuDialogDefaultIndex(0)
+	EndEvent
+	
+	Event OnMenuAcceptST(Int AcceptedIndex)
+		HandTattooIndex = AcceptedIndex
+		SetMenuOptionValueST(HandTattooIndex + 1)
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_ExcludeHandSlotState
+	Event OnSelectST()
+		If VisibilityManager.HandTattooExcluded[HandTattooIndex] == False
+			VisibilityManager.HandTattooExcluded[HandTattooIndex] = True
+		Else
+			VisibilityManager.HandTattooExcluded[HandTattooIndex] = False
+		EndIf
+		SetToggleOptionValueST(VisibilityManager.HandTattooExcluded[HandTattooIndex])
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_HandSlotFameState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
 		
@@ -1194,11 +1103,45 @@ State SLSF_Reloaded_FaceSlot2FameState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FaceTattooExtraFameType[1] = FameManager.FameType[AcceptedIndex]
+		VisibilityManager.HandTattooExtraFameType[HandTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
 
-State SLSF_Reloaded_FaceSlot3FameState
+State SLSF_Reloaded_FootTattooSlotState
+	Event OnMenuOpenST()
+		String[] FootSlotIndex = Utility.CreateStringArray(TattooSlots)
+		
+		Int ArrayIndex = 0
+		While ArrayIndex < TattooSlots
+			FootSlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
+			ArrayIndex += 1
+		EndWhile
+		
+		SetMenuDialogOptions(FootSlotIndex)
+		SetMenuDialogStartIndex(FootTattooIndex)
+		SetMenuDialogDefaultIndex(0)
+	EndEvent
+	
+	Event OnMenuAcceptST(Int AcceptedIndex)
+		FootTattooIndex = AcceptedIndex
+		SetMenuOptionValueST(FootTattooIndex + 1)
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_ExcludeFootSlotState
+	Event OnSelectST()
+		If VisibilityManager.FootTattooExcluded[FootTattooIndex] == False
+			VisibilityManager.FootTattooExcluded[FootTattooIndex] = True
+		Else
+			VisibilityManager.FootTattooExcluded[FootTattooIndex] = False
+		EndIf
+		SetToggleOptionValueST(VisibilityManager.FootTattooExcluded[FootTattooIndex])
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_FootSlotFameState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
 		
@@ -1209,232 +1152,7 @@ State SLSF_Reloaded_FaceSlot3FameState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FaceTattooExtraFameType[2] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FaceSlot4FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FaceTattooExtraFameType[3] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FaceSlot5FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FaceTattooExtraFameType[4] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FaceSlot6FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FaceTattooExtraFameType[5] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_HandSlot1FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.HandTattooExtraFameType[0] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_HandSlot2FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.HandTattooExtraFameType[1] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_HandSlot3FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.HandTattooExtraFameType[2] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_HandSlot4FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.HandTattooExtraFameType[3] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_HandSlot5FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.HandTattooExtraFameType[4] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_HandSlot6FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.HandTattooExtraFameType[5] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FootSlot1FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FootTattooExtraFameType[0] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FootSlot2FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FootTattooExtraFameType[1] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FootSlot3FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FootTattooExtraFameType[2] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FootSlot4FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FootTattooExtraFameType[3] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FootSlot5FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FootTattooExtraFameType[4] = FameManager.FameType[AcceptedIndex]
-	EndEvent
-EndState
-
-State SLSF_Reloaded_FootSlot6FameState
-	Event OnMenuOpenST()
-		Int StartIndex = 0
-		
-		SetMenuDialogOptions(FameManager.FameType)
-		SetMenuDialogStartIndex(StartIndex)
-		SetMenuDialogDefaultIndex(StartIndex)
-	EndEvent
-	
-	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
-		VisibilityManager.FootTattooExtraFameType[5] = FameManager.FameType[AcceptedIndex]
+		VisibilityManager.FootTattooExtraFameType[FootTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
 

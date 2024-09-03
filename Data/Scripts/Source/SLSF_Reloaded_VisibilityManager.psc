@@ -8,9 +8,17 @@ SexlabFramework Property Sexlab Auto
 ;SlaveTats Property SlaveTatsScript Auto
 
 Bool[] Property BodyTattooApplied Auto Hidden
+Bool[] Property BodyTattooVisible Auto Hidden
+Bool[] Property BodyTattooExcluded Auto Hidden
 Bool[] Property FaceTattooApplied Auto Hidden
+Bool[] Property FaceTattooVisible Auto Hidden
+Bool[] Property FaceTattooExcluded Auto Hidden
 Bool[] Property HandTattooApplied Auto Hidden
+Bool[] Property HandTattooVisible Auto Hidden
+Bool[] Property HandTattooExcluded Auto Hidden
 Bool[] Property FootTattooApplied Auto Hidden
+Bool[] Property FootTattooVisible Auto Hidden
+Bool[] Property FootTattooExcluded Auto Hidden
 
 String[] Property BodyTattooSubcategory Auto ;Size = 6, Default = None. Filled by MCM settings | Chest, Pelvis, Ass, Back, None
 String[] Property BodyTattooExtraFameType Auto ;Size = 6, Default = None. Filled by MCM settings
@@ -18,7 +26,8 @@ String[] Property FaceTattooExtraFameType Auto
 String[] Property HandTattooExtraFameType Auto
 String[] Property FootTattooExtraFameType Auto
 
-Int Property VisibleBodyTats Auto
+Int Property VisibleBodyTats Auto Hidden
+Int Property VisibleTattoos Auto Hidden
 
 Keyword Property SLSF_Reloaded_HidesIdentity Auto
 Keyword Property SLSF_Reloaded_DoesNotHideIdentity Auto
@@ -40,10 +49,21 @@ Event OnInit()
 EndEvent
 
 Function Startup()
-	BodyTattooApplied = New Bool[6]
-	FaceTattooApplied = New Bool[6]
-	HandTattooApplied = New Bool[6]
-	FootTattooApplied = New Bool[6]
+	BodyTattooApplied = New Bool[90]
+	BodyTattooVisible = New Bool[90]
+	BodyTattooExcluded = New Bool[90]
+	
+	FaceTattooApplied = New Bool[90]
+	FaceTattooVisible = New Bool[90]
+	FaceTattooExcluded = New Bool[90]
+	
+	HandTattooApplied = New Bool[90]
+	HandTattooVisible = New Bool[90]
+	HandTattooExcluded = New Bool[90]
+	
+	FootTattooApplied = New Bool[90]
+	FootTattooVisible = New Bool[90]
+	FootTattooExcluded = New Bool[90]
 	
 	VisibleBodyTats = 0
 	
@@ -109,26 +129,26 @@ Function CheckAppliedTattoos()
 	EndIf
 	Int CheckedSlot = 0
 	
-	While CheckedSlot < 6
-		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Body", CheckedSlot) != 0
+	While CheckedSlot < Config.TattooSlots
+		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Body", CheckedSlot) != 0 && BodyTattooExcluded[CheckedSlot] == False
 			BodyTattooApplied[CheckedSlot] = True
 		Else
 			BodyTattooApplied[CheckedSlot] = False
 		EndIf
 		
-		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Face", CheckedSlot) != 0
+		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Face", CheckedSlot) != 0 && FaceTattooExcluded[CheckedSlot] == False
 			FaceTattooApplied[CheckedSlot] = True
 		Else
 			FaceTattooApplied[CheckedSlot] = False
 		EndIf
 		
-		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Hands", CheckedSlot) != 0
+		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Hands", CheckedSlot) != 0 && HandTattooExcluded[CheckedSlot] == False
 			HandTattooApplied[CheckedSlot] = True
 		Else
 			HandTattooApplied[CheckedSlot] = False
 		EndIf
 		
-		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Feet", CheckedSlot) != 0
+		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Feet", CheckedSlot) != 0 && FootTattooExcluded[CheckedSlot] == False
 			FootTattooApplied[CheckedSlot] = True
 		Else
 			FootTattooApplied[CheckedSlot] = False
@@ -144,7 +164,7 @@ Int Function CountAppliedTattoos(String TattooArea)
 	Int AppliedCount = 0
 	Int CountedIndex = 0
 	
-	While CountedIndex < 6
+	While CountedIndex < Config.TattooSlots
 		If TattooArea == "Body" && BodyTattooApplied[CountedIndex] == True
 			AppliedCount += 1
 		EndIf
@@ -173,23 +193,39 @@ Int Function CountVisibleTattoos()
 	EndIf
 	
 	VisibleBodyTats = 0
-	Int VisibleTattoos = 0
+	VisibleTattoos = 0
 	Int SlotIndex = 0
 	
-	While SlotIndex < 6
+	While SlotIndex < Config.TattooSlots
 		If IsBodyTattooVisible(SlotIndex) == True
+			BodyTattooVisible[SlotIndex] = True
 			VisibleTattoos += 1
 			VisibleBodyTats += 1
+		Else
+			BodyTattooVisible[SlotIndex] = False
 		EndIf
+		
 		If IsHandTattooVisible(SlotIndex) == True
+			HandTattooVisible[SlotIndex] = True
 			VisibleTattoos += 1
+		Else
+			HandTattooVisible[SlotIndex] = False
 		EndIf
+		
 		If IsFaceTattooVisible(SlotIndex) == True
+			FaceTattooVisible[SlotIndex] = True
 			VisibleTattoos += 1
+		Else
+			FaceTattooVisible[SlotIndex] = False
 		EndIf
+		
 		If IsFootTattooVisible(SlotIndex) == True
+			FootTattooVisible[SlotIndex] = True
 			VisibleTattoos += 1
+		Else
+			FootTattooVisible[SlotIndex] = False
 		EndIf
+		
 		SlotIndex += 1
 	EndWhile
 	

@@ -655,7 +655,7 @@ Bool Function CanGainTattooFame(String FameLocation)
 		Int TotalTattoos = VisibilityManager.CountVisibleTattoos()
 		Int BodyTattoos = VisibilityManager.VisibleBodyTats
 		
-		If TotalTattoos > 10 || BodyTattoos == 6
+		If TotalTattoos > 10 || BodyTattoos < 5
 			return True
 		ElseIf (TotalTattoos > 8 || BodyTattoos == 5) && TattooFame < 125
 			return True
@@ -683,7 +683,7 @@ EndFunction
 
 Bool Function CheckTattooExtraFame(String ExtraFame)
 	Int TattooSlot = 0
-	While TattooSlot < 6
+	While TattooSlot < Config.TattooSlots
 		If VisibilityManager.IsBodyTattooVisible(TattooSlot) == True && VisibilityManager.BodyTattooExtraFameType[TattooSlot] == ExtraFame
 			return True
 		EndIf

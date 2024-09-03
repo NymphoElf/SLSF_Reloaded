@@ -2,6 +2,7 @@ ScriptName SLSF_Reloaded_DataManager extends Quest
 
 SLSF_Reloaded_FameManager Property FameManager Auto
 SLSF_Reloaded_LocationManager Property LocationManager Auto
+SLSF_Reloaded_MCM Property Config Auto
 
 Int[] Property WhiterunFame Auto
 Int[] Property WindhelmFame Auto
@@ -47,7 +48,7 @@ Int[] Property CustomLocation19Fame Auto
 Int[] Property CustomLocation20Fame Auto
 Int[] Property CustomLocation21Fame Auto
 
-Int Property ExternalModArraySize Auto
+Int Property ExternalModArraySize Auto Hidden
 
 Bool[] Property ExternalFlags Auto
 
@@ -104,6 +105,21 @@ Function SetDefaults()
 	Utility.ResizeBoolArray(BoundFlags, 128)
 	Utility.ResizeBoolArray(TattooFlags, 128)
 	Utility.ResizeBoolArray(CumDumpFlags, 128)
+	
+	Int LocationIndex = 0
+	While LocationIndex < LocationManager.DefaultLocation.Length
+		Config.HasFameAtDefaultLocation[LocationIndex] = False
+		Config.DefaultLocationSpreadChance[LocationIndex] = 30
+		LocationIndex += 1
+	EndWhile
+	
+	LocationIndex = 0
+	While LocationIndex < LocationManager.CustomLocation.Length
+		Config.HasFameAtCustomLocation[LocationIndex] = False
+		Config.CustomLocationSpreadChance[LocationIndex] = 30
+		LocationIndex += 1
+	EndWhile
+	
 EndFunction
 
 Int Function GetFameValue(String LocationName, String FameCategory)
@@ -301,6 +317,8 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Debug.MessageBox("SLSF Reloaded - ERROR: Could not set Fame Value for " + LocationName + "!")
 		EndIf
 	EndIf
+	
+	FameOverviewCheck()
 EndFunction
 
 Bool Function GetExternalFlags(String FlagName)
@@ -563,4 +581,53 @@ Function CheckFlags()
 	Else
 		ExternalFlags[21] = True
 	EndIf
+EndFunction
+
+Function FameOverviewCheck()
+	Int LocationIndex = 0
+	Int TypeIndex = 0
+	Bool HasFameInLocation = False
+	While LocationIndex < LocationManager.DefaultLocation.Length
+		Debug.Trace("FameOverviewCheck - Location: " + LocationManager.DefaultLocation[LocationIndex])
+		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
+			Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
+			If GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
+				HasFameInLocation = True
+				Config.HasFameAtDefaultLocation[LocationIndex] = True
+			EndIf
+			TypeIndex += 1
+		EndWhile
+		
+		If HasFameInLocation == False
+			Config.HasFameAtDefaultLocation[LocationIndex] = False
+		EndIf
+		
+		HasFameInLocation = False
+		TypeIndex = 0
+		LocationIndex += 1
+	EndWhile
+	
+	LocationIndex = 0
+	TypeIndex = 0
+	HasFameInLocation = False
+	
+	While LocationIndex < LocationManager.CustomLocation.Length
+		Debug.Trace("FameOverviewCheck - Location: " + LocationManager.CustomLocation[LocationIndex])
+		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
+			Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
+			If GetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
+				HasFameInLocation = True
+				Config.HasFameAtCustomLocation[LocationIndex] = True
+			EndIf
+			TypeIndex += 1
+		EndWhile
+		
+		If HasFameInLocation == False
+			Config.HasFameAtCustomLocation[LocationIndex] = False
+		EndIf
+		
+		HasFameInLocation = False
+		TypeIndex = 0
+		LocationIndex += 1
+	EndWhile
 EndFunction
