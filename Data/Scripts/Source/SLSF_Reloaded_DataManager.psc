@@ -78,7 +78,12 @@ Bool[] Property TattooFlags Auto Hidden
 Bool[] Property CumDumpFlags Auto Hidden
 
 Event OnInit()
+	RegisterForUpdateGameTime(0.25)
 	SetDefaults()
+EndEvent
+
+Event OnUpdateGameTime()
+	FameOverviewCheck()
 EndEvent
 
 Function SetDefaults()
@@ -317,8 +322,6 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Debug.MessageBox("SLSF Reloaded - ERROR: Could not set Fame Value for " + LocationName + "!")
 		EndIf
 	EndIf
-	
-	FameOverviewCheck()
 EndFunction
 
 Bool Function GetExternalFlags(String FlagName)

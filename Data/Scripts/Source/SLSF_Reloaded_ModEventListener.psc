@@ -109,6 +109,7 @@ Example:
 
 Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendSlutFameGain") ;This should ALWAYS be the first line for each event
 ModEvent.PushString(EventHandle, "Whiterun") ;Our Location Name
+ModEvent.PushString(EventHandle, "Slut") ;Our Category - If applicable
 ModEvent.PushInt(EventHandle, 0) ;The minimum fame the player should have
 ModEvent.PushInt(EventHandle, 100) ;The maximum fame the player is allowed from this event
 ModEvent.Send(EventHandle) ;Sends the data from our "ModEvent.Push" lines. This should ALWAYS be the last line for each event
@@ -148,7 +149,7 @@ Event OnExternalFameGain(String Category, String EventLocation, Int MinFame, Int
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue(Category, EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, Category)
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame(Category, EventLocation, False)
@@ -165,7 +166,7 @@ Event OnExternalSlutGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Slut", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Slut")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Slut", EventLocation, False)
@@ -182,7 +183,7 @@ Event OnExternalWhoreGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Whore", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Whore")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Whore", EventLocation, False)
@@ -199,7 +200,7 @@ Event OnExternalExhibitionistGain(String EventLocation, Int MinFame, Int MaxFame
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Exhibitionist", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Exhibitionist")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Exhibitionist", EventLocation, False)
@@ -216,7 +217,7 @@ Event OnExternalOralGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Oral", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Oral")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Oral", EventLocation, False)
@@ -233,7 +234,7 @@ Event OnExternalAnalGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Anal", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Anal")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Anal", EventLocation, False)
@@ -250,7 +251,7 @@ Event OnExternalNastyGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Nasty", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Nasty")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Nasty", EventLocation, False)
@@ -267,7 +268,7 @@ Event OnExternalPregnantGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Pregnant", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Pregnant")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Pregnant", EventLocation, False)
@@ -284,7 +285,7 @@ Event OnExternalDominantGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Dominant", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Dominant")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Dominant", EventLocation, False)
@@ -301,7 +302,7 @@ Event OnExternalSubmissiveGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Submissive", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Submissive")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Submissive", EventLocation, False)
@@ -318,7 +319,7 @@ Event OnExternalSadistGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Sadist", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Sadist")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Sadist", EventLocation, False)
@@ -335,7 +336,7 @@ Event OnExternalMasochistGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Masochist", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Masochist")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Masochist", EventLocation, False)
@@ -352,7 +353,7 @@ Event OnExternalGentleGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Gentle", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Gentle")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Gentle", EventLocation, False)
@@ -369,7 +370,7 @@ Event OnExternalLikesMenGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Likes Men", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Likes Men")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Likes Men", EventLocation, False)
@@ -386,7 +387,7 @@ Event OnExternalLikesWomenGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Likes Women", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Likes Women")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Likes Women", EventLocation, False)
@@ -403,7 +404,7 @@ Event OnExternalLikesOrcGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Likes Orc", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Likes Orc")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Likes Orc", EventLocation, False)
@@ -420,7 +421,7 @@ Event OnExternalLikesKhajiitGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Likes Khajiit", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Likes Khajiit")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Likes Khajiit", EventLocation, False)
@@ -437,7 +438,7 @@ Event OnExternalLikesArgonianGain(String EventLocation, Int MinFame, Int MaxFame
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Likes Argonian", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Likes Argonian")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Likes Argonian", EventLocation, False)
@@ -454,7 +455,7 @@ Event OnExternalBestialityGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Bestiality", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Bestiality")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Bestiality", EventLocation, False)
@@ -471,7 +472,7 @@ Event OnExternalGroupGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Group", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Group")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Group", EventLocation, False)
@@ -488,7 +489,7 @@ Event OnExternalBoundGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Bound", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Bound")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Bound", EventLocation, False)
@@ -505,7 +506,7 @@ Event OnExternalTattooGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Tattoo", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Tattoo")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Tattoo", EventLocation, False)
@@ -522,7 +523,7 @@ Event OnExternalCumDumpGain(String EventLocation, Int MinFame, Int MaxFame)
 		return
 	EndIf
 	
-	Int CurrentFame = Data.GetFameValue("Cum Dump", EventLocation)
+	Int CurrentFame = Data.GetFameValue(EventLocation, "Cum Dump")
 	
 	If CurrentFame >= MinFame && CurrentFame < MaxFame
 		FameManager.GainFame("Cum Dump", EventLocation, False)
@@ -539,11 +540,12 @@ USE THESE TO PERFORM MANUAL ONE-TIME FAME INCREASES
 
 ;/
 This event requires specifying the location and category of fame to increase, as well as the minimum amount to increase and the maximum.
-The location will default to the player's current location if not specified. If location is invalid, the event fails.
+Use "Current" for the EventLocation if you want to get the player's current location. 
+If the location is invalid, the event fails. If using "Current", event failure is not necessarily bad.
 If the category is not specified, or is not a valid category, the event will fail.
-If Minimums and Maximums are not specified, they default to 1. If the Minimum is higher than the Maximum, it will apply the Minimum.
+If the Minimum is higher than the Maximum, it will apply the Minimum.
 If either are below 0, they will set to 0. If either are above 150, they will set to 150. If increase is not possible, event fails.
-If the Minimum and Maximums are different, it will randomly pick a number between those values to increase.
+If the Minimum and Maximums are different, it will randomly pick a number between those values to increase (inclusive).
 /;
 
 Event OnExternalManualFameGain(String Category, String EventLocation, Int MinIncrease, Int MaxIncrease)
@@ -763,9 +765,9 @@ EndEvent
 This event requires specifying the location and category of fame to decay, as well as the minimum amount to decay and the maximum.
 The location will default to the player's current location if not specified. If location is invalid, the event fails.
 If the category is not specified, or is not a valid category, the event will fail.
-If Minimums and Maximums are not specified, they default to 1. If the Minimum is higher than the Maximum, it will apply the Minimum.
+If the Minimum is higher than the Maximum, it will apply the Minimum.
 If either are below 0, they will set to 0. If either are above 150, they will set to 150. If decay is not possible, event fails.
-If the Minimum and Maximums are different, it will randomly pick a number between those values to decay.
+If the Minimum and Maximums are different, it will randomly pick a number between those values to decay (inclusive).
 /;
 
 Event OnExternalManualFameDecay(String EventLocation, String Category, Int MinDecay, Int MaxDecay)
@@ -1203,13 +1205,17 @@ EndEvent
 You can use these events to pull data from SLSF Reloaded without making it a Hard dependency
 /;
 
-Event OnRequestLocation(Bool Strict = False)
+;You must specify if you want the STRICT location (the current cell) or not. If Strict = False, then it will return the first valid Fame Location, if any.
+;In either case, you may get a return of "None" if the location is unknown or invalid for fame.
+Event OnRequestLocation(Bool Strict)
 	String LocationToReturn = ""
 	
 	If Strict == False
 		LocationToReturn = LocationManager.CurrentLocationName()
+		;returns None if the location is not valid for fame
 	Else
 		LocationToReturn = LocationManager.FetchLocationName(LocationManager.CurrentLocation)
+		;returns None if there is no location value specified in the current cell
 	EndIf
 	
 	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedLocation")

@@ -18,6 +18,8 @@ Race[] Property ArgonianRace Auto
 
 GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
 
+GlobalVariable Property SLSF_Reloaded_Skooma Auto
+
 Event OnInit()
 	RegisterForUpdateGameTime(0.5)
 	Mods.CheckInstalledMods()
@@ -146,11 +148,35 @@ EndEvent
 
 Event OnUpdateGameTime()
 	FameManager.RegisterForSingleUpdate(0.1)
+	
+	Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
+	Int NewSkoomaValue = OldSkoomaValue - 2
+	
+	If NewSkoomaValue < 0
+		NewSkoomaValue = 0
+	EndIf
+	
+	SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
 EndEvent
 
 Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
-	If (akBaseObject == none || akBaseObject.GetName() == "")
+	String ObjectName = ""
+	
+	If akBaseObject != none
+		ObjectName = akBaseObject.GetName()
+	EndIf
+	
+	If (akBaseObject == none || ObjectName == "")
 		return
+	ElseIf (ObjectName == "Skooma" || ObjectName == "Kordir's Skooma" || ObjectName == "Redwater Skooma" || ObjectName == "Double-Distilled Skooma")
+		Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
+		Int NewSkoomaValue = OldSkoomaValue + 1
+		
+		If NewSkoomaValue > 150
+			NewSkoomaValue = 150
+		EndIf
+		
+		SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
 	EndIf
 	
 	VisibilityManager.RegisterForSingleUpdate(0.1)

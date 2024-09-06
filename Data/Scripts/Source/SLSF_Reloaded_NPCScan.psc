@@ -7,25 +7,19 @@ SexlabFramework Property Sexlab Auto
 
 Actor Property PlayerRef Auto
 GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
+String Property CurrentLocation Auto Hidden
 
 Event OnEffectStart(Actor akTarget, Actor akCaster)
-	String CurrentLocation = ""
-	If LocationManager.CurrentLocation != None
-		CurrentLocation = LocationManager.CurrentLocationName()
-	Else
-		return
-	EndIf
-	
 	If Sexlab.IsActorActive(akTarget) == True
 		return
 	EndIf
 	
-	If LocationManager.IsLocationValid(CurrentLocation) == False
-		return
-	EndIf
-	
-	If Config.NPCNeedsLOS && !akTarget.HasLOS(PlayerRef)
-		If akTarget.GetDistance(PlayerRef) > Config.MinimumNPCLOSDistance
+	If Config.NPCNeedsLOS == True
+		If !akTarget.HasLOS(PlayerRef)
+			If akTarget.GetDistance(PlayerRef) > Config.MinimumNPCLOSDistance
+				return
+			EndIf
+		ElseIf !PlayerRef.IsDetectedBy(akTarget)
 			return
 		EndIf
 	EndIf
