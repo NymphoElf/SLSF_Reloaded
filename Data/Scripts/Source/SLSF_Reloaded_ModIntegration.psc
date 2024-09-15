@@ -11,6 +11,9 @@ Bool Property IsFHUInstalled Auto Hidden
 Bool Property IsSlaveTatsInstalled Auto Hidden
 Bool Property IsSLSInstalled Auto Hidden
 Bool Property IsFameCommentsInstalled Auto Hidden
+Bool Property IsBimbosInstalled Auto Hidden
+Bool Property IsSimplePlayerProstitutionInstalled Auto Hidden
+Bool Property IsSexlabApproachInstalled Auto Hidden
 
 Keyword Property DD_Lockable Auto Hidden
 Keyword Property DD_Collar Auto Hidden
@@ -155,6 +158,12 @@ Function CheckInstalledMods()
 		IsFameCommentsInstalled = True
 	Else
 		IsFameCommentsInstalled = False
+	EndIf
+	
+	If Game.GetModByName("CustomComments.esp") != 255
+		IsBimbosInstalled = True
+	Else
+		IsBimbosInstalled = False
 	EndIf
 EndFunction
 

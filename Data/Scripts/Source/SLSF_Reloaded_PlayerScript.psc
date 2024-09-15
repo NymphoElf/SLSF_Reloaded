@@ -6,6 +6,7 @@ SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_ModEventListener Property Listener Auto
 SLSF_Reloaded_MCM Property Config Auto
+SLSF_Reloaded_DataManager Property Data Auto
 SexlabFramework Property Sexlab Auto
 
 Actor Property PlayerRef Auto
@@ -15,6 +16,8 @@ Spell Property NPCScanSpell Auto
 Race[] Property OrcRace Auto
 Race[] Property KhajiitRace Auto
 Race[] Property ArgonianRace Auto
+
+Bool Property IsWhoreEvent = False Auto Hidden
 
 GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
 
@@ -53,11 +56,17 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 		Actor[] Actors = PlayerController.Positions
 		Int PlayerSex = PlayerRef.GetActorBase().GetSex() ;0 = Male | 1 = Female
 		
+		If PlayerController.Animation.HasTag("BodySearch")
+			return ;Ignore BodySearch Animations
+		EndIf
+		
 		If PlayerController.Animation.HasTag("LeadIn") && Config.AllowForeplayFame == True
 			Foreplay = True
 		ElseIf PlayerController.Animation.HasTag("LeadIn") && Config.AllowForeplayFame == False
 			return
 		EndIf
+		
+		IsWhoreEvent = Data.CheckWhoreEvent()
 		
 		If Actors.Length > 1
 			If PlayerController.Animation.HasTag("Oral")
@@ -73,7 +82,7 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 			EndIf
 			
 			If !PlayerController.Animation.HasTag("Aggressive") && !Sexlab.IsVictim(PlayerThread, PlayerRef) && !Sexlab.IsAggressor(PlayerThread, PlayerRef)
-				If Mods.IsPublicWhore(PlayerRef) == True
+				If Mods.IsPublicWhore(PlayerRef) == True || IsWhoreEvent == True
 					FameManager.GainFame("Whore", PlayerLocation, Foreplay)
 				Else
 					FameManager.GainFame("Slut", PlayerLocation, Foreplay)
@@ -90,9 +99,9 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 				EndIf
 			Else
 				If PlayerController.Animation.HasTag("Aggressive")
-					If PlayerSex != 0 || FameManager.CanGainBoundFame() || Config.SubmissiveDefault == True
+					If (PlayerSex != 0 || FameManager.CanGainBoundFame() || Config.SubmissiveDefault == True) && Config.DominantDefault == False
 						FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
-					ElseIf PlayerSex == 0 || (PlayerRef.GetActorBase().GetSex() != 0 && Sexlab.IsUsingStrapon(PlayerThread, PlayerRef)) || Config.DominantDefault == True
+					ElseIf (PlayerSex == 0 || (PlayerRef.GetActorBase().GetSex() != 0 && Sexlab.IsUsingStrapon(PlayerThread, PlayerRef)) || Config.DominantDefault == True) && Config.SubmissiveDefault == False
 						FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
 					EndIf
 				EndIf
@@ -107,15 +116,21 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 			EndIf
 			
 			If (PlayerSex == 1 && Sexlab.FemaleCount(Actors) > 1) || (PlayerSex == 0 && Sexlab.FemaleCount(Actors) > 0)
-				FameManager.GainFame("Likes Women", PlayerLocation, Foreplay)
+				If !Sexlab.IsVictim(PlayerThread, PlayerRef) || (Sexlab.IsVictim(PlayerThread, PlayerRef) && Config.AllowLikeFameWhenRaped == True)
+					FameManager.GainFame("Likes Women", PlayerLocation, Foreplay)
+				EndIf
 			EndIf
 			
 			If (PlayerSex == 1 && Sexlab.MaleCount(Actors) > 0) || (PlayerSex == 0 && Sexlab.MaleCount(Actors) > 1)
-				FameManager.GainFame("Likes Men", PlayerLocation, Foreplay)
+				If !Sexlab.IsVictim(PlayerThread, PlayerRef) || (Sexlab.IsVictim(PlayerThread, PlayerRef) && Config.AllowLikeFameWhenRaped == True)
+					FameManager.GainFame("Likes Men", PlayerLocation, Foreplay)
+				EndIf
 			EndIf
 			
 			If PlayerController.Animation.HasTag("Creature") || PlayerController.Animation.HasTag("Bestiality")
-				FameManager.GainFame("Bestiality", PlayerLocation, Foreplay)
+				If !Sexlab.IsVictim(PlayerThread, PlayerRef) || (Sexlab.IsVictim(PlayerThread, PlayerRef) && Config.AllowLikeFameWhenRaped == True)
+					FameManager.GainFame("Bestiality", PlayerLocation, Foreplay)
+				EndIf
 			EndIf
 
 			If (!Sexlab.IsVictim(PlayerThread, PlayerRef) && !Sexlab.IsAggressor(PlayerThread, PlayerRef)) && (PlayerController.Animation.HasTag("Loving") || PlayerController.Animation.HasTag("Hugging") || PlayerController.Animation.HasTag("Cuddling") || PlayerController.Animation.HasTag("Kissing"))
@@ -126,11 +141,17 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 			While ActorIndex < Actors.Length
 				If Actors[ActorIndex] != PlayerRef
 					If Actors[ActorIndex].GetRace() == OrcRace[0] || Actors[ActorIndex].GetRace() == OrcRace[1]
-						FameManager.GainFame("Likes Orc", PlayerLocation, Foreplay)
+						If !Sexlab.IsVictim(PlayerThread, PlayerRef) || (Sexlab.IsVictim(PlayerThread, PlayerRef) && Config.AllowLikeFameWhenRaped == True)
+							FameManager.GainFame("Likes Orc", PlayerLocation, Foreplay)
+						EndIf
 					ElseIf Actors[ActorIndex].GetRace() == KhajiitRace[0] || Actors[ActorIndex].GetRace() == KhajiitRace[1]
-						FameManager.GainFame("Likes Khajiit", PlayerLocation, Foreplay)
+						If !Sexlab.IsVictim(PlayerThread, PlayerRef) || (Sexlab.IsVictim(PlayerThread, PlayerRef) && Config.AllowLikeFameWhenRaped == True)
+							FameManager.GainFame("Likes Khajiit", PlayerLocation, Foreplay)
+						EndIf
 					ElseIf Actors[ActorIndex].GetRace() == ArgonianRace[0] || Actors[ActorIndex].GetRace() == ArgonianRace[1]
-						FameManager.GainFame("Likes Argonian", PlayerLocation, Foreplay)
+						If !Sexlab.IsVictim(PlayerThread, PlayerRef) || (Sexlab.IsVictim(PlayerThread, PlayerRef) && Config.AllowLikeFameWhenRaped == True)
+							FameManager.GainFame("Likes Argonian", PlayerLocation, Foreplay)
+						EndIf
 					EndIf
 				EndIf
 				ActorIndex += 1

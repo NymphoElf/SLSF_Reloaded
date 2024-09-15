@@ -63,6 +63,9 @@ Bool Property ExternalGroupFlag Auto Hidden
 Bool Property ExternalBoundFlag Auto Hidden
 Bool Property ExternalTattooFlag Auto Hidden
 Bool Property ExternalCumDumpFlag Auto Hidden
+Bool Property ExternalUnfaithfulFlag Auto Hidden
+Bool Property ExternalCuckFlag Auto Hidden
+Bool Property ExternalAirheadFlag Auto Hidden
 
 ;Globals for SLSF Fame Comments
 GlobalVariable Property SlutGlobal Auto
@@ -89,8 +92,10 @@ GlobalVariable Property TattooGlobal Auto
 GlobalVariable Property CumDumpGlobal Auto
 GlobalVariable Property CheatGlobal Auto
 GlobalVariable Property CuckGlobal Auto
+GlobalVariable Property AirheadGlobal Auto
 
 Bool Property SLSFCFameTypesCleared Auto Hidden
+Bool Property AirheadFameCleared Auto Hidden
 
 ;/
 ---Originals---
@@ -123,6 +128,7 @@ Bool Property SLSFCFameTypesCleared Auto Hidden
 [21] Cum Dump
 [22] Unfaithful
 [23] Cuck
+[24] Airhead
 /;
 
 Event OnInit()
@@ -268,8 +274,26 @@ Event OnUpdate()
 			LocationIndex += 1
 		EndWhile
 		SLSFCFameTypesCleared = True
-	Else
+	ElseIf Mods.IsFameCommentsInstalled == True
 		SLSFCFameTypesCleared = False
+	EndIf
+	
+	If Mods.IsBimbosInstalled == False && AirheadFameCleared == False
+		LocationIndex = 0
+		While LocationIndex < LocationManager.DefaultLocation.Length
+			Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Airhead", 0)
+			LocationIndex += 1
+		EndWhile
+		
+		LocationIndex = 0
+		
+		While LocationIndex < CustomLocations
+			Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Airhead", 0)
+			LocationIndex += 1
+		EndWhile
+		AirheadFameCleared = True
+	ElseIf Mods.IsBimbosInstalled == True
+		AirheadFameCleared = False
 	EndIf
 	
 	Bool ValidScanLocation = True
@@ -424,10 +448,28 @@ Function CheckExternalFlags()
 		ExternalTattooFlag = False
 	EndIf
 	
-	If Data.GetExternalFlags("Cum Dump")
+	If Data.GetExternalFlags("Cum Dump") == True
 		ExternalCumDumpFlag = True
 	Else
 		ExternalCumDumpFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Unfaithful") == True
+		ExternalUnfaithfulFlag = True
+	Else
+		ExternalUnfaithfulFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Cuck") == True
+		ExternalCuckFlag = True
+	Else
+		ExternalCuckFlag = False
+	EndIf
+	
+	If Data.GetExternalFlags("Airhead") == True
+		ExternalAirheadFlag = True
+	Else
+		ExternalAirheadFlag = False
 	EndIf
 EndFunction
 
@@ -847,13 +889,20 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	EndIf
 	
 	If Mods.IsFameCommentsInstalled == True
-		If CheckTattooExtraFame("Unfaithful") == True
+		If CheckTattooExtraFame("Unfaithful") == True || ExternalUnfaithfulFlag == True
 			PossibleFameArray[PossibleFameCount] = "Unfaithful"
 			PossibleFameCount += 1
 		EndIf
 		
-		If CheckTattooExtraFame("Cuck") == True
+		If CheckTattooExtraFame("Cuck") == True || ExternalCuckFlag == True
 			PossibleFameArray[PossibleFameCount] = "Cuck"
+			PossibleFameCount += 1
+		EndIf
+	EndIf
+	
+	If Mods.IsBimbosInstalled == True
+		If CheckTattooExtraFame("Airhead") == True || ExternalAirheadFlag == True
+			PossibleFameArray[PossibleFameCount] = "Airhead"
 			PossibleFameCount += 1
 		EndIf
 	EndIf
@@ -1527,6 +1576,7 @@ Function UpdateGlobals()
 		CumDumpGlobal.SetValue(0)
 		CheatGlobal.SetValue(0)
 		CuckGlobal.SetValue(0)
+		AirheadGlobal.SetValue(0)
 	Else
 		WhoreGlobal.SetValue(Data.GetFameValue(LocationName, "Whore"))
 		SlutGlobal.SetValue(Data.GetFameValue(LocationName, "Slut"))
@@ -1552,5 +1602,6 @@ Function UpdateGlobals()
 		CumDumpGlobal.SetValue(Data.GetFameValue(LocationName, "Cum Dump"))
 		CheatGlobal.SetValue(Data.GetFameValue(LocationName, "Unfaithful"))
 		CuckGlobal.SetValue(Data.GetFameValue(LocationName, "Cuck"))
+		AirheadGlobal.SetValue(Data.GetFameValue(LocationName, "Airhead"))
 	EndIf
 EndFunction

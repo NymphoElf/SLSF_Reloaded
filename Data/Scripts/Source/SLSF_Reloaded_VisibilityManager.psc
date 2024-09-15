@@ -35,7 +35,7 @@ Keyword Property SLSF_Reloaded_CoversHands Auto
 Keyword Property SLSF_Reloaded_CoversFeet Auto
 Keyword Property SLSF_Reloaded_CoversBack Auto
 
-Actor Property PlayerRef Auto ; = PlayerScript.PlayerRef
+Actor Property PlayerRef Auto
 
 GlobalVariable Property OralCumGlobal Auto
 GlobalVariable Property AnalCumGlobal Auto

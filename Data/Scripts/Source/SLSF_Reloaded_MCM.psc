@@ -25,6 +25,7 @@ Bool Property AllowForeplayFame Auto Hidden
 Bool Property SubmissiveDefault Auto Hidden
 Bool Property DominantDefault Auto Hidden
 Bool Property UseGlobalFameMultiplier Auto Hidden
+Bool Property AllowLikeFameWhenRaped Auto Hidden
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
 
@@ -99,6 +100,7 @@ Function SetDefaults()
 	NotifyFameSpread = False
 	PlayerIsAnonymous = False
 	AnonymityEnabled = True
+	AllowLikeFameWhenRaped = True
 	
 	NightStart = 22
 	NightEnd = 6
@@ -196,12 +198,6 @@ Event OnConfigOpen()
 	Pages[9] = "Spread Info"
 	
 	VisibilityManager.RegisterForSingleUpdate(0.1)
-	
-	If Mods.IsFameCommentsInstalled == False
-		If MaximumSpreadCategories > 22
-			MaximumSpreadCategories = 22
-		EndIf
-	EndIf
 	
 	If Mods.IsSexlabPlusInstalled == True
 		DominantDefault = False
@@ -320,6 +316,10 @@ Event OnPageReset(String page)
 			AddTextOption("Unfaithful Fame:", Data.GetFameValue(LocationDetailsSelected, "Unfaithful") as String)
 		EndIf
 		
+		If Mods.IsBimbosInstalled == True
+			AddTextOption("Airhead Fame:", Data.GetFameValue(LocationDetailsSelected, "Airhead") as String)
+		EndIf
+		
 		SetCursorPosition(9)
 		AddTextOption("Gentle Fame: ", Data.GetFameValue(LocationDetailsSelected, "Gentle") as String)
 		AddTextOption("Likes Men Fame: ", Data.GetFameValue(LocationDetailsSelected, "Likes Men") as String)
@@ -358,6 +358,7 @@ Event OnPageReset(String page)
 		AddHeaderOption("Fame Gain Settings")
 		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
 		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame", AllowForeplayFame, 0)
+		AddToggleOptionST("SLSF_Reloaded_AllowLikeFameWhenRapedState", "Allow Like Fame When Raped", AllowLikeFameWhenRaped, 0)
 		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
 		AddSliderOptionST("SLSF_Reloaded_NightStartState", "Night Starts at:", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
 		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
@@ -416,6 +417,10 @@ Event OnPageReset(String page)
 		If Mods.IsFameCommentsInstalled == True
 			AddSliderOptionST("SLSF_Reloaded_UnfaithfulMultiplierState", "Unfaithful Multiplier:", FameCategoryMultiplier[22], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 			AddSliderOptionST("SLSF_Reloaded_CuckMultiplierState", "Cuck Multiplier:", FameCategoryMultiplier[23], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		EndIf
+		
+		If Mods.IsBimbosInstalled == True
+			AddSliderOptionST("SLSF_Reloaded_AirheadMultiplierState", "Airhead Multiplier", FameCategoryMultiplier[24], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		EndIf
 	
 	ElseIf (page == "Tattoo Settings")
@@ -602,6 +607,12 @@ Event OnPageReset(String page)
 			AddTextOption("SLSF Fame Comments", "True")
 		Else
 			AddTextOption("SLSF Fame Comments", "False")
+		EndIf
+		
+		If Mods.IsBimbosInstalled == True
+			AddTextOption("Bimbos of Skyrim", "True")
+		Else
+			AddTextOption("Bimbos of Skyrim", "False")
 		EndIf
 		
 		SetCursorPosition(1)
@@ -884,6 +895,18 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 		return 0
 	EndIf
 EndFunction
+
+State SLSF_Reloaded_AllowLikeFameWhenRapedState
+	Event OnSelectST()
+		If AllowLikeFameWhenRaped == False
+			AllowLikeFameWhenRaped = True
+		Else
+			AllowLikeFameWhenRaped = False
+		EndIf
+		
+		SetToggleOptionValueST(AllowLikeFameWhenRaped)
+	EndEvent
+EndState
 
 State SLSF_Reloaded_MaxTattooSlotsState
 	Event OnSliderOpenST()
@@ -1203,10 +1226,12 @@ State SLSF_Reloaded_SubmissiveDefaultState
 	Event OnSelectST()
 		If SubmissiveDefault == False
 			SubmissiveDefault = True
+			DominantDefault = False
 		Else
 			SubmissiveDefault = False
 		EndIf
 		SetToggleOptionValueST(SubmissiveDefault, False, "SLSF_Reloaded_SubmissiveDefaultState")
+		SetToggleOptionValueST(DominantDefault, False, "SLSF_Reloaded_DominantDefaultState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1215,10 +1240,12 @@ State SLSF_Reloaded_DominantDefaultState
 	Event OnSelectST()
 		If DominantDefault == False
 			DominantDefault = True
+			SubmissiveDefault = False
 		Else
 			DominantDefault = False
 		EndIf
 		SetToggleOptionValueST(DominantDefault, False, "SLSF_Reloaded_DominantDefaultState")
+		SetToggleOptionValueST(SubmissiveDefault, False, "SLSF_Reloaded_SubmissiveDefaultState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1409,11 +1436,7 @@ State SLSF_Reloaded_MaximumSpreadCategoriesState
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(MaximumSpreadCategories)
 		SetSliderDialogDefaultValue(5)
-		If Mods.IsFameCommentsInstalled == True
-			SetSliderDialogRange(1, 24)
-		Else
-			SetSliderDialogRange(1, 22)
-		EndIf
+		SetSliderDialogRange(1, 10)
 		SetSliderDialogInterval(1)
 	EndEvent
 	
@@ -2191,5 +2214,24 @@ State SLSF_Reloaded_CuckMultiplierState
 	Event OnDefaultST()
 		FameCategoryMultiplier[23] = 1.0
 		SetSliderOptionValueST(FameCategoryMultiplier[23], "{1}", False, "SLSF_Reloaded_CuckMultiplierState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_AirheadMultiplierState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FameCategoryMultiplier[24])
+		SetSliderDialogDefaultValue(1.0)
+		SetSliderDialogRange(0.5, 3)
+		SetSliderDialogInterval(0.5)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FameCategoryMultiplier[24] = value
+		SetSliderOptionValueST(FameCategoryMultiplier[24], "{1}", False, "SLSF_Reloaded_AirheadMultiplierState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FameCategoryMultiplier[24] = 1.0
+		SetSliderOptionValueST(FameCategoryMultiplier[24], "{1}", False, "SLSF_Reloaded_AirheadMultiplierState")
 	EndEvent
 EndState
