@@ -54,32 +54,32 @@ Bool[] Property ExternalFlags Auto
 
 String[] Property ExternalMods Auto
 
-Bool[] Property SlutFlags Auto Hidden
-Bool[] Property WhoreFlags Auto Hidden
-Bool[] Property ExhibitionistFlags Auto Hidden
-Bool[] Property OralFlags Auto Hidden
-Bool[] Property AnalFlags Auto Hidden
-Bool[] Property NastyFlags Auto Hidden
-Bool[] Property PregnantFlags Auto Hidden
-Bool[] Property DominantFlags Auto Hidden
-Bool[] Property SubmissiveFlags Auto Hidden
-Bool[] Property SadistFlags Auto Hidden
-Bool[] Property MasochistFlags Auto Hidden
-Bool[] Property GentleFlags Auto Hidden
-Bool[] Property LikesMenFlags Auto Hidden
-Bool[] Property LikesWomenFlags Auto Hidden
-Bool[] Property LikesOrcFlags Auto Hidden
-Bool[] Property LikesKhajiitFlags Auto Hidden
-Bool[] Property LikesArgonianFlags Auto Hidden
-Bool[] Property BestialityFlags Auto Hidden
-Bool[] Property GroupFlags Auto Hidden
-Bool[] Property BoundFlags Auto Hidden
-Bool[] Property TattooFlags Auto Hidden
-Bool[] Property CumDumpFlags Auto Hidden
-Bool[] Property UnfaithfulFlags Auto Hidden
-Bool[] Property CuckFlags Auto Hidden
-Bool[] Property AirheadFlags Auto Hidden
-Bool[] Property WhoreEventFlags Auto Hidden
+Bool[] Property SlutFlags Auto
+Bool[] Property WhoreFlags Auto
+Bool[] Property ExhibitionistFlags Auto
+Bool[] Property OralFlags Auto
+Bool[] Property AnalFlags Auto
+Bool[] Property NastyFlags Auto
+Bool[] Property PregnantFlags Auto
+Bool[] Property DominantFlags Auto
+Bool[] Property SubmissiveFlags Auto
+Bool[] Property SadistFlags Auto
+Bool[] Property MasochistFlags Auto
+Bool[] Property GentleFlags Auto
+Bool[] Property LikesMenFlags Auto
+Bool[] Property LikesWomenFlags Auto
+Bool[] Property LikesOrcFlags Auto
+Bool[] Property LikesKhajiitFlags Auto
+Bool[] Property LikesArgonianFlags Auto
+Bool[] Property BestialityFlags Auto
+Bool[] Property GroupFlags Auto
+Bool[] Property BoundFlags Auto
+Bool[] Property TattooFlags Auto
+Bool[] Property CumDumpFlags Auto
+Bool[] Property UnfaithfulFlags Auto
+Bool[] Property CuckFlags Auto
+Bool[] Property AirheadFlags Auto
+Bool[] Property WhoreEventFlags Auto
 
 Event OnInit()
 	RegisterForUpdateGameTime(0.25)
@@ -92,29 +92,32 @@ EndEvent
 
 Function SetDefaults()
 	ExternalModArraySize = 1
-	Utility.ResizeBoolArray(SlutFlags, 128)
-	Utility.ResizeBoolArray(Whoreflags, 128)
-	Utility.ResizeBoolArray(ExhibitionistFlags, 128)
-	Utility.ResizeBoolArray(OralFlags, 128)
-	Utility.ResizeBoolArray(AnalFlags, 128)
-	Utility.ResizeBoolArray(NastyFlags, 128)
-	Utility.ResizeBoolArray(PregnantFlags, 128)
-	Utility.ResizeBoolArray(DominantFlags, 128)
-	Utility.ResizeBoolArray(SubmissiveFlags, 128)
-	Utility.ResizeBoolArray(SadistFlags, 128)
-	Utility.ResizeBoolArray(MasochistFlags, 128)
-	Utility.ResizeBoolArray(GentleFlags, 128)
-	Utility.ResizeBoolArray(LikesMenFlags, 128)
-	Utility.ResizeBoolArray(LikesWomenFlags, 128)
-	Utility.ResizeBoolArray(LikesOrcFlags, 128)
-	Utility.ResizeBoolArray(LikesKhajiitFlags, 128)
-	Utility.ResizeBoolArray(LikesArgonianFlags, 128)
-	Utility.ResizeBoolArray(BestialityFlags, 128)
-	Utility.ResizeBoolArray(GroupFlags, 128)
-	Utility.ResizeBoolArray(BoundFlags, 128)
-	Utility.ResizeBoolArray(TattooFlags, 128)
-	Utility.ResizeBoolArray(CumDumpFlags, 128)
-	Utility.ResizeBoolArray(WhoreEventFlags, 128)
+	SlutFlags = New Bool[50]
+	WhoreFlags = New Bool[50]
+	ExhibitionistFlags = New Bool[50]
+	OralFlags = New Bool[50]
+	AnalFlags = New Bool[50]
+	NastyFlags = New Bool[50]
+	PregnantFlags = New Bool[50]
+	DominantFlags = New Bool[50]
+	SubmissiveFlags = New Bool[50]
+	SadistFlags = New Bool[50]
+	MasochistFlags = New Bool[50]
+	GentleFlags = New Bool[50]
+	LikesMenFlags = New Bool[50]
+	LikesWomenFlags = New Bool[50]
+	LikesOrcFlags = New Bool[50]
+	LikesKhajiitFlags = New Bool[50]
+	LikesArgonianFlags = New Bool[50]
+	BestialityFlags = New Bool[50]
+	GroupFlags = New Bool[50]
+	BoundFlags = New Bool[50]
+	TattooFlags = New Bool[50]
+	CumDumpFlags = New Bool[50]
+	UnfaithfulFlags = New Bool[50]
+	CuckFlags = New Bool[50]
+	AirheadFlags = New Bool[50]
+	WhoreEventFlags = New Bool[50]
 	
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
@@ -385,16 +388,11 @@ EndFunction
 
 Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
 	Int ModIndex = ExternalMods.Find(ModName)
+	Int EmptyModIndex = ExternalMods.Find("-EMPTY-")
 	
 	If ModIndex < 0 || ModIndex > ExternalMods.Length
-		If ExternalModArraySize == 1 && ExternalMods[0] == "-EMPTY-"
-			ModIndex = 0
-			ExternalMods[0] = ModName
-		ElseIf ExternalModArraySize < 128
-			ExternalModArraySize += 1
-			Utility.ResizeStringArray(ExternalMods, ExternalModArraySize)
-			ModIndex = (ExternalModArraySize - 1)
-			ExternalMods[ModIndex] = ModName
+		If EmptyModIndex >= 0
+			ExternalMods[EmptyModIndex] = ModName
 		Else
 			Debug.MessageBox("Cannot Add " + ModName + " to External Mod List. External Mod List full.")
 			return
