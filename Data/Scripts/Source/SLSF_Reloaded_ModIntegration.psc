@@ -12,7 +12,6 @@ Bool Property IsSlaveTatsInstalled Auto Hidden
 Bool Property IsSLSInstalled Auto Hidden
 Bool Property IsFameCommentsInstalled Auto Hidden
 Bool Property IsBimbosInstalled Auto Hidden
-Bool Property IsSimplePlayerProstitutionInstalled Auto Hidden
 Bool Property IsSexlabApproachInstalled Auto Hidden
 
 Keyword Property DD_Lockable Auto Hidden
@@ -197,16 +196,18 @@ Bool Function IsESPregnant(Actor actorRef)
 EndFunction
 
 Bool Function IsPublicWhore(Actor actorRef)
-	PW_MainLoopScript PublicWhore = GetPWData()
-	If IsPWInstalled == True && PublicWhore.isWhoreNow == True
-		return True
+	If IsPWInstalled == True
+		PW_MainLoopScript PublicWhore = GetPWData()
+		If PublicWhore.isWhoreNow == True
+			return True
+		EndIf
 	EndIf
 	return False
 EndFunction
 
 Int Function GetFHUInflation(Actor actorRef)
-	sr_InflateQuest FillHerUp = GetFHUData()
 	If IsFHUInstalled == True
+		sr_InflateQuest FillHerUp = GetFHUData()
 		return FillHerUp.GetInflation(actorRef) as Int
 	EndIf
 	return 0
