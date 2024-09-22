@@ -13,37 +13,6 @@ Bool Property CustomLocationsFull Auto Hidden
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 
-;/
-Locations:
-
---Holds (Major Locations)--
-Whiterun
-Winterhold
-Windhelm (Eastmarch)
-Solitude (Haafingar)
-Riften (Rift)
-Markarth (Reach)
-Morthal (Hjaalmarch)
-Dawnstar (Pale)
-Falkreath
-Raven Rock (DLC2)
-
---Minor Locations--
-Riverwood
-Rorikstead
-Ivarstead
-Shor's Stone
-Dragon Bridge
-Karthwasten
-Skaal Village
-
---Orc Encampments (Minor Locations)--
-Largashbur
-Dushnikh Yal
-Mor Khazgur
-Narzulbur
-/;
-
 Bool Function IsLocationValid(String CheckedLocation)
 	If CheckedLocation == "-NONE-"
 		return False

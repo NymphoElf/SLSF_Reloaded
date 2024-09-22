@@ -39,7 +39,7 @@ Keyword Property SLSF_Reloaded_VaginalPiercing Auto
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 GlobalVariable Property IsVisiblyBound Auto
 
-Actor Property PlayerRef Auto ;= PlayerScript.PlayerRef
+Actor Property PlayerRef Auto
 
 Bool Property ExternalWhoreFlag Auto Hidden
 Bool Property ExternalSlutFlag Auto Hidden
@@ -97,40 +97,6 @@ GlobalVariable Property AirheadGlobal Auto
 Bool Property SLSFCFameTypesCleared Auto Hidden
 Bool Property AirheadFameCleared Auto Hidden
 
-;/
----Originals---
-[0] Whore
-[1] Slut
-[2] Exhibitionist
-
-[3] Oral
-[4] Anal
-[5] Nasty
-[6] Pregnant
-
-[7] Dominant
-[8] Submissive
-[9] Sadist
-[10] Masochist
-[11] Gentle
-
-[12] Likes Men
-[13] Likes Women
-[14] Likes Orc
-[15] Likes Khajiit
-[16] Likes Argonian
-[17] Bestiality
-[18] Group
-
----New---
-[19] Bound
-[20] Tattoo
-[21] Cum Dump
-[22] Unfaithful
-[23] Cuck
-[24] Airhead
-/;
-
 Event OnInit()
 	Startup()
 EndEvent
@@ -165,7 +131,6 @@ Event OnUpdate()
 	Float Time = Utility.GetCurrentGameTime()
 	Int CountdownChange = ((Time - LastCheckedTime) * 48) as Int
 	Int DecayIterations = (CountdownChange/24) as Int
-	Int SpreadIterations = (CountdownChange/48) as Int
 	
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	
@@ -174,7 +139,7 @@ Event OnUpdate()
 	EndIf
 	Debug.Trace("SLSF Realoaded Fame Manager - Countdown Change = " + CountdownChange)
 	
-	;Update 'global' timers
+	;Update countdown timers
 	DecayCountdown -= CountdownChange
 	SpreadCountdown -= CountdownChange
 	
@@ -183,7 +148,7 @@ Event OnUpdate()
 		DecayIterations = 1
 	EndIf
 	
-	IterationMultiplier = DecayIterations
+	IterationMultiplier = DecayIterations ;Multiply Decay changes by the number of decays that should have happened normally
 	
 	If DecayCountdown <= 0
 		DecayFame()
@@ -256,6 +221,7 @@ Event OnUpdate()
 		LocationIndex += 1
 	EndWhile
 	
+	;Update last Checked Time now that Decay and Spread has been processed
 	LastCheckedTime = Time
 	
 	If Mods.IsFameCommentsInstalled == False && SLSFCFameTypesCleared == False
@@ -306,6 +272,7 @@ Event OnUpdate()
 		ValidScanLocation = False
 	EndIf
 	
+	;Multiply Fame Gains by the number of times NPC Scanning should have happened
 	If CountdownChange > 1
 		IterationMultiplier = CountdownChange
 	Else
@@ -316,6 +283,7 @@ Event OnUpdate()
 		PlayerScript.RunNPCDetect()
 	EndIf
 	
+	;Reset Multiplier - Required to not improperly multiply other events
 	If IterationMultiplier != 1
 		IterationMultiplier = 1
 	EndIf
@@ -615,82 +583,23 @@ EndFunction
 
 Bool Function CanGainPregnantFame(String FameLocation)
 	;Check Pregnant Fame
-	If PlayerRef.GetFactionRank(Mods.FertilityFaction) > 30  && Data.GetFameValue(FameLocation, "Pregnant") < 50
+	Int FertilityFactionRank = PlayerRef.GetFactionRank(Mods.FertilityFaction)
+	Int HentaiPregFactionRank = PlayerRef.GetFactionRank(Mods.HentaiPregFaction)
+	Int CurrentPregFame = Data.GetFameValue(FameLocation, "Pregnant")
+	
+	If FertilityFactionRank > 30 && FertilityFactionRank <= 60 && CurrentPregFame < 50
 		return True
-	ElseIf PlayerRef.GetFactionRank(Mods.FertilityFaction) > 60 || Mods.IsECPregnant(PlayerRef) || Mods.IsESPregnant(PlayerRef)
+	ElseIf HentaiPregFactionRank == 2 && CurrentPregFame < 50
+		return True
+	ElseIf FertilityFactionRank > 60 || HentaiPregFactionRank == 3 || Mods.IsECPregnant(PlayerRef) || Mods.IsESPregnant(PlayerRef)
 		return True
 	EndIf
+	
 	return False
 EndFunction
 	
 Bool Function CanGainBoundFame()
 	;Check Bound Fame
-	;/ (Old Code)
-	If Mods.IsDDInstalled == True && PlayerRef.WornHasKeyword(Mods.DD_Lockable)
-		ArmorSlots = New Armor[28]
-			ArmorSlots[0] = PlayerRef.GetEquippedArmorInSlot(31)
-			ArmorSlots[1] = PlayerRef.GetEquippedArmorInSlot(32)
-			ArmorSlots[2] = PlayerRef.GetEquippedArmorInSlot(33)
-			ArmorSlots[3] = PlayerRef.GetEquippedArmorInSlot(34)
-			ArmorSlots[4] = PlayerRef.GetEquippedArmorInSlot(35)
-			ArmorSlots[5] = PlayerRef.GetEquippedArmorInSlot(36)
-			ArmorSlots[6] = PlayerRef.GetEquippedArmorInSlot(37)
-			ArmorSlots[7] = PlayerRef.GetEquippedArmorInSlot(38)
-			ArmorSlots[8] = PlayerRef.GetEquippedArmorInSlot(39)
-			ArmorSlots[9] = PlayerRef.GetEquippedArmorInSlot(40)
-			ArmorSlots[10] = PlayerRef.GetEquippedArmorInSlot(41)
-			ArmorSlots[11] = PlayerRef.GetEquippedArmorInSlot(42)
-			ArmorSlots[12] = PlayerRef.GetEquippedArmorInSlot(43)
-			ArmorSlots[13] = PlayerRef.GetEquippedArmorInSlot(44)
-			ArmorSlots[14] = PlayerRef.GetEquippedArmorInSlot(45)
-			ArmorSlots[15] = PlayerRef.GetEquippedArmorInSlot(46)
-			ArmorSlots[16] = PlayerRef.GetEquippedArmorInSlot(47)
-			ArmorSlots[17] = PlayerRef.GetEquippedArmorInSlot(48)
-			ArmorSlots[18] = PlayerRef.GetEquippedArmorInSlot(49)
-			ArmorSlots[19] = PlayerRef.GetEquippedArmorInSlot(52)
-			ArmorSlots[20] = PlayerRef.GetEquippedArmorInSlot(53)
-			ArmorSlots[21] = PlayerRef.GetEquippedArmorInSlot(54)
-			ArmorSlots[22] = PlayerRef.GetEquippedArmorInSlot(55)
-			ArmorSlots[23] = PlayerRef.GetEquippedArmorInSlot(56)
-			ArmorSlots[24] = PlayerRef.GetEquippedArmorInSlot(57)
-			ArmorSlots[25] = PlayerRef.GetEquippedArmorInSlot(58)
-			ArmorSlots[26] = PlayerRef.GetEquippedArmorInSlot(59)
-			ArmorSlots[27] = PlayerRef.GetEquippedArmorInSlot(60)
-		
-		DD_Keywords = New Keyword[5]
-			DD_Keywords[0] = Mods.DD_Collar
-			DD_Keywords[1] = Mods.DD_NipplePiercing
-			DD_Keywords[2] = Mods.DD_VaginalPiercing
-			DD_Keywords[3] = Mods.DD_VaginalPlug
-			DD_Keywords[4] = Mods.DD_AnalPlug
-		
-		Int SlotIndex = 0
-		Int KeywordIndex = 0
-		Bool InvalidatingKeyword = False
-		While SlotIndex < ArmorSlots.Length
-			
-			While KeywordIndex < DD_Keywords.Length
-				If ArmorSlots[SlotIndex] != None
-					If ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable) && ArmorSlots[SlotIndex].HasKeyword(DD_Keywords[KeywordIndex])
-						InvalidatingKeyword = True
-					EndIf
-				EndIf
-				KeywordIndex += 1
-			EndWhile
-			
-			If ArmorSlots[SlotIndex] != None
-				If ArmorSlots[SlotIndex].HasKeyword(Mods.DD_Lockable) && InvalidatingKeyword == False
-					return True
-				EndIf
-			EndIf
-			
-			InvalidatingKeyword = False ;Reset for next slot check
-			KeywordIndex = 0
-			SlotIndex += 1
-		EndWhile
-	EndIf
-	/;
-	
 	VisibilityManager.CheckBondage()
 	
 	If IsVisiblyBound.GetValue() == 1
@@ -730,6 +639,8 @@ EndFunction
 Bool Function CanGainCumDumpFame()
 	;Check Cum Dump Fame
 	If Mods.GetFHUInflation(PlayerRef) > 2
+		return True
+	ElseIf	PlayerRef.GetFactionRank(Mods.HentaiPregFaction) == 1
 		return True
 	EndIf
 	return False

@@ -5,8 +5,6 @@ SLSF_Reloaded_MCM Property Config Auto
 
 SexlabFramework Property Sexlab Auto
 
-;SlaveTats Property SlaveTatsScript Auto
-
 Bool[] Property BodyTattooApplied Auto Hidden
 Bool[] Property BodyTattooVisible Auto Hidden
 Bool[] Property BodyTattooExcluded Auto Hidden
@@ -20,11 +18,11 @@ Bool[] Property FootTattooApplied Auto Hidden
 Bool[] Property FootTattooVisible Auto Hidden
 Bool[] Property FootTattooExcluded Auto Hidden
 
-String[] Property BodyTattooSubcategory Auto ;Size = 6, Default = None. Filled by MCM settings | Chest, Pelvis, Ass, Back, None
-String[] Property BodyTattooExtraFameType Auto ;Size = 6, Default = None. Filled by MCM settings
-String[] Property FaceTattooExtraFameType Auto
-String[] Property HandTattooExtraFameType Auto
-String[] Property FootTattooExtraFameType Auto
+String[] Property BodyTattooSubcategory Auto Hidden ;Filled by MCM settings | Chest, Pelvis, Ass, Back, None
+String[] Property BodyTattooExtraFameType Auto Hidden ;Filled by MCM settings
+String[] Property FaceTattooExtraFameType Auto Hidden
+String[] Property HandTattooExtraFameType Auto Hidden
+String[] Property FootTattooExtraFameType Auto Hidden
 
 Int Property VisibleBodyTats Auto Hidden
 Int Property VisibleTattoos Auto Hidden
@@ -64,6 +62,12 @@ Function Startup()
 	FootTattooApplied = New Bool[90]
 	FootTattooVisible = New Bool[90]
 	FootTattooExcluded = New Bool[90]
+	
+	BodyTattooSubcategory = New String[90]
+	BodyTattooExtraFameType = New String[90]
+	FaceTattooExtraFameType = New String[90]
+	HandTattooExtraFameType = New String[90]
+	FootTattooExtraFameType = New String[90]
 	
 	VisibleBodyTats = 0
 	

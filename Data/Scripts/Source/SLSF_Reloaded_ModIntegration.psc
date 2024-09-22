@@ -8,6 +8,7 @@ Bool Property IsESInstalled Auto Hidden
 Bool Property IsPWInstalled Auto Hidden
 Bool Property IsFMInstalled Auto Hidden
 Bool Property IsFHUInstalled Auto Hidden
+Bool Property IsHentaiPregInstalled Auto Hidden
 Bool Property IsSlaveTatsInstalled Auto Hidden
 Bool Property IsSLSInstalled Auto Hidden
 Bool Property IsFameCommentsInstalled Auto Hidden
@@ -41,6 +42,8 @@ Faction Property ChaurusBreeder Auto Hidden
 Faction Property SpiderBreeder Auto Hidden
 
 Faction Property FertilityFaction Auto Hidden
+
+Faction Property HentaiPregFaction Auto Hidden
 
 Function CheckInstalledMods()
 	If SexlabUtil.GetVersion() > 20000
@@ -163,6 +166,14 @@ Function CheckInstalledMods()
 		IsBimbosInstalled = True
 	Else
 		IsBimbosInstalled = False
+	EndIf
+	
+	If Game.GetModByName("HentaiPregnancy.esm") != 255
+		IsHentaiPregInstalled = True
+		HentaiPregFaction = Game.GetFormFromFile(0x00012085, "HentaiPregnancy.esm") as Faction
+	Else
+		IsHentaiPregInstalled = False
+		HentaiPregFaction = None
 	EndIf
 EndFunction
 

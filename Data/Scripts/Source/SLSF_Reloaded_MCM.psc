@@ -220,15 +220,14 @@ Event OnConfigClose()
 EndEvent
 
 Event OnPageReset(String page)
-	;/
-	LoadCustomContent("SLSF Reloaded/SexlabSexualFameReloadedLogo.dds", 184, 31)
+	
 	If (page == "")
-		;LoadCustomContent("SexlabSexualFameReloadedLogo.dds", 226, -2)
+		LoadCustomContent("SLSF Reloaded/SLSFReloadedLogo.dds", 250, 0)
 		return
 	Else
 		UnloadCustomContent()
 	EndIf
-	/;
+	
 	SetCursorFillMode(TOP_TO_BOTTOM)
 	SetCursorPosition(0)
 	
@@ -589,6 +588,12 @@ Event OnPageReset(String page)
 			AddTextOption("Fill Her Up", "True")
 		Else
 			AddTextOption("Fill Her Up", "False")
+		EndIf
+		
+		If Mods.IsHentaiPregInstalled == True
+			AddTextOption("Hentai Pregnancy", "True")
+		Else
+			AddTextOption("Hentai Pregnancy", "False")
 		EndIf
 		
 		If Mods.IsSlaveTatsInstalled == True
