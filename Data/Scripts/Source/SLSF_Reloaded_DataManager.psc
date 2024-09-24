@@ -48,6 +48,8 @@ Int[] Property CustomLocation19Fame Auto
 Int[] Property CustomLocation20Fame Auto
 Int[] Property CustomLocation21Fame Auto
 
+Bool[] Property HasSpreadableFame Auto ;0-20 = Default Locations, 21-41 = Custom Locations
+
 Bool[] Property ExternalFlags Auto
 
 String[] Property ExternalMods Auto Hidden
@@ -86,6 +88,7 @@ EndEvent
 
 Event OnUpdateGameTime()
 	FameOverviewCheck()
+	CheckSpreadableFame()
 EndEvent
 
 Function SetDefaults()
@@ -137,6 +140,238 @@ Function SetDefaults()
 		LocationIndex += 1
 	EndWhile
 	
+EndFunction
+
+Function CheckSpreadableFame()
+	Int FameIndex = 0
+	Int LocationIndex = 0
+	Bool SpreadableFameFound = False
+	
+	While LocationIndex < HasSpreadableFame.Length
+		FameIndex = 0
+		While SpreadableFameFound == False && FameIndex < FameManager.FameType.Length
+			If LocationIndex == 0 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If WhiterunFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 1 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If WinterholdFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 2 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If WindhelmFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 3 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If SolitudeFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 4 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If RiftenFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 5 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If MarkarthFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 6 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If MorthalFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 7 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If DawnstarFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 8 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If FalkreathFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 9 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If RavenRockFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 10 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If RiverwoodFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 11 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If RoriksteadFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 12 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If IvarsteadFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 13 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If ShorsStoneFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 14 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If DragonBridgeFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 15 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If KarthwastenFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 16 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If SkaalVillageFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 17 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If LargashburFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 18 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If DushnikhYalFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 19 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If MorKhazgurFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 20 && Config.HasFameAtDefaultLocation[LocationIndex] == True
+				If NarzulburFame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 21 && Config.HasFameAtCustomLocation[0] == True
+				If CustomLocation1Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 22 && Config.HasFameAtCustomLocation[1] == True
+				If CustomLocation2Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 23 && Config.HasFameAtCustomLocation[2] == True
+				If CustomLocation3Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 24 && Config.HasFameAtCustomLocation[3] == True
+				If CustomLocation4Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 25 && Config.HasFameAtCustomLocation[4] == True
+				If CustomLocation5Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 26 && Config.HasFameAtCustomLocation[5] == True
+				If CustomLocation6Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 27 && Config.HasFameAtCustomLocation[6] == True
+				If CustomLocation7Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 28 && Config.HasFameAtCustomLocation[7] == True
+				If CustomLocation8Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 29 && Config.HasFameAtCustomLocation[8] == True
+				If CustomLocation9Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 30 && Config.HasFameAtCustomLocation[9] == True
+				If CustomLocation10Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 31 && Config.HasFameAtCustomLocation[10] == True
+				If CustomLocation11Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 32 && Config.HasFameAtCustomLocation[11] == True
+				If CustomLocation12Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 33 && Config.HasFameAtCustomLocation[12] == True
+				If CustomLocation13Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 34 && Config.HasFameAtCustomLocation[13] == True
+				If CustomLocation14Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 35 && Config.HasFameAtCustomLocation[14] == True
+				If CustomLocation15Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 36 && Config.HasFameAtCustomLocation[15] == True
+				If CustomLocation16Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 37 && Config.HasFameAtCustomLocation[16] == True
+				If CustomLocation17Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 38 && Config.HasFameAtCustomLocation[17] == True
+				If CustomLocation18Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 39 && Config.HasFameAtCustomLocation[18] == True
+				If CustomLocation19Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 40 && Config.HasFameAtCustomLocation[19] == True
+				If CustomLocation20Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			ElseIf LocationIndex == 41 && Config.HasFameAtCustomLocation[20] == True
+				If CustomLocation21Fame[FameIndex] >= Config.MinimumFameToSpread
+					HasSpreadableFame[LocationIndex] = True
+					SpreadableFameFound = True
+				EndIf
+			EndIf
+			
+			FameIndex += 1
+		EndWhile
+		
+		If SpreadableFameFound == False
+			HasSpreadableFame[LocationIndex] = False
+		EndIf
+		
+		SpreadableFameFound = False
+		LocationIndex += 1
+	EndWhile
 EndFunction
 
 Int Function GetFameValue(String LocationName, String FameCategory)

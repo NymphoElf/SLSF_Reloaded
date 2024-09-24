@@ -685,7 +685,8 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	EndIf
 	
 	Int PossibleFameCount = 0
-	PossibleFameArray = New String[24]
+	Int ArrayLimit = FameType.Length ;Just in case I decide to increase the default fames again it will automatically increase the maximum possible fames again
+	PossibleFameArray = Utility.CreateStringArray(ArrayLimit) ;"New" is bitchy with variables in the array size indicator. It requires a strict integer, so I used this instead.
 	
 	CheckExternalFlags()
 	
@@ -1113,7 +1114,7 @@ Function SpreadFameRoll()
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationCanSpread[LocationIndex] == True
-			If Config.HasFameAtDefaultLocation[LocationIndex] == True
+			If Data.HasSpreadableFame[LocationIndex] == True
 				SpreadChance = Config.DefaultLocationSpreadChance[LocationIndex]
 				If SpreadChance == 0
 					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
@@ -1145,11 +1146,12 @@ Function SpreadFameRoll()
 	EndWhile
 	
 	LocationIndex = 0
+	Int LocationIndexOffset = LocationManager.CustomLocation.Length ;Needed to properly check the array in the Data script
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	
 	While LocationIndex < CustomLocations
 		If CustomLocationCanSpread[LocationIndex] == True
-			If Config.HasFameAtCustomLocation[LocationIndex] == True
+			If Data.HasSpreadableFame[LocationIndex + LocationIndexOffset] == True
 				SpreadChance = Config.CustomLocationSpreadChance[LocationIndex]
 				If SpreadChance == 0
 					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
