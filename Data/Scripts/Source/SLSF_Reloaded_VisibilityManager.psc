@@ -436,17 +436,33 @@ Bool Function IsFootTattooVisible(Int SlotNumber)
 EndFunction
 
 Bool Function IsAssCumVisible()
-	If Sexlab.CountCumAnal(PlayerRef) > 0
-		If Mods.IsANDInstalled == True
-			If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
+	If Mods.IsCOEInstalled == True
+		If Mods.COE.CountCum(PlayerRef, False, False, True) > 0
+			If Mods.IsANDInstalled == True
+				If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
+					return True
+				EndIf
+			ElseIf Mods.IsSLSInstalled == True && PlayerRef.GetEquippedArmorInSlot(32) != None
+				If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
+					return True
+				EndIf
+			ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
 				return True
 			EndIf
-		ElseIf Mods.IsSLSInstalled == True && PlayerRef.GetEquippedArmorInSlot(32) != None
-			If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
+		EndIf
+	Else
+		If Sexlab.CountCumAnal(PlayerRef) > 0
+			If Mods.IsANDInstalled == True
+				If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
+					return True
+				EndIf
+			ElseIf Mods.IsSLSInstalled == True && PlayerRef.GetEquippedArmorInSlot(32) != None
+				If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
+					return True
+				EndIf
+			ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
 				return True
 			EndIf
-		ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
-			return True
 		EndIf
 	EndIf
 	
@@ -454,13 +470,25 @@ Bool Function IsAssCumVisible()
 EndFunction
 
 Bool Function IsVaginalCumVisible()
-	If Sexlab.CountCumVaginal(PlayerRef) > 0
-		If Mods.IsANDInstalled == True
-			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
+	If Mods.IsCOEInstalled == True
+		If Mods.COE.CountCum(PlayerRef, True, False, False) > 0
+			If Mods.IsANDInstalled == True
+				If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
+					return True
+				EndIf
+			ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
 				return True
 			EndIf
-		ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
-			return True
+		EndIf
+	Else
+		If Sexlab.CountCumVaginal(PlayerRef) > 0
+			If Mods.IsANDInstalled == True
+				If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
+					return True
+				EndIf
+			ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
+				return True
+			EndIf
 		EndIf
 	EndIf
 	
@@ -468,10 +496,16 @@ Bool Function IsVaginalCumVisible()
 EndFunction
 
 Bool Function IsOralCumVisible()
-	If Sexlab.CountCumOral(PlayerRef) > 0 && IsPlayerAnonymous() == False
-		return True
+	If Mods.IsCOEInstalled == True
+		If Mods.COE.CountCum(PlayerRef, False, True, False) > 0 && IsPlayerAnonymous() == False
+			return True
+		EndIf
+	Else
+		If Sexlab.CountCumOral(PlayerRef) > 0 && IsPlayerAnonymous() == False
+			return True
+		EndIf
 	EndIf
-	
+
 	return False
 EndFunction
 

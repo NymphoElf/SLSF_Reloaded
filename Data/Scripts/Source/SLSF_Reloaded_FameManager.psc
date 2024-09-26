@@ -572,7 +572,14 @@ Bool Function CanGainNastyFame(String FameLocation)
 		return False
 	EndIf
 	
-	Int CumCount = Sexlab.CountCum(PlayerRef)
+	Int CumCount = 0
+	
+	If Mods.IsCOEInstalled == True
+		CumCount = Mods.COE.CountCum(PlayerRef, True, True, True)
+	Else
+		CumCount = Sexlab.CountCum(PlayerRef)
+	EndIf
+	
 	If CumCount > 3
 		return True
 	ElseIf CumCount > 1 && Data.GetFameValue(FameLocation, "Nasty") < 75

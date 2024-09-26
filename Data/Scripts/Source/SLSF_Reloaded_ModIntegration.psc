@@ -14,6 +14,9 @@ Bool Property IsSLSInstalled Auto Hidden
 Bool Property IsFameCommentsInstalled Auto Hidden
 Bool Property IsBimbosInstalled Auto Hidden
 Bool Property IsSexlabApproachInstalled Auto Hidden
+Bool Property IsCOEInstalled Auto Hidden
+
+SCO_CumHandler Property COE Auto Hidden
 
 Keyword Property DD_Lockable Auto Hidden
 Keyword Property DD_Collar Auto Hidden
@@ -175,6 +178,14 @@ Function CheckInstalledMods()
 		IsHentaiPregInstalled = False
 		HentaiPregFaction = None
 	EndIf
+	
+	If Game.GetModByName("Sexlab - Cum Overlays.esp") != 255
+		IsCOEInstalled = True
+		COE = GetCOEData()
+	Else
+		IsCOEInstalled = False
+		COE = None
+	EndIf
 EndFunction
 
 sr_InflateQuest Function GetFHUData() Global
@@ -183,6 +194,10 @@ EndFunction
 
 PW_MainLoopScript Function GetPWData() Global
 	return Game.GetFormFromFile(0xD63, "Public Whore.esp") as PW_MainLoopScript
+EndFunction
+
+SCO_CumHandler Function GetCOEData() Global
+	return Game.GetFormFromFile(0xD62, "Sexlab - Cum Overlays.esp") as SCO_CumHandler
 EndFunction
 
 Bool Function IsFMPregnant(Actor actorRef)
