@@ -1,0 +1,4 @@
+Scriptname PW_RE_ThreesomeScript extends PW_SideQuestScript Conditional
+
+Function RegisterForEvents()
+endFunction

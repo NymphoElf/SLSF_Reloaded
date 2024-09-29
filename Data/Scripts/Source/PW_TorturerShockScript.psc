@@ -1,0 +1,1 @@
+Scriptname PW_TorturerShockScript extends activemagiceffect  
