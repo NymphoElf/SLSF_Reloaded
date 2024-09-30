@@ -54,7 +54,7 @@ endFunction
 function Startup()
 	
 	isSLAInstalled = checkModInstalled("SexlabAroused.esm")
-	isSLSFInstalled = checkModInstalled("SexLab - Sexual Fame [SLSF].esm" )
+	isSLSFInstalled = checkModInstalled("SLSF Reloaded.esp" )
 	isDDInstalled = checkModInstalled("Devious Devices - Integration.esm")
 	isSlaveTatsInstalled = checkModInstalled("SlaveTats.esp")
 	isFadeTattoosInstalled = checkModInstalled("FadeTattoos.esp")
@@ -96,6 +96,7 @@ endFunction
 
 event OnPlayerLoadGame()
 	isANDInstalled = checkModInstalled("Advanced Nudity Detection.esp")
+	isSLSFInstalled = checkModInstalled("SLSF Reloaded.esp")
 endEvent
 
 event CheckTimeComponents()

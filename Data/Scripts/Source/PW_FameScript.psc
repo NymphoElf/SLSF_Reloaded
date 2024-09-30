@@ -5,6 +5,7 @@ import PW_Utility
 PW_ModIntegrationsScript property mods Auto
 PW_ActorManagerScript property actorMgr Auto
 PW_Constants property constants Auto
+PW_SLSF Property SLSFScript Auto
 
 SexlabFramework property Sexlab Auto
 
@@ -117,6 +118,16 @@ float[] property lastFameGainGameTime auto
 
 bool property fameStartEnabled = true Auto
 
+;SLSF Reloaded Properties
+Int Property SLSFR_SlutFame Auto Hidden
+Int Property SLSFR_WhoreFame Auto Hidden
+Int Property SLSFR_ExhibitionistFame Auto Hidden
+Int Property SLSFR_SubmissiveFame Auto Hidden
+Int Property SLSFR_BestialityFame Auto Hidden
+
+Bool Property useSLSFonly Auto Hidden
+
+;Local Variables
 int currentLocIndex
 int lastLocIndex
 
@@ -176,6 +187,9 @@ function Startup()
 	
 	RegisterForModEvent("PW_ModFame", "ModFame")
 	RegisterForModEvent("PW_ModFameLocal", "ModFameLocal")
+	
+	SLSFScript.Startup()
+	
 	UpdateFeats()
 	
 endFunction
@@ -190,6 +204,57 @@ event EnterCity(int newLocIndex)
 	lastLocIndex = newLocIndex
 	
 	isPlayerThaneHere = isPlayerThane[newLocIndex]
+	
+	if(Mods.usingSLSF)
+		String CurrentLocation = "NoLocation"
+		
+		If currentLocIndex == 0
+			CurrentLocation = "Dawnstar"
+		ElseIf currentLocIndex == 1
+			CurrentLocation = "Falkreath"
+		ElseIf currentLocIndex == 2
+			CurrentLocation = "Markarth"
+		ElseIf currentLocIndex == 3
+			CurrentLocation = "Morthal"
+		ElseIf currentLocIndex == 4
+			CurrentLocation = "Riften"
+		ElseIf currentLocIndex == 5
+			CurrentLocation = "Solitude"
+		ElseIf currentLocIndex == 6
+			CurrentLocation = "Whiterun"
+		ElseIf currentLocIndex == 7
+			CurrentLocation = "Windhelm"
+		ElseIf currentLocIndex == 8
+			CurrentLocation = "Winterhold"
+		EndIf
+		
+		If CurrentLocation != "NoLocation"
+			Int EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Slut")
+			ModEvent.Send(EventHandle)
+			
+			EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Whore")
+			ModEvent.Send(EventHandle)
+			
+			EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Exhibitionist")
+			ModEvent.Send(EventHandle)
+			
+			EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Submissive")
+			ModEvent.Send(EventHandle)
+			
+			EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Bestiality")
+			ModEvent.Send(EventHandle)
+		endIf
+	endIf
 endEvent
 
 event LeaveCity(int locIndex)
@@ -393,13 +458,54 @@ function UpdateFame()
 	endIf
 	
 	if(Mods.usingSLSF)
-		updateLocSLSF(currentLocIndex)
-	else
-		slsfBestialityFame = new int[9]
-		slsfExhibitionistFame = new int[9]
-		slsfSlutFame = new int[9]
-		slsfSubmissiveFame = new int[9]
-		slsfWhoreFame = new int[9]
+		String CurrentLocation = "NoLocation"
+		
+		If currentLocIndex == 0
+			CurrentLocation = "Dawnstar"
+		ElseIf currentLocIndex == 1
+			CurrentLocation = "Falkreath"
+		ElseIf currentLocIndex == 2
+			CurrentLocation = "Markarth"
+		ElseIf currentLocIndex == 3
+			CurrentLocation = "Morthal"
+		ElseIf currentLocIndex == 4
+			CurrentLocation = "Riften"
+		ElseIf currentLocIndex == 5
+			CurrentLocation = "Solitude"
+		ElseIf currentLocIndex == 6
+			CurrentLocation = "Whiterun"
+		ElseIf currentLocIndex == 7
+			CurrentLocation = "Windhelm"
+		ElseIf currentLocIndex == 8
+			CurrentLocation = "Winterhold"
+		EndIf
+		
+		If CurrentLocation != "NoLocation"
+			Int EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Slut")
+			ModEvent.Send(EventHandle)
+			
+			EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Whore")
+			ModEvent.Send(EventHandle)
+			
+			EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Exhibitionist")
+			ModEvent.Send(EventHandle)
+			
+			EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Submissive")
+			ModEvent.Send(EventHandle)
+			
+			EventHandle = ModEvent.Create("SLSF_Reloaded_RequestFame")
+			ModEvent.PushString(EventHandle, CurrentLocation)
+			ModEvent.PushString(EventHandle, "Bestiality")
+			ModEvent.Send(EventHandle)
+		endIf
 	endIf
 	
 	if(playerCurrentStatus == 0 && eligibilityTimeoutDays[currentLocIndex] == 0 && !(Mods.isPlayerEnslaved() && eligibilitySlaveryLockout))
@@ -414,7 +520,6 @@ function UpdateFame()
 		endIf
 	endIf
 	
-
 	return
 endFunction
 
@@ -425,19 +530,49 @@ int Function CalculateSexFame(int locIndex, int fameType)
 	endIf
 
 	if fameType == constants.FAME_TYPE_BESTIALITY
-		return slsfBestialityFame[locIndex] + bestialityFame[locIndex]
+		If includeSLSFValues == True
+			return SLSFR_BestialityFame + bestialityFame[locIndex]
+		ElseIf useSLSFonly == True
+			return SLSFR_BestialityFame
+		Else
+			return bestialityFame[locIndex]
+		EndIf
 		
 	elseIf fameType == constants.FAME_TYPE_EXHIBITIONIST
-		return slsfExhibitionistFame[locIndex] + exhibitionistFame[locIndex]
+		If includeSLSFValues == True
+			return SLSFR_ExhibitionistFame + exhibitionistFame[locIndex]
+		ElseIf useSLSFonly == True
+			return SLSFR_ExhibitionistFame
+		Else
+			return exhibitionistFame[locIndex]
+		EndIf
 		
 	elseIf fameType == constants.FAME_TYPE_SLUT
-		return slsfSlutFame[locIndex] + slutFame[locIndex]
+		If includeSLSFValues == True
+			return SLSFR_SlutFame + slutFame[locIndex]
+		ElseIf useSLSFonly == True
+			return SLSFR_SlutFame
+		Else
+			return slutFame[locIndex]
+		EndIf
 		
 	elseIf fameType == constants.FAME_TYPE_SUBMISSIVE
-		return slsfSubmissiveFame[locIndex] + submissiveFame[locIndex]
+		If includeSLSFValues == True
+			return SLSFR_SubmissiveFame + submissiveFame[locIndex]
+		ElseIf useSLSFonly == True
+			return SLSFR_SubmissiveFame
+		else
+			return submissiveFame[locIndex]
+		endIf
 		
 	elseIf fameType == constants.FAME_TYPE_WHORE
-		return slsfWhoreFame[locIndex] + whoreFame[locIndex]
+		If includeSLSFValues == True
+			return slsfWhoreFame[locIndex] + whoreFame[locIndex]
+		ElseIf useSLSFonly == True
+			return SLSFR_WhoreFame
+		else
+			return whoreFame[locIndex]
+		endIf
 	
 	else
 		pwDebug(self, constants.LOG_ERROR, "CalculateSexFame(): not a valid fame type")
@@ -451,11 +586,17 @@ int Function CalculateTotalSexFame(int locIndex)
 		return 0
 	endIf
 	
-	return slsfBestialityFame[locIndex] + bestialityFame[locIndex] \
-	     + slsfExhibitionistFame[locIndex] + exhibitionistFame[locIndex] \
-		 + slsfSlutFame[locIndex] + slutFame[locIndex] \
-		 + slsfSubmissiveFame[locIndex] + submissiveFame[locIndex] \
-		 + slsfWhoreFame[locIndex] + whoreFame[locIndex]
+	If includeSLSFValues == True
+		return slsfBestialityFame[locIndex] + bestialityFame[locIndex] \
+			 + slsfExhibitionistFame[locIndex] + exhibitionistFame[locIndex] \
+			 + slsfSlutFame[locIndex] + slutFame[locIndex] \
+			 + slsfSubmissiveFame[locIndex] + submissiveFame[locIndex] \
+			 + slsfWhoreFame[locIndex] + whoreFame[locIndex]
+	ElseIf useSLSFonly == True
+		return SLSFR_BestialityFame + SLSFR_ExhibitionistFame + SLSFR_SlutFame + SLSFR_SubmissiveFame + SLSFR_WhoreFame
+	Else
+		return bestialityFame[locIndex] + exhibitionistFame[locIndex] + slutFame[locIndex] + submissiveFame[locIndex] + whoreFame[locIndex]
+	EndIf
 endFunction
 
 Bool Function IsPlayerSexFameEligible(int locIndex)
@@ -514,7 +655,7 @@ function ClearEligibilityTimeout(int locIndex)
 	eligibilityTimeoutDays[locIndex] = 0
 endFunction
 
-	
+;/ - Unnecessary with SLSF Reloaded
 function UpdateLocSLSF(int index)
 {Pulls SLSF fames from SLSF. SLSF gives values for the player's current location; they can't be pulled from any other location.
 We nonetheless have an index arg on this just in case we find a way.}
@@ -537,6 +678,7 @@ We nonetheless have an index arg on this just in case we find a way.}
 
 	return
 endFunction
+/;
 
 event ModFameLocal(int fameType, int amount)
 	ModFame(lastLocIndex, fameType, amount)

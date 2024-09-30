@@ -761,7 +761,8 @@ event OnPageReset(string page) ;Called whenever a new page is selected, and used
 		AddHeaderOption("Sex Fame Configuration")
 		fameStartEnabledIndex = AddToggleOption("Sexual Fame Start Enabled", Fame.fameStartEnabled)
 		sexFameThresholdIndex = AddSliderOption("Total Sex Fame Required", Fame.sexFameThreshold, "{0}")
-		includeSLSFValuesIndex = AddToggleOption("Include SLSF in calculations", Fame.includeSLSFValues, disabledIfFalse(Mods.usingSLSF))
+		includeSLSFValuesIndex = AddToggleOption("Add SLSF Fame to PW Fame", Fame.includeSLSFValues, disabledIf(Mods.usingSLSF == False || Fame.useSLSFonly == True))
+		AddToggleOptionST("UseSLSFOnlyState", "Use SLSF Fame Only", Fame.useSLSFonly, disabledIf(Mods.usingSLSF == False || Fame.includeSLSFValues == True))
 		promiscuityMultiplierIndex = AddSliderOption("Promiscuity Daily Multiplier", Fame.promiscuityMultiplier, "{1}x")
 		modestyMultiplierIndex = AddSliderOption("Modesty Daily Multiplier", Fame.modestyMultiplier, "{1}x")
 		modestyPeriodIndex = AddSliderOption("Modesty Multiplier After", Fame.modestyPeriod, "{0} days")
@@ -950,6 +951,18 @@ event OnPageReset(string page) ;Called whenever a new page is selected, and used
 
 endEvent
 
+State UseSLSFOnlyState
+	Event OnSelectST()
+		If Fame.useSLSFonly == false
+			Fame.useSLSFonly = true
+		else
+			Fame.useSLSFonly = false
+		endIf
+		SetToggleOptionValueST(Fame.useSLSFonly)
+		ForcePageReset()
+	endEvent
+EndState
+
 event OnOptionSelect(int optionIndex)
 	
 	;ELIGIBILITY/STARTUP
@@ -960,6 +973,7 @@ event OnOptionSelect(int optionIndex)
 	elseIf(optionIndex == includeSLSFValuesIndex)
 		Fame.includeSLSFValues = !Fame.includeSLSFValues
 		SetToggleOptionValue(includeSLSFValuesIndex, Fame.includeSLSFValues)
+		ForcePageReset()
 	
 	elseIf(optionIndex == heroFameStartEnabledIndex)
 		Fame.usingHeroFame = !Fame.usingHeroFame
@@ -2127,6 +2141,13 @@ event OnOptionHighlight(int optionIndex)
 	endIf
 endEvent
 
+int function DisabledIf(bool condition)
+	if (condition)
+		return OPTION_FLAG_DISABLED
+	else
+		return OPTION_FLAG_NONE
+	endIf
+endFunction
 
 int function disabledIfFalse(bool predicate)
 	if(predicate)
