@@ -217,7 +217,7 @@ ImageSpaceModifier property FadeToBlack Auto
 
 
 ;===Advanced Nudity Stuff===
-AND_MCM Property AND_Config Auto
+AND_MCM Property AND_Config Auto Hidden
 
 Faction Property AND_NudeActorFaction Auto Hidden
 Faction Property AND_ToplessFaction Auto Hidden
@@ -237,14 +237,14 @@ Bool Property requireGenitals Auto Hidden
 Bool Property requireAss Auto Hidden
 Bool Property requireUnderwear Auto Hidden
 
-Armor[] Property AND_Slots Auto
-Keyword[] Property AND_Curtain_Keywords Auto
-Keyword[] Property AND_ArmorTop_Keywords Auto
-Keyword[] Property AND_ArmorBottom_Keywords Auto
-Keyword[] Property AND_Bra_Keywords Auto
-Keyword[] Property AND_Underwear_Keywords Auto
-Keyword[] Property AND_Other_Keywords Auto
-Keyword[] Property AND_Baka_Keywords Auto
+Armor[] Property AND_Slots Auto Hidden
+Keyword[] Property AND_Curtain_Keywords Auto Hidden
+Keyword[] Property AND_ArmorTop_Keywords Auto Hidden
+Keyword[] Property AND_ArmorBottom_Keywords Auto Hidden
+Keyword[] Property AND_Bra_Keywords Auto Hidden
+Keyword[] Property AND_Underwear_Keywords Auto Hidden
+Keyword[] Property AND_Other_Keywords Auto Hidden
+Keyword[] Property AND_Baka_Keywords Auto Hidden
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| CONTROL |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
@@ -356,7 +356,8 @@ Event OnPlayerLoadGame()
 			AND_Other_Keywords[1] = Game.GetFormFromFile(0x826, "Advanced Nudity Detection.esp") as Keyword ;NipplePastie
 			AND_Other_Keywords[2] = Game.GetFormFromFile(0x827, "Advanced Nudity Detection.esp") as Keyword ;VaginaPastie
 			AND_Other_Keywords[3] = Game.GetFormFromFile(0x807, "Advanced Nudity Detection.esp") as Keyword ;CoversAll
-			
+		
+		AND_Config = Game.GetFormFromFile(0x837, "Advanced Nudity Detection.esp") as AND_MCM
 		
 	Else
 		AND_Curtain_Keywords = new Keyword[1]
@@ -381,6 +382,8 @@ Event OnPlayerLoadGame()
 		AND_ShowingUnderwearFaction = none
 		AND_ShowingGenitalsFaction = none
 		AND_ShowingAssFaction = none
+		
+		AND_Config = None
 	EndIf
 	
 	If mods.isSLAInstalled == True
