@@ -18,7 +18,7 @@ Bool[] Property CustomLocationCanDecay Auto
 String[] Property FameType Auto
 String[] Property PossibleFameArray Auto Hidden
 String[] Property PossibleSpreadTargets Auto Hidden
-String[] Property PossibleSpreadCategories Auto Hidden
+;String[] Property PossibleSpreadCategories Auto Hidden
 
 Int[] Property DefaultLocationSpreadPauseTimer Auto
 Int[] Property CustomLocationSpreadPauseTimer Auto
@@ -128,6 +128,8 @@ Function Startup()
 EndFunction
 
 Event OnUpdate()
+	Data.RegisterForSingleUpdate(0.1)
+	
 	Float Time = Utility.GetCurrentGameTime()
 	Int CountdownChange = ((Time - LastCheckedTime) * 48) as Int
 	Int DecayIterations = (CountdownChange/24) as Int
@@ -443,7 +445,7 @@ EndFunction
 
 Bool Function CanGainWhoreFame()
 	;Check Whore Fame
-	If Mods.IsPublicWhore(PlayerRef)
+	If Mods.IsPublicWhore() == True
 		return True
 	EndIf
 	return False
@@ -1129,7 +1131,8 @@ Function SpreadFameRoll()
 					SpreadFame(LocationManager.DefaultLocation[LocationIndex])
 					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 				ElseIf SpreadChance > 100 || SpreadChance < 0
-					Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is not valid!")
+					Debug.Trace("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+					Config.DefaultLocationSpreadChance[LocationIndex] = 30
 				Else
 					FameSpreadRoll = Utility.RandomInt(1, 100)
 					If FameSpreadRoll <= SpreadChance
@@ -1166,7 +1169,8 @@ Function SpreadFameRoll()
 					SpreadFame(LocationManager.CustomLocation[LocationIndex])
 					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 				ElseIf SpreadChance > 100 || SpreadChance < 0
-					Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is not valid!")
+					Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+					Config.CustomLocationSpreadChance[LocationIndex] = 30
 				Else
 					FameSpreadRoll = Utility.RandomInt(1, 100)
 					If FameSpreadRoll <= SpreadChance
@@ -1196,7 +1200,7 @@ Function SpreadFame(String SpreadFromLocation)
 	Int SpreadableFame = 0
 	Int PossibleFameSpreadCategories = 0
 	Int PossibleFameSpreadIndex = 0
-	PossibleSpreadCategories = New String[1] ;Set Default array size to 1 | resize as necessary
+	String[] PossibleCategoryCount = Utility.CreateStringArray(FameType.Length, "-EMPTY-")
 	
 	;Count possible categories & fill array
 	While PossibleFameSpreadIndex < FameType.Length
@@ -1204,18 +1208,18 @@ Function SpreadFame(String SpreadFromLocation)
 		
 		If SpreadableFame >= Config.MinimumFameToSpread
 			PossibleFameSpreadCategories += 1
-			If PossibleFameSpreadCategories > 1
-				Utility.ResizeStringArray(PossibleSpreadCategories, PossibleFameSpreadCategories)
-			EndIf
-			PossibleSpreadCategories[(PossibleFameSpreadCategories - 1)] = FameType[PossibleFameSpreadIndex]
+			PossibleCategoryCount[(PossibleFameSpreadCategories - 1)] = FameType[PossibleFameSpreadIndex]
 		EndIf
 		
 		PossibleFameSpreadIndex += 1
 	EndWhile
 	
 	If PossibleFameSpreadCategories == 0
+		Debug.Trace("SLSF Reloaded - No Spreadable Categories found for " + SpreadFromLocation + ". Fame Spread Skipped.")
 		return
 	EndIf
+	
+	String[] PossibleSpreadCategories = Utility.CreateStringArray(PossibleFameSpreadCategories)
 	
 	;Get possible fame spread targets
 	Int DefaultLocations = LocationManager.DefaultLocation.Length
@@ -1377,12 +1381,12 @@ EndFunction
 
 Function FameGainNotification()
 	;Placeholder - Will be refined after testing
-	Debug.Notification("SLSF Realoaded - Your fame has increased")
+	Debug.Notification("SLSF Reloaded - Your fame has increased")
 EndFunction
 
 Function FameDecayNotification()
 	;Placeholder - Will be refined after testing
-	Debug.Notification("SLSF Realoaded - Your fame has decayed")
+	Debug.Notification("SLSF Reloaded - Your fame has decayed")
 EndFunction
 
 Int Function CalculateFameSpread(Int FromFame, Int TargetFame)
@@ -1403,7 +1407,7 @@ EndFunction
 
 Function FameSpreadNotification()
 	;Placeholder - Will be refined after testing
-	Debug.Notification("SLSF Realoaded - Your fame has spread")
+	Debug.Notification("SLSF Reloaded - Your fame has spread")
 EndFunction
 
 Function ClearFame(String LocationToClear)

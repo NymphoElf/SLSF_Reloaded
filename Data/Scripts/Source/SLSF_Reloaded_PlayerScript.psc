@@ -7,6 +7,7 @@ SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_ModEventListener Property Listener Auto
 SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DataManager Property Data Auto
+SLSF_Reloaded_NPCScan Property NPCScanScript Auto
 SexlabFramework Property Sexlab Auto
 
 Actor Property PlayerRef Auto
@@ -82,7 +83,7 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 			EndIf
 			
 			If !PlayerController.Animation.HasTag("Aggressive") && !Sexlab.IsVictim(PlayerThread, PlayerRef) && !Sexlab.IsAggressor(PlayerThread, PlayerRef)
-				If Mods.IsPublicWhore(PlayerRef) == True || IsWhoreEvent == True
+				If Mods.IsPublicWhore() == True || IsWhoreEvent == True
 					FameManager.GainFame("Whore", PlayerLocation, Foreplay)
 				Else
 					FameManager.GainFame("Slut", PlayerLocation, Foreplay)
@@ -165,6 +166,7 @@ EndEvent
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	LocationManager.CurrentLocation = akNewLoc
 	FameManager.UpdateGlobals()
+	NPCScanScript.CurrentLocation = LocationManager.CurrentLocationName()
 EndEvent
 
 Event OnUpdateGameTime()

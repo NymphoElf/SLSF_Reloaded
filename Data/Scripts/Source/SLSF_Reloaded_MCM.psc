@@ -626,7 +626,7 @@ Event OnPageReset(String page)
 		AddTextOption("Player is EC Pregnant:", Mods.IsECPregnant(PlayerScript.PlayerRef) as String)
 		AddTextOption("Player is ES Pregnant:", Mods.IsESPregnant(PlayerScript.PlayerRef) as String)
 		AddTextOption("Player is FM Pregnant:", Mods.IsFMPregnant(PlayerScript.PlayerRef) as String)
-		AddTextOption("Player is Public Whore:", Mods.IsPublicWhore(PlayerScript.PlayerRef) as String)
+		AddTextOption("Player is Public Whore:", Mods.IsPublicWhore() as String)
 		AddTextOption("Player's FHU Inflation:", Mods.GetFHUInflation(PlayerScript.PlayerRef) as String)
 		AddTextOption("Total Visible Tattoos:", VisibilityManager.VisibleTattoos as String)
 		If IsVisiblyBound.GetValue() == 1

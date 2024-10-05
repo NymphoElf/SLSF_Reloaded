@@ -17,6 +17,8 @@ Bool Property IsSexlabApproachInstalled Auto Hidden
 Bool Property IsCOEInstalled Auto Hidden
 
 SCO_CumHandler Property COE Auto Hidden
+sr_InflateQuest Property FHU Auto Hidden
+PW_MainLoopScript Property PublicWhore Auto Hidden
 
 Keyword Property DD_Lockable Auto Hidden
 Keyword Property DD_Collar Auto Hidden
@@ -141,8 +143,10 @@ Function CheckInstalledMods()
 	
 	If Game.GetModByName("sr_FillHerUp.esp") != 255
 		IsFHUInstalled = True
+		FHU = GetFHUData()
 	Else
 		IsFHUInstalled = False
+		FHU = None
 	EndIf
 	
 	If Game.GetModByName("SlaveTats.esp") != 255
@@ -221,9 +225,8 @@ Bool Function IsESPregnant(Actor actorRef)
 	return False
 EndFunction
 
-Bool Function IsPublicWhore(Actor actorRef)
+Bool Function IsPublicWhore()
 	If IsPWInstalled == True
-		PW_MainLoopScript PublicWhore = GetPWData()
 		If PublicWhore.isWhoreNow == True
 			return True
 		EndIf
@@ -233,8 +236,7 @@ EndFunction
 
 Int Function GetFHUInflation(Actor actorRef)
 	If IsFHUInstalled == True
-		sr_InflateQuest FillHerUp = GetFHUData()
-		return FillHerUp.GetInflation(actorRef) as Int
+		return FHU.GetInflation(actorRef) as Int
 	EndIf
 	return 0
 EndFunction
