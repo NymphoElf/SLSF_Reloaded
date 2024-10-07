@@ -170,7 +170,7 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 EndEvent
 
 Event OnUpdateGameTime()
-	FameManager.RegisterForSingleUpdate(0.1)
+	FameManager.UpdateFame()
 	
 	Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
 	Int NewSkoomaValue = OldSkoomaValue - 2

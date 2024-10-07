@@ -87,7 +87,7 @@ Event OnInit()
 	SetDefaults()
 EndEvent
 
-Event OnUpdate()
+Function FameCheck()
 	FameOverviewCheck()
 	
 	SpreadableFameCheckDelay -= 1
@@ -96,7 +96,7 @@ Event OnUpdate()
 		CheckSpreadableFame()
 		SpreadableFameCheckDelay = (Config.SpreadTimeNeeded / 4) as Int
 	EndIf
-EndEvent
+EndFunction
 
 Function SetDefaults()
 	ExternalMods = New String[100]
@@ -897,9 +897,13 @@ Function FameOverviewCheck()
 	Int TypeIndex = 0
 	Bool HasFameInLocation = False
 	While LocationIndex < LocationManager.DefaultLocation.Length
-		Debug.Trace("FameOverviewCheck - Location: " + LocationManager.DefaultLocation[LocationIndex])
+		If Config.EnableTracing == True
+			Debug.Trace("FameOverviewCheck - Location: " + LocationManager.DefaultLocation[LocationIndex])
+		EndIf
 		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
-			Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
+			If Config.EnableTracing == True
+				Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
+			EndIf
 			If GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
 				HasFameInLocation = True
 				Config.HasFameAtDefaultLocation[LocationIndex] = True
@@ -921,9 +925,14 @@ Function FameOverviewCheck()
 	HasFameInLocation = False
 	
 	While LocationIndex < LocationManager.CustomLocation.Length
-		Debug.Trace("FameOverviewCheck - Location: " + LocationManager.CustomLocation[LocationIndex])
+		If Config.EnableTracing == True
+			Debug.Trace("FameOverviewCheck - Location: " + LocationManager.CustomLocation[LocationIndex])
+		EndIf
+		
 		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
-			Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
+			If Config.EnableTracing == True
+				Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
+			EndIf
 			If GetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
 				HasFameInLocation = True
 				Config.HasFameAtCustomLocation[LocationIndex] = True

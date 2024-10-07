@@ -18,7 +18,6 @@ Bool[] Property CustomLocationCanDecay Auto
 String[] Property FameType Auto
 String[] Property PossibleFameArray Auto Hidden
 String[] Property PossibleSpreadTargets Auto Hidden
-;String[] Property PossibleSpreadCategories Auto Hidden
 
 Int[] Property DefaultLocationSpreadPauseTimer Auto
 Int[] Property CustomLocationSpreadPauseTimer Auto
@@ -127,8 +126,8 @@ Function Startup()
 	IterationMultiplier = 1
 EndFunction
 
-Event OnUpdate()
-	Data.RegisterForSingleUpdate(0.1)
+Function UpdateFame()
+	Data.FameCheck()
 	
 	Float Time = Utility.GetCurrentGameTime()
 	Int CountdownChange = ((Time - LastCheckedTime) * 48) as Int
@@ -139,7 +138,9 @@ Event OnUpdate()
 	If CountdownChange < 1
 		CountdownChange = 1
 	EndIf
-	Debug.Trace("SLSF Realoaded Fame Manager - Countdown Change = " + CountdownChange)
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded Fame Manager - Countdown Change = " + CountdownChange)
+	EndIf
 	
 	;Update countdown timers
 	DecayCountdown -= CountdownChange
@@ -289,7 +290,7 @@ Event OnUpdate()
 	If IterationMultiplier != 1
 		IterationMultiplier = 1
 	EndIf
-EndEvent
+EndFunction
 
 Function CheckExternalFlags()
 	If Data.GetExternalFlags("Whore") == True
@@ -680,16 +681,20 @@ EndFunction
 
 Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	If LocationManager.IsLocationValid(FameLocation) == False
-		If CalledExternally == True
-			Debug.Trace("SLSF Reloaded - External FameGainRoll - Location is Invalid")
-		Else
-			Debug.Trace("SLSF Reloaded - FameGainRoll Function - Location is Invalid")
+		If Config.EnableTracing == True
+			If CalledExternally == True
+				Debug.Trace("SLSF Reloaded - External FameGainRoll - Location is Invalid")
+			Else
+				Debug.Trace("SLSF Reloaded - FameGainRoll Function - Location is Invalid")
+			EndIf
 		EndIf
 		return
 	EndIf
 	
 	If VisibilityManager.IsPlayerAnonymous() == True
-		Debug.Trace("SLSF Reloaded - FameGainRoll Function - Player is Anonymous")
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - FameGainRoll Function - Player is Anonymous")
+		EndIf
 		return
 	EndIf
 	
@@ -829,7 +834,9 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	EndIf
 	
 	If PossibleFameCount == 0
-		Debug.Trace("SLSF Reloaded - FameGainRoll Function - PossibleFameCount is Zero")
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - FameGainRoll Function - PossibleFameCount is Zero")
+		EndIf
 		return ;If none of the above categories are possible, end function
 	EndIf
 
@@ -1131,7 +1138,9 @@ Function SpreadFameRoll()
 					SpreadFame(LocationManager.DefaultLocation[LocationIndex])
 					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 				ElseIf SpreadChance > 100 || SpreadChance < 0
-					Debug.Trace("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+					If Config.EnableTracing == True
+						Debug.Trace("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+					EndIf
 					Config.DefaultLocationSpreadChance[LocationIndex] = 30
 				Else
 					FameSpreadRoll = Utility.RandomInt(1, 100)
@@ -1215,7 +1224,9 @@ Function SpreadFame(String SpreadFromLocation)
 	EndWhile
 	
 	If PossibleFameSpreadCategories == 0
-		Debug.Trace("SLSF Reloaded - No Spreadable Categories found for " + SpreadFromLocation + ". Fame Spread Skipped.")
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - No Spreadable Categories found for " + SpreadFromLocation + ". Fame Spread Skipped.")
+		EndIf
 		return
 	EndIf
 	
@@ -1255,7 +1266,9 @@ Function SpreadFame(String SpreadFromLocation)
 		EndIf
 	EndWhile
 	
-	Debug.Trace("Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
+	If Config.EnableTracing == True
+		Debug.Trace("Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
+	EndIf
 	
 	;When valid target is found, randomize how many fame categories are spread and by how much, based on config values.
 	Int NumberOfCategoriesToSpread = 0

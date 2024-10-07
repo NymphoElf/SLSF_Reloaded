@@ -28,6 +28,7 @@ Bool Property UseGlobalFameMultiplier Auto Hidden
 Bool Property AllowLikeFameWhenRaped Auto Hidden
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
+Bool Property EnableTracing Auto Hidden
 
 Float Property NightStart Auto Hidden
 Float Property NightEnd Auto Hidden
@@ -79,7 +80,7 @@ EndEvent
 
 Function InstallMCM()
 	ModName = "SLSF Reloaded"
-	Pages = New String[10]
+	Pages = New String[11]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
 	Pages[2] = "General Settings"
@@ -90,6 +91,7 @@ Function InstallMCM()
 	Pages[7] = "Tattoo Info"
 	Pages[8] = "Decay Info"
 	Pages[9] = "Spread Info"
+	Pages[10] = "Debug"
 EndFunction
 
 Function SetDefaults()
@@ -145,6 +147,7 @@ Function SetDefaults()
 	
 	LocationDetailsSelected = "Whiterun"
 	AllowForeplayFame = True
+	EnableTracing = False
 	
 	SLSF_Reloaded_CommentFrequency.SetValue(50)
 EndFunction
@@ -185,7 +188,7 @@ Function CheckLocationUnregister()
 EndFunction
 
 Event OnConfigOpen()
-	Pages = New String[10]
+	Pages = New String[11]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
 	Pages[2] = "General Settings"
@@ -196,6 +199,7 @@ Event OnConfigOpen()
 	Pages[7] = "Tattoo Info"
 	Pages[8] = "Decay Info"
 	Pages[9] = "Spread Info"
+	Pages[10] = "Debug"
 	
 	VisibilityManager.RegisterForSingleUpdate(0.1)
 	
@@ -890,6 +894,8 @@ Event OnPageReset(String page)
 		;AddTextOption(LocationManager.CustomLocation[19] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[19] as String)
 		AddTextOption(LocationManager.CustomLocation[20] + " Can Spread:", FameManager.CustomLocationCanSpread[20] as String)
 		;AddTextOption(LocationManager.CustomLocation[20] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[20] as String)
+	ElseIf (page == "Debug")
+		AddToggleOptionST("SLSF_Reloaded_EnableTraceState", "Enable Tracing", EnableTracing, 0)
 	EndIf
 EndEvent
 
@@ -900,6 +906,18 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 		return 0
 	EndIf
 EndFunction
+
+State SLSF_Reloaded_EnableTraceState
+	Event OnSelectST()
+		If EnableTracing == False
+			EnableTracing = True
+		Else
+			EnableTracing = False
+		EndIf
+		
+		SetToggleOptionValueST(EnableTracing)
+	EndEvent
+EndState
 
 State SLSF_Reloaded_AllowLikeFameWhenRapedState
 	Event OnSelectST()
