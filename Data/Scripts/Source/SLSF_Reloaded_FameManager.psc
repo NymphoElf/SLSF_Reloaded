@@ -1265,7 +1265,7 @@ Function SpreadFame(String SpreadFromLocation)
 	Bool TargetLocationValid = False
 	
 	While TargetLocationValid == False
-		TargetLocationIndex = Utility.RandomInt(0, TotalLocations)
+		TargetLocationIndex = Utility.RandomInt(0, (TotalLocations -1))
 		If SpreadFromLocation != PossibleSpreadTargets[TargetLocationIndex] ;ensure we are not trying to spread to the original location
 			TargetLocationValid = True
 		EndIf
