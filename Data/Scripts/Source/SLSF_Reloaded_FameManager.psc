@@ -1209,7 +1209,7 @@ Function SpreadFame(String SpreadFromLocation)
 	Int SpreadableFame = 0
 	Int PossibleFameSpreadCategories = 0
 	Int PossibleFameSpreadIndex = 0
-	String[] PossibleCategoryCount = Utility.CreateStringArray(FameType.Length, "-EMPTY-")
+	String[] PossibleCategoryList = Utility.CreateStringArray(FameType.Length, "-EMPTY-")
 	
 	;Count possible categories & fill array
 	While PossibleFameSpreadIndex < FameType.Length
@@ -1217,7 +1217,7 @@ Function SpreadFame(String SpreadFromLocation)
 		
 		If SpreadableFame >= Config.MinimumFameToSpread
 			PossibleFameSpreadCategories += 1
-			PossibleCategoryCount[(PossibleFameSpreadCategories - 1)] = FameType[PossibleFameSpreadIndex]
+			PossibleCategoryList[(PossibleFameSpreadCategories - 1)] = FameType[PossibleFameSpreadIndex]
 		EndIf
 		
 		PossibleFameSpreadIndex += 1
@@ -1230,7 +1230,12 @@ Function SpreadFame(String SpreadFromLocation)
 		return
 	EndIf
 	
-	String[] PossibleSpreadCategories = Utility.CreateStringArray(PossibleFameSpreadCategories)
+	String[] PossibleSpreadCategories = Utility.CreateStringArray(PossibleFameSpreadCategories, "-EMPTY-")
+	Int CopyIndex = 0
+	While CopyIndex < PossibleFameSpreadCategories
+		PossibleSpreadCategories[CopyIndex] = PossibleCategoryList[CopyIndex]
+		CopyIndex += 1
+	EndWhile
 	
 	;Get possible fame spread targets
 	Int DefaultLocations = LocationManager.DefaultLocation.Length

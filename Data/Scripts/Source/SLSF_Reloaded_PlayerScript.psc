@@ -158,7 +158,9 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 				ActorIndex += 1
 			EndWhile
 		Else
-			RunNPCDetect()
+			If LocationManager.IsLocationValid(NPCScanScript.CurrentLocation) == True
+				RunNPCDetect()
+			EndIf
 		EndIf
 	EndIf
 EndEvent
@@ -166,7 +168,11 @@ EndEvent
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	LocationManager.CurrentLocation = akNewLoc
 	FameManager.UpdateGlobals()
-	NPCScanScript.CurrentLocation = LocationManager.CurrentLocationName()
+	If akNewLoc == None
+		NPCScanScript.CurrentLocation = "-NONE-"
+	Else
+		NPCScanScript.CurrentLocation = LocationManager.CurrentLocationName()
+	EndIf
 EndEvent
 
 Event OnUpdateGameTime()
