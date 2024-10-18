@@ -33,6 +33,7 @@ Keyword Property DD_Bra Auto Hidden
 Keyword Property DD_HeavyBondage Auto Hidden
 
 Keyword Property SLS_BikiniArmor Auto Hidden
+MagicEffect Property SLS_CollarCurse Auto Hidden
 
 Faction Property AND_Nude Auto Hidden
 Faction Property AND_Topless Auto Hidden
@@ -158,9 +159,11 @@ Function CheckInstalledMods()
 	If Game.GetModByName("SL Survival.esp") != 255
 		IsSLSInstalled = True
 		SLS_BikiniArmor = Game.GetFormFromFile(0x00049867, "SL Survival.esp") as Keyword
+		SLS_CollarCurse = Game.GetFormFromFile(0x00045160, "SL Survival.esp") as MagicEffect
 	Else
 		IsSLSInstalled = False
 		SLS_BikiniArmor = None
+		SLS_CollarCurse = None
 	EndIf
 	
 	If Game.GetModByName("SLSFFameComments.esp") != 255
@@ -220,6 +223,13 @@ EndFunction
 
 Bool Function IsESPregnant(Actor actorRef)
 	If IsESInstalled == True && actorRef.IsInFaction(SpiderBreeder)
+		return True
+	EndIf
+	return False
+EndFunction
+
+Bool Function IsHentaiPregnant(Actor actorRef)
+	If IsHentaiPregInstalled == True && actorRef.GetFactionRank(HentaiPregFaction) > 1
 		return True
 	EndIf
 	return False

@@ -648,7 +648,7 @@ EndFunction
 
 Bool Function CanGainCumDumpFame()
 	;Check Cum Dump Fame
-	If Mods.GetFHUInflation(PlayerRef) > 2
+	If Mods.GetFHUInflation(PlayerRef) >= Config.CumDumpFHUReq
 		return True
 	ElseIf	PlayerRef.GetFactionRank(Mods.HentaiPregFaction) == 1
 		return True
@@ -906,6 +906,12 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 	Int FameGained = 0
 	Float FameMultiplier = Config.FameChangeMultiplier
 	
+	Int GainVeryHigh = Config.MaxVHighFameGain
+	Int GainHigh = Config.MaxHighFameGain
+	Int GainMedium = Config.MaxMedFameGain
+	Int GainLow = Config.MaxLowFameGain
+	Int GainVeryLow = Config.MaxVLowFameGain
+	
 	If Config.UseGlobalFameMultiplier == False
 		Int TypeIndex = FameType.Find(Category)
 		FameMultiplier = Config.FameCategoryMultiplier[TypeIndex]
@@ -920,15 +926,15 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 	Int PreviousFame = Data.GetFameValue(LocationName, Category)
 	
 	If PreviousFame >= 100
-		FameGained = ((Utility.RandomInt(1,2) * FameMultiplier) as Int) * IterationMultiplier
+		FameGained = ((Utility.RandomInt(1,GainVeryHigh) * FameMultiplier) as Int) * IterationMultiplier
 	ElseIf PreviousFame >= 75
-		FameGained = ((Utility.RandomInt(1,4) * FameMultiplier) as Int) * IterationMultiplier
+		FameGained = ((Utility.RandomInt(1,GainHigh) * FameMultiplier) as Int) * IterationMultiplier
 	ElseIf PreviousFame >= 50
-		FameGained = ((Utility.RandomInt(1,6) * FameMultiplier) as Int) * IterationMultiplier
+		FameGained = ((Utility.RandomInt(1,GainMedium) * FameMultiplier) as Int) * IterationMultiplier
 	ElseIf PreviousFame >= 25
-		FameGained = ((Utility.RandomInt(1,8) * FameMultiplier) as Int) * IterationMultiplier
+		FameGained = ((Utility.RandomInt(1,GainLow) * FameMultiplier) as Int) * IterationMultiplier
 	Else
-		FameGained = ((Utility.RandomInt(1,10) * FameMultiplier) as Int) * IterationMultiplier
+		FameGained = ((Utility.RandomInt(1,GainVeryLow) * FameMultiplier) as Int) * IterationMultiplier
 	EndIf
 	
 	If FameGained < 1
@@ -987,6 +993,12 @@ Function DecayFame()
 	Int NewFame = 0
 	Int PreviousFame = 0
 	
+	Int DecayVeryHigh = 0 - Config.MaxVHighFameDecay
+	Int DecayHigh = 0 - Config.MaxHighFameDecay
+	Int DecayMedium = 0 - Config.MaxMedFameDecay
+	Int DecayLow = 0 - Config.MaxLowFameDecay
+	Int DecayVeryLow = 0 - Config.MaxVLowFameDecay
+	
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationCanDecay[LocationIndex] == True
 			While TypeIndex < FameType.Length
@@ -998,7 +1010,7 @@ Function DecayFame()
 				
 				If PreviousFame > 0
 					If PreviousFame >= 100
-						FameDecay = ((-1 * FameMultiplier) as Int) * IterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayVeryHigh,-1)* FameMultiplier) as Int) * IterationMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1006,7 +1018,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					ElseIf PreviousFame >= 75
-						FameDecay = ((Utility.RandomInt(-2,-1) * FameMultiplier) as Int) * IterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayHigh,-1) * FameMultiplier) as Int) * IterationMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1014,7 +1026,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					ElseIf PreviousFame >= 50
-						FameDecay = ((Utility.RandomInt(-3,-1) * FameMultiplier) as Int) * IterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayMedium,-1) * FameMultiplier) as Int) * IterationMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1022,7 +1034,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					ElseIf PreviousFame >= 25
-						FameDecay = ((Utility.RandomInt(-4,-1) * FameMultiplier) as Int) * IterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayLow,-1) * FameMultiplier) as Int) * IterationMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1030,7 +1042,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					Else
-						FameDecay = ((Utility.RandomInt(-5,-1) * FameMultiplier) as Int) * IterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayVeryLow,-1) * FameMultiplier) as Int) * IterationMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1265,7 +1277,7 @@ Function SpreadFame(String SpreadFromLocation)
 	Bool TargetLocationValid = False
 	
 	While TargetLocationValid == False
-		TargetLocationIndex = Utility.RandomInt(0, (TotalLocations -1))
+		TargetLocationIndex = Utility.RandomInt(0, (TotalLocations - 1))
 		If SpreadFromLocation != PossibleSpreadTargets[TargetLocationIndex] ;ensure we are not trying to spread to the original location
 			TargetLocationValid = True
 		EndIf

@@ -57,6 +57,11 @@ EndFunction
 
 Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRegister = False)
 	If ExternalRegister == False
+		If CustomLocationsFull == True
+			Debug.MessageBox("SLSF Reloaded - Cannot Register Custom Location: " + LocationToRegister + ". Custom Location List is Full.")
+			return False
+		EndIf
+		
 		If LocationToRegister != "" && LocationToRegister != "Wilderness" && CurrentLocation != None
 			If IsLocationValid(LocationToRegister) == False
 				return True
@@ -69,6 +74,11 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 			return False
 		EndIf
 	Else
+		If CustomLocationsFull == True
+			Debug.MessageBox("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location: " + LocationToRegister + ". Custom Location List is Full.")
+			return False
+		EndIf
+		
 		If LocationToRegister != "" && LocationToRegister != "Wilderness"
 			If IsLocationValid(LocationToRegister) == False
 				return True
@@ -158,19 +168,14 @@ String Function CurrentLocationParent(Location LocationRef)
 EndFunction
 
 Function RegisterCustomLocation()
-	Debug.Notification("Attempting to register location. Please wait...")
-	
-	If FetchLocationName(CurrentLocation) == "-NONE-"
-		Debug.MessageBox("SLSF Reloaded - Cannot Register Custom Location. Custom Location is None and therefore invalid.")
-		return
-	EndIf
-	
-	If CustomLocationsFull == True
-		Debug.MessageBox("SLSF Reloaded - Cannot Register Custom Location. Custom Location List is Full.")
-		return
-	EndIf
-	
 	String LocationToRegister = FetchLocationName(CurrentLocation)
+	
+	Debug.Notification("Attempting to register " + LocationToRegister + ". Please wait...")
+	
+	If LocationToRegister == "-NONE-"
+		Debug.MessageBox("SLSF Reloaded - Cannot Register Custom Location. Location invalid.")
+		return
+	EndIf
 	
 	If LocationCanBeRegistered(LocationToRegister, False) == False
 		return

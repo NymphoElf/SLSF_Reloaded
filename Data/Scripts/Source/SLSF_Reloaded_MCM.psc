@@ -46,6 +46,7 @@ Float Property FameChanceByLover Auto Hidden
 Float Property MinimumNPCLOSDistance Auto Hidden
 Float Property FameChangeMultiplier Auto Hidden
 Float[] Property FameCategoryMultiplier Auto
+Float Property CumDumpFHUReq Auto Hidden
 
 Int Property TattooSlots Auto Hidden
 Int Property BodyTattooIndex Auto Hidden
@@ -54,6 +55,16 @@ Int Property HandTattooIndex Auto Hidden
 Int Property FootTattooIndex Auto Hidden
 Int[] Property DefaultLocationSpreadChance Auto
 Int[] Property CustomLocationSpreadChance Auto
+Int Property MaxVLowFameGain Auto Hidden
+Int Property MaxLowFameGain Auto Hidden
+Int Property MaxMedFameGain Auto Hidden
+Int Property MaxHighFameGain Auto Hidden
+Int Property MaxVHighFameGain Auto Hidden
+Int Property MaxVLowFameDecay Auto Hidden
+Int Property MaxLowFameDecay Auto Hidden
+Int Property MaxMedFameDecay Auto Hidden
+Int Property MaxHighFameDecay Auto Hidden
+Int Property MaxVHighFameDecay Auto Hidden
 
 String Property TattooStatusSelect Auto Hidden
 
@@ -126,6 +137,7 @@ Function SetDefaults()
 	
 	UseGlobalFameMultiplier = True
 	FameChangeMultiplier = 1.0
+	CumDumpFHUReq = 2.0
 	
 	Int TypeIndex = 0
 	While TypeIndex < FameCategoryMultiplier.Length
@@ -361,21 +373,30 @@ Event OnPageReset(String page)
 		AddHeaderOption("Fame Gain Settings")
 		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
 		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame", AllowForeplayFame, 0)
-		AddToggleOptionST("SLSF_Reloaded_AllowLikeFameWhenRapedState", "Allow Like Fame When Raped", AllowLikeFameWhenRaped, 0)
+		AddToggleOptionST("SLSF_Reloaded_AllowLikeFameWhenRapedState", "Allow 'Likes' Fame When Raped", AllowLikeFameWhenRaped, 0)
 		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
 		AddSliderOptionST("SLSF_Reloaded_NightStartState", "Night Starts at:", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
 		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
-		
-		AddHeaderOption("NPC Fame Chances")
-		AddToggleOptionST("SLSF_Reloaded_NPCNeedsLOSState", "NPCs Need Line of Sight", NPCNeedsLOS, 0)
-		AddSliderOptionST("SLSF_Reloaded_MinimumNPCLOSDistanceState", "Minimum NPC Distance for LOS:", MinimumNPCLOSDistance as Int, "{0}", GetDisabledOptionFlagIf(NPCNeedsLOS == False))
-		AddSliderOptionST("SLSF_Reloaded_FameChanceByEnemyState", "Enemy Fame Chance", FameChanceByEnemy, "{0}%", 0)
-		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "Neutral Fame Chance", FameChanceByNeutral, "{0}%", 0)
-		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "Friend Fame Chance", FameChanceByFriend, "{0}%", 0)
-		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "Lover Fame Chance", FameChanceByLover, "{0}%", 0)
+		If Mods.IsFHUInstalled == True
+			AddSliderOptionST("SLSF_Reloaded_FHUThresholdState", "FHU Inflation for Cum Dump:", CumDumpFHUReq, "{2}", 0)
+		EndIf
+		AddSliderOptionST("SLSF_Reloaded_MaxVLowFameGainState", "Maximum Very Low Fame Gain:", MaxVLowFameGain, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxLowFameGainState", "Maximum Low Fame Gain:", MaxLowFameGain, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxMedFameGainState", "Maximum Medium Fame Gain:", MaxMedFameGain, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxHighFameGainState", "Maximum High Fame Gain:", MaxHighFameGain, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxVHighFameGainState", "Maximum Very High Fame Gain:", MaxVHighFameGain, "{0}", 0)
 		
 		AddHeaderOption("Fame Decay Settings")
 		AddSliderOptionST("SLSF_Reloaded_DecayTimeNeededState", "Time Between Decays (Hours):", (DecayTimeNeeded / 2), "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxVLowFameDecayState", "Maximum Very Low Fame Decay:", MaxVLowFameDecay, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxLowFameDecayState", "Maximum Low Fame Decay:", MaxLowFameDecay, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxMedFameDecayState", "Maximum Medium Fame Decay:", MaxMedFameDecay, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxHighFameDecayState", "Maximum High Fame Decay:", MaxHighFameDecay, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxVHighFameDecayState", "Maximum Very High Fame Decay:", MaxVHighFameDecay, "{0}", 0)
+		
+		AddHeaderOption("Multiplier Settings")
+		AddToggleOptionST("SLSF_Reloaded_UseGlobalMultiplierState", "Use Global Multiplier", UseGlobalFameMultiplier, 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "Global Fame Multiplier:", FameChangeMultiplier, "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == False))
 		
 		AddHeaderOption("Fame Spread Settings")
 		AddSliderOptionST("SLSF_Reloaded_SpreadTimeNeededState", "Time Between Spreads (Hours):", (SpreadTimeNeeded / 2), "{0}", 0)
@@ -385,9 +406,13 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadCategoriesState", "Maximum Spread Categories:", MaximumSpreadCategories, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadPercentageState", "Maximum Spread Percentage:", MaximumSpreadPercentage, "{0}%", 0)
 		
-		AddHeaderOption("Multiplier Settings")
-		AddToggleOptionST("SLSF_Reloaded_UseGlobalMultiplierState", "Use Global Multiplier", UseGlobalFameMultiplier, 0)
-		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "Global Fame Multiplier:", FameChangeMultiplier, "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == False))
+		AddHeaderOption("NPC Fame Chances")
+		AddToggleOptionST("SLSF_Reloaded_NPCNeedsLOSState", "NPCs Need Line of Sight", NPCNeedsLOS, 0)
+		AddSliderOptionST("SLSF_Reloaded_MinimumNPCLOSDistanceState", "Minimum NPC Distance for LOS:", MinimumNPCLOSDistance as Int, "{0}", GetDisabledOptionFlagIf(NPCNeedsLOS == False))
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByEnemyState", "Enemy Fame Chance", FameChanceByEnemy, "{0}%", 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "Neutral Fame Chance", FameChanceByNeutral, "{0}%", 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "Friend Fame Chance", FameChanceByFriend, "{0}%", 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "Lover Fame Chance", FameChanceByLover, "{0}%", 0)
 		
 		AddHeaderOption("Reset Fame")
 		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "Clear All Fame", ClearAllFameTrigger, 0)
@@ -627,12 +652,28 @@ Event OnPageReset(String page)
 		SetCursorPosition(1)
 		AddHeaderOption("Detected Conditions")
 		AddTextOption("Player is Anonymous:", VisibilityManager.IsPlayerAnonymous() as String)
-		AddTextOption("Player is EC Pregnant:", Mods.IsECPregnant(PlayerScript.PlayerRef) as String)
-		AddTextOption("Player is ES Pregnant:", Mods.IsESPregnant(PlayerScript.PlayerRef) as String)
-		AddTextOption("Player is FM Pregnant:", Mods.IsFMPregnant(PlayerScript.PlayerRef) as String)
-		AddTextOption("Player is Public Whore:", Mods.IsPublicWhore() as String)
-		AddTextOption("Player's FHU Inflation:", Mods.GetFHUInflation(PlayerScript.PlayerRef) as String)
+		
+		If Mods.IsECInstalled == True
+			AddTextOption("Player is Chaurus Pregnant:", Mods.IsECPregnant(PlayerScript.PlayerRef) as String)
+		EndIf
+		If Mods.IsESInstalled == True
+			AddTextOption("Player is Spider Pregnant:", Mods.IsESPregnant(PlayerScript.PlayerRef) as String)
+		EndIf
+		If Mods.IsFMInstalled == True
+			AddTextOption("Player is FM Pregnant:", Mods.IsFMPregnant(PlayerScript.PlayerRef) as String)
+		EndIf
+		If Mods.IsHentaiPregInstalled == True
+			AddTextOption("Player is Hentai Pregnant:", Mods.IsHentaiPregnant(PlayerScript.PlayerRef) as String)
+		EndIf
+		If Mods.IsPWInstalled == True
+			AddTextOption("Player is Public Whore:", Mods.IsPublicWhore() as String)
+		EndIf
+		If Mods.IsFHUInstalled == True
+			AddTextOption("Player's FHU Inflation:", Mods.GetFHUInflation(PlayerScript.PlayerRef) as String)
+		EndIf
+		
 		AddTextOption("Total Visible Tattoos:", VisibilityManager.VisibleTattoos as String)
+		
 		If IsVisiblyBound.GetValue() == 1
 			AddTextOption("Visibly Bound:", "Yes")
 		Else
@@ -906,6 +947,215 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 		return 0
 	EndIf
 EndFunction
+
+State SLSF_Reloaded_MaxVLowFameGainState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxVLowFameGain)
+		SetSliderDialogDefaultValue(10)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxVLowFameGain = value as Int
+		SetSliderOptionValueST(MaxVLowFameGain, "{0}", False, "SLSF_Reloaded_MaxVLowFameGainState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxVLowFameGain = 10
+		SetSliderOptionValueST(MaxVLowFameGain, "{0}", False, "SLSF_Reloaded_MaxVLowFameGainState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MaxLowFameGainState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxLowFameGain)
+		SetSliderDialogDefaultValue(8)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxLowFameGain = value as Int
+		SetSliderOptionValueST(MaxLowFameGain, "{0}", False, "SLSF_Reloaded_MaxLowFameGainState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxLowFameGain = 8
+		SetSliderOptionValueST(MaxLowFameGain, "{0}", False, "SLSF_Reloaded_MaxLowFameGainState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MaxMedFameGainState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxMedFameGain)
+		SetSliderDialogDefaultValue(6)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxMedFameGain = value as Int
+		SetSliderOptionValueST(MaxMedFameGain, "{0}", False, "SLSF_Reloaded_MaxMedFameGainState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxMedFameGain = 6
+		SetSliderOptionValueST(MaxMedFameGain, "{0}", False, "SLSF_Reloaded_MaxMedFameGainState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MaxHighFameGainState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxHighFameGain)
+		SetSliderDialogDefaultValue(4)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxHighFameGain = value as Int
+		SetSliderOptionValueST(MaxHighFameGain, "{0}", False, "SLSF_Reloaded_MaxHighFameGainState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxHighFameGain = 4
+		SetSliderOptionValueST(MaxHighFameGain, "{0}", False, "SLSF_Reloaded_MaxHighFameGainState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MaxVHighFameGainState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxVHighFameGain)
+		SetSliderDialogDefaultValue(2)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxVHighFameGain = value as Int
+		SetSliderOptionValueST(MaxVHighFameGain, "{0}", False, "SLSF_Reloaded_MaxVHighFameGainState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxVHighFameGain = 2
+		SetSliderOptionValueST(MaxVHighFameGain, "{0}", False, "SLSF_Reloaded_MaxVHighFameGainState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MaxVLowFameDecayState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxVLowFameDecay)
+		SetSliderDialogDefaultValue(5)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxVLowFameDecay = value as Int
+		SetSliderOptionValueST(MaxVLowFameDecay, "{0}", False, "SLSF_Reloaded_MaxVLowFameDecayState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxVLowFameDecay = 5
+		SetSliderOptionValueST(MaxVLowFameDecay, "{0}", False, "SLSF_Reloaded_MaxVLowFameDecayState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MaxLowFameDecayState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxLowFameDecay)
+		SetSliderDialogDefaultValue(4)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxLowFameDecay = value as Int
+		SetSliderOptionValueST(MaxLowFameDecay, "{0}", False, "SLSF_Reloaded_MaxLowFameDecayState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxLowFameDecay = 4
+		SetSliderOptionValueST(MaxLowFameDecay, "{0}", False, "SLSF_Reloaded_MaxLowFameDecayState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MaxMedFameDecayState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxMedFameDecay)
+		SetSliderDialogDefaultValue(3)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxMedFameDecay = value as Int
+		SetSliderOptionValueST(MaxMedFameDecay, "{0}", False, "SLSF_Reloaded_MaxMedFameDecayState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxMedFameDecay = 3
+		SetSliderOptionValueST(MaxMedFameDecay, "{0}", False, "SLSF_Reloaded_MaxMedFameDecayState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MaxHighFameDecayState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxHighFameDecay)
+		SetSliderDialogDefaultValue(2)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxHighFameDecay = value as Int
+		SetSliderOptionValueST(MaxHighFameDecay, "{0}", False, "SLSF_Reloaded_MaxHighFameDecayState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxHighFameDecay = 4
+		SetSliderOptionValueST(MaxHighFameDecay, "{0}", False, "SLSF_Reloaded_MaxHighFameDecayState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_MaxVHighFameDecayState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(MaxVHighFameDecay)
+		SetSliderDialogDefaultValue(1)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		MaxVHighFameDecay = value as Int
+		SetSliderOptionValueST(MaxVHighFameDecay, "{0}", False, "SLSF_Reloaded_MaxVHighFameDecayState")
+	EndEvent
+	
+	Event OnDefaultST()
+		MaxVHighFameDecay = 2
+		SetSliderOptionValueST(MaxVHighFameDecay, "{0}", False, "SLSF_Reloaded_MaxVHighFameDecayState")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_FHUThresholdState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(CumDumpFHUReq)
+		SetSliderDialogDefaultValue(2.0)
+		SetSliderDialogRange(0.5, 4.0)
+		SetSliderDialogInterval(0.05)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		CumDumpFHUReq = value
+		SetSliderOptionValueST(CumDumpFHUReq, "{2}", False, "SLSF_Reloaded_FHUThresholdState")
+	EndEvent
+	
+	Event OnDefaultST()
+		CumDumpFHUReq = 2.0
+		SetSliderOptionValueST(CumDumpFHUReq, "{2}", False, "SLSF_Reloaded_FHUThresholdState")
+	EndEvent
+EndState
 
 State SLSF_Reloaded_EnableTraceState
 	Event OnSelectST()

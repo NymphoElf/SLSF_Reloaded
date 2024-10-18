@@ -41,6 +41,8 @@ GlobalVariable Property VaginalCumGlobal Auto
 GlobalVariable Property IsVisiblyBound Auto
 GlobalVariable Property IsHeavilyBound Auto
 GlobalVariable Property IsLightlyBound Auto
+GlobalVariable Property IsBelted Auto
+GlobalVariable Property IsCollared Auto
 
 Event OnInit()
 	Startup()
@@ -563,6 +565,14 @@ Function CheckBondage()
 					DD_BeltVisible = True
 				EndIf
 			EndIf
+		ElseIf DD_HarnessSlot != None
+			If DD_HarnessSlot.HasKeyword(Mods.DD_Belt)
+				If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1 || PlayerRef.GetFactionRank(Mods.AND_Ass) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1)
+					DD_BeltVisible = True
+				ElseIf BodySlot == None
+					DD_BeltVisible = True
+				EndIf
+			EndIf
 		EndIf
 		
 		;Harness Check
@@ -593,5 +603,19 @@ Function CheckBondage()
 	
 	If IsPlayerAnonymous() == True
 		IsVisiblyBound.SetValue(0)
+	EndIf
+	
+	If PlayerRef.WornHasKeyword(Mods.DD_Belt)
+		IsBelted.SetValue(1)
+	Else
+		IsBelted.SetValue(0)
+	EndIf
+	
+	If PlayerRef.WornHasKeyword(Mods.DD_Collar) && (PlayerRef.HasMagicEffect(Mods.SLS_CollarCurse) == True)
+		IsCollared.SetValue(0) ;False
+	ElseIf PlayerRef.WornHasKeyword(Mods.DD_Collar) && (PlayerRef.HasMagicEffect(Mods.SLS_CollarCurse) == False)
+		IsCollared.SetValue(1) ;True
+	Else
+		IsCollared.SetValue(0) ;False
 	EndIf
 EndFunction
