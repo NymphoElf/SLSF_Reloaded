@@ -498,7 +498,7 @@ Event OnPageReset(String page)
 		
 		SetCursorPosition(5)
 		AddHeaderOption("Face Tattoos")
-		AddMenuOptionST("SLSF_ReloadedFaceTattoSlotState", "Face Tattoo Slot", (FaceTattooIndex + 1), 0)
+		AddMenuOptionST("SLSF_Reloaded_FaceTattooSlotState", "Face Tattoo Slot", (FaceTattooIndex + 1), 0)
 		AddToggleOptionST("SLSF_Reloaded_ExcludeFaceSlotState", "Exclude From Fame", VisibilityManager.FaceTattooExcluded[FaceTattooIndex], 0)
 		If VisibilityManager.FaceTattooApplied[FaceTattooIndex] == True
 			AddTextOption("Slot Used:", "Yes")
@@ -1588,7 +1588,7 @@ State SLSF_Reloaded_MinimumNPCLOSDistanceState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		MinimumNPCLOSDistance = value * 32 ;Need to convert to Skyrim Units, which we are doing ins steps of 32, or ~18 inches
+		MinimumNPCLOSDistance = value * 32 ;Need to convert to Skyrim Units, which we are doing in steps of 32, or ~18 inches
 		SetSliderOptionValueST(MinimumNPCLOSDistance, "{0}", False, "SLSF_Reloaded_MinimumNPCLOSDistanceState")
 	EndEvent
 	
