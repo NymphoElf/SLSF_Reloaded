@@ -9,6 +9,7 @@ SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_NPCScan Property NPCScan Auto
 SexlabFramework Property Sexlab Auto
+SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
 
 Bool[] Property DefaultLocationCanSpread Auto 
 Bool[] Property CustomLocationCanSpread Auto 
@@ -37,6 +38,8 @@ Keyword Property SLSF_Reloaded_VaginalPiercing Auto
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 GlobalVariable Property IsVisiblyBound Auto
+GlobalVariable Property IsHeavilyBound Auto
+GlobalVariable Property IsLightlyBound Auto
 
 Actor Property PlayerRef Auto
 
@@ -608,12 +611,66 @@ Bool Function CanGainPregnantFame(String FameLocation)
 	return False
 EndFunction
 	
-Bool Function CanGainBoundFame()
+Bool Function CanGainBoundFame(String FameLocation)
 	;Check Bound Fame
 	VisibilityManager.CheckBondage()
 	
+	Int BondagePoints = 0
+	
+	If VisibilityManager.DD_CollarVisible == True && Config.AllowCollarBoundFame == True
+		BondagePoints += 1
+	EndIf
+	
+	If VisibilityManager.DD_BraVisible == True || PlayerRef.WornHasKeyword(Mods.DD_Corset)
+		BondagePoints += 2
+	EndIf
+	
+	If VisibilityManager.DD_BeltVisible == True
+		BondagePoints += 2
+	EndIf
+	
+	If VisibilityManager.DD_HarnessVisible == True || PlayerRef.WornHasKeyword(Mods.DD_Suit)
+		BondagePoints += 3
+	EndIf
+	
+	If PlayerRef.WornHasKeyword(Mods.DD_ArmCuffs) || PlayerRef.WornHasKeyword(Mods.DD_ArmCuffsFront) || PlayerRef.WornHasKeyword(Mods.DD_Armbinder) || PlayerRef.WornHasKeyword(Mods.DD_ArmbinderElbow) || PlayerRef.WornHasKeyword(Mods.DD_Gloves)
+		BondagePoints += 2
+	EndIf
+	
+	If PlayerRef.WornHasKeyword(Mods.DD_LegCuffs) || PlayerRef.WornHasKeyword(Mods.DD_Boots)
+		BondagePoints += 2
+	EndIf
+	
+	If PlayerRef.WornHasKeyword(Mods.DD_Blindfold)
+		BondagePoints += 1
+	EndIf
+	
+	If PlayerRef.WornHasKeyword(Mods.DD_Gag) || PlayerRef.WornHasKeyword(Mods.DD_GagPanel)
+		BondagePoints += 1
+	EndIf
+	
 	If IsVisiblyBound.GetValue() == 1
-		return True
+		If IsHeavilyBound.GetValue() == 1 || BondagePoints > 8
+			return True
+		ElseIf IsLightlyBound.GetValue() == 1
+			If BondagePoints == 1 && Data.GetFameValue(FameLocation, "Bound") < 15
+				return True
+			ElseIf BondagePoints == 2 && Data.GetFameValue(FameLocation, "Bound") < 30
+				return True
+			ElseIf BondagePoints == 3 && Data.GetFameValue(FameLocation, "Bound") < 45
+				return True
+			ElseIf BondagePoints == 4 && Data.GetFameValue(FameLocation, "Bound") < 60
+				return True
+			ElseIf BondagePoints == 5 && Data.GetFameValue(FameLocation, "Bound") < 75
+				return True
+			ElseIf BondagePoints == 6 && Data.GetFameValue(FameLocation, "Bound") < 90
+				return True
+			ElseIf BondagePoints == 7 && Data.GetFameValue(FameLocation, "Bound") < 105
+				return True
+			ElseIf BondagePoints == 8 && Data.GetFameValue(FameLocation, "Bound") < 120
+				return True
+			EndIf
+		EndIf
 	EndIf
 	
 	return False
@@ -709,7 +766,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 		PossibleFameCount += 1
 	EndIf
 	
-	If CanGainBoundFame() == True || CheckTattooExtraFame("Bound") == True || ExternalBoundFlag == True
+	If CanGainBoundFame(FameLocation) == True || CheckTattooExtraFame("Bound") == True || ExternalBoundFlag == True
 		PossibleFameArray[PossibleFameCount] = "Bound"
 		PossibleFameCount += 1
 	EndIf
@@ -982,6 +1039,10 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 	If Config.NotifyFameIncrease == True
 		FameGainNotification()
 	EndIf
+	
+	If Config.AllowLegacyOverwrite == True
+		LegacyOverwrite.OverwriteLegacyFame()
+	EndIf
 EndFunction
 
 Function DecayFame()
@@ -1131,6 +1192,10 @@ Function DecayFame()
 	
 	If Config.NotifyFameDecay == True && DecayNotificationMakesSense == True
 		FameDecayNotification()
+	EndIf
+	
+	If Config.AllowLegacyOverwrite == True
+		LegacyOverwrite.OverwriteLegacyFame()
 	EndIf
 EndFunction
 
@@ -1407,6 +1472,10 @@ Function SpreadFame(String SpreadFromLocation)
 	If Config.NotifyFameSpread == True
 		FameSpreadNotification()
 	EndIf
+	
+	If Config.AllowLegacyOverwrite == True
+		LegacyOverwrite.OverwriteLegacyFame()
+	EndIf
 EndFunction
 
 Function FameGainNotification()
@@ -1498,6 +1567,10 @@ Function ClearAllFame()
 	CumDumpGlobal.SetValue(0)
 	CheatGlobal.SetValue(0)
 	CuckGlobal.SetValue(0)
+	
+	If Config.AllowLegacyOverwrite == True
+		LegacyOverwrite.OverwriteLegacyFame()
+	EndIf
 	
 	Debug.MessageBox("All fame has been cleared.")
 EndFunction

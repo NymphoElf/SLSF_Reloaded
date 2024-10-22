@@ -18,6 +18,12 @@ Bool[] Property FootTattooApplied Auto Hidden
 Bool[] Property FootTattooVisible Auto Hidden
 Bool[] Property FootTattooExcluded Auto Hidden
 
+Bool Property DD_BraVisible Auto Hidden
+Bool Property DD_BeltVisible Auto Hidden
+Bool Property DD_HarnessVisible Auto Hidden
+Bool Property DD_CollarVisible Auto Hidden
+Bool Property IsWearingUnhideable Auto Hidden
+
 String[] Property BodyTattooSubcategory Auto Hidden ;Filled by MCM settings | Chest, Pelvis, Ass, Back, None
 String[] Property BodyTattooExtraFameType Auto Hidden ;Filled by MCM settings
 String[] Property FaceTattooExtraFameType Auto Hidden
@@ -532,69 +538,93 @@ Function CheckBondage()
 	Armor DD_BraSlot = PlayerRef.GetEquippedArmorInSlot(56)
 	Armor DD_BeltSlot = PlayerRef.GetEquippedArmorInSlot(49)
 	Armor DD_HarnessSlot = PlayerRef.GetEquippedArmorInSlot(58)
+	Armor DD_CollarSlot = PlayerRef.GetEquippedArmorInSlot(45)
 	
-	Bool DD_BraVisible = False
-	Bool DD_BeltVisible = False
-	Bool DD_HarnessVisible = False
+	DD_BraVisible = False
+	DD_BeltVisible = False
+	DD_HarnessVisible = False
+	DD_CollarVisible = False
 	
 	If PlayerRef.WornHasKeyword(Mods.DD_HeavyBondage)
 		IsLightlyBound.SetValue(0)
 		IsHeavilyBound.SetValue(1)
 		IsVisiblyBound.SetValue(1)
-	ElseIf PlayerRef.WornHasKeyword(Mods.DD_Lockable) && (DD_BraSlot != None || DD_BeltSlot != None || DD_HarnessSlot != None)
-		IsLightlyBound.SetValue(1)
-		IsHeavilyBound.SetValue(0)
-		
-		;Bra Check
-		If DD_BraSlot != None
-			If DD_BraSlot.HasKeyword(Mods.DD_Bra)
-				If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1)
-					DD_BraVisible = True
-				ElseIf BodySlot == None
-					DD_BraVisible = True
+	ElseIf PlayerRef.WornHasKeyword(Mods.DD_Lockable) 
+		If (DD_CollarSlot != None || DD_BraSlot != None || DD_BeltSlot != None || DD_HarnessSlot != None)
+			;Collar Check
+			;NOTE - I'm not aware of a good way to check if a collar is "hidden", therefore I'm assuming all collars are visible if worn
+			If DD_CollarSlot != None
+				If DD_CollarSlot.HasKeyword(Mods.DD_Collar)
+					If Mods.IsSLSInstalled == True
+						If PlayerRef.HasMagicEffect(Mods.SLS_CollarCurse) == True && Config.AllowSLSCursedCollarBoundFame == False
+							DD_CollarVisible = False ;Prevent 'Unfair' Bound Fame due to Sexlab Survival Mechanics
+						Else
+							DD_CollarVisible = True
+						EndIf
+					Else
+						DD_CollarVisible = True
+					EndIf
+				EndIf
+			EndIf
+			
+			;Bra Check
+			If DD_BraSlot != None
+				If DD_BraSlot.HasKeyword(Mods.DD_Bra)
+					If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1)
+						DD_BraVisible = True
+					ElseIf BodySlot == None
+						DD_BraVisible = True
+					EndIf
+				EndIf
+			EndIf
+			
+			;Belt Check
+			If DD_BeltSlot != None
+				If DD_BeltSlot.HasKeyword(Mods.DD_Belt)
+					If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1 || PlayerRef.GetFactionRank(Mods.AND_Ass) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1)
+						DD_BeltVisible = True
+					ElseIf BodySlot == None
+						DD_BeltVisible = True
+					EndIf
+				EndIf
+			ElseIf DD_HarnessSlot != None
+				If DD_HarnessSlot.HasKeyword(Mods.DD_Belt)
+					If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1 || PlayerRef.GetFactionRank(Mods.AND_Ass) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1)
+						DD_BeltVisible = True
+					ElseIf BodySlot == None
+						DD_BeltVisible = True
+					EndIf
+				EndIf
+			EndIf
+			
+			;Harness Check
+			If DD_HarnessSlot != None
+				If DD_HarnessSlot.HasKeyword(Mods.DD_Harness)
+					If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1)
+						DD_HarnessVisible = True
+					ElseIf BodySlot == None
+						DD_HarnessVisible = True
+					EndIf
 				EndIf
 			EndIf
 		EndIf
 		
-		;Belt Check
-		If DD_BeltSlot != None
-			If DD_BeltSlot.HasKeyword(Mods.DD_Belt)
-				If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1 || PlayerRef.GetFactionRank(Mods.AND_Ass) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1)
-					DD_BeltVisible = True
-				ElseIf BodySlot == None
-					DD_BeltVisible = True
-				EndIf
-			EndIf
-		ElseIf DD_HarnessSlot != None
-			If DD_HarnessSlot.HasKeyword(Mods.DD_Belt)
-				If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1 || PlayerRef.GetFactionRank(Mods.AND_Ass) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1)
-					DD_BeltVisible = True
-				ElseIf BodySlot == None
-					DD_BeltVisible = True
-				EndIf
-			EndIf
+		If PlayerRef.WornHasKeyword(Mods.DD_Hood) || PlayerRef.WornHasKeyword(Mods.DD_Gag) || PlayerRef.WornHasKeyword(Mods.DD_GagPanel) || PlayerRef.WornHasKeyword(Mods.DD_ArmCuffs) \
+		|| PlayerRef.WornHasKeyword(Mods.DD_ArmCuffsFront) || PlayerRef.WornHasKeyword(Mods.DD_Armbinder) || PlayerRef.WornHasKeyword(Mods.DD_ArmbinderElbow) || PlayerRef.WornHasKeyword(Mods.DD_Gloves) \
+		|| PlayerRef.WornHasKeyword(Mods.DD_LegCuffs) || PlayerRef.WornHasKeyword(Mods.DD_Boots) || PlayerRef.WornHasKeyword(Mods.DD_Suit) || PlayerRef.WornHasKeyword(Mods.DD_Corset) || PlayerRef.WornHasKeyword(Mods.DD_Blindfold)
+			IsWearingUnhideable = True
+		Else
+			IsWearingUnhideable = False
 		EndIf
 		
-		;Harness Check
-		If DD_HarnessSlot != None
-			If DD_HarnessSlot.HasKeyword(Mods.DD_Harness)
-				If Mods.IsANDInstalled == True && (PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1)
-					DD_HarnessVisible = True
-				ElseIf BodySlot == None
-					DD_HarnessVisible = True
-				EndIf
-			EndIf
-		EndIf
-		
-		If DD_BraVisible == True || DD_BeltVisible == True || DD_HarnessVisible == True
+		If DD_CollarVisible == True || DD_BraVisible == True || DD_BeltVisible == True || DD_HarnessVisible == True || IsWearingUnhideable == True
 			IsVisiblyBound.SetValue(1)
 		Else
 			IsVisiblyBound.SetValue(0)
 		EndIf
-	ElseIf PlayerRef.WornHasKeyword(Mods.DD_Hood) && Config.AnonymityEnabled == False
-		IsHeavilyBound.SetValue(0)
+		
 		IsLightlyBound.SetValue(1)
-		IsVisiblyBound.SetValue(1)
+		IsHeavilyBound.SetValue(0)
 	Else
 		IsVisiblyBound.SetValue(0)
 		IsLightlyBound.SetValue(0)
@@ -606,14 +636,12 @@ Function CheckBondage()
 	EndIf
 	
 	If PlayerRef.WornHasKeyword(Mods.DD_Belt)
-		IsBelted.SetValue(1)
+		IsBelted.SetValue(1) ;True
 	Else
-		IsBelted.SetValue(0)
+		IsBelted.SetValue(0) ;False
 	EndIf
 	
-	If PlayerRef.WornHasKeyword(Mods.DD_Collar) && (PlayerRef.HasMagicEffect(Mods.SLS_CollarCurse) == True)
-		IsCollared.SetValue(0) ;False
-	ElseIf PlayerRef.WornHasKeyword(Mods.DD_Collar) && (PlayerRef.HasMagicEffect(Mods.SLS_CollarCurse) == False)
+	If PlayerRef.WornHasKeyword(Mods.DD_Collar)
 		IsCollared.SetValue(1) ;True
 	Else
 		IsCollared.SetValue(0) ;False

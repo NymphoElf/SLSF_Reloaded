@@ -9,6 +9,7 @@ SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_NPCScan Property NPCScanScript Auto
 SexlabFramework Property Sexlab Auto
+SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
 
 Actor Property PlayerRef Auto
 
@@ -100,7 +101,7 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 				EndIf
 			Else
 				If PlayerController.Animation.HasTag("Aggressive")
-					If (PlayerSex != 0 || FameManager.CanGainBoundFame() || Config.SubmissiveDefault == True) && Config.DominantDefault == False
+					If (PlayerSex != 0 || FameManager.CanGainBoundFame(PlayerLocation) || Config.SubmissiveDefault == True) && Config.DominantDefault == False
 						FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
 					ElseIf (PlayerSex == 0 || (PlayerRef.GetActorBase().GetSex() != 0 && Sexlab.IsUsingStrapon(PlayerThread, PlayerRef)) || Config.DominantDefault == True) && Config.SubmissiveDefault == False
 						FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
@@ -108,7 +109,7 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 				EndIf
 			EndIf
 			
-			If Sexlab.IsVictim(PlayerThread, PlayerRef) || FameManager.CanGainBoundFame()
+			If Sexlab.IsVictim(PlayerThread, PlayerRef) || FameManager.CanGainBoundFame(PlayerLocation)
 				FameManager.GainFame("Masochist", PlayerLocation, Foreplay)
 			EndIf
 			
@@ -186,6 +187,10 @@ Event OnUpdateGameTime()
 	EndIf
 	
 	SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
+	
+	If Config.AllowLegacyOverwrite == True
+		LegacyOverwrite.OverwriteLegacyFame()
+	EndIf
 EndEvent
 
 Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)

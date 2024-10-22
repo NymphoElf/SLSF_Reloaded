@@ -26,9 +26,13 @@ Bool Property SubmissiveDefault Auto Hidden
 Bool Property DominantDefault Auto Hidden
 Bool Property UseGlobalFameMultiplier Auto Hidden
 Bool Property AllowLikeFameWhenRaped Auto Hidden
+Bool Property EnableTracing Auto Hidden
+Bool Property AllowSLSCursedCollarBoundFame Auto Hidden
+Bool Property AllowCollarBoundFame Auto Hidden
+Bool Property AllowLegacyOverwrite Auto Hidden
+
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
-Bool Property EnableTracing Auto Hidden
 
 Float Property NightStart Auto Hidden
 Float Property NightEnd Auto Hidden
@@ -114,6 +118,13 @@ Function SetDefaults()
 	PlayerIsAnonymous = False
 	AnonymityEnabled = True
 	AllowLikeFameWhenRaped = True
+	AllowSLSCursedCollarBoundFame = False
+	AllowCollarBoundFame = False
+	If Mods.IsLegacySLSFInstalled == True
+		AllowLegacyOverwrite = True
+	Else
+		AllowLegacyOverwrite = False
+	EndIf
 	
 	NightStart = 22
 	NightEnd = 6
@@ -134,6 +145,16 @@ Function SetDefaults()
 	FaceTattooIndex = 0
 	HandTattooIndex = 0
 	FootTattooIndex = 0
+	MaxVLowFameGain = 10
+	MaxLowFameGain = 8
+	MaxMedFameGain = 6
+	MaxHighFameGain = 4
+	MaxVHighFameGain = 2
+	MaxVLowFameDecay = 5
+	MaxLowFameDecay = 4
+	MaxMedFameDecay = 3
+	MaxHighFameDecay = 2
+	MaxVHighFameDecay = 1
 	
 	UseGlobalFameMultiplier = True
 	FameChangeMultiplier = 1.0
@@ -371,15 +392,16 @@ Event OnPageReset(String page)
 		
 	ElseIf (page == "Fame Settings")
 		AddHeaderOption("Fame Gain Settings")
+		AddToggleOptionST("SLSF_Reloaded_AllowLegacyOverwriteState", "Allow Legacy SLSF Overwrite", AllowLegacyOverwrite, GetDisabledOptionFlagIf(Mods.IsLegacySLSFInstalled == False))
 		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
 		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame", AllowForeplayFame, 0)
 		AddToggleOptionST("SLSF_Reloaded_AllowLikeFameWhenRapedState", "Allow 'Likes' Fame When Raped", AllowLikeFameWhenRaped, 0)
+		AddToggleOptionST("SLSF_Reloaded_AllowCollarBoundFame", "Allow Bound Fame from Collars", AllowCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsDDInstalled == False))
+		AddToggleOptionST("SLSF_Reloaded_AllowSLSCurseCollarBoundFameState", "Allow SLS Cursed Collar Bound Fame", AllowSLSCursedCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsSLSInstalled == False || AllowCollarBoundFame == False))
 		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
 		AddSliderOptionST("SLSF_Reloaded_NightStartState", "Night Starts at:", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
 		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
-		If Mods.IsFHUInstalled == True
-			AddSliderOptionST("SLSF_Reloaded_FHUThresholdState", "FHU Inflation for Cum Dump:", CumDumpFHUReq, "{2}", 0)
-		EndIf
+		AddSliderOptionST("SLSF_Reloaded_FHUThresholdState", "FHU Inflation for Cum Dump:", CumDumpFHUReq, "{2}", GetDisabledOptionFlagIf(Mods.IsFHUInstalled == False))
 		AddSliderOptionST("SLSF_Reloaded_MaxVLowFameGainState", "Maximum Very Low Fame Gain:", MaxVLowFameGain, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaxLowFameGainState", "Maximum Low Fame Gain:", MaxLowFameGain, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaxMedFameGainState", "Maximum Medium Fame Gain:", MaxMedFameGain, "{0}", 0)
@@ -649,6 +671,12 @@ Event OnPageReset(String page)
 			AddTextOption("Bimbos of Skyrim", "False")
 		EndIf
 		
+		If Mods.IsLegacySLSFInstalled == True
+			AddTextOption("Legacy SLSF", "True")
+		Else
+			AddTextOption("Legacy SLSF", "False")
+		EndIf
+		
 		SetCursorPosition(1)
 		AddHeaderOption("Detected Conditions")
 		AddTextOption("Player is Anonymous:", VisibilityManager.IsPlayerAnonymous() as String)
@@ -660,7 +688,7 @@ Event OnPageReset(String page)
 			AddTextOption("Player is Spider Pregnant:", Mods.IsESPregnant(PlayerScript.PlayerRef) as String)
 		EndIf
 		If Mods.IsFMInstalled == True
-			AddTextOption("Player is FM Pregnant:", Mods.IsFMPregnant(PlayerScript.PlayerRef) as String)
+			AddTextOption("Player is Fertility Mode Pregnant:", Mods.IsFMPregnant(PlayerScript.PlayerRef) as String)
 		EndIf
 		If Mods.IsHentaiPregInstalled == True
 			AddTextOption("Player is Hentai Pregnant:", Mods.IsHentaiPregnant(PlayerScript.PlayerRef) as String)
@@ -947,6 +975,43 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 		return 0
 	EndIf
 EndFunction
+
+State SLSF_Reloaded_AllowLegacyOverwriteState
+	Event OnSelectST()
+		If AllowLegacyOverwrite == False
+			AllowLegacyOverwrite = True
+		Else
+			AllowLegacyOverwrite = False
+		EndIf
+		
+		SetToggleOptionValueST(AllowLegacyOverwrite)
+	EndEvent
+EndState
+
+State SLSF_Reloaded_AllowCollarBoundFame
+	Event OnSelectST()
+		If AllowCollarBoundFame == False
+			AllowCollarBoundFame = True
+		Else
+			AllowCollarBoundFame = False
+		EndIf
+		
+		SetToggleOptionValueST(AllowCollarBoundFame)
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_AllowSLSCurseCollarBoundFameState
+	Event OnSelectST()
+		If AllowSLSCursedCollarBoundFame == False
+			AllowSLSCursedCollarBoundFame = True
+		Else
+			AllowSLSCursedCollarBoundFame = False
+		EndIf
+		
+		SetToggleOptionValueST(AllowSLSCursedCollarBoundFame)
+	EndEvent
+EndState
 
 State SLSF_Reloaded_MaxVLowFameGainState
 	Event OnSliderOpenST()
@@ -1581,14 +1646,14 @@ EndState
 
 State SLSF_Reloaded_MinimumNPCLOSDistanceState
 	Event OnSliderOpenST()
-		SetSliderDialogStartValue((MinimumNPCLOSDistance / 32))
-		SetSliderDialogDefaultValue(5)
-		SetSliderDialogRange(1, 20)
-		SetSliderDialogInterval(1)
+		SetSliderDialogStartValue(MinimumNPCLOSDistance)
+		SetSliderDialogDefaultValue(160)
+		SetSliderDialogRange(32, 1024)
+		SetSliderDialogInterval(32) ;Skyrim Units, which we are doing in steps of 32, or ~18 inches
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		MinimumNPCLOSDistance = value * 32 ;Need to convert to Skyrim Units, which we are doing in steps of 32, or ~18 inches
+		MinimumNPCLOSDistance = value
 		SetSliderOptionValueST(MinimumNPCLOSDistance, "{0}", False, "SLSF_Reloaded_MinimumNPCLOSDistanceState")
 	EndEvent
 	

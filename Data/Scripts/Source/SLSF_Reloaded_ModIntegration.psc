@@ -1,5 +1,8 @@
 ScriptName SLSF_Reloaded_ModIntegration extends Quest
 
+SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
+SLSF_Reloaded_MCM Property Config Auto
+
 Bool Property IsSexlabPlusInstalled Auto Hidden
 Bool Property IsANDInstalled Auto Hidden
 Bool Property IsDDInstalled Auto Hidden
@@ -15,10 +18,12 @@ Bool Property IsFameCommentsInstalled Auto Hidden
 Bool Property IsBimbosInstalled Auto Hidden
 Bool Property IsSexlabApproachInstalled Auto Hidden
 Bool Property IsCOEInstalled Auto Hidden
+Bool Property IsLegacySLSFInstalled Auto Hidden
 
 SCO_CumHandler Property COE Auto Hidden
 sr_InflateQuest Property FHU Auto Hidden
 PW_MainLoopScript Property PublicWhore Auto Hidden
+SLSF_Configuration Property LegacyConfig Auto Hidden
 
 Keyword Property DD_Lockable Auto Hidden
 Keyword Property DD_Collar Auto Hidden
@@ -31,6 +36,18 @@ Keyword Property DD_Harness Auto Hidden
 Keyword Property DD_Belt Auto Hidden
 Keyword Property DD_Bra Auto Hidden
 Keyword Property DD_HeavyBondage Auto Hidden
+Keyword Property DD_ArmCuffs Auto Hidden
+Keyword Property DD_ArmCuffsFront Auto Hidden
+Keyword Property DD_Armbinder Auto Hidden
+Keyword Property DD_ArmbinderElbow Auto Hidden
+Keyword Property DD_Gloves Auto Hidden
+Keyword Property DD_LegCuffs Auto Hidden
+Keyword Property DD_Boots Auto Hidden
+Keyword Property DD_Gag Auto Hidden
+Keyword Property DD_GagPanel Auto Hidden
+Keyword Property DD_Suit Auto Hidden
+Keyword Property DD_Corset Auto Hidden
+Keyword Property DD_Blindfold Auto Hidden
 
 Keyword Property SLS_BikiniArmor Auto Hidden
 MagicEffect Property SLS_CollarCurse Auto Hidden
@@ -50,6 +67,8 @@ Faction Property SpiderBreeder Auto Hidden
 Faction Property FertilityFaction Auto Hidden
 
 Faction Property HentaiPregFaction Auto Hidden
+
+GlobalVariable Property SLSF_Reloaded_CommentFrequency Auto
 
 Function CheckInstalledMods()
 	If SexlabUtil.GetVersion() > 20000
@@ -80,8 +99,30 @@ Function CheckInstalledMods()
 		AND_Ass = None
 	EndIf
 	
+	Int DD_ModuleCount = 0
+	
 	If Game.GetModByName("Devious Devices - Assets.esm") != 255
+		DD_ModuleCount += 1
+	EndIf
+	
+	If Game.GetModByName("Devious Devices - Integration.esm") != 255
+		DD_ModuleCount += 1
+	EndIf
+	
+	If Game.GetModByName("Devious Devices - Expansion.esm") != 255
+		DD_ModuleCount += 1
+	EndIf
+	
+	If DD_ModuleCount == 3
 		IsDDInstalled = True
+	ElseIf DD_ModuleCount > 0 && DD_ModuleCount < 3
+		Debug.MessageBox("You are missing one or more Devious Devices plugins! (Assets, Integration, and Expansion) Devious Devices will not be considered installed by SLSF Reloaded unless you have all of these!")
+		IsDDInstalled = False
+	Else
+		IsDDInstalled = False
+	EndIf
+	
+	If IsDDInstalled == True
 		DD_Lockable = Game.GetFormFromFile(0x00003894, "Devious Devices - Assets.esm") as Keyword
 		DD_Collar = Game.GetFormFromFile(0x00003DF7, "Devious Devices - Assets.esm") as Keyword
 		DD_NipplePiercing = Game.GetFormFromFile(0x0000CA39, "Devious Devices - Assets.esm") as Keyword
@@ -92,8 +133,23 @@ Function CheckInstalledMods()
 		DD_Harness = Game.GetFormFromFile(0x00017C43, "Devious Devices - Assets.esm") as Keyword
 		DD_Belt = Game.GetFormFromFile(0x00003330, "Devious Devices - Assets.esm") as Keyword
 		DD_Bra = Game.GetFormFromFile(0x00003DFA, "Devious Devices - Assets.esm") as Keyword
+		DD_ArmCuffs = Game.GetFormFromFile(0x00003DF9, "Devious Devices - Assets.esm") as Keyword
+		DD_Armbinder = Game.GetFormFromFile(0x0000CA3A, "Devious Devices - Assets.esm") as Keyword
+		DD_Blindfold = Game.GetFormFromFile(0x00011B1A, "Devious Devices - Assets.esm") as Keyword
+		DD_Boots = Game.GetFormFromFile(0x00027F29, "Devious Devices - Assets.esm") as Keyword
+		DD_Corset = Game.GetFormFromFile(0x00027F28, "Devious Devices - Assets.esm") as Keyword
+		DD_Gag = Game.GetFormFromFile(0x00007EB8, "Devious Devices - Assets.esm") as Keyword
+		DD_GagPanel = Game.GetFormFromFile(0x0001F306, "Devious Devices - Assets.esm") as Keyword
+		DD_Gloves = Game.GetFormFromFile(0x0002AFA1, "Devious Devices - Assets.esm") as Keyword
+		DD_LegCuffs = Game.GetFormFromFile(0x00003DF8, "Devious Devices - Assets.esm") as Keyword
+		DD_Suit = Game.GetFormFromFile(0x0002AFA3, "Devious Devices - Assets.esm") as Keyword
+		
+		DD_HeavyBondage = Game.GetFormFromFile(0x0005226C, "Devious Devices - Integration.esm") as Keyword
+		DD_ArmCuffsFront = Game.GetFormFromFile(0x00063AD9, "Devious Devices - Integration.esm") as Keyword
+		DD_ArmbinderElbow = Game.GetFormFromFile(0x00062539, "Devious Devices - Integration.esm") as Keyword
 	Else
 		IsDDInstalled = False
+		
 		DD_Lockable = None
 		DD_Collar = None
 		DD_NipplePiercing = None
@@ -104,12 +160,20 @@ Function CheckInstalledMods()
 		DD_Harness = None
 		DD_Belt = None
 		DD_Bra = None
-	EndIf
-	
-	If Game.GetModByName("Devious Devices - Integration.esm") != 255
-		DD_HeavyBondage = Game.GetFormFromFile(0x0005226C, "Devious Devices - Integration.esm") as Keyword
-	Else
+		DD_ArmCuffs = None
+		DD_Armbinder = None
+		DD_Blindfold = None
+		DD_Boots = None
+		DD_Corset = None
+		DD_Gag = None
+		DD_GagPanel = None
+		DD_Gloves = None
+		DD_LegCuffs = None
+		DD_Suit = None
+		
 		DD_HeavyBondage = None
+		DD_ArmCuffsFront = None
+		DD_ArmbinderElbow = None
 	EndIf
 	
 	If Game.GetModByName("EstrusChaurus.esp") != 255
@@ -193,6 +257,14 @@ Function CheckInstalledMods()
 		IsCOEInstalled = False
 		COE = None
 	EndIf
+	
+	If Game.GetModByName("SexLab - Sexual Fame [SLSF].esm") != 255
+		IsLegacySLSFInstalled = True
+		LegacyConfig = GetLegacyConfig()
+	Else
+		IsLegacySLSFInstalled = False
+		LegacyConfig = None
+	EndIf
 EndFunction
 
 sr_InflateQuest Function GetFHUData() Global
@@ -205,6 +277,22 @@ EndFunction
 
 SCO_CumHandler Function GetCOEData() Global
 	return Game.GetFormFromFile(0xD62, "Sexlab - Cum Overlays.esp") as SCO_CumHandler
+EndFunction
+
+SLSF_Configuration Function GetLegacyConfig() Global
+	return Game.GetFormFromFile(0x00016AB9, "SexLab - Sexual Fame [SLSF].esm") as SLSF_Configuration
+EndFunction
+
+Function OverwriteLegacyConfig()
+	LegacyConfig.LocationFameModInc = 0
+	LegacyConfig.LocationFameModDec = 0
+	LegacyConfig.ContageMagnitudo = 0
+	
+	LegacyConfig.ChildRemover = False
+	LegacyConfig.DisableTutorial = True
+	LegacyConfig.NotificationIncrease = False
+	LegacyConfig.AllowCommentProbability = (SLSF_Reloaded_CommentFrequency.GetValue() / 100)
+	LegacyConfig.CommentProbabilityRepository = LegacyConfig.AllowCommentProbability
 EndFunction
 
 Bool Function IsFMPregnant(Actor actorRef)
@@ -244,9 +332,9 @@ Bool Function IsPublicWhore()
 	return False
 EndFunction
 
-Int Function GetFHUInflation(Actor actorRef)
+Float Function GetFHUInflation(Actor actorRef)
 	If IsFHUInstalled == True
-		return FHU.GetInflation(actorRef) as Int
+		return FHU.GetInflation(actorRef)
 	EndIf
 	return 0
 EndFunction
