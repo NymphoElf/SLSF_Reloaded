@@ -1,7 +1,11 @@
 Scriptname SLSF_Reloaded_CommentManager extends Quest  
 
+SLSF_Reloaded_ModIntegration Property Mods Auto
+SLSF_Reloaded_MCM Property Config Auto
+
 GlobalVariable Property SLSF_AllowComment Auto
 GlobalVariable Property SLSF_Reloaded_CommentFrequency Auto
+GlobalVariable Property WICommentChanceNaked Auto
 
 Actor Property PlayerRef Auto
 
@@ -10,6 +14,8 @@ Event OnInit()
 EndEvent
 
 Event OnUpdate()
+	NakedCommentPublicWhoreCheck()
+	
     If PlayerRef.GetCombatState() != 0
         RegisterForSingleUpdate(6.0)
     Else
@@ -23,3 +29,11 @@ Event OnUpdate()
         RegisterForSingleUpdate(2.0)
     EndIf
 EndEvent
+
+Function NakedCommentPublicWhoreCheck()
+	If Mods.IsPublicWhore() == True && Config.DisableNakedCommentsWhilePW == True
+		WICommentChanceNaked.SetValue(-1)
+	ElseIf Mods.IsANDInstalled == False
+		WICommentChanceNaked.SetValue(100)
+	EndIf
+EndFunction

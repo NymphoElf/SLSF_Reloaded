@@ -38,6 +38,10 @@ Function RegisterExternalEvents()
 	RegisterForModEvent("SLSF_Reloaded_SendLocationRegister", "OnExternalLocationRegister")
 	RegisterForModEvent("SLSF_Reloaded_SendLocationUnregister", "OnExternalLocationUnregister")
 	
+	;MOD REGISTRATION LISTENERS
+	RegisterForModEvent("SLSF_Reloaded_RegisterMod", "OnExternalModRegister")
+	RegisterForModEvent("SLSF_Reloaded_UnregisterMod", "OnExternalModUnregister")
+	
 	;FLAG LISTENERS
 	RegisterForModEvent("SLSF_Reloaded_SetSlutFlag", "OnExternalSlutFlag")
 	RegisterForModEvent("SLSF_Reloaded_SetWhoreFlag", "OnExternalWhoreFlag")
@@ -70,6 +74,9 @@ Function RegisterExternalEvents()
 	RegisterForModEvent("SLSF_Reloaded_RequestLocation", "OnRequestLocation")
 	RegisterForModEvent("SLSF_Reloaded_RequestFame", "OnRequestFame")
 	RegisterForModEvent("SLSF_Reloaded_RequestCumVisibility", "OnRequestCumVisibility")
+	RegisterForModEvent("SLSF_Reloaded_RequestFlagState", "OnRequestFlagState")
+	RegisterForModEvent("SLSF_Reloaded_RequestModFlagState", "OnRequestModFlagState")
+	RegisterForModEvent("SLSF_Reloaded_RequestModRegisterState", "OnRequestModRegisterState")
 EndFunction
 
 ;/
@@ -703,24 +710,79 @@ Event OnExternalLocationUnregister(Form LocationToUnregister)
 EndEvent
 
 ;/
+==========================================
+========MOD REGISTRATION LISTENERS========
+==========================================
+
+The register function allows your mod to send Flags to SLSF Reloaded for Periodic Fame gains
+
+YOU MUST SEND THE NAME OF YOUR PLUGIN INCLUDING ".esp"/".esl"/".esm"
+
+Example:
+
+Int EventHandle = ModEvent.Create("SLSF_Reloaded_RegisterMod")
+ModEvent.PushString("SLSF Reloaded.esp")
+ModEvent.Send(EventHandle)
+
+If your mod has an uninstall function, it is recommended to include the Unregistration function with your mod!
+
+If your mod is otherwise uninstalled, it will still purge your mod from the registry.
+
+Example:
+
+Int EventHandle = ModEvent.Create("SLSF_Reloaded_UnregisterMod")
+ModEvent.PushString("SLSF Reloaded.esp")
+ModEvent.Send(EventHandle)
+
+/;
+
+Event OnExternalModRegister(String ModName = "-EMPTY-")
+	Data.RegisterExternalMod(ModName)
+EndEvent
+
+Event OnExternalModUnregister(String ModName = "-EMPTY")
+	Data.UnregisterExternalMod(ModName)
+EndEvent
+
+;/
 ==============================
 ========FLAG LISTENERS========
 ==============================
 These listeners allow you to manually set Fame flags, which will enable the periodic check
-to increase fame based on your mod's internal state.
-In order to prevent conflicts, these flags are filtered by mod name.
-Therefore, you must send the NAME of your mod in a string and the BOOLEAN for that category.
+to increase fame based on whatever you decide.
+
+In order to prevent conflicts, these flags are filtered by plugin name, with a maximum of 100 different plugins that can set flags.
+
+YOU MUST REGISTER YOUR MOD WITH SLSF RELOADED FIRST!!! SEE ABOVE EXAMPLE!!!
+
+Therefore, you must send the PLUGIN NAME of your mod in a string and the BOOLEAN for that category.
 
 TRUE means that you want to enable fame gains for that category from your mod
+(This WILL overrule the mod's internal conditions)
 
 FALSE means you want to disable fame gains for that category from your mod
-(this will NOT overrule this mod's internal conditions, and if another mod is still enabling fame gains for that category it will remain enabled)
+(This WILL NOT overrule this mod's internal conditions, and if another mod is still enabling fame gains for that category it will remain enabled.)
+
+Example (enable Slut Flag):
+
+Int EventHandle = ModEvent.Create("SLSF_Reloaded_SetSlutFlag")
+ModEvent.PushString("SLSF Reloaded.esp")
+ModEvent.PushBool(True)
+ModEvent.Send(EventHandle)
+
+Example (disable Slut Flag):
+
+Int EventHandle = ModEvent.Create("SLSF_Reloaded_SetSlutFlag")
+ModEvent.PushString("SLSF Reloaded.esp")
+ModEvent.PushBool(False)
+ModEvent.Send(EventHandle)
 /;
 
 Event OnExternalSlutFlag(String ModName, Bool Flag)
 	Data.SetExternalFlags(ModName, "Slut", Flag)
 EndEvent
 
+;This only gives PERIODIC Whore Fame. If you want sex acts to give Whore Fame instead of Slut Fame, use "Whore Event Flag".
 Event OnExternalWhoreFlag(String ModName, Bool Flag)
 	Data.SetExternalFlags(ModName, "Whore", Flag)
 EndEvent
@@ -817,6 +879,7 @@ Event OnExternalAirheadFlag(String ModName, Bool Flag)
 	Data.SetExternalFlags(ModName, "Airhead", Flag)
 EndEvent
 
+;The Whore Event flag turns any potential "Slut" fame from SEX ACTS - aka from Sexlab Animations - into Whore fame. Useful for prostitution mods not inherently used by SLSF Reloaded.
 Event OnExternalWhoreEventFlag(String ModName, Bool Flag)
 	Data.SetExternalFlags(ModName, "Whore Event", Flag)
 EndEvent
@@ -826,7 +889,7 @@ EndEvent
 ========DATA LISTENERS========
 ==============================
 
-You can use these events to pull data from SLSF Reloaded without making it a Hard dependency
+You can use these events to pull data from SLSF Reloaded without making it a Hard dependency, and are useful for debugging your mod
 /;
 
 ;You must specify if you want the STRICT location (the current cell) or not. If Strict = False, then it will return the first valid Fame Location, if any.
@@ -892,5 +955,42 @@ Event OnRequestCumVisibility(String CumLocation)
 	
 	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedCum")
 	ModEvent.PushBool(EventHandle, Result)
+	ModEvent.Send(EventHandle)
+EndEvent
+
+;Get the Flag State for SLSF Reloaded
+Event OnRequestFlagState(String FlagName)
+	Bool RequestedFlagState = Data.GetExternalFlags(FlagName)
+	String FlagExists = Data.DoesFlagExist(FlagName)
+	
+	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnFlagState")
+	ModEvent.PushString(EventHandle, FlagName) ;Sends back the Flag Name you requested the State for
+	ModEvent.PushString(EventHandle, FlagExists) ;Tells you if the Flag exists - Useful in case you misspelled the Flag Name. If the Flag does not exist, the Flag State will be False
+	ModEvent.PushBool(EventHandle, RequestedFlagState) ;Will return TRUE if ANY mod has set it to true
+	ModEvent.Send(EventHandle)
+EndEvent
+
+;Get the Flag State from a specific mod - ModName MUST be the PLUGIN NAME (Example: "mrt_SimpleProstitution.esp")
+Event OnRequestModFlagState(String ModName, String FlagName)
+	Bool RequestedModFlagState = Data.GetModFlagState(ModName, FlagName)
+	String FlagExists = Data.DoesFlagExist(FlagName)
+	Bool IsModRegistered = Data.IsModRegistered(ModName)
+	
+	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnModFlagState")
+	ModEvent.PushString(EventHandle, ModName) ;Sends back the mod name you requested the Flag State for
+	ModEvent.PushBool(EventHandle, IsModRegistered) ;True if the mod is Registered - If False, maybe you misspelled your plugin name or forgot to register it?
+	ModEvent.PushString(EventHandle, FlagName) ;Sends back your requested Flag Name
+	ModEvent.PushString(EventHandle, FlagExists) ;Tells you if the Flag exists - Useful in case you misspelled
+	ModEvent.PushBool(EventHandle, RequestedModFlagState) ;State of the flag you requested - False if the mod is not registered or if the flag does not exist
+	ModEvent.Send(EventHandle)
+EndEvent
+
+;This will tell you if the mod is registered with SLSF Reloaded or not
+Event OnRequestModRegisterState(String ModName)
+	Bool IsModRegistered = Data.IsModRegistered(ModName)
+	
+	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnModRegisteredState")
+	ModEvent.PushString(EventHandle, ModName)
+	ModEvent.PushBool(EventHandle, IsModRegistered)
 	ModEvent.Send(EventHandle)
 EndEvent

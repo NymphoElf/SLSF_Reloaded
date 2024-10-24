@@ -31,7 +31,6 @@ String[] Property HandTattooExtraFameType Auto Hidden
 String[] Property FootTattooExtraFameType Auto Hidden
 
 Int Property VisibleBodyTats Auto Hidden
-Int Property VisibleTattoos Auto Hidden
 
 Keyword Property SLSF_Reloaded_HidesIdentity Auto
 Keyword Property SLSF_Reloaded_DoesNotHideIdentity Auto
@@ -52,30 +51,31 @@ GlobalVariable Property IsCollared Auto
 
 Event OnInit()
 	Startup()
+	UpdateTattooSlots()
 EndEvent
 
 Function Startup()
-	BodyTattooApplied = New Bool[90]
-	BodyTattooVisible = New Bool[90]
-	BodyTattooExcluded = New Bool[90]
+	BodyTattooApplied = New Bool[40]
+	BodyTattooVisible = New Bool[40]
+	BodyTattooExcluded = New Bool[40]
 	
-	FaceTattooApplied = New Bool[90]
-	FaceTattooVisible = New Bool[90]
-	FaceTattooExcluded = New Bool[90]
+	FaceTattooApplied = New Bool[40]
+	FaceTattooVisible = New Bool[40]
+	FaceTattooExcluded = New Bool[40]
 	
-	HandTattooApplied = New Bool[90]
-	HandTattooVisible = New Bool[90]
-	HandTattooExcluded = New Bool[90]
+	HandTattooApplied = New Bool[40]
+	HandTattooVisible = New Bool[40]
+	HandTattooExcluded = New Bool[40]
 	
-	FootTattooApplied = New Bool[90]
-	FootTattooVisible = New Bool[90]
-	FootTattooExcluded = New Bool[90]
+	FootTattooApplied = New Bool[40]
+	FootTattooVisible = New Bool[40]
+	FootTattooExcluded = New Bool[40]
 	
-	BodyTattooSubcategory = New String[90]
-	BodyTattooExtraFameType = New String[90]
-	FaceTattooExtraFameType = New String[90]
-	HandTattooExtraFameType = New String[90]
-	FootTattooExtraFameType = New String[90]
+	BodyTattooSubcategory = New String[40]
+	BodyTattooExtraFameType = New String[40]
+	FaceTattooExtraFameType = New String[40]
+	HandTattooExtraFameType = New String[40]
+	FootTattooExtraFameType = New String[40]
 	
 	VisibleBodyTats = 0
 	
@@ -84,6 +84,36 @@ Function Startup()
 		BodyTattooSubcategory[BodySlotIndex] = "(None)"
 		BodySlotIndex += 1
 	EndWhile
+EndFunction
+
+Function UpdateTattooSlots()
+	If Mods.IsSlaveTatsInstalled == True
+		Int SlotCount = 0
+		SlotCount = SlaveTats.SLOTS("Body")
+		If SlotCount > 40
+			SlotCount = 40
+		EndIf
+		Config.BodyTattooSlots = SlotCount
+		
+		SlotCount = SlaveTats.SLOTS("Face")
+		If SlotCount > 40
+			SlotCount = 40
+		EndIf
+		Config.FaceTattooSlots = SlotCount
+		
+		SlotCount = SlaveTats.SLOTS("Hands")
+		If SlotCount > 40
+			SlotCount = 40
+		EndIf
+		Config.HandTattooSlots = SlotCount
+		
+		SlotCount = SlaveTats.SLOTS("Feet")
+		If SlotCount > 40
+			SlotCount = 40
+		EndIf
+		Config.FootTattooSlots = SlotCount
+		
+	EndIf
 EndFunction
 
 Event OnUpdate()
@@ -141,25 +171,37 @@ Function CheckAppliedTattoos()
 	EndIf
 	Int CheckedSlot = 0
 	
-	While CheckedSlot < Config.TattooSlots
+	While CheckedSlot < Config.BodyTattooSlots
 		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Body", CheckedSlot) != 0 && BodyTattooExcluded[CheckedSlot] == False
 			BodyTattooApplied[CheckedSlot] = True
 		Else
 			BodyTattooApplied[CheckedSlot] = False
 		EndIf
-		
+		CheckedSlot += 1
+	EndWhile
+	
+	CheckedSlot = 0
+	While CheckedSlot < Config.FaceTattooSlots
 		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Face", CheckedSlot) != 0 && FaceTattooExcluded[CheckedSlot] == False
 			FaceTattooApplied[CheckedSlot] = True
 		Else
 			FaceTattooApplied[CheckedSlot] = False
 		EndIf
-		
+		CheckedSlot += 1
+	EndWhile
+	
+	CheckedSlot = 0
+	While CheckedSlot < Config.HandTattooSlots
 		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Hands", CheckedSlot) != 0 && HandTattooExcluded[CheckedSlot] == False
 			HandTattooApplied[CheckedSlot] = True
 		Else
 			HandTattooApplied[CheckedSlot] = False
 		EndIf
-		
+		CheckedSlot += 1
+	EndWhile
+	
+	CheckedSlot = 0
+	While CheckedSlot < Config.FootTattooSlots
 		If SlaveTats.get_applied_tattoo_in_slot(PlayerRef, "Feet", CheckedSlot) != 0 && FootTattooExcluded[CheckedSlot] == False
 			FootTattooApplied[CheckedSlot] = True
 		Else
@@ -175,8 +217,19 @@ Int Function CountAppliedTattoos(String TattooArea)
 	EndIf
 	Int AppliedCount = 0
 	Int CountedIndex = 0
+	Int TotalSlots = 0
 	
-	While CountedIndex < Config.TattooSlots
+	If TattooArea == "Body"
+		TotalSlots = Config.BodyTattooSlots
+	ElseIf TattooArea == "Face"
+		TotalSlots = Config.FaceTattooSlots
+	ElseIf TattooArea == "Hands"
+		TotalSlots = Config.HandTattooSlots
+	ElseIf TattooArea == "Feet"
+		TotalSlots = Config.FootTattooSlots
+	EndIf
+	
+	While CountedIndex < TotalSlots
 		If TattooArea == "Body" && BodyTattooApplied[CountedIndex] == True
 			AppliedCount += 1
 		EndIf
@@ -205,10 +258,10 @@ Int Function CountVisibleTattoos()
 	EndIf
 	
 	VisibleBodyTats = 0
-	VisibleTattoos = 0
+	Int VisibleTattoos = 0
 	Int SlotIndex = 0
 	
-	While SlotIndex < Config.TattooSlots
+	While SlotIndex < Config.BodyTattooSlots
 		If IsBodyTattooVisible(SlotIndex) == True
 			BodyTattooVisible[SlotIndex] = True
 			VisibleTattoos += 1
@@ -216,21 +269,33 @@ Int Function CountVisibleTattoos()
 		Else
 			BodyTattooVisible[SlotIndex] = False
 		EndIf
-		
+		SlotIndex += 1
+	EndWhile
+	
+	SlotIndex = 0
+	While SlotIndex < Config.HandTattooSlots
 		If IsHandTattooVisible(SlotIndex) == True
 			HandTattooVisible[SlotIndex] = True
 			VisibleTattoos += 1
 		Else
 			HandTattooVisible[SlotIndex] = False
 		EndIf
-		
+		SlotIndex += 1
+	EndWhile
+	
+	SlotIndex = 0
+	While SlotIndex < Config.FaceTattooSlots
 		If IsFaceTattooVisible(SlotIndex) == True
 			FaceTattooVisible[SlotIndex] = True
 			VisibleTattoos += 1
 		Else
 			FaceTattooVisible[SlotIndex] = False
 		EndIf
-		
+		SlotIndex += 1
+	EndWhile
+	
+	SlotIndex = 0
+	While SlotIndex < Config.FootTattooSlots
 		If IsFootTattooVisible(SlotIndex) == True
 			FootTattooVisible[SlotIndex] = True
 			VisibleTattoos += 1
@@ -256,11 +321,12 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 	If Mods.IsSLSInstalled == True && Mods.IsANDInstalled == True
 		If BodyTattooSubcategory[SlotNumber] == "(None)"
 			If PlayerRef.GetEquippedArmorInSlot(32) != None
-				If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
+				If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 \
+				|| PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
 					return True
 				EndIf
 			Else
-				If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
+				If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
 					return True
 				EndIf
 			EndIf
@@ -296,7 +362,11 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 			Debug.MessageBox("SLSF Reloaded - ERROR: Body Tattoo Subcategory is invalid.")
 		EndIf
 	ElseIf Mods.IsSLSInstalled == False && Mods.IsANDInstalled == True
-		If BodyTattooSubcategory[SlotNumber] == "(None)" || BodyTattooSubcategory[SlotNumber] == "Chest"
+		If BodyTattooSubcategory[SlotNumber] == "(None)"
+			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
+				return True
+			EndIf
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Chest"
 			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
 				return True
 			EndIf

@@ -7,7 +7,6 @@ SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 SLSF_Reloaded_ModEventListener Property ExternalListener Auto
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_MCM Property Config Auto
-SLSF_Reloaded_NPCScan Property NPCScan Auto
 SexlabFramework Property Sexlab Auto
 SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
 
@@ -268,16 +267,6 @@ Function UpdateFame()
 		AirheadFameCleared = False
 	EndIf
 	
-	Bool ValidScanLocation = True
-	If LocationManager.CurrentLocation != None
-		NPCScan.CurrentLocation = LocationManager.CurrentLocationName()
-		If LocationManager.IsLocationValid(NPCScan.CurrentLocation) == False
-			ValidScanLocation = False
-		EndIf
-	Else
-		ValidScanLocation = False
-	EndIf
-	
 	;Multiply Fame Gains by the number of times NPC Scanning should have happened
 	If CountdownChange > 1
 		IterationMultiplier = CountdownChange
@@ -285,7 +274,7 @@ Function UpdateFame()
 		IterationMultiplier = 1
 	EndIf
 	
-	If ValidScanLocation == True && VisibilityManager.IsPlayerAnonymous() == False
+	If VisibilityManager.IsPlayerAnonymous() == False
 		PlayerScript.RunNPCDetect()
 	EndIf
 	
@@ -685,7 +674,7 @@ Bool Function CanGainTattooFame(String FameLocation)
 		Int TotalTattoos = VisibilityManager.CountVisibleTattoos()
 		Int BodyTattoos = VisibilityManager.VisibleBodyTats
 		
-		If TotalTattoos > 10 || BodyTattoos < 5
+		If TotalTattoos > 10 || BodyTattoos > 5
 			return True
 		ElseIf (TotalTattoos > 8 || BodyTattoos == 5) && TattooFame < 125
 			return True
@@ -715,19 +704,31 @@ EndFunction
 
 Bool Function CheckTattooExtraFame(String ExtraFame)
 	Int TattooSlot = 0
-	While TattooSlot < Config.TattooSlots
+	While TattooSlot < Config.BodyTattooSlots
 		If VisibilityManager.IsBodyTattooVisible(TattooSlot) == True && VisibilityManager.BodyTattooExtraFameType[TattooSlot] == ExtraFame
 			return True
 		EndIf
+		TattooSlot += 1
+	EndWhile
 		
+	TattooSlot = 0
+	While TattooSlot < Config.FaceTattooSlots
 		If VisibilityManager.IsFaceTattooVisible(TattooSlot) == True && VisibilityManager.FaceTattooExtraFameType[TattooSlot] == ExtraFame
 			return True
 		EndIf
-		
+		TattooSlot += 1
+	EndWhile
+	
+	TattooSlot = 0
+	While TattooSlot < Config.HandTattooSlots
 		If VisibilityManager.IsHandTattooVisible(TattooSlot) == True && VisibilityManager.HandTattooExtraFameType[TattooSlot] == ExtraFame
 			return True
 		EndIf
-		
+		TattooSlot += 1
+	EndWhile
+	
+	TattooSlot = 0
+	While TattooSlot < Config.FootTattooSlots
 		If VisibilityManager.IsFootTattooVisible(TattooSlot) == True && VisibilityManager.FootTattooExtraFameType[TattooSlot] == ExtraFame
 			return True
 		EndIf
@@ -979,6 +980,12 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 	If ((Hour > Config.NightStart || Hour < Config.NightEnd) && Config.ReduceFameAtNight == True) || IsForeplay == True
 		FameMultiplier = FameMultiplier / 2 ;Half Fame Gains at night
 	EndIf
+	
+	;/
+	If HasForeplay == True
+		FameMultiplier = (FameMultiplier * 1.5) ;Increase fame by an extra 50%
+	EndIf
+	/;
 	
 	Int PreviousFame = Data.GetFameValue(LocationName, Category)
 	

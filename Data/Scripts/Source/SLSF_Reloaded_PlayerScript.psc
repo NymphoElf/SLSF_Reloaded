@@ -7,7 +7,6 @@ SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_ModEventListener Property Listener Auto
 SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DataManager Property Data Auto
-SLSF_Reloaded_NPCScan Property NPCScanScript Auto
 SexlabFramework Property Sexlab Auto
 SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
 
@@ -29,15 +28,27 @@ Event OnInit()
 	RegisterForUpdateGameTime(0.5)
 	Mods.CheckInstalledMods()
 	RegisterForModEvent("HookAnimationStart", "OnSexlabAnimationStart")
+	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 EndEvent
 
 Event OnPlayerLoadGame()
 	Mods.CheckInstalledMods()
 	Listener.RegisterExternalEvents()
+	Data.CleanExternalModList()
+	VisibilityManager.UpdateTattooSlots()
 	RegisterForModEvent("HookAnimationStart", "OnSexlabAnimationStart")
+	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 EndEvent
 
 Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
+	AnimationAnalyze(threadID, hasPlayer)
+EndEvent
+
+Event OnSexlabForeplayEnd(Int threadID, Bool hasPlayer)
+	AnimationAnalyze(threadID, hasPlayer)
+EndEvent
+
+Function AnimationAnalyze(Int threadID, Bool hasPlayer)
 	If VisibilityManager.IsPlayerAnonymous() == True
 		return
 	EndIf
@@ -48,7 +59,7 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 		return
 	EndIf
 	
-	Utility.Wait(15.0) ;Give the player a short time to change the animation if needed before grabbing information about the animation. Tried to account for possible starting lag as well.
+	Utility.Wait(5.0) ;Give the player a short time to change the animation if needed before grabbing information about the animation. Tried to account for possible starting lag as well.
 	Bool Foreplay = False
 	
 	If Sexlab.IsActorActive(PlayerRef) == True
@@ -103,7 +114,7 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 				If PlayerController.Animation.HasTag("Aggressive")
 					If (PlayerSex != 0 || FameManager.CanGainBoundFame(PlayerLocation) || Config.SubmissiveDefault == True) && Config.DominantDefault == False
 						FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
-					ElseIf (PlayerSex == 0 || (PlayerRef.GetActorBase().GetSex() != 0 && Sexlab.IsUsingStrapon(PlayerThread, PlayerRef)) || Config.DominantDefault == True) && Config.SubmissiveDefault == False
+					ElseIf (PlayerSex == 0 || (PlayerSex != 0 && Sexlab.IsUsingStrapon(PlayerThread, PlayerRef)) || Config.DominantDefault == True) && Config.SubmissiveDefault == False
 						FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
 					EndIf
 				EndIf
@@ -159,21 +170,16 @@ Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 				ActorIndex += 1
 			EndWhile
 		Else
-			If LocationManager.IsLocationValid(NPCScanScript.CurrentLocation) == True
+			If LocationManager.IsLocationValid(LocationManager.CurrentLocationName()) == True
 				RunNPCDetect()
 			EndIf
 		EndIf
 	EndIf
-EndEvent
+EndFunction
 
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	LocationManager.CurrentLocation = akNewLoc
 	FameManager.UpdateGlobals()
-	If akNewLoc == None
-		NPCScanScript.CurrentLocation = "-NONE-"
-	Else
-		NPCScanScript.CurrentLocation = LocationManager.CurrentLocationName()
-	EndIf
 EndEvent
 
 Event OnUpdateGameTime()

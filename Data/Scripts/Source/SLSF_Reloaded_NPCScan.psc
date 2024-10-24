@@ -10,6 +10,12 @@ GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
 String Property CurrentLocation Auto Hidden
 
 Event OnEffectStart(Actor akTarget, Actor akCaster)
+	CurrentLocation = LocationManager.CurrentLocationName()
+	
+	If LocationManager.IsLocationValid(CurrentLocation) == False
+		return
+	EndIf
+	
 	If Sexlab.IsActorActive(akTarget) == True
 		return
 	EndIf

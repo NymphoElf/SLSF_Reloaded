@@ -629,20 +629,251 @@ Bool Function GetExternalFlags(String FlagName)
 		return ExternalFlags[23]
 	ElseIf FlagName == "Airhead"
 		return ExternalFlags[24]
+	Else
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded Get External Flags: Flag Name " + FlagName + " not found.")
+		EndIf
+		return False
 	EndIf
 EndFunction
 
-Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
+Function RegisterExternalMod(String ModName)
 	Int ModIndex = ExternalMods.Find(ModName)
 	Int EmptyModIndex = ExternalMods.Find("-EMPTY-")
+	Bool PluginFound = False
+	
+	If ModName == "-EMPTY-"
+		Debug.MessageBox("SLSF Reloaded External Mod Register Error: ModName is EMPTY. Mod not registered!")
+		return
+	Else
+		If Game.GetModByName(ModName) != 255
+			PluginFound = True
+		EndIf
+		
+		If PluginFound == False
+			Debug.MessageBox("SLSF Reloaded External Mod Register Error: Plugin " + ModName + " not found. Mod not registered!")
+			return
+		EndIf
+	EndIf
 	
 	If ModIndex < 0 || ModIndex > ExternalMods.Length
 		If EmptyModIndex >= 0
 			ExternalMods[EmptyModIndex] = ModName
 		Else
-			Debug.MessageBox("Cannot Add " + ModName + " to External Mod List. External Mod List full.")
+			If Config.EnableTracing == True
+				Debug.Trace("Cannot Add " + ModName + " to External Mod List. External Mod List full.")
+			EndIf
 			return
 		EndIf
+	Else
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded External Mod Register: Mod " + ModName + " already registered. Skipping register function...")
+		EndIf
+	EndIf
+EndFunction
+
+Function CleanExternalModList()
+	Int ModIndex = 0
+	Bool ModFound = False
+	
+	While ModIndex < ExternalMods.Length
+		If ExternalMods[ModIndex] != "-EMPTY-"
+			If Game.GetModByName(ExternalMods[ModIndex]) != 255
+				ModFound = True
+			EndIf
+			
+			If ModFound == False
+				UnregisterExternalMod(ExternalMods[ModIndex])
+			EndIf
+		EndIf
+		ModIndex += 1
+	EndWhile
+EndFunction
+
+Function UnregisterExternalMod(String ModName)
+	Int ModIndex = ExternalMods.Find(ModName)
+	
+	If ModIndex < 0 || ModIndex > ExternalMods.Length
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded External Mod Unregister Error: Mod " + ModName + " not found in External Mod List. Mod unregister skipped...")
+		EndIf
+		return
+	Else
+		ExternalMods[ModIndex] = "-EMPTY-"
+		WhoreFlags[ModIndex] = False
+		SlutFlags[ModIndex] = False
+		ExhibitionistFlags[ModIndex] = False
+		OralFlags[ModIndex] = False
+		AnalFlags[ModIndex] = False
+		NastyFlags[ModIndex] = False
+		PregnantFlags[ModIndex] = False
+		DominantFlags[ModIndex] = False
+		SubmissiveFlags[ModIndex] = False
+		SadistFlags[ModIndex] = False
+		MasochistFlags[ModIndex] = False
+		GentleFlags[ModIndex] = False
+		LikesMenFlags[ModIndex] = False
+		LikesWomenFlags[ModIndex] = False
+		LikesOrcFlags[ModIndex] = False
+		LikesKhajiitFlags[ModIndex] = False
+		LikesArgonianFlags[ModIndex] = False
+		BestialityFlags[ModIndex] = False
+		GroupFlags[ModIndex] = False
+		BoundFlags[ModIndex] = False
+		TattooFlags[ModIndex] = False
+		CumDumpFlags[ModIndex] = False
+		UnfaithfulFlags[ModIndex] = False
+		CuckFlags[ModIndex] = False
+		AirheadFlags[ModIndex] = False
+		WhoreEventFlags[ModIndex] = False
+	EndIf
+EndFunction
+
+Bool Function GetModFlagState(String ModName, String FlagName)
+	Int ModIndex = ExternalMods.Find(ModName)
+	
+	If ModIndex < 0 || ModIndex > ExternalMods.Length
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded Get Mod Flag State: Mod " + ModName + " not found.")
+		EndIf
+		return False
+	EndIf
+	
+	If FlagName == "Whore"
+		return WhoreFlags[ModIndex]
+	ElseIf FlagName == "Slut"
+		return SlutFlags[ModIndex]
+	ElseIf FlagName == "Exhibitionist"
+		return ExhibitionistFlags[ModIndex]
+	ElseIf FlagName == "Oral"
+		return OralFlags[ModIndex]
+	ElseIf FlagName == "Anal"
+		return AnalFlags[ModIndex]
+	ElseIf FlagName == "Nasty"
+		return NastyFlags[ModIndex]
+	ElseIf FlagName == "Pregnant"
+		return PregnantFlags[ModIndex]
+	ElseIf FlagName == "Dominant"
+		return DominantFlags[ModIndex]
+	ElseIf FlagName == "Submissive"
+		return SubmissiveFlags[ModIndex]
+	ElseIf FlagName == "Sadist"
+		return SadistFlags[ModIndex]
+	ElseIf FlagName == "Masochist"
+		return MasochistFlags[ModIndex]
+	ElseIf FlagName == "Gentle"
+		return GentleFlags[ModIndex]
+	ElseIf FlagName == "Likes Men"
+		return LikesMenFlags[ModIndex]
+	ElseIf FlagName == "Likes Women"
+		return LikesWomenFlags[ModIndex]
+	ElseIf FlagName == "Likes Orc"
+		return LikesOrcFlags[ModIndex]
+	ElseIf FlagName == "Likes Khajiit"
+		return LikesKhajiitFlags[ModIndex]
+	ElseIf FlagName == "Likes Argonian"
+		return LikesArgonianFlags[ModIndex]
+	ElseIf FlagName == "Bestiality"
+		return BestialityFlags[ModIndex]
+	ElseIf FlagName == "Group"
+		return GroupFlags[ModIndex]
+	ElseIf FlagName == "Bound"
+		return BoundFlags[ModIndex]
+	ElseIf FlagName == "Tattoo"
+		return TattooFlags[ModIndex]
+	ElseIf FlagName == "Cum Dump"
+		return CumDumpFlags[ModIndex]
+	ElseIf FlagName == "Unfaithful"
+		return UnfaithfulFlags[ModIndex]
+	ElseIf FlagName == "Cuck"
+		return CuckFlags[ModIndex]
+	ElseIf FlagName == "Airhead"
+		return AirheadFlags[ModIndex]
+	Else
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded Get Mod Flag State: Flag Name " + FlagName + " not found.")
+		EndIf
+		return False
+	EndIf
+EndFunction
+
+String Function DoesFlagExist(String FlagName)
+	If FlagName == "Whore"
+		return "Yes"
+	ElseIf FlagName == "Slut"
+		return "Yes"
+	ElseIf FlagName == "Exhibitionist"
+		return "Yes"
+	ElseIf FlagName == "Oral"
+		return "Yes"
+	ElseIf FlagName == "Anal"
+		return "Yes"
+	ElseIf FlagName == "Nasty"
+		return "Yes"
+	ElseIf FlagName == "Pregnant"
+		return "Yes"
+	ElseIf FlagName == "Dominant"
+		return "Yes"
+	ElseIf FlagName == "Submissive"
+		return "Yes"
+	ElseIf FlagName == "Sadist"
+		return "Yes"
+	ElseIf FlagName == "Masochist"
+		return "Yes"
+	ElseIf FlagName == "Gentle"
+		return "Yes"
+	ElseIf FlagName == "Likes Men"
+		return "Yes"
+	ElseIf FlagName == "Likes Women"
+		return "Yes"
+	ElseIf FlagName == "Likes Orc"
+		return "Yes"
+	ElseIf FlagName == "Likes Khajiit"
+		return "Yes"
+	ElseIf FlagName == "Likes Argonian"
+		return "Yes"
+	ElseIf FlagName == "Bestiality"
+		return "Yes"
+	ElseIf FlagName == "Group"
+		return "Yes"
+	ElseIf FlagName == "Bound"
+		return "Yes"
+	ElseIf FlagName == "Tattoo"
+		return "Yes"
+	ElseIf FlagName == "Cum Dump"
+		return "Yes"
+	ElseIf FlagName == "Unfaithful"
+		return "Yes"
+	ElseIf FlagName == "Cuck"
+		return "Yes"
+	ElseIf FlagName == "Airhead"
+		return "Yes"
+	Else
+		return "No"
+	EndIf
+EndFunction
+
+Bool Function IsModRegistered(String ModName)
+	Int ModIndex = ExternalMods.Find(ModName)
+	
+	If ModIndex < 0 || ModIndex > ExternalMods.Length
+		return False
+	Else
+		return True
+	EndIf
+EndFunction
+
+Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
+	If ModName == "Simple Player Prostitution"
+		RegisterExternalMod("mrt_SimpleProstitution.esp")
+		ModName = "mrt_SimpleProstitution.esp"
+	EndIf
+	
+	Int ModIndex = ExternalMods.Find(ModName)
+	
+	If ModIndex < 0 || ModIndex > ExternalMods.Length
+		Debug.MessageBox("SLSF Reloaded External Flags Error: Cannot Set " + FlagName + " for " + ModName + ". " + ModName + " is not Registered with SLSF Reloaded.")
+		return
 	EndIf
 	
 	If FlagName == "Whore"

@@ -194,8 +194,10 @@ Function CheckInstalledMods()
 	
 	If Game.GetModByName("Public Whore.esp") != 255
 		IsPWInstalled = True
+		PublicWhore = Game.GetFormFromFile(0xD63, "Public Whore.esp") as PW_MainLoopScript
 	Else
 		IsPWInstalled = False
+		PublicWhore = None
 	EndIf
 	
 	If Game.GetModByName("Fertility Mode 3 Fixes and Updates.esp") != 255

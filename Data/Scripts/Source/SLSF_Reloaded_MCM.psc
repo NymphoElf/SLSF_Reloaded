@@ -30,6 +30,7 @@ Bool Property EnableTracing Auto Hidden
 Bool Property AllowSLSCursedCollarBoundFame Auto Hidden
 Bool Property AllowCollarBoundFame Auto Hidden
 Bool Property AllowLegacyOverwrite Auto Hidden
+Bool Property DisableNakedCommentsWhilePW Auto Hidden
 
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
@@ -52,7 +53,10 @@ Float Property FameChangeMultiplier Auto Hidden
 Float[] Property FameCategoryMultiplier Auto
 Float Property CumDumpFHUReq Auto Hidden
 
-Int Property TattooSlots Auto Hidden
+Int Property BodyTattooSlots Auto Hidden
+Int Property FaceTattooSlots Auto Hidden
+Int Property HandTattooSlots Auto Hidden
+Int Property FootTattooSlots Auto Hidden
 Int Property BodyTattooIndex Auto Hidden
 Int Property FaceTattooIndex Auto Hidden
 Int Property HandTattooIndex Auto Hidden
@@ -80,6 +84,7 @@ Int Property UnregisterLocationIndex Auto Hidden
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 GlobalVariable Property SLSF_Reloaded_CommentFrequency Auto
 GlobalVariable Property IsVisiblyBound Auto
+GlobalVariable Property WICommentChanceNaked Auto
 
 Event OnConfigInit()
 	Utility.Wait(1.0)
@@ -139,7 +144,6 @@ Function SetDefaults()
 	FameChanceByNeutral = 75
 	FameChanceByFriend = 50
 	FameChanceByLover = 25
-	TattooSlots = 6
 	TattooStatusSelect = "Body"
 	BodyTattooIndex = 0
 	FaceTattooIndex = 0
@@ -374,15 +378,17 @@ Event OnPageReset(String page)
 		EndIf
 	
 	ElseIf (page == "General Settings")
+		AddHeaderOption("Legacy Overwrite")
+		AddToggleOptionST("SLSF_Reloaded_AllowLegacyOverwriteState", "Allow Legacy SLSF Overwrite", AllowLegacyOverwrite, GetDisabledOptionFlagIf(Mods.IsLegacySLSFInstalled == False))
+		
 		AddHeaderOption("Dom/Sub Defaults")
 		AddTextOption("Sexlab P+ Installed:", (Mods.IsSexlabPlusInstalled) as String)
 		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Default to Submissive", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True || Mods.IsSexlabPlusInstalled == True))
 		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Default to Dominant", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True || Mods.IsSexlabPlusInstalled == True))
+		AddToggleOptionST("SLSF_Reloaded_DisableNakedCommentsWhilePWState", "No Naked Comments While Public Whore", DisableNakedCommentsWhilePW, GetDisabledOptionFlagIf(Mods.IsPWInstalled == False))
 		
-		If Mods.IsFameCommentsInstalled == True
-			AddHeaderOption("Comment Settings")
-			AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance: ", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", 0)
-		EndIf
+		AddHeaderOption("Fame Comments Settings")
+		AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance: ", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", GetDisabledOptionFlagIf(Mods.IsFameCommentsInstalled == False))
 		
 		SetCursorPosition(1)
 		AddHeaderOption("Notification Toggles")
@@ -392,16 +398,15 @@ Event OnPageReset(String page)
 		
 	ElseIf (page == "Fame Settings")
 		AddHeaderOption("Fame Gain Settings")
-		AddToggleOptionST("SLSF_Reloaded_AllowLegacyOverwriteState", "Allow Legacy SLSF Overwrite", AllowLegacyOverwrite, GetDisabledOptionFlagIf(Mods.IsLegacySLSFInstalled == False))
 		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
-		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame", AllowForeplayFame, 0)
+		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame Bonus", AllowForeplayFame, 0)
 		AddToggleOptionST("SLSF_Reloaded_AllowLikeFameWhenRapedState", "Allow 'Likes' Fame When Raped", AllowLikeFameWhenRaped, 0)
 		AddToggleOptionST("SLSF_Reloaded_AllowCollarBoundFame", "Allow Bound Fame from Collars", AllowCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsDDInstalled == False))
 		AddToggleOptionST("SLSF_Reloaded_AllowSLSCurseCollarBoundFameState", "Allow SLS Cursed Collar Bound Fame", AllowSLSCursedCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsSLSInstalled == False || AllowCollarBoundFame == False))
 		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
 		AddSliderOptionST("SLSF_Reloaded_NightStartState", "Night Starts at:", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
 		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
-		AddSliderOptionST("SLSF_Reloaded_FHUThresholdState", "FHU Inflation for Cum Dump:", CumDumpFHUReq, "{2}", GetDisabledOptionFlagIf(Mods.IsFHUInstalled == False))
+		AddSliderOptionST("SLSF_Reloaded_FHUThresholdState", "FHU Inflation needed for Cum Dump:", CumDumpFHUReq, "{2}", GetDisabledOptionFlagIf(Mods.IsFHUInstalled == False))
 		AddSliderOptionST("SLSF_Reloaded_MaxVLowFameGainState", "Maximum Very Low Fame Gain:", MaxVLowFameGain, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaxLowFameGainState", "Maximum Low Fame Gain:", MaxLowFameGain, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaxMedFameGainState", "Maximum Medium Fame Gain:", MaxMedFameGain, "{0}", 0)
@@ -474,14 +479,15 @@ Event OnPageReset(String page)
 		EndIf
 	
 	ElseIf (page == "Tattoo Settings")
-		AddHeaderOption("Maximum Tattoo Slots")
-		AddSliderOptionST("SLSF_Reloaded_MaxTattooSlotsState", "Number of Slots", TattooSlots, "{0}", 0)
-		
 		AddHeaderOption("Body Tattoos")
 		AddMenuOptionST("SLSF_Reloaded_BodyTattooSlotState", "Body Tattoo Slot", (BodyTattooIndex + 1), 0)
 		AddToggleOptionST("SLSF_Reloaded_ExcludeBodySlotState", "Exclude From Fame", VisibilityManager.BodyTattooExcluded[BodyTattooIndex], 0)
 		If VisibilityManager.BodyTattooApplied[BodyTattooIndex] == True
-			AddTextOption("Slot Used:", "Yes")
+			If VisibilityManager.BodyTattooExcluded[BodyTattooIndex] == True
+				AddTextOption("Slot Used:", "Yes (Excluded)")
+			Else
+				AddTextOption("Slot Used:", "Yes")
+			EndIf
 			If VisibilityManager.IsBodyTattooVisible(BodyTattooIndex) == True
 				AddTextOption("Slot Visible:", "Yes")
 			Else
@@ -489,7 +495,7 @@ Event OnPageReset(String page)
 			EndIf
 		Else
 			If VisibilityManager.BodyTattooExcluded[BodyTattooIndex] == True
-				AddTextOption("Slot Used:", "Excluded")
+				AddTextOption("Slot Used:", "No (Excluded)")
 			Else
 				AddTextOption("Slot Used:", "No")
 			EndIf
@@ -518,7 +524,7 @@ Event OnPageReset(String page)
 		EndIf
 		AddMenuOptionST("SLSF_Reloaded_HandSlotFameState", "Extra Fame", VisibilityManager.HandTattooExtraFameType[HandTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[HandTattooIndex] == False))
 		
-		SetCursorPosition(5)
+		SetCursorPosition(1)
 		AddHeaderOption("Face Tattoos")
 		AddMenuOptionST("SLSF_Reloaded_FaceTattooSlotState", "Face Tattoo Slot", (FaceTattooIndex + 1), 0)
 		AddToggleOptionST("SLSF_Reloaded_ExcludeFaceSlotState", "Exclude From Fame", VisibilityManager.FaceTattooExcluded[FaceTattooIndex], 0)
@@ -700,7 +706,7 @@ Event OnPageReset(String page)
 			AddTextOption("Player's FHU Inflation:", Mods.GetFHUInflation(PlayerScript.PlayerRef) as String)
 		EndIf
 		
-		AddTextOption("Total Visible Tattoos:", VisibilityManager.VisibleTattoos as String)
+		AddTextOption("Total Visible Tattoos:", VisibilityManager.CountVisibleTattoos() as String)
 		
 		If IsVisiblyBound.GetValue() == 1
 			AddTextOption("Visibly Bound:", "Yes")
@@ -719,12 +725,12 @@ Event OnPageReset(String page)
 		Int TattooIndex = 0
 		Int SlotNumber = 1
 		If TattooStatusSelect == "Body"
-			While TattooIndex < TattooSlots
-				If TattooIndex == (TattooSlots / 2)
+			While TattooIndex < BodyTattooSlots
+				If BodyTattooSlots > 8 && TattooIndex == (BodyTattooSlots / 2)
 					SetCursorPosition(7)
 				EndIf
 				
-				If VisibilityManager.BodyTattooVisible[TattooIndex] == True
+				If VisibilityManager.IsBodyTattooVisible(TattooIndex) == True
 					AddTextOption("Slot " + SlotNumber, "Yes")
 				Else
 					AddTextOption("Slot " + SlotNumber, "No")
@@ -735,12 +741,12 @@ Event OnPageReset(String page)
 		EndIf
 		
 		If TattooStatusSelect == "Face"
-			While TattooIndex < TattooSlots
-				If TattooIndex == (TattooSlots / 2)
+			While TattooIndex < FaceTattooSlots
+				If FaceTattooSlots > 8 && TattooIndex == (FaceTattooSlots / 2)
 					SetCursorPosition(7)
 				EndIf
 				
-				If VisibilityManager.FaceTattooVisible[TattooIndex] == True
+				If VisibilityManager.IsFaceTattooVisible(TattooIndex) == True
 					AddTextOption("Slot " + SlotNumber, "Yes")
 				Else
 					AddTextOption("Slot " + SlotNumber, "No")
@@ -751,12 +757,12 @@ Event OnPageReset(String page)
 		EndIf
 		
 		If TattooStatusSelect == "Hands"
-			While TattooIndex < TattooSlots
-				If TattooIndex == (TattooSlots / 2)
+			While TattooIndex < HandTattooSlots
+				If HandTattooSlots > 8 && TattooIndex == (HandTattooSlots / 2)
 					SetCursorPosition(7)
 				EndIf
 				
-				If VisibilityManager.HandTattooVisible[TattooIndex] == True
+				If VisibilityManager.IsHandTattooVisible(TattooIndex) == True
 					AddTextOption("Slot " + SlotNumber, "Yes")
 				Else
 					AddTextOption("Slot " + SlotNumber, "No")
@@ -767,12 +773,12 @@ Event OnPageReset(String page)
 		EndIf
 		
 		If TattooStatusSelect == "Feet"
-			While TattooIndex < TattooSlots
-				If TattooIndex == (TattooSlots / 2)
+			While TattooIndex < FootTattooSlots
+				If FootTattooSlots > 8 && TattooIndex == (FootTattooSlots / 2)
 					SetCursorPosition(7)
 				EndIf
 				
-				If VisibilityManager.FootTattooVisible[TattooIndex] == True
+				If VisibilityManager.IsFootTattooVisible(TattooIndex) == True
 					AddTextOption("Slot " + SlotNumber, "Yes")
 				Else
 					AddTextOption("Slot " + SlotNumber, "No")
@@ -975,6 +981,18 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 		return 0
 	EndIf
 EndFunction
+
+State SLSF_Reloaded_DisableNakedCommentsWhilePWState
+	Event OnSelectST()
+		If DisableNakedCommentsWhilePW == False
+			DisableNakedCommentsWhilePW = True
+		Else
+			DisableNakedCommentsWhilePW = False
+		EndIf
+		
+		SetToggleOptionValueST(DisableNakedCommentsWhilePW)
+	EndEvent
+EndState
 
 State SLSF_Reloaded_AllowLegacyOverwriteState
 	Event OnSelectST()
@@ -1246,25 +1264,6 @@ State SLSF_Reloaded_AllowLikeFameWhenRapedState
 	EndEvent
 EndState
 
-State SLSF_Reloaded_MaxTattooSlotsState
-	Event OnSliderOpenST()
-		SetSliderDialogStartValue(TattooSlots)
-		SetSliderDialogDefaultValue(6)
-		SetSliderDialogRange(6, 90)
-		SetSliderDialogInterval(1)
-	EndEvent
-	
-	Event OnSliderAcceptST(float value)
-		TattooSlots = value as Int
-		SetSliderOptionValueST(TattooSlots, "{0}", False, "SLSF_Reloaded_MaxTattooSlotsState")
-	EndEvent
-	
-	Event OnDefaultST()
-		TattooSlots = 6
-		SetSliderOptionValueST(TattooSlots, "{0}", False, "SLSF_Reloaded_MaxTattooSlotsState")
-	EndEvent
-EndState
-
 State SLSF_Reloaded_TattooStatusState
 	Event OnMenuOpenST()
 		String[] TattooArea = New String[4]
@@ -1293,10 +1292,10 @@ EndState
 
 State SLSF_Reloaded_BodyTattooSlotState
 	Event OnMenuOpenST()
-		String[] BodySlotIndex = Utility.CreateStringArray(TattooSlots)
+		String[] BodySlotIndex = Utility.CreateStringArray(BodyTattooSlots)
 		
 		Int ArrayIndex = 0
-		While ArrayIndex < TattooSlots
+		While ArrayIndex < BodyTattooSlots
 			BodySlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
 			ArrayIndex += 1
 		EndWhile
@@ -1372,10 +1371,10 @@ EndState
 
 State SLSF_Reloaded_FaceTattooSlotState
 	Event OnMenuOpenST()
-		String[] FaceSlotIndex = Utility.CreateStringArray(TattooSlots)
+		String[] FaceSlotIndex = Utility.CreateStringArray(FaceTattooSlots)
 		
 		Int ArrayIndex = 0
-		While ArrayIndex < TattooSlots
+		While ArrayIndex < FaceTattooSlots
 			FaceSlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
 			ArrayIndex += 1
 		EndWhile
@@ -1421,10 +1420,10 @@ EndState
 
 State SLSF_Reloaded_HandTattooSlotState
 	Event OnMenuOpenST()
-		String[] HandSlotIndex = Utility.CreateStringArray(TattooSlots)
+		String[] HandSlotIndex = Utility.CreateStringArray(HandTattooSlots)
 		
 		Int ArrayIndex = 0
-		While ArrayIndex < TattooSlots
+		While ArrayIndex < HandTattooSlots
 			HandSlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
 			ArrayIndex += 1
 		EndWhile
@@ -1470,10 +1469,10 @@ EndState
 
 State SLSF_Reloaded_FootTattooSlotState
 	Event OnMenuOpenST()
-		String[] FootSlotIndex = Utility.CreateStringArray(TattooSlots)
+		String[] FootSlotIndex = Utility.CreateStringArray(FootTattooSlots)
 		
 		Int ArrayIndex = 0
-		While ArrayIndex < TattooSlots
+		While ArrayIndex < FootTattooSlots
 			FootSlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
 			ArrayIndex += 1
 		EndWhile
