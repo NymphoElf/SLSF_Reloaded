@@ -100,7 +100,7 @@ EndEvent
 
 Function InstallMCM()
 	ModName = "SLSF Reloaded"
-	Pages = New String[11]
+	Pages = New String[12]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
 	Pages[2] = "General Settings"
@@ -111,7 +111,8 @@ Function InstallMCM()
 	Pages[7] = "Tattoo Info"
 	Pages[8] = "Decay Info"
 	Pages[9] = "Spread Info"
-	Pages[10] = "Debug"
+	Pages[10] = "Registered Mods"
+	Pages[11] = "Debug"
 EndFunction
 
 Function SetDefaults()
@@ -225,7 +226,7 @@ Function CheckLocationUnregister()
 EndFunction
 
 Event OnConfigOpen()
-	Pages = New String[11]
+	Pages = New String[12]
 	Pages[0] = "Fame Overview"
 	Pages[1] = "Detailed Fame View"
 	Pages[2] = "General Settings"
@@ -236,7 +237,8 @@ Event OnConfigOpen()
 	Pages[7] = "Tattoo Info"
 	Pages[8] = "Decay Info"
 	Pages[9] = "Spread Info"
-	Pages[10] = "Debug"
+	Pages[10] = "Registered Mods"
+	Pages[11] = "Debug"
 	
 	VisibilityManager.RegisterForSingleUpdate(0.1)
 	
@@ -882,93 +884,105 @@ Event OnPageReset(String page)
 	ElseIf (page == "Spread Info")
 		AddTextOption("Spread Countdown:", (FameManager.SpreadCountdown / 2) as Int + " Hours")
 		AddHeaderOption("Default Locations")
-		AddTextOption(LocationManager.DefaultLocation[0] + " Can Spread:", FameManager.DefaultLocationCanSpread[0] as String)
+		AddTextOption(LocationManager.DefaultLocation[0] + " Can Spread:", Data.HasSpreadableFame[0] as String)
 		;AddTextOption(LocationManager.DefaultLocation[0] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[0] as String)
-		AddTextOption(LocationManager.DefaultLocation[1] + " Can Spread:", FameManager.DefaultLocationCanSpread[1] as String)
+		AddTextOption(LocationManager.DefaultLocation[1] + " Can Spread:", Data.HasSpreadableFame[1] as String)
 		;AddTextOption(LocationManager.DefaultLocation[1] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[1] as String)
-		AddTextOption(LocationManager.DefaultLocation[2] + " Can Spread:", FameManager.DefaultLocationCanSpread[2] as String)
+		AddTextOption(LocationManager.DefaultLocation[2] + " Can Spread:", Data.HasSpreadableFame[2] as String)
 		;AddTextOption(LocationManager.DefaultLocation[2] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[2] as String)
-		AddTextOption(LocationManager.DefaultLocation[3] + " Can Spread:", FameManager.DefaultLocationCanSpread[3] as String)
+		AddTextOption(LocationManager.DefaultLocation[3] + " Can Spread:", Data.HasSpreadableFame[3] as String)
 		;AddTextOption(LocationManager.DefaultLocation[3] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[3] as String)
-		AddTextOption(LocationManager.DefaultLocation[4] + " Can Spread:", FameManager.DefaultLocationCanSpread[4] as String)
+		AddTextOption(LocationManager.DefaultLocation[4] + " Can Spread:", Data.HasSpreadableFame[4] as String)
 		;AddTextOption(LocationManager.DefaultLocation[4] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[4] as String)
-		AddTextOption(LocationManager.DefaultLocation[5] + " Can Spread:", FameManager.DefaultLocationCanSpread[5] as String)
+		AddTextOption(LocationManager.DefaultLocation[5] + " Can Spread:", Data.HasSpreadableFame[5] as String)
 		;AddTextOption(LocationManager.DefaultLocation[5] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[5] as String)
-		AddTextOption(LocationManager.DefaultLocation[6] + " Can Spread:", FameManager.DefaultLocationCanSpread[6] as String)
+		AddTextOption(LocationManager.DefaultLocation[6] + " Can Spread:", Data.HasSpreadableFame[6] as String)
 		;AddTextOption(LocationManager.DefaultLocation[6] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[6] as String)
-		AddTextOption(LocationManager.DefaultLocation[7] + " Can Spread:", FameManager.DefaultLocationCanSpread[7] as String)
+		AddTextOption(LocationManager.DefaultLocation[7] + " Can Spread:", Data.HasSpreadableFame[7] as String)
 		;AddTextOption(LocationManager.DefaultLocation[7] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[7] as String)
-		AddTextOption(LocationManager.DefaultLocation[8] + " Can Spread:", FameManager.DefaultLocationCanSpread[8] as String)
+		AddTextOption(LocationManager.DefaultLocation[8] + " Can Spread:", Data.HasSpreadableFame[8] as String)
 		;AddTextOption(LocationManager.DefaultLocation[8] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[8] as String)
-		AddTextOption(LocationManager.DefaultLocation[9] + " Can Spread:", FameManager.DefaultLocationCanSpread[9] as String)
+		AddTextOption(LocationManager.DefaultLocation[9] + " Can Spread:", Data.HasSpreadableFame[9] as String)
 		;AddTextOption(LocationManager.DefaultLocation[9] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[9] as String)
-		AddTextOption(LocationManager.DefaultLocation[10] + " Can Spread:", FameManager.DefaultLocationCanSpread[10] as String)
+		AddTextOption(LocationManager.DefaultLocation[10] + " Can Spread:", Data.HasSpreadableFame[10] as String)
 		;AddTextOption(LocationManager.DefaultLocation[10] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[10] as String)
-		AddTextOption(LocationManager.DefaultLocation[11] + " Can Spread:", FameManager.DefaultLocationCanSpread[11] as String)
+		AddTextOption(LocationManager.DefaultLocation[11] + " Can Spread:", Data.HasSpreadableFame[11] as String)
 		;AddTextOption(LocationManager.DefaultLocation[11] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[11] as String)
-		AddTextOption(LocationManager.DefaultLocation[12] + " Can Spread:", FameManager.DefaultLocationCanSpread[12] as String)
+		AddTextOption(LocationManager.DefaultLocation[12] + " Can Spread:", Data.HasSpreadableFame[12] as String)
 		;AddTextOption(LocationManager.DefaultLocation[12] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[12] as String)
-		AddTextOption(LocationManager.DefaultLocation[13] + " Can Spread:", FameManager.DefaultLocationCanSpread[13] as String)
+		AddTextOption(LocationManager.DefaultLocation[13] + " Can Spread:", Data.HasSpreadableFame[13] as String)
 		;AddTextOption(LocationManager.DefaultLocation[13] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[13] as String)
-		AddTextOption(LocationManager.DefaultLocation[14] + " Can Spread:", FameManager.DefaultLocationCanSpread[14] as String)
+		AddTextOption(LocationManager.DefaultLocation[14] + " Can Spread:", Data.HasSpreadableFame[14] as String)
 		;AddTextOption(LocationManager.DefaultLocation[14] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[14] as String)
-		AddTextOption(LocationManager.DefaultLocation[15] + " Can Spread:", FameManager.DefaultLocationCanSpread[15] as String)
+		AddTextOption(LocationManager.DefaultLocation[15] + " Can Spread:", Data.HasSpreadableFame[15] as String)
 		;AddTextOption(LocationManager.DefaultLocation[15] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[15] as String)
-		AddTextOption(LocationManager.DefaultLocation[16] + " Can Spread:", FameManager.DefaultLocationCanSpread[16] as String)
+		AddTextOption(LocationManager.DefaultLocation[16] + " Can Spread:", Data.HasSpreadableFame[16] as String)
 		;AddTextOption(LocationManager.DefaultLocation[16] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[16] as String)
-		AddTextOption(LocationManager.DefaultLocation[17] + " Can Spread:", FameManager.DefaultLocationCanSpread[17] as String)
+		AddTextOption(LocationManager.DefaultLocation[17] + " Can Spread:", Data.HasSpreadableFame[17] as String)
 		;AddTextOption(LocationManager.DefaultLocation[17] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[17] as String)
-		AddTextOption(LocationManager.DefaultLocation[18] + " Can Spread:", FameManager.DefaultLocationCanSpread[18] as String)
+		AddTextOption(LocationManager.DefaultLocation[18] + " Can Spread:", Data.HasSpreadableFame[18] as String)
 		;AddTextOption(LocationManager.DefaultLocation[18] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[18] as String)
-		AddTextOption(LocationManager.DefaultLocation[19] + " Can Spread:", FameManager.DefaultLocationCanSpread[19] as String)
+		AddTextOption(LocationManager.DefaultLocation[19] + " Can Spread:", Data.HasSpreadableFame[19] as String)
 		;AddTextOption(LocationManager.DefaultLocation[19] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[19] as String)
-		AddTextOption(LocationManager.DefaultLocation[20] + " Can Spread:", FameManager.DefaultLocationCanSpread[20] as String)
+		AddTextOption(LocationManager.DefaultLocation[20] + " Can Spread:", Data.HasSpreadableFame[20] as String)
 		;AddTextOption(LocationManager.DefaultLocation[20] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[20] as String)
 		
 		SetCursorPosition(3)
 		AddHeaderOption("Custom Locations")
-		AddTextOption(LocationManager.CustomLocation[0] + " Can Spread:", FameManager.CustomLocationCanSpread[0] as String)
+		AddTextOption(LocationManager.CustomLocation[0] + " Can Spread:", Data.HasSpreadableFame[21] as String)
 		;AddTextOption(LocationManager.CustomLocation[0] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[0] as String)
-		AddTextOption(LocationManager.CustomLocation[1] + " Can Spread:", FameManager.CustomLocationCanSpread[1] as String)
+		AddTextOption(LocationManager.CustomLocation[1] + " Can Spread:", Data.HasSpreadableFame[22] as String)
 		;AddTextOption(LocationManager.CustomLocation[1] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[1] as String)
-		AddTextOption(LocationManager.CustomLocation[2] + " Can Spread:", FameManager.CustomLocationCanSpread[2] as String)
+		AddTextOption(LocationManager.CustomLocation[2] + " Can Spread:", Data.HasSpreadableFame[23] as String)
 		;AddTextOption(LocationManager.CustomLocation[2] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[2] as String)
-		AddTextOption(LocationManager.CustomLocation[3] + " Can Spread:", FameManager.CustomLocationCanSpread[3] as String)
+		AddTextOption(LocationManager.CustomLocation[3] + " Can Spread:", Data.HasSpreadableFame[24] as String)
 		;AddTextOption(LocationManager.CustomLocation[3] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[3] as String)
-		AddTextOption(LocationManager.CustomLocation[4] + " Can Spread:", FameManager.CustomLocationCanSpread[4] as String)
+		AddTextOption(LocationManager.CustomLocation[4] + " Can Spread:", Data.HasSpreadableFame[25] as String)
 		;AddTextOption(LocationManager.CustomLocation[4] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[4] as String)
-		AddTextOption(LocationManager.CustomLocation[5] + " Can Spread:", FameManager.CustomLocationCanSpread[5] as String)
+		AddTextOption(LocationManager.CustomLocation[5] + " Can Spread:", Data.HasSpreadableFame[26] as String)
 		;AddTextOption(LocationManager.CustomLocation[5] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[5] as String)
-		AddTextOption(LocationManager.CustomLocation[6] + " Can Spread:", FameManager.CustomLocationCanSpread[6] as String)
+		AddTextOption(LocationManager.CustomLocation[6] + " Can Spread:", Data.HasSpreadableFame[27] as String)
 		;AddTextOption(LocationManager.CustomLocation[6] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[6] as String)
-		AddTextOption(LocationManager.CustomLocation[7] + " Can Spread:", FameManager.CustomLocationCanSpread[7] as String)
+		AddTextOption(LocationManager.CustomLocation[7] + " Can Spread:", Data.HasSpreadableFame[28] as String)
 		;AddTextOption(LocationManager.CustomLocation[7] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[7] as String)
-		AddTextOption(LocationManager.CustomLocation[8] + " Can Spread:", FameManager.CustomLocationCanSpread[8] as String)
+		AddTextOption(LocationManager.CustomLocation[8] + " Can Spread:", Data.HasSpreadableFame[29] as String)
 		;AddTextOption(LocationManager.CustomLocation[8] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[8] as String)
-		AddTextOption(LocationManager.CustomLocation[9] + " Can Spread:", FameManager.CustomLocationCanSpread[9] as String)
+		AddTextOption(LocationManager.CustomLocation[9] + " Can Spread:", Data.HasSpreadableFame[30] as String)
 		;AddTextOption(LocationManager.CustomLocation[9] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[9] as String)
-		AddTextOption(LocationManager.CustomLocation[10] + " Can Spread:", FameManager.CustomLocationCanSpread[10] as String)
+		AddTextOption(LocationManager.CustomLocation[10] + " Can Spread:", Data.HasSpreadableFame[31] as String)
 		;AddTextOption(LocationManager.CustomLocation[10] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[10] as String)
-		AddTextOption(LocationManager.CustomLocation[11] + " Can Spread:", FameManager.CustomLocationCanSpread[11] as String)
+		AddTextOption(LocationManager.CustomLocation[11] + " Can Spread:", Data.HasSpreadableFame[32] as String)
 		;AddTextOption(LocationManager.CustomLocation[11] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[11] as String)
-		AddTextOption(LocationManager.CustomLocation[12] + " Can Spread:", FameManager.CustomLocationCanSpread[12] as String)
+		AddTextOption(LocationManager.CustomLocation[12] + " Can Spread:", Data.HasSpreadableFame[33] as String)
 		;AddTextOption(LocationManager.CustomLocation[12] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[12] as String)
-		AddTextOption(LocationManager.CustomLocation[13] + " Can Spread:", FameManager.CustomLocationCanSpread[13] as String)
+		AddTextOption(LocationManager.CustomLocation[13] + " Can Spread:", Data.HasSpreadableFame[34] as String)
 		;AddTextOption(LocationManager.CustomLocation[13] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[13] as String)
-		AddTextOption(LocationManager.CustomLocation[14] + " Can Spread:", FameManager.CustomLocationCanSpread[14] as String)
+		AddTextOption(LocationManager.CustomLocation[14] + " Can Spread:", Data.HasSpreadableFame[35] as String)
 		;AddTextOption(LocationManager.CustomLocation[14] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[14] as String)
-		AddTextOption(LocationManager.CustomLocation[15] + " Can Spread:", FameManager.CustomLocationCanSpread[15] as String)
+		AddTextOption(LocationManager.CustomLocation[15] + " Can Spread:", Data.HasSpreadableFame[36] as String)
 		;AddTextOption(LocationManager.CustomLocation[15] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[15] as String)
-		AddTextOption(LocationManager.CustomLocation[16] + " Can Spread:", FameManager.CustomLocationCanSpread[16] as String)
+		AddTextOption(LocationManager.CustomLocation[16] + " Can Spread:", Data.HasSpreadableFame[37] as String)
 		;AddTextOption(LocationManager.CustomLocation[16] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[16] as String)
-		AddTextOption(LocationManager.CustomLocation[17] + " Can Spread:", FameManager.CustomLocationCanSpread[17] as String)
+		AddTextOption(LocationManager.CustomLocation[17] + " Can Spread:", Data.HasSpreadableFame[38] as String)
 		;AddTextOption(LocationManager.CustomLocation[17] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[17] as String)
-		AddTextOption(LocationManager.CustomLocation[18] + " Can Spread:", FameManager.CustomLocationCanSpread[18] as String)
+		AddTextOption(LocationManager.CustomLocation[18] + " Can Spread:", Data.HasSpreadableFame[39] as String)
 		;AddTextOption(LocationManager.CustomLocation[18] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[18] as String)
-		AddTextOption(LocationManager.CustomLocation[19] + " Can Spread:", FameManager.CustomLocationCanSpread[19] as String)
+		AddTextOption(LocationManager.CustomLocation[19] + " Can Spread:", Data.HasSpreadableFame[40] as String)
 		;AddTextOption(LocationManager.CustomLocation[19] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[19] as String)
-		AddTextOption(LocationManager.CustomLocation[20] + " Can Spread:", FameManager.CustomLocationCanSpread[20] as String)
+		AddTextOption(LocationManager.CustomLocation[20] + " Can Spread:", Data.HasSpreadableFame[41] as String)
 		;AddTextOption(LocationManager.CustomLocation[20] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[20] as String)
+	ElseIf (page == "Registered Mods")
+		Int PageFillIndex = 0
+		Int ModCount = Data.CountExternalMods()
+		AddTextOption("Number of Mods:", ModCount + " (" + Data.ExternalMods.Length + " Max)")
+		AddHeaderOption("Registered Mod List")
+		While PageFillIndex < ModCount
+			If PageFillIndex == (Data.ExternalMods.Length / 2)
+				SetCursorPosition(5)
+			EndIf
+			AddTextOption(Data.ExternalMods[PageFillIndex], "")
+			PageFillIndex += 1
+		EndWhile
 	ElseIf (page == "Debug")
 		AddToggleOptionST("SLSF_Reloaded_EnableTraceState", "Enable Tracing", EnableTracing, 0)
 	EndIf

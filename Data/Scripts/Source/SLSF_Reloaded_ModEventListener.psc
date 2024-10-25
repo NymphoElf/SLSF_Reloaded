@@ -80,6 +80,84 @@ Function RegisterExternalEvents()
 EndFunction
 
 ;/
+=====================
+========NOTES========
+=====================
+
+You may un-comment the debug lines (remove ";") and recompile this script for testing and debugging purposes
+If you wish, you may also add your own debug functions.
+
+!!!!!!!!!DO NOT MESS WITH ANYTHING ELSE!!!!!!!!!
+
+
+============================================
+========VALID LOCATION LIST (STRING)========
+============================================
+[Default Locations - In no particular order]
+
+[Major Locations]
+Whiterun
+Windhelm |or| Eastmarch
+Winterhold
+Markarth |or| the Reach
+Riften |or| the Rift
+Solitude |or| Haafingar
+Morthal |or| Hjaalmarch
+Dawnstar |or| the Pale
+Falkreath
+
+[Minor Locations]
+Raven Rock
+Riverwood
+Rorikstead
+Ivarstead
+Shor's Stone
+Dragon Bridge
+Karthwasten
+Skaal Village
+Largashbur
+Dushnikh Yal
+Mor Khazgur
+Narzulbur
+
+[Custom Locations need to be specified by their location name string.]
+[Use SLSF_Reloaded_RequestLocation to find and verify that information,
+or manually register the location with SLSF_Reloaded_SendLocationRegister]
+[Recommend extensive testing for custom locations.]
+
+==============================================
+========VALID FAME CATEGORIES (STRING)========
+==============================================
+[In no particular order]
+
+Slut
+Whore
+Exhibitionist
+Oral
+Anal
+Nasty
+Pregnant
+Group
+Dominant
+Submissive
+Sadist
+Masochist
+Gentle
+Likes Men
+Likes Women
+Likes Orc
+Likes Khajiit
+Likes Argonian
+Bestiality
+Bound - Requires Devious Devices
+Tattoo - Requires Slave Tats
+Cum Dump - Requires Fill Her Up Baka Edition
+Unfaithful - Requires Fame Comments
+Cuck - Requires Fame Comments
+Airhead - Requires Bimbos of Skyrim
+/;
+
+;/
 =================================================
 ========AUTOMATED FAME INCREASE LISTENERS========
 =================================================
@@ -88,6 +166,7 @@ USE THESE TO PERFORM ONE-TIME FAME INCREASES VIA THE INTERNAL FUNCTIONS. USE THE
 
 ==PARAMETERS/ARGUMENTS==
 EventLocation = YOU MUST MANUALLY DEFINE A LOCATION NAME. THE LOCATION MUST BE VALID OTHERWISE THE EVENT WILL FAIL
+[Use "Current" for the player's current location - will fail if the player's location is invalid. This is fine.]
 
 MinFame       = YOU MUST MANUALLY DEFINE A MINIMUM FAME VALUE THAT YOUR EVENT NEEDS BEFORE IT STARTS AFFECTING FAME.
 
@@ -113,17 +192,31 @@ Parameter 2 (First parameter right of Parameter 1)
 [and so on...]
 /;
 
+
+;This event manually triggers the internal Fame Gain Roll event (aka the same event from a Periodic increase)
 Event OnExternalFameGainRoll(String EventLocation)
+	If EventLocation == "Current"
+		EventLocation = LocationManager.CurrentLocationName()
+	EndIf
+	
+	If LocationManager.IsLocationValid(EventLocation) == False
+		;Debug.Trace("External Fame Gain Event Location is Invalid")
+		return
+	EndIf
+	
 	FameManager.FameGainRoll(EventLocation, True)
 EndEvent
 
+;This event manually triggers the internal Fame Gain function for a location and category
+;MinFame means the player NEEDS AT LEAST that much fame or it will fail
+;MaxFame means the player NEEDS LESS THAN that much fame or it will fail
 Event OnExternalFameGain(String Category, String EventLocation, Int MinFame, Int MaxFame)
 	If EventLocation == "Current"
 		EventLocation = LocationManager.CurrentLocationName()
 	EndIf
 	
 	If LocationManager.IsLocationValid(EventLocation) == False
-		Debug.Trace("External Fame Gain Event Location is Invalid")
+		;Debug.Trace("External Fame Gain Event Location is Invalid")
 		return
 	EndIf
 	
@@ -134,7 +227,7 @@ Event OnExternalFameGain(String Category, String EventLocation, Int MinFame, Int
 	EndIf
 	
 	If ValidCategoryFound == False
-		Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Fame Category " + Category + " is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Fame Category " + Category + " is Invalid.")
 		return
 	EndIf
 	
@@ -155,7 +248,8 @@ USE THESE TO PERFORM MANUAL ONE-TIME FAME INCREASES
 
 ;/
 This event requires specifying the location and category of fame to increase, as well as the minimum amount to increase and the maximum.
-Use "Current" for the EventLocation if you want to get the player's current location. 
+Use "Current" for the EventLocation if you want to get the player's current location.
+
 If the location is invalid, the event fails. If using "Current", event failure is not necessarily bad.
 If the category is not specified, or is not a valid category, the event will fail.
 If the Minimum is higher than the Maximum, it will apply the Minimum.
@@ -169,7 +263,7 @@ Event OnExternalManualFameGain(String Category, String EventLocation, Int MinInc
 	EndIf
 	
 	If LocationManager.IsLocationValid(EventLocation) == False
-		Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Fame Location " + EventLocation + " is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Fame Location " + EventLocation + " is Invalid.")
 		return
 	EndIf
 	
@@ -180,7 +274,7 @@ Event OnExternalManualFameGain(String Category, String EventLocation, Int MinInc
 	EndIf
 	
 	If ValidCategoryFound == False
-		Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Fame Category " + Category + " is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Fame Category " + Category + " is Invalid.")
 		return
 	EndIf
 	
@@ -197,7 +291,7 @@ Event OnExternalManualFameGain(String Category, String EventLocation, Int MinInc
 	EndIf
 	
 	If MinIncrease == 0 && MaxIncrease == 0
-		Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Gain is only 0")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameGain - Gain is only 0")
 		return
 	EndIf
 	
@@ -227,7 +321,7 @@ Event OnExternalManualFameGainAllInLocation(String EventLocation, Int MinIncreas
 	EndIf
 	
 	If LocationManager.IsLocationValid(EventLocation) == False
-		Debug.Trace("SLSF Reloaded - OnExternalManualFameGainAllInLocation - Fame Location " + EventLocation + " is Invalid.")
+		;Debug.Trace("SLSF Reloaded - OnExternalManualFameGainAllInLocation - Fame Location " + EventLocation + " is Invalid.")
 		return
 	EndIf
 	
@@ -245,13 +339,13 @@ Event OnExternalManualFameGainAllInLocation(String EventLocation, Int MinIncreas
 	
 	Int IncreaseValue = 0
 	Bool RandomizeIncreaseValue = True
-	If MinIncrease > MaxIncrease || MinIncrease == MaxIncrease
+	If MinIncrease >= MaxIncrease
 		IncreaseValue = MinIncrease
 		RandomizeIncreaseValue = False
 	EndIf
 	
 	If MinIncrease == 0 && MaxIncrease == 0
-		Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Decay Value is 0")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Decay Value is 0")
 		return
 	EndIf
 	
@@ -296,13 +390,13 @@ Event OnExternalManualFameGainAll(Int MinIncrease, Int MaxIncrease)
 	
 	Int IncreaseValue = 0
 	Bool RandomizeIncreaseValue = True
-	If MinIncrease > MaxIncrease || MinIncrease == MaxIncrease
+	If MinIncrease >= MaxIncrease
 		IncreaseValue = MinIncrease
 		RandomizeIncreaseValue = False
 	EndIf
 	
 	If MinIncrease == 0 && MaxIncrease == 0
-		Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Decay Value is 0")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Decay Value is 0")
 		return
 	EndIf
 	
@@ -378,7 +472,8 @@ EndEvent
 
 ;/
 This event requires specifying the location and category of fame to decay, as well as the minimum amount to decay and the maximum.
-The location will default to the player's current location if not specified. If location is invalid, the event fails.
+If location is invalid, the event fails. Use "Current" if you want to use the player's current location.
+
 If the category is not specified, or is not a valid category, the event will fail.
 If the Minimum is higher than the Maximum, it will apply the Minimum.
 If either are below 0, they will set to 0. If either are above 150, they will set to 150. If decay is not possible, event fails.
@@ -391,7 +486,7 @@ Event OnExternalManualFameDecay(String EventLocation, String Category, Int MinDe
 	EndIf
 	
 	If LocationManager.IsLocationValid(EventLocation) == False
-		Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Fame Location " + EventLocation + " is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Fame Location " + EventLocation + " is Invalid.")
 		return
 	EndIf
 	
@@ -402,7 +497,7 @@ Event OnExternalManualFameDecay(String EventLocation, String Category, Int MinDe
 	EndIf
 	
 	If ValidCategoryFound == False
-		Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Fame Category " + Category + " is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Fame Category " + Category + " is Invalid.")
 		return
 	EndIf
 	
@@ -419,12 +514,12 @@ Event OnExternalManualFameDecay(String EventLocation, String Category, Int MinDe
 	EndIf
 	
 	If MinDecay == 0 && MaxDecay == 0
-		Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Decay Value is 0")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameDecay - Decay Value is 0")
 		return
 	EndIf
 	
 	Int DecayValue = 0
-	If MinDecay > MaxDecay || MinDecay == MaxDecay
+	If MinDecay >= MaxDecay
 		DecayValue = MinDecay
 	Else
 		DecayValue = Utility.RandomInt(MinDecay, MaxDecay)
@@ -450,7 +545,7 @@ Event OnExternalManualFameDecayAllInLocation(String EventLocation, Int MinDecay,
 	EndIf
 	
 	If LocationManager.IsLocationValid(EventLocation) == False
-		Debug.Trace("SLSF Reloaded - ExternalManualFameDecayAllInLocation - Fame Location " + EventLocation + " is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameDecayAllInLocation - Fame Location " + EventLocation + " is Invalid.")
 		return
 	EndIf
 	
@@ -468,13 +563,13 @@ Event OnExternalManualFameDecayAllInLocation(String EventLocation, Int MinDecay,
 	
 	Int DecayValue = 0
 	Bool RandomizeDecayValue = True
-	If MinDecay > MaxDecay || MinDecay == MaxDecay
+	If MinDecay >= MaxDecay
 		DecayValue = MinDecay
 		RandomizeDecayValue = False
 	EndIf
 	
 	If MinDecay == 0 && MaxDecay == 0
-		Debug.Trace("SLSF Reloaded - ExternalManualFameDecayAllInLocation - Decay Value is 0")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameDecayAllInLocation - Decay Value is 0")
 		return
 	EndIf
 	
@@ -519,13 +614,13 @@ Event OnExternalManualFameDecayAll(Int MinDecay, Int MaxDecay)
 	
 	Int DecayValue = 0
 	Bool RandomizeDecayValue = True
-	If MinDecay > MaxDecay || MinDecay == MaxDecay
+	If MinDecay >= MaxDecay
 		DecayValue = MinDecay
 		RandomizeDecayValue = False
 	EndIf
 	
 	If MinDecay == 0 && MaxDecay == 0
-		Debug.Trace("SLSF Reloaded - ExternalManualFameDecayAll - Decay Value is 0")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameDecayAll - Decay Value is 0")
 		return
 	EndIf
 	
@@ -596,7 +691,7 @@ EndEvent
 ;This event forces a fame spread from the defined location, as long as the location is valid
 Event OnExternalFameSpread(Location SpreadFromLocation)
 	If SpreadFromLocation == None
-		Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is None.")
+		;Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is None.")
 		return
 	EndIf
 	
@@ -604,37 +699,36 @@ Event OnExternalFameSpread(Location SpreadFromLocation)
 	If LocationManager.IsLocationValid(LocationName) == True
 		FameManager.SpreadFame(LocationName)
 	Else
-		Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is Invalid.")
 	EndIf
 EndEvent
 
 Event OnExternalFameSpreadByName(String SpreadFromLocation)
 	If SpreadFromLocation == "NULL" || SpreadFromLocation == "-EMPTY-" || SpreadFromLocation == ""
-		Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is None.")
+		;Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is None.")
 		return
 	EndIf
 	
 	If LocationManager.IsLocationValid(SpreadFromLocation) == True
 		FameManager.SpreadFame(SpreadFromLocation)
 	Else
-		Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalFameSpread - Location is Invalid.")
 	EndIf
 EndEvent
 
 ;/
-You MUST define all aspects of this event. There are not reasonable defaults.
 PercentToSpread minimum is 10. If it is lower than 10, it will be set to 10. Maximum PercentToSpread is 100.
 Please do not change these minimums and maximums.
 /;
 
 Event OnExternalManualFameSpread(String SpreadFromLocation, String SpreadToLocation, String Category, Int PercentToSpread)
 	If LocationManager.IsLocationValid(SpreadFromLocation) == False
-		Debug.Trace("SLSF Reloaded - ExternalManualFameSpread - SpreadFromLocation is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameSpread - SpreadFromLocation is Invalid.")
 		return
 	EndIf
 	
 	If LocationManager.IsLocationValid(SpreadToLocation) == False
-		Debug.Trace("SLSF Reloaded - ExternalManualFameSpread - SpreadToLocation is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameSpread - SpreadToLocation is Invalid.")
 		return
 	EndIf
 	
@@ -645,12 +739,12 @@ Event OnExternalManualFameSpread(String SpreadFromLocation, String SpreadToLocat
 	EndIf
 	
 	If ValidCategoryFound == False
-		Debug.Trace("SLSF Reloaded - ExternalManualFameSpread - Fame Category " + Category + " is Invalid.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameSpread - Fame Category " + Category + " is Invalid.")
 		return
 	EndIf
 	
 	If Data.GetFameValue(SpreadFromLocation, Category) < 10
-		Debug.Trace("SLSF Reloaded - ExternalManualFameSpread - Fame Value is too low. Cannot Spread Fame.")
+		;Debug.Trace("SLSF Reloaded - ExternalManualFameSpread - Fame Value is too low. Cannot Spread Fame.")
 		return
 	EndIf
 	
@@ -687,7 +781,7 @@ TOO MANY LOCATIONS WILL BOG DOWN THE SCRIPT!
 Event OnExternalLocationRegister(Form LocationToRegister)
 	Location LocationForm = LocationToRegister as Location
 	If LocationForm == None
-		Debug.Trace("SLSF Reloaded - ExternalLocationRegister - Location is NONE.")
+		;Debug.Trace("SLSF Reloaded - ExternalLocationRegister - Location is NONE.")
 		return
 	Else
 		String LocationName = LocationManager.FetchLocationName(LocationForm)
@@ -701,7 +795,7 @@ EndEvent
 Event OnExternalLocationUnregister(Form LocationToUnregister)
 	Location LocationForm = LocationToUnregister as Location
 	If LocationForm == None
-		Debug.Trace("SLSF Reloaded - ExternalLocationUnregister - Location is NONE.")
+		;Debug.Trace("SLSF Reloaded - ExternalLocationUnregister - Location is NONE.")
 		return
 	Else
 		String LocationName = LocationManager.FetchLocationName(LocationForm)
@@ -737,10 +831,18 @@ ModEvent.Send(EventHandle)
 /;
 
 Event OnExternalModRegister(String ModName = "-EMPTY-")
+	If ModName == "-EMPTY-"
+		;Debug.Trace("SLSF Reloaded Mod Register: Cannot Register EMPTY.")
+		return
+	EndIf
 	Data.RegisterExternalMod(ModName)
 EndEvent
 
-Event OnExternalModUnregister(String ModName = "-EMPTY")
+Event OnExternalModUnregister(String ModName = "-EMPTY-")
+	If ModName == "-EMPTY-"
+		;Debug.Trace("SLSF Reloaded Mod Unregister: Cannot Unregister EMPTY.")
+		return
+	EndIf
 	Data.UnregisterExternalMod(ModName)
 EndEvent
 
@@ -916,12 +1018,12 @@ Event OnRequestFame(String LocationName, String Category)
 	EndIf
 	
 	If LocationManager.IsLocationValid(LocationName) == False
-		Debug.Trace("SLSF Reloaded - External Fame Request Location Invalid")
+		;Debug.Trace("SLSF Reloaded - External Fame Request Location Invalid")
 		return
 	EndIf
 	
 	If FameManager.FameType.Find(Category) < 0 || FameManager.FameType.Find(Category) > FameManager.FameType.Length
-		Debug.Trace("SLSF Reloaded - External Fame Request Category Invalid")
+		;Debug.Trace("SLSF Reloaded - External Fame Request Category Invalid")
 		return
 	EndIf
 	

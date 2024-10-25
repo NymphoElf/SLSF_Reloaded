@@ -642,18 +642,13 @@ Function RegisterExternalMod(String ModName)
 	Int EmptyModIndex = ExternalMods.Find("-EMPTY-")
 	Bool PluginFound = False
 	
-	If ModName == "-EMPTY-"
-		Debug.MessageBox("SLSF Reloaded External Mod Register Error: ModName is EMPTY. Mod not registered!")
+	If Game.GetModByName(ModName) != 255
+		PluginFound = True
+	EndIf
+	
+	If PluginFound == False
+		Debug.MessageBox("SLSF Reloaded External Mod Register Error: Plugin " + ModName + " not found. Mod not registered!")
 		return
-	Else
-		If Game.GetModByName(ModName) != 255
-			PluginFound = True
-		EndIf
-		
-		If PluginFound == False
-			Debug.MessageBox("SLSF Reloaded External Mod Register Error: Plugin " + ModName + " not found. Mod not registered!")
-			return
-		EndIf
 	EndIf
 	
 	If ModIndex < 0 || ModIndex > ExternalMods.Length
@@ -670,6 +665,20 @@ Function RegisterExternalMod(String ModName)
 			Debug.Trace("SLSF Reloaded External Mod Register: Mod " + ModName + " already registered. Skipping register function...")
 		EndIf
 	EndIf
+EndFunction
+
+Int Function CountExternalMods()
+	Int ModCount = 0
+	Int ModIndex = 0
+	
+	While ModIndex < ExternalMods.Length
+		If ExternalMods[ModIndex] != "-EMPTY-"
+			ModCount += 1
+		EndIf
+		ModIndex += 1
+	EndWhile
+	
+	return ModCount
 EndFunction
 
 Function CleanExternalModList()
@@ -864,11 +873,6 @@ Bool Function IsModRegistered(String ModName)
 EndFunction
 
 Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
-	If ModName == "Simple Player Prostitution"
-		RegisterExternalMod("mrt_SimpleProstitution.esp")
-		ModName = "mrt_SimpleProstitution.esp"
-	EndIf
-	
 	Int ModIndex = ExternalMods.Find(ModName)
 	
 	If ModIndex < 0 || ModIndex > ExternalMods.Length
