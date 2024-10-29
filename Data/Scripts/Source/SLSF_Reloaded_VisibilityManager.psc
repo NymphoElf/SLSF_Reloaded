@@ -112,7 +112,6 @@ Function UpdateTattooSlots()
 			SlotCount = 40
 		EndIf
 		Config.FootTattooSlots = SlotCount
-		
 	EndIf
 EndFunction
 
@@ -548,6 +547,10 @@ Bool Function IsAssCumVisible()
 EndFunction
 
 Bool Function IsVaginalCumVisible()
+	If PlayerRef.GetActorBase().GetSex() == 0 ;Exclude Males
+		return False
+	EndIf
+	
 	If Mods.IsCOEInstalled == True
 		If Mods.COE.CountCum(PlayerRef, True, False, False) > 0
 			If Mods.IsANDInstalled == True
@@ -614,6 +617,7 @@ Function CheckBondage()
 	DD_BeltVisible = False
 	DD_HarnessVisible = False
 	DD_CollarVisible = False
+	IsWearingUnhideable = False
 	
 	If PlayerRef.WornHasKeyword(Mods.DD_HeavyBondage)
 		IsLightlyBound.SetValue(0)
@@ -626,12 +630,14 @@ Function CheckBondage()
 			If DD_CollarSlot != None
 				If DD_CollarSlot.HasKeyword(Mods.DD_Collar)
 					If Mods.IsSLSInstalled == True
-						If PlayerRef.HasMagicEffect(Mods.SLS_CollarCurse) == True && Config.AllowSLSCursedCollarBoundFame == False
-							DD_CollarVisible = False ;Prevent 'Unfair' Bound Fame due to Sexlab Survival Mechanics
-						Else
-							DD_CollarVisible = True
+						If Config.AllowCollarBoundFame == True
+							If PlayerRef.HasMagicEffect(Mods.SLS_CollarCurse) == True && Config.AllowSLSCursedCollarBoundFame == True
+								DD_CollarVisible = True
+							ElseIf PlayerRef.HasMagicEffect(Mods.SLS_CollarCurse) == False
+								DD_CollarVisible = True
+							EndIf
 						EndIf
-					Else
+					ElseIf Config.AllowCollarBoundFame == True
 						DD_CollarVisible = True
 					EndIf
 				EndIf
@@ -683,8 +689,6 @@ Function CheckBondage()
 		|| PlayerRef.WornHasKeyword(Mods.DD_ArmCuffsFront) || PlayerRef.WornHasKeyword(Mods.DD_Armbinder) || PlayerRef.WornHasKeyword(Mods.DD_ArmbinderElbow) || PlayerRef.WornHasKeyword(Mods.DD_Gloves) \
 		|| PlayerRef.WornHasKeyword(Mods.DD_LegCuffs) || PlayerRef.WornHasKeyword(Mods.DD_Boots) || PlayerRef.WornHasKeyword(Mods.DD_Suit) || PlayerRef.WornHasKeyword(Mods.DD_Corset) || PlayerRef.WornHasKeyword(Mods.DD_Blindfold)
 			IsWearingUnhideable = True
-		Else
-			IsWearingUnhideable = False
 		EndIf
 		
 		If DD_CollarVisible == True || DD_BraVisible == True || DD_BeltVisible == True || DD_HarnessVisible == True || IsWearingUnhideable == True

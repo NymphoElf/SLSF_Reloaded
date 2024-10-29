@@ -26,6 +26,8 @@ Bool Property SubmissiveDefault Auto Hidden
 Bool Property DominantDefault Auto Hidden
 Bool Property UseGlobalFameMultiplier Auto Hidden
 Bool Property AllowLikeFameWhenRaped Auto Hidden
+Bool Property AllowBestialityWhenRaped Auto Hidden
+Bool Property VictimsAreMasochist Auto Hidden
 Bool Property EnableTracing Auto Hidden
 Bool Property AllowSLSCursedCollarBoundFame Auto Hidden
 Bool Property AllowCollarBoundFame Auto Hidden
@@ -123,7 +125,9 @@ Function SetDefaults()
 	NotifyFameSpread = False
 	PlayerIsAnonymous = False
 	AnonymityEnabled = True
-	AllowLikeFameWhenRaped = True
+	AllowLikeFameWhenRaped = False
+	AllowBestialityWhenRaped = False
+	VictimsAreMasochist = False
 	AllowSLSCursedCollarBoundFame = False
 	AllowCollarBoundFame = False
 	If Mods.IsLegacySLSFInstalled == True
@@ -329,7 +333,19 @@ Event OnPageReset(String page)
 		Else
 			AddTextOption("Detected Location:", "-NONE-")
 		EndIf
-		AddTextOption("Fame Location:", LocationManager.CurrentLocationName())
+		String FameLocation = LocationManager.CurrentLocationName()
+		If FameLocation == "Haafingar"
+			FameLocation = "Haafingar (Solitude)"
+		ElseIf FameLocation == "Eastmarch"
+			FameLocation = "Eastmarch (Windhelm)"
+		ElseIf FameLocation == "the Pale"
+			FameLocation = "the Pale (Dawnstar)"
+		ElseIf FameLocation == "the Reach"
+			FameLocation = "the Reach (Markarth)"
+		ElseIf FameLocation == "the Rift"
+			FameLocation = "the Rift (Riften)"
+		EndIf
+		AddTextOption("Fame Location:", FameLocation)
 		
 		SetCursorPosition(1)
 		AddHeaderOption("Selected Location")
@@ -381,7 +397,7 @@ Event OnPageReset(String page)
 	
 	ElseIf (page == "General Settings")
 		AddHeaderOption("Legacy Overwrite")
-		AddToggleOptionST("SLSF_Reloaded_AllowLegacyOverwriteState", "Allow Legacy SLSF Overwrite", AllowLegacyOverwrite, GetDisabledOptionFlagIf(Mods.IsLegacySLSFInstalled == False))
+		AddToggleOptionST("SLSF_Reloaded_AllowLegacyOverwriteState", "Overwrite Legacy SLSF", AllowLegacyOverwrite, GetDisabledOptionFlagIf(Mods.IsLegacySLSFInstalled == False))
 		
 		AddHeaderOption("Dom/Sub Defaults")
 		AddTextOption("Sexlab P+ Installed:", (Mods.IsSexlabPlusInstalled) as String)
@@ -390,7 +406,7 @@ Event OnPageReset(String page)
 		AddToggleOptionST("SLSF_Reloaded_DisableNakedCommentsWhilePWState", "No Naked Comments While Public Whore", DisableNakedCommentsWhilePW, GetDisabledOptionFlagIf(Mods.IsPWInstalled == False))
 		
 		AddHeaderOption("Fame Comments Settings")
-		AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance: ", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", GetDisabledOptionFlagIf(Mods.IsFameCommentsInstalled == False))
+		AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance:", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", GetDisabledOptionFlagIf(Mods.IsFameCommentsInstalled == False))
 		
 		SetCursorPosition(1)
 		AddHeaderOption("Notification Toggles")
@@ -403,6 +419,8 @@ Event OnPageReset(String page)
 		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
 		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame Bonus", AllowForeplayFame, 0)
 		AddToggleOptionST("SLSF_Reloaded_AllowLikeFameWhenRapedState", "Allow 'Likes' Fame When Raped", AllowLikeFameWhenRaped, 0)
+		AddToggleOptionST("SLSF_Reloaded_AllowBestialityWhenRapedState", "Allow Bestiality Fame When Raped", AllowBestialityWhenRaped, 0)
+		AddToggleOptionST("SLSF_Reloaded_VictimsAreMasochistState", "Allow Masochist Fame When Raped", VictimsAreMasochist, 0)
 		AddToggleOptionST("SLSF_Reloaded_AllowCollarBoundFame", "Allow Bound Fame from Collars", AllowCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsDDInstalled == False))
 		AddToggleOptionST("SLSF_Reloaded_AllowSLSCurseCollarBoundFameState", "Allow SLS Cursed Collar Bound Fame", AllowSLSCursedCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsSLSInstalled == False || AllowCollarBoundFame == False))
 		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
@@ -715,9 +733,38 @@ Event OnPageReset(String page)
 		Else
 			AddTextOption("Visibly Bound:", "No")
 		EndIf
+		
+		If VisibilityManager.IsOralCumVisible() == True
+			AddTextOption("Oral Cum Visible:", "Yes")
+		Else
+			AddTextOption("Oral Cum Visible:", "No")
+		EndIf
+		
+		If PlayerScript.PlayerRef.GetActorBase().GetSex() == 0
+			AddTextOption("Vaginal Cum Visible:", "N/A")
+		ElseIf VisibilityManager.IsVaginalCumVisible() == True
+			AddTextOption("Vaginal Cum Visible:", "Yes")
+		Else
+			AddTextOption("Vaginal Cum Visible:", "No")
+		EndIf
+		
+		If VisibilityManager.IsAssCumVisible() == True
+			AddTextOption("Anal Cum Visible:", "Yes")
+		Else
+			AddTextOption("Anal Cum Visible:", "No")
+		EndIf
+		
+		Float DecayTimeBase = (FameManager.DecayCountdown / 2)
+		Int DecayCountdownHours = DecayTimeBase as Int
+		Int DecayCountdownHalfHours = ((DecayTimeBase - DecayCountdownHours) * 10) as Int
+		
+		Float SpreadTimeBase = (FameManager.SpreadCountdown / 2)
+		Int SpreadCountdownHours = SpreadTimeBase as Int
+		Int SpreadCountdownHalfHours = ((SpreadTimeBase - SpreadCountdownHours) * 10) as Int
+		
 		AddHeaderOption("Decay & Spread Timers")
-		AddTextOption("Time Until Decay:", (FameManager.DecayCountdown/2) as Int + " Hours")
-		AddTextOption("Time Until Spread:", (FameManager.SpreadCountdown/2) as Int + " Hours")
+		AddTextOption("Time Until Decay:", DecayCountdownHours + "." + DecayCountdownHalfHours + " Hours")
+		AddTextOption("Time Until Spread:", SpreadCountdownHours + "." + SpreadCountdownHalfHours + " Hours")
 	
 	ElseIf (page == "Tattoo Info")
 		AddHeaderOption("Select Tattoo Area")
@@ -791,186 +838,53 @@ Event OnPageReset(String page)
 		EndIf
 	
 	ElseIf (page == "Decay Info")
-		AddTextOption("Decay Countdown:", (FameManager.DecayCountdown / 2) as Int + " Hours")
+		Float TimeBase = (FameManager.DecayCountdown / 2)
+		Int CountdownHours = TimeBase as Int
+		Int CountdownHalfHours = ((TimeBase - CountdownHours) * 10) as Int
+		
+		AddTextOption("Decay Countdown:", CountdownHours + "." + CountdownHalfHours + " Hours")
 		AddHeaderOption("Default Locations")
-		AddTextOption(LocationManager.DefaultLocation[0] + " Can Decay:", FameManager.DefaultLocationCanDecay[0] as String)
-		;AddTextOption(LocationManager.DefaultLocation[0] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[0] as String)
-		AddTextOption(LocationManager.DefaultLocation[1] + " Can Decay:", FameManager.DefaultLocationCanDecay[1] as String)
-		;AddTextOption(LocationManager.DefaultLocation[1] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[1] as String)
-		AddTextOption(LocationManager.DefaultLocation[2] + " Can Decay:", FameManager.DefaultLocationCanDecay[2] as String)
-		;AddTextOption(LocationManager.DefaultLocation[2] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[2] as String)
-		AddTextOption(LocationManager.DefaultLocation[3] + " Can Decay:", FameManager.DefaultLocationCanDecay[3] as String)
-		;AddTextOption(LocationManager.DefaultLocation[3] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[3] as String)
-		AddTextOption(LocationManager.DefaultLocation[4] + " Can Decay:", FameManager.DefaultLocationCanDecay[4] as String)
-		;AddTextOption(LocationManager.DefaultLocation[4] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[4] as String)
-		AddTextOption(LocationManager.DefaultLocation[5] + " Can Decay:", FameManager.DefaultLocationCanDecay[5] as String)
-		;AddTextOption(LocationManager.DefaultLocation[5] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[5] as String)
-		AddTextOption(LocationManager.DefaultLocation[6] + " Can Decay:", FameManager.DefaultLocationCanDecay[6] as String)
-		;AddTextOption(LocationManager.DefaultLocation[6] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[6] as String)
-		AddTextOption(LocationManager.DefaultLocation[7] + " Can Decay:", FameManager.DefaultLocationCanDecay[7] as String)
-		;AddTextOption(LocationManager.DefaultLocation[7] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[7] as String)
-		AddTextOption(LocationManager.DefaultLocation[8] + " Can Decay:", FameManager.DefaultLocationCanDecay[8] as String)
-		;AddTextOption(LocationManager.DefaultLocation[8] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[8] as String)
-		AddTextOption(LocationManager.DefaultLocation[9] + " Can Decay:", FameManager.DefaultLocationCanDecay[9] as String)
-		;AddTextOption(LocationManager.DefaultLocation[9] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[9] as String)
-		AddTextOption(LocationManager.DefaultLocation[10] + " Can Decay:", FameManager.DefaultLocationCanDecay[10] as String)
-		;AddTextOption(LocationManager.DefaultLocation[10] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[10] as String)
-		AddTextOption(LocationManager.DefaultLocation[11] + " Can Decay:", FameManager.DefaultLocationCanDecay[11] as String)
-		;AddTextOption(LocationManager.DefaultLocation[11] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[11] as String)
-		AddTextOption(LocationManager.DefaultLocation[12] + " Can Decay:", FameManager.DefaultLocationCanDecay[12] as String)
-		;AddTextOption(LocationManager.DefaultLocation[12] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[12] as String)
-		AddTextOption(LocationManager.DefaultLocation[13] + " Can Decay:", FameManager.DefaultLocationCanDecay[13] as String)
-		;AddTextOption(LocationManager.DefaultLocation[13] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[13] as String)
-		AddTextOption(LocationManager.DefaultLocation[14] + " Can Decay:", FameManager.DefaultLocationCanDecay[14] as String)
-		;AddTextOption(LocationManager.DefaultLocation[14] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[14] as String)
-		AddTextOption(LocationManager.DefaultLocation[15] + " Can Decay:", FameManager.DefaultLocationCanDecay[15] as String)
-		;AddTextOption(LocationManager.DefaultLocation[15] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[15] as String)
-		AddTextOption(LocationManager.DefaultLocation[16] + " Can Decay:", FameManager.DefaultLocationCanDecay[16] as String)
-		;AddTextOption(LocationManager.DefaultLocation[16] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[16] as String)
-		AddTextOption(LocationManager.DefaultLocation[17] + " Can Decay:", FameManager.DefaultLocationCanDecay[17] as String)
-		;AddTextOption(LocationManager.DefaultLocation[17] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[17] as String)
-		AddTextOption(LocationManager.DefaultLocation[18] + " Can Decay:", FameManager.DefaultLocationCanDecay[18] as String)
-		;AddTextOption(LocationManager.DefaultLocation[18] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[18] as String)
-		AddTextOption(LocationManager.DefaultLocation[19] + " Can Decay:", FameManager.DefaultLocationCanDecay[19] as String)
-		;AddTextOption(LocationManager.DefaultLocation[19] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[19] as String)
-		AddTextOption(LocationManager.DefaultLocation[20] + " Can Decay:", FameManager.DefaultLocationCanDecay[20] as String)
-		;AddTextOption(LocationManager.DefaultLocation[20] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[20] as String)
+		Int LocationIndex = 0
+		While LocationIndex < LocationManager.DefaultLocation.Length
+			AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Can Decay:", (FameManager.DefaultLocationCanDecay[LocationIndex] && HasFameAtDefaultLocation[LocationIndex]) as String)
+			;AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[LocationIndex] as String)
+			LocationIndex += 1
+		EndWhile
+		
+		LocationIndex = 0
 		
 		SetCursorPosition(3)
 		AddHeaderOption("Custom Locations")
-		AddTextOption(LocationManager.CustomLocation[0] + " Can Decay:", FameManager.CustomLocationCanDecay[0] as String)
-		;AddTextOption(LocationManager.CustomLocation[0] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[0] as String)
-		AddTextOption(LocationManager.CustomLocation[1] + " Can Decay:", FameManager.CustomLocationCanDecay[1] as String)
-		;AddTextOption(LocationManager.CustomLocation[1] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[1] as String)
-		AddTextOption(LocationManager.CustomLocation[2] + " Can Decay:", FameManager.CustomLocationCanDecay[2] as String)
-		;AddTextOption(LocationManager.CustomLocation[2] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[2] as String)
-		AddTextOption(LocationManager.CustomLocation[3] + " Can Decay:", FameManager.CustomLocationCanDecay[3] as String)
-		;AddTextOption(LocationManager.CustomLocation[3] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[3] as String)
-		AddTextOption(LocationManager.CustomLocation[4] + " Can Decay:", FameManager.CustomLocationCanDecay[4] as String)
-		;AddTextOption(LocationManager.CustomLocation[4] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[4] as String)
-		AddTextOption(LocationManager.CustomLocation[5] + " Can Decay:", FameManager.CustomLocationCanDecay[5] as String)
-		;AddTextOption(LocationManager.CustomLocation[5] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[5] as String)
-		AddTextOption(LocationManager.CustomLocation[6] + " Can Decay:", FameManager.CustomLocationCanDecay[6] as String)
-		;AddTextOption(LocationManager.CustomLocation[6] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[6] as String)
-		AddTextOption(LocationManager.CustomLocation[7] + " Can Decay:", FameManager.CustomLocationCanDecay[7] as String)
-		;AddTextOption(LocationManager.CustomLocation[7] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[7] as String)
-		AddTextOption(LocationManager.CustomLocation[8] + " Can Decay:", FameManager.CustomLocationCanDecay[8] as String)
-		;AddTextOption(LocationManager.CustomLocation[8] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[8] as String)
-		AddTextOption(LocationManager.CustomLocation[9] + " Can Decay:", FameManager.CustomLocationCanDecay[9] as String)
-		;AddTextOption(LocationManager.CustomLocation[9] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[9] as String)
-		AddTextOption(LocationManager.CustomLocation[10] + " Can Decay:", FameManager.CustomLocationCanDecay[10] as String)
-		;AddTextOption(LocationManager.CustomLocation[10] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[10] as String)
-		AddTextOption(LocationManager.CustomLocation[11] + " Can Decay:", FameManager.CustomLocationCanDecay[11] as String)
-		;AddTextOption(LocationManager.CustomLocation[11] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[11] as String)
-		AddTextOption(LocationManager.CustomLocation[12] + " Can Decay:", FameManager.CustomLocationCanDecay[12] as String)
-		;AddTextOption(LocationManager.CustomLocation[12] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[12] as String)
-		AddTextOption(LocationManager.CustomLocation[13] + " Can Decay:", FameManager.CustomLocationCanDecay[13] as String)
-		;AddTextOption(LocationManager.CustomLocation[13] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[13] as String)
-		AddTextOption(LocationManager.CustomLocation[14] + " Can Decay:", FameManager.CustomLocationCanDecay[14] as String)
-		;AddTextOption(LocationManager.CustomLocation[14] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[14] as String)
-		AddTextOption(LocationManager.CustomLocation[15] + " Can Decay:", FameManager.CustomLocationCanDecay[15] as String)
-		;AddTextOption(LocationManager.CustomLocation[15] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[15] as String)
-		AddTextOption(LocationManager.CustomLocation[16] + " Can Decay:", FameManager.CustomLocationCanDecay[16] as String)
-		;AddTextOption(LocationManager.CustomLocation[16] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[16] as String)
-		AddTextOption(LocationManager.CustomLocation[17] + " Can Decay:", FameManager.CustomLocationCanDecay[17] as String)
-		;AddTextOption(LocationManager.CustomLocation[17] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[17] as String)
-		AddTextOption(LocationManager.CustomLocation[18] + " Can Decay:", FameManager.CustomLocationCanDecay[18] as String)
-		;AddTextOption(LocationManager.CustomLocation[18] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[18] as String)
-		AddTextOption(LocationManager.CustomLocation[19] + " Can Decay:", FameManager.CustomLocationCanDecay[19] as String)
-		;AddTextOption(LocationManager.CustomLocation[19] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[19] as String)
-		AddTextOption(LocationManager.CustomLocation[20] + " Can Decay:", FameManager.CustomLocationCanDecay[20] as String)
-		;AddTextOption(LocationManager.CustomLocation[20] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[20] as String)
+		While LocationIndex < LocationManager.CustomLocation.Length
+			AddTextOption(LocationManager.CustomLocation[LocationIndex] + " Can Decay:", (FameManager.CustomLocationCanDecay[LocationIndex] && HasFameAtCustomLocation[LocationIndex]) as String)
+			;AddTextOption(LocationManager.CustomLocation[LocationIndex] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[LocationIndex] as String)
+			LocationIndex += 1
+		EndWhile
 		
 	ElseIf (page == "Spread Info")
-		AddTextOption("Spread Countdown:", (FameManager.SpreadCountdown / 2) as Int + " Hours")
-		AddHeaderOption("Default Locations")
-		AddTextOption(LocationManager.DefaultLocation[0] + " Can Spread:", Data.HasSpreadableFame[0] as String)
-		;AddTextOption(LocationManager.DefaultLocation[0] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[0] as String)
-		AddTextOption(LocationManager.DefaultLocation[1] + " Can Spread:", Data.HasSpreadableFame[1] as String)
-		;AddTextOption(LocationManager.DefaultLocation[1] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[1] as String)
-		AddTextOption(LocationManager.DefaultLocation[2] + " Can Spread:", Data.HasSpreadableFame[2] as String)
-		;AddTextOption(LocationManager.DefaultLocation[2] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[2] as String)
-		AddTextOption(LocationManager.DefaultLocation[3] + " Can Spread:", Data.HasSpreadableFame[3] as String)
-		;AddTextOption(LocationManager.DefaultLocation[3] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[3] as String)
-		AddTextOption(LocationManager.DefaultLocation[4] + " Can Spread:", Data.HasSpreadableFame[4] as String)
-		;AddTextOption(LocationManager.DefaultLocation[4] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[4] as String)
-		AddTextOption(LocationManager.DefaultLocation[5] + " Can Spread:", Data.HasSpreadableFame[5] as String)
-		;AddTextOption(LocationManager.DefaultLocation[5] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[5] as String)
-		AddTextOption(LocationManager.DefaultLocation[6] + " Can Spread:", Data.HasSpreadableFame[6] as String)
-		;AddTextOption(LocationManager.DefaultLocation[6] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[6] as String)
-		AddTextOption(LocationManager.DefaultLocation[7] + " Can Spread:", Data.HasSpreadableFame[7] as String)
-		;AddTextOption(LocationManager.DefaultLocation[7] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[7] as String)
-		AddTextOption(LocationManager.DefaultLocation[8] + " Can Spread:", Data.HasSpreadableFame[8] as String)
-		;AddTextOption(LocationManager.DefaultLocation[8] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[8] as String)
-		AddTextOption(LocationManager.DefaultLocation[9] + " Can Spread:", Data.HasSpreadableFame[9] as String)
-		;AddTextOption(LocationManager.DefaultLocation[9] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[9] as String)
-		AddTextOption(LocationManager.DefaultLocation[10] + " Can Spread:", Data.HasSpreadableFame[10] as String)
-		;AddTextOption(LocationManager.DefaultLocation[10] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[10] as String)
-		AddTextOption(LocationManager.DefaultLocation[11] + " Can Spread:", Data.HasSpreadableFame[11] as String)
-		;AddTextOption(LocationManager.DefaultLocation[11] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[11] as String)
-		AddTextOption(LocationManager.DefaultLocation[12] + " Can Spread:", Data.HasSpreadableFame[12] as String)
-		;AddTextOption(LocationManager.DefaultLocation[12] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[12] as String)
-		AddTextOption(LocationManager.DefaultLocation[13] + " Can Spread:", Data.HasSpreadableFame[13] as String)
-		;AddTextOption(LocationManager.DefaultLocation[13] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[13] as String)
-		AddTextOption(LocationManager.DefaultLocation[14] + " Can Spread:", Data.HasSpreadableFame[14] as String)
-		;AddTextOption(LocationManager.DefaultLocation[14] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[14] as String)
-		AddTextOption(LocationManager.DefaultLocation[15] + " Can Spread:", Data.HasSpreadableFame[15] as String)
-		;AddTextOption(LocationManager.DefaultLocation[15] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[15] as String)
-		AddTextOption(LocationManager.DefaultLocation[16] + " Can Spread:", Data.HasSpreadableFame[16] as String)
-		;AddTextOption(LocationManager.DefaultLocation[16] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[16] as String)
-		AddTextOption(LocationManager.DefaultLocation[17] + " Can Spread:", Data.HasSpreadableFame[17] as String)
-		;AddTextOption(LocationManager.DefaultLocation[17] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[17] as String)
-		AddTextOption(LocationManager.DefaultLocation[18] + " Can Spread:", Data.HasSpreadableFame[18] as String)
-		;AddTextOption(LocationManager.DefaultLocation[18] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[18] as String)
-		AddTextOption(LocationManager.DefaultLocation[19] + " Can Spread:", Data.HasSpreadableFame[19] as String)
-		;AddTextOption(LocationManager.DefaultLocation[19] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[19] as String)
-		AddTextOption(LocationManager.DefaultLocation[20] + " Can Spread:", Data.HasSpreadableFame[20] as String)
-		;AddTextOption(LocationManager.DefaultLocation[20] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[20] as String)
+		Float TimeBase = (FameManager.SpreadCountdown / 2)
+		Int CountdownHours = TimeBase as Int
+		Int CountdownHalfHours = ((TimeBase - CountdownHours) * 10) as Int
 		
+		AddTextOption("Spread Countdown:", CountdownHours + "." + CountdownHalfHours + " Hours")
+		AddHeaderOption("Default Locations")
+		
+		Int LocationIndex = 0
+		While LocationIndex < LocationManager.DefaultLocation.Length
+			AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Can Spread:", Data.DefaultLocationHasSpreadableFame[LocationIndex] as String)
+			;AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[LocationIndex] as String)
+			LocationIndex += 1
+		EndWhile
+		
+		LocationIndex = 0
 		SetCursorPosition(3)
 		AddHeaderOption("Custom Locations")
-		AddTextOption(LocationManager.CustomLocation[0] + " Can Spread:", Data.HasSpreadableFame[21] as String)
-		;AddTextOption(LocationManager.CustomLocation[0] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[0] as String)
-		AddTextOption(LocationManager.CustomLocation[1] + " Can Spread:", Data.HasSpreadableFame[22] as String)
-		;AddTextOption(LocationManager.CustomLocation[1] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[1] as String)
-		AddTextOption(LocationManager.CustomLocation[2] + " Can Spread:", Data.HasSpreadableFame[23] as String)
-		;AddTextOption(LocationManager.CustomLocation[2] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[2] as String)
-		AddTextOption(LocationManager.CustomLocation[3] + " Can Spread:", Data.HasSpreadableFame[24] as String)
-		;AddTextOption(LocationManager.CustomLocation[3] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[3] as String)
-		AddTextOption(LocationManager.CustomLocation[4] + " Can Spread:", Data.HasSpreadableFame[25] as String)
-		;AddTextOption(LocationManager.CustomLocation[4] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[4] as String)
-		AddTextOption(LocationManager.CustomLocation[5] + " Can Spread:", Data.HasSpreadableFame[26] as String)
-		;AddTextOption(LocationManager.CustomLocation[5] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[5] as String)
-		AddTextOption(LocationManager.CustomLocation[6] + " Can Spread:", Data.HasSpreadableFame[27] as String)
-		;AddTextOption(LocationManager.CustomLocation[6] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[6] as String)
-		AddTextOption(LocationManager.CustomLocation[7] + " Can Spread:", Data.HasSpreadableFame[28] as String)
-		;AddTextOption(LocationManager.CustomLocation[7] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[7] as String)
-		AddTextOption(LocationManager.CustomLocation[8] + " Can Spread:", Data.HasSpreadableFame[29] as String)
-		;AddTextOption(LocationManager.CustomLocation[8] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[8] as String)
-		AddTextOption(LocationManager.CustomLocation[9] + " Can Spread:", Data.HasSpreadableFame[30] as String)
-		;AddTextOption(LocationManager.CustomLocation[9] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[9] as String)
-		AddTextOption(LocationManager.CustomLocation[10] + " Can Spread:", Data.HasSpreadableFame[31] as String)
-		;AddTextOption(LocationManager.CustomLocation[10] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[10] as String)
-		AddTextOption(LocationManager.CustomLocation[11] + " Can Spread:", Data.HasSpreadableFame[32] as String)
-		;AddTextOption(LocationManager.CustomLocation[11] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[11] as String)
-		AddTextOption(LocationManager.CustomLocation[12] + " Can Spread:", Data.HasSpreadableFame[33] as String)
-		;AddTextOption(LocationManager.CustomLocation[12] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[12] as String)
-		AddTextOption(LocationManager.CustomLocation[13] + " Can Spread:", Data.HasSpreadableFame[34] as String)
-		;AddTextOption(LocationManager.CustomLocation[13] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[13] as String)
-		AddTextOption(LocationManager.CustomLocation[14] + " Can Spread:", Data.HasSpreadableFame[35] as String)
-		;AddTextOption(LocationManager.CustomLocation[14] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[14] as String)
-		AddTextOption(LocationManager.CustomLocation[15] + " Can Spread:", Data.HasSpreadableFame[36] as String)
-		;AddTextOption(LocationManager.CustomLocation[15] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[15] as String)
-		AddTextOption(LocationManager.CustomLocation[16] + " Can Spread:", Data.HasSpreadableFame[37] as String)
-		;AddTextOption(LocationManager.CustomLocation[16] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[16] as String)
-		AddTextOption(LocationManager.CustomLocation[17] + " Can Spread:", Data.HasSpreadableFame[38] as String)
-		;AddTextOption(LocationManager.CustomLocation[17] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[17] as String)
-		AddTextOption(LocationManager.CustomLocation[18] + " Can Spread:", Data.HasSpreadableFame[39] as String)
-		;AddTextOption(LocationManager.CustomLocation[18] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[18] as String)
-		AddTextOption(LocationManager.CustomLocation[19] + " Can Spread:", Data.HasSpreadableFame[40] as String)
-		;AddTextOption(LocationManager.CustomLocation[19] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[19] as String)
-		AddTextOption(LocationManager.CustomLocation[20] + " Can Spread:", Data.HasSpreadableFame[41] as String)
-		;AddTextOption(LocationManager.CustomLocation[20] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[20] as String)
+		While LocationIndex < LocationManager.CustomLocation.Length
+			AddTextOption(LocationManager.CustomLocation[LocationIndex] + " Can Spread:", Data.CustomLocationHasSpreadableFame[LocationIndex] as String)
+			;AddTextOption(LocationManager.CustomLocation[LocationIndex] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[LocationIndex] as String)
+			LocationIndex += 1
+		EndWhile
+		
 	ElseIf (page == "Registered Mods")
 		Int PageFillIndex = 0
 		Int ModCount = Data.CountExternalMods()
@@ -995,6 +909,30 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 		return 0
 	EndIf
 EndFunction
+
+State SLSF_Reloaded_VictimsAreMasochistState
+	Event OnSelectST()
+		If VictimsAreMasochist == False
+			VictimsAreMasochist = True
+		Else
+			VictimsAreMasochist = False
+		EndIf
+		
+		SetToggleOptionValueST(VictimsAreMasochist)
+	EndEvent
+EndState
+
+State SLSF_Reloaded_AllowBestialityWhenRapedState
+	Event OnSelectST()
+		If AllowBestialityWhenRaped == False
+			AllowBestialityWhenRaped = True
+		Else
+			AllowBestialityWhenRaped = False
+		EndIf
+		
+		SetToggleOptionValueST(AllowBestialityWhenRaped)
+	EndEvent
+EndState
 
 State SLSF_Reloaded_DisableNakedCommentsWhilePWState
 	Event OnSelectST()

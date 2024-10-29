@@ -22,7 +22,7 @@ Bool Property IsLegacySLSFInstalled Auto Hidden
 
 SCO_CumHandler Property COE Auto Hidden
 sr_InflateQuest Property FHU Auto Hidden
-PW_MainLoopScript Property PublicWhore Auto Hidden
+PW_TrackerScript Property PW_Tracker Auto Hidden
 SLSF_Configuration Property LegacyConfig Auto Hidden
 
 Keyword Property DD_Lockable Auto Hidden
@@ -69,6 +69,27 @@ Faction Property FertilityFaction Auto Hidden
 Faction Property HentaiPregFaction Auto Hidden
 
 GlobalVariable Property SLSF_Reloaded_CommentFrequency Auto
+
+GlobalVariable Property SLSF_CurrentFamePCLocation_Anal Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Argonian Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Beast Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Dom_Mas Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Exh_Exp Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_GentleL Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Group Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Khajiit Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_LikeMan Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_LikeWoman Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Masoc Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Nasty Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Oral Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Orc Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Pregna Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Sadic Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_SkoomaUse Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Slut Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Sub_Slave Auto Hidden
+GlobalVariable Property SLSF_CurrentFamePCLocation_Whore Auto Hidden
 
 Function CheckInstalledMods()
 	If SexlabUtil.GetVersion() > 20000
@@ -194,10 +215,10 @@ Function CheckInstalledMods()
 	
 	If Game.GetModByName("Public Whore.esp") != 255
 		IsPWInstalled = True
-		PublicWhore = Game.GetFormFromFile(0xD63, "Public Whore.esp") as PW_MainLoopScript
+		PW_Tracker = Game.GetFormFromFile(0x00016C84, "Public Whore.esp") as PW_TrackerScript
 	Else
 		IsPWInstalled = False
-		PublicWhore = None
+		PW_Tracker = None
 	EndIf
 	
 	If Game.GetModByName("Fertility Mode 3 Fixes and Updates.esp") != 255
@@ -263,9 +284,51 @@ Function CheckInstalledMods()
 	If Game.GetModByName("SexLab - Sexual Fame [SLSF].esm") != 255
 		IsLegacySLSFInstalled = True
 		LegacyConfig = GetLegacyConfig()
+		
+		SLSF_CurrentFamePCLocation_Anal = Game.GetFormFromFile(0x00024255, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Argonian = Game.GetFormFromFile(0x00024256, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Beast = Game.GetFormFromFile(0x00024257, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Dom_Mas = Game.GetFormFromFile(0x00024258, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Exh_Exp = Game.GetFormFromFile(0x00024259, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_GentleL = Game.GetFormFromFile(0x0002425A, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Group = Game.GetFormFromFile(0x0002425B, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Khajiit = Game.GetFormFromFile(0x0002425C, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_LikeMan = Game.GetFormFromFile(0x0002425D, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_LikeWoman = Game.GetFormFromFile(0x0002425E, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Masoc = Game.GetFormFromFile(0x0002425F, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Nasty = Game.GetFormFromFile(0x00024260, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Oral = Game.GetFormFromFile(0x00024261, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Orc = Game.GetFormFromFile(0x00024262, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Pregna = Game.GetFormFromFile(0x00024263, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Sadic = Game.GetFormFromFile(0x00024264, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_SkoomaUse = Game.GetFormFromFile(0x00024265, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Slut = Game.GetFormFromFile(0x00024266, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Sub_Slave = Game.GetFormFromFile(0x00024267, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
+		SLSF_CurrentFamePCLocation_Whore = Game.GetFormFromFile(0x00024268, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
 	Else
 		IsLegacySLSFInstalled = False
 		LegacyConfig = None
+		
+		SLSF_CurrentFamePCLocation_Anal = None
+		SLSF_CurrentFamePCLocation_Argonian = None
+		SLSF_CurrentFamePCLocation_Beast = None
+		SLSF_CurrentFamePCLocation_Dom_Mas = None
+		SLSF_CurrentFamePCLocation_Exh_Exp = None
+		SLSF_CurrentFamePCLocation_GentleL = None
+		SLSF_CurrentFamePCLocation_Group = None
+		SLSF_CurrentFamePCLocation_Khajiit = None
+		SLSF_CurrentFamePCLocation_LikeMan = None
+		SLSF_CurrentFamePCLocation_LikeWoman = None
+		SLSF_CurrentFamePCLocation_Masoc = None
+		SLSF_CurrentFamePCLocation_Nasty = None
+		SLSF_CurrentFamePCLocation_Oral = None
+		SLSF_CurrentFamePCLocation_Orc = None
+		SLSF_CurrentFamePCLocation_Pregna = None
+		SLSF_CurrentFamePCLocation_Sadic = None
+		SLSF_CurrentFamePCLocation_SkoomaUse = None
+		SLSF_CurrentFamePCLocation_Slut = None
+		SLSF_CurrentFamePCLocation_Sub_Slave = None
+		SLSF_CurrentFamePCLocation_Whore = None
 	EndIf
 EndFunction
 
@@ -327,7 +390,7 @@ EndFunction
 
 Bool Function IsPublicWhore()
 	If IsPWInstalled == True
-		If PublicWhore.isWhoreNow == True
+		If PW_Tracker.GetCurrentStatus() == 2
 			return True
 		EndIf
 	EndIf

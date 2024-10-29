@@ -2,6 +2,7 @@ ScriptName SLSF_Reloaded_LegacyOverwrite extends Quest
 
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
+SLSF_Reloaded_LocationManager Property LocationManager Auto
 
 Function OverwriteLegacyFame()
 	Mods.OverwriteLegacyConfig()
@@ -12,6 +13,19 @@ Function OverwriteLegacyFame()
 	String LocationName = "-EMPTY-" ;The Location Name for SLSF Reloaded
 	String FameType = "-EMPTY-" ;The Fame Category for SLSF Reloaded
 	String LegacyString = "-EMPTY-" ;The Storage Util string we need to set for overwriting Legacy SLSF
+	
+	String PlayerLocation = LocationManager.CurrentLocationName()
+	If	PlayerLocation == "Haafingar"
+		PlayerLocation = "Solitude"
+	ElseIf PlayerLocation == "Eastmarch"
+		PlayerLocation = "Windhelm"
+	ElseIf PlayerLocation == "the Pale"
+		PlayerLocation = "Dawnstar"
+	ElseIf PlayerLocation == "the Reach"
+		PlayerLocation = "Markarth"
+	ElseIf PlayerLocation == "the Rift"
+		PlayerLocation = "Riften"
+	EndIf
 	
 	While LocationIndex < 24
 		If LocationIndex == 0
@@ -130,6 +144,50 @@ Function OverwriteLegacyFame()
 			EndIf
 			
 			StorageUtil.IntListSet(None, LegacyString, LocationIndex, FameValue)
+			
+			If LocationName == PlayerLocation
+				If FameType == "Anal"
+					Mods.SLSF_CurrentFamePCLocation_Anal.SetValue(FameValue)
+				ElseIf FameType == "Likes Argonian"
+					Mods.SLSF_CurrentFamePCLocation_Argonian.SetValue(FameValue)
+				ElseIf FameType == "Bestiality"
+					Mods.SLSF_CurrentFamePCLocation_Beast.SetValue(FameValue)
+				ElseIf FameType == "Dominant"
+					Mods.SLSF_CurrentFamePCLocation_Dom_Mas.SetValue(FameValue)
+				ElseIf FameType == "Exhibitionist"
+					Mods.SLSF_CurrentFamePCLocation_Exh_Exp.SetValue(FameValue)
+				ElseIf FameType == "Gentle"
+					Mods.SLSF_CurrentFamePCLocation_GentleL.SetValue(FameValue)
+				ElseIf FameType == "Group"
+					Mods.SLSF_CurrentFamePCLocation_Group.SetValue(FameValue)
+				ElseIf FameType == "Likes Khajiit"
+					Mods.SLSF_CurrentFamePCLocation_Khajiit.SetValue(FameValue)
+				ElseIf FameType == "Likes Men"
+					Mods.SLSF_CurrentFamePCLocation_LikeMan.SetValue(FameValue)
+				ElseIf FameType == "Likes Women"
+					Mods.SLSF_CurrentFamePCLocation_LikeWoman.SetValue(FameValue)
+				ElseIf FameType == "Masochist"
+					Mods.SLSF_CurrentFamePCLocation_Masoc.SetValue(FameValue)
+				ElseIf FameType == "Nasty"
+					Mods.SLSF_CurrentFamePCLocation_Nasty.SetValue(FameValue)
+				ElseIf FameType == "Oral"
+					Mods.SLSF_CurrentFamePCLocation_Oral.SetValue(FameValue)
+				ElseIf FameType == "Likes Orc"
+					Mods.SLSF_CurrentFamePCLocation_Orc.SetValue(FameValue)
+				ElseIf FameType == "Pregnant"
+					Mods.SLSF_CurrentFamePCLocation_Pregna.SetValue(FameValue)
+				ElseIf FameType == "Sadist"
+					Mods.SLSF_CurrentFamePCLocation_Sadic.SetValue(FameValue)
+				ElseIf FameIndex == 16 ;Skooma
+					Mods.SLSF_CurrentFamePCLocation_SkoomaUse.SetValue(FameValue)
+				ElseIf FameType == "Slut"
+					Mods.SLSF_CurrentFamePCLocation_Slut.SetValue(FameValue)
+				ElseIf FameType == "Submissive"
+					Mods.SLSF_CurrentFamePCLocation_Sub_Slave.SetValue(FameValue)
+				ElseIf FameType == "Whore"
+					Mods.SLSF_CurrentFamePCLocation_Whore.SetValue(FameValue)
+				EndIf
+			EndIf
 			
 			FameIndex += 1
 		EndWhile
