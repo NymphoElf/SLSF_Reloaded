@@ -37,6 +37,9 @@ Keyword Property SLSF_Reloaded_DoesNotHideIdentity Auto
 Keyword Property SLSF_Reloaded_CoversHands Auto
 Keyword Property SLSF_Reloaded_CoversFeet Auto
 Keyword Property SLSF_Reloaded_CoversBack Auto
+Keyword Property SLSF_Reloaded_DoesNotCoverHands Auto
+Keyword Property SLSF_Reloaded_DoesNotCoverFeet Auto
+Keyword Property SLSF_Reloaded_DoesNotCoverBack Auto
 
 Actor Property PlayerRef Auto
 
@@ -346,10 +349,10 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 				If PlayerRef.GetEquippedArmorInSlot(32) != None 
 					If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
 						If PlayerRef.GetEquippedArmorInSlot(46) != None 
-							If PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(Mods.SLS_BikiniArmor) && PlayerRef.GetEquippedArmorInSlot(47) == None
+							If PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(Mods.SLS_BikiniArmor) && (PlayerRef.GetEquippedArmorInSlot(47) == None || PlayerRef.GetEquippedArmorInSlot(47).HasKeyword(SLSF_Reloaded_DoesNotCoverBack))
 								return True
 							EndIf
-						ElseIf PlayerRef.GetEquippedArmorInSlot(47) == None
+						ElseIf PlayerRef.GetEquippedArmorInSlot(47) == None || PlayerRef.GetEquippedArmorInSlot(47).HasKeyword(SLSF_Reloaded_DoesNotCoverBack)
 							return True
 						EndIf
 					EndIf
@@ -379,7 +382,7 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 			EndIf
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Back"
 			If !PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversBack) && (PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1)
-				If PlayerRef.GetEquippedArmorInSlot(46) == None && PlayerRef.GetEquippedArmorInSlot(47) == None
+				If (PlayerRef.GetEquippedArmorInSlot(46) == None || PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(SLSF_Reloaded_DoesNotCoverBack)) && (PlayerRef.GetEquippedArmorInSlot(47) == None || PlayerRef.GetEquippedArmorInSlot(47).HasKeyword(SLSF_Reloaded_DoesNotCoverBack))
 					return True
 				EndIf
 			EndIf
@@ -388,7 +391,7 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 		EndIf
 	ElseIf Mods.IsSLSInstalled == True && Mods.IsANDInstalled == False
 		If PlayerRef.GetEquippedArmorInSlot(32) == None || PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
-			If (PlayerRef.GetEquippedArmorInSlot(46) == None || PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(Mods.SLS_BikiniArmor)) && PlayerRef.GetEquippedArmorInSlot(47) == None
+			If (PlayerRef.GetEquippedArmorInSlot(46) == None || PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(SLSF_Reloaded_DoesNotCoverBack)) && (PlayerRef.GetEquippedArmorInSlot(47) == None || PlayerRef.GetEquippedArmorInSlot(47).HasKeyword(SLSF_Reloaded_DoesNotCoverBack))
 				return True
 			EndIf
 		EndIf
@@ -494,8 +497,10 @@ Bool Function IsHandTattooVisible(Int SlotNumber)
 	If Mods.IsSlaveTatsInstalled == False
 		return False
 	Else
-		If CountAppliedTattoos("Hands") == 0 || HandTattooApplied[SlotNumber] == False || PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversHands) || PlayerRef.GetEquippedArmorInSlot(33) != None
-			return False
+		If CountAppliedTattoos("Hands") == 0 || HandTattooApplied[SlotNumber] == False || PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversHands)
+			If PlayerRef.GetEquippedArmorInSlot(33) != None && PlayerRef.GetEquippedArmorInSlot(33).HasKeyword(SLSF_Reloaded_DoesNotCoverHands) == False
+				return False
+			EndIf
 		EndIf
 	EndIf
 	return True
@@ -505,8 +510,10 @@ Bool Function IsFootTattooVisible(Int SlotNumber)
 	If Mods.IsSlaveTatsInstalled == False
 		return False
 	Else
-		If CountAppliedTattoos("Feet") == 0 || FootTattooApplied[SlotNumber] == False || PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversFeet) || PlayerRef.GetEquippedArmorInSlot(37) != None
-			return False
+		If CountAppliedTattoos("Feet") == 0 || FootTattooApplied[SlotNumber] == False || PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversFeet)
+			If PlayerRef.GetEquippedArmorInSlot(37) != None && PlayerRef.GetEquippedArmorInSlot(37).HasKeyword(SLSF_Reloaded_DoesNotCoverFeet) == False
+				return False
+			EndIf
 		EndIf
 	EndIf
 	return True

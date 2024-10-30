@@ -68,7 +68,8 @@ Function RegisterExternalEvents()
 	RegisterForModEvent("SLSF_Reloaded_SetUnfaithfulFlag", "OnExternalUnfaithfulFlag")
 	RegisterForModEvent("SLSF_Reloaded_SetCuckFlag", "OnExternalCuckFlag")
 	RegisterForModEvent("SLSF_Reloaded_SetAirheadFlag", "OnExternalAirheadFlag")
-	RegisterForModEvent("SLSF_Reloaded_SetWhoreEventFlag", "OnExternalWhoreEventFlag") ;Used specifically for checking if a Sexlab Event should give Whore fame
+	RegisterForModEvent("SLSF_Reloaded_SetWhoreEventFlag", "OnExternalWhoreEventFlag") ;DEPRECATED - Use Sex Woker flag instead
+	RegisterForModEvent("SLSF_Reloaded_SetSexWorkerFlag", "OnExternalSexWorkerFlag") ;Used specifically for checking if a Sexlab Event should give Whore fame
 	
 	;DATA LISTENERS
 	RegisterForModEvent("SLSF_Reloaded_RequestLocation", "OnRequestLocation")
@@ -981,9 +982,14 @@ Event OnExternalAirheadFlag(String ModName, Bool Flag)
 	Data.SetExternalFlags(ModName, "Airhead", Flag)
 EndEvent
 
-;The Whore Event flag turns any potential "Slut" fame from SEX ACTS - aka from Sexlab Animations - into Whore fame. Useful for prostitution mods not inherently used by SLSF Reloaded.
+;DEPRECATED - The Whore Event flag turns any potential "Slut" fame from SEX ACTS - aka from Sexlab Animations - into Whore fame. Useful for prostitution mods not inherently used by SLSF Reloaded.
 Event OnExternalWhoreEventFlag(String ModName, Bool Flag)
-	Data.SetExternalFlags(ModName, "Whore Event", Flag)
+	Data.SetExternalFlags(ModName, "Sex Worker", Flag)
+EndEvent
+
+;The Sex Worker flag turns any potential "Slut" fame from SEX ACTS - aka from Sexlab Animations - into Whore fame. Useful for prostitution mods not inherently used by SLSF Reloaded.
+Event OnExternalSexWorkerFlag(String ModName, Bool Flag)
+	Data.SetExternalFlags(ModName, "Sex Worker", Flag)
 EndEvent
 
 ;/

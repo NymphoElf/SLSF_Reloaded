@@ -519,7 +519,7 @@ Event OnPageReset(String page)
 			Else
 				AddTextOption("Slot Used:", "No")
 			EndIf
-			AddTextOption("Slot Visible:", "No")
+			AddTextOption("Slot Visible:", "No (Unused)")
 		EndIf
 		AddMenuOptionST("SLSF_Reloaded_BodySlotFameState", "Extra Fame", VisibilityManager.BodyTattooExtraFameType[BodyTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[BodyTattooIndex] == False))
 		AddMenuOptionST("SLSF_Reloaded_BodySlotSubcategoryState", "Subcategory", VisibilityManager.BodyTattooSubcategory[BodyTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[BodyTattooIndex] == False))
@@ -528,7 +528,11 @@ Event OnPageReset(String page)
 		AddMenuOptionST("SLSF_Reloaded_HandTattooSlotState", "Hand Tattoo Slot", (HandTattooIndex + 1), 0)
 		AddToggleOptionST("SLSF_Reloaded_ExcludeHandSlotState", "Exclude From Fame", VisibilityManager.HandTattooExcluded[HandTattooIndex], 0)
 		If VisibilityManager.HandTattooApplied[HandTattooIndex] == True
-			AddTextOption("Slot Used:", "Yes")
+			If VisibilityManager.HandTattooExcluded[HandTattooIndex]
+				AddTextOption("Slot Used:", "Yes (Excluded)")
+			Else
+				AddTextOption("Slot Used:", "Yes")
+			EndIf
 			If VisibilityManager.IsHandTattooVisible(HandTattooIndex) == True
 				AddTextOption("Slot Visible:", "Yes")
 			Else
@@ -536,11 +540,11 @@ Event OnPageReset(String page)
 			EndIf
 		Else
 			If VisibilityManager.HandTattooExcluded[HandTattooIndex] == True
-				AddTextOption("Slot Used:", "Excluded")
+				AddTextOption("Slot Used:", "No (Excluded)")
 			Else
 				AddTextOption("Slot Used:", "No")
 			EndIf
-			AddTextOption("Slot Visible:", "No")
+			AddTextOption("Slot Visible:", "No (Unused)")
 		EndIf
 		AddMenuOptionST("SLSF_Reloaded_HandSlotFameState", "Extra Fame", VisibilityManager.HandTattooExtraFameType[HandTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[HandTattooIndex] == False))
 		
@@ -549,7 +553,11 @@ Event OnPageReset(String page)
 		AddMenuOptionST("SLSF_Reloaded_FaceTattooSlotState", "Face Tattoo Slot", (FaceTattooIndex + 1), 0)
 		AddToggleOptionST("SLSF_Reloaded_ExcludeFaceSlotState", "Exclude From Fame", VisibilityManager.FaceTattooExcluded[FaceTattooIndex], 0)
 		If VisibilityManager.FaceTattooApplied[FaceTattooIndex] == True
-			AddTextOption("Slot Used:", "Yes")
+			If VisibilityManager.FaceTattooExcluded[FaceTattooIndex]
+				AddTextOption("Slot Used:", "Yes (Excluded)")
+			Else
+				AddTextOption("Slot Used:", "Yes")
+			EndIf
 			If VisibilityManager.IsFaceTattooVisible(FaceTattooIndex) == True
 				AddTextOption("Slot Visible:", "Yes")
 			Else
@@ -557,19 +565,24 @@ Event OnPageReset(String page)
 			EndIf
 		Else
 			If VisibilityManager.FaceTattooExcluded[FaceTattooIndex] == True
-				AddTextOption("Slot Used:", "Excluded")
+				AddTextOption("Slot Used:", "No (Excluded)")
 			Else
 				AddTextOption("Slot Used:", "No")
 			EndIf
-			AddTextOption("Slot Visible:", "No")
+			AddTextOption("Slot Visible:", "No (Unused)")
 		EndIf
 		AddMenuOptionST("SLSF_Reloaded_FaceSlotFameState", "Extra Fame", VisibilityManager.FaceTattooExtraFameType[FaceTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[FaceTattooIndex] == False))
 		
+		AddEmptyOption()
 		AddHeaderOption("Foot Tattoos")
 		AddMenuOptionST("SLSF_Reloaded_FootTattooSlotState", "Foot Tattoo Slot", (FootTattooIndex + 1), 0)
 		AddToggleOptionST("SLSF_Reloaded_ExcludeFootSlotState", "Exclude From Fame", VisibilityManager.FootTattooExcluded[FootTattooIndex], 0)
 		If VisibilityManager.FootTattooApplied[FootTattooIndex] == True
-			AddTextOption("Slot Used:", "Yes")
+			If VisibilityManager.FootTattooExcluded[FootTattooIndex]
+				AddTextOption("Slot Used:", "Yes (Excluded)")
+			Else
+				AddTextOption("Slot Used:", "Yes")
+			EndIf
 			If VisibilityManager.IsFootTattooVisible(FootTattooIndex) == True
 				AddTextOption("Slot Visible:", "Yes")
 			Else
@@ -577,11 +590,11 @@ Event OnPageReset(String page)
 			EndIf
 		Else
 			If VisibilityManager.FootTattooExcluded[FootTattooIndex] == True
-				AddTextOption("Slot Used:", "Excluded")
+				AddTextOption("Slot Used:", "No (Excluded)")
 			Else
 				AddTextOption("Slot Used:", "No")
 			EndIf
-			AddTextOption("Slot Visible:", "No")
+			AddTextOption("Slot Visible:", "No (Unused)")
 		EndIf
 		AddMenuOptionST("SLSF_Reloaded_FootSlotFameState", "Extra Fame", VisibilityManager.FootTattooExtraFameType[FootTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[FootTattooIndex] == False))
 		

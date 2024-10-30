@@ -14,11 +14,11 @@ Bool[] Property DefaultLocationCanDecay Auto
 Bool[] Property CustomLocationCanDecay Auto 
 
 String[] Property FameType Auto
-String[] Property PossibleSpreadTargets Auto Hidden
 
 Int[] Property DefaultLocationDecayPauseTimer Auto 
 Int[] Property CustomLocationDecayPauseTimer Auto 
 Int Property DecayCountdown Auto Hidden
+Int Property DecayDivisor Auto Hidden
 Int Property SpreadCountdown Auto Hidden
 Int Property GainIterationMultiplier Auto Hidden
 Int Property DecayIterationMultiplier Auto Hidden
@@ -98,9 +98,7 @@ EndEvent
 Function Startup()
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
-		;DefaultLocationCanSpread[LocationIndex] = True
 		DefaultLocationCanDecay[LocationIndex] = True
-		;DefaultLocationSpreadPauseTimer[LocationIndex] = 0
 		DefaultLocationDecayPauseTimer[LocationIndex] = 0
 		LocationIndex += 1
 	EndWhile
@@ -108,9 +106,7 @@ Function Startup()
 	LocationIndex = 0
 	
 	While LocationIndex < LocationManager.CustomLocation.Length
-		;CustomLocationCanSpread[LocationIndex] = False
 		CustomLocationCanDecay[LocationIndex] = False
-		;CustomLocationSpreadPauseTimer[LocationIndex] = 0
 		CustomLocationDecayPauseTimer[LocationIndex] = 0
 		LocationIndex += 1
 	EndWhile
@@ -127,7 +123,7 @@ Function UpdateFame()
 	
 	Float Time = Utility.GetCurrentGameTime()
 	Int CountdownChange = ((Time - LastCheckedTime) * 48) as Int ;Get the number of "half-hours" that have passed since last check
-	Int DecayIterations = (CountdownChange/(Config.DecayTimeNeeded)) as Int
+	Int DecayIterations = (CountdownChange/DecayDivisor) as Int
 	;^^^(Default 24)- if 24 or more "half-hours" have passed, then 12 or more hours have passed. Get the number of 12-hour intervals that have passed. Max 2 (usually)
 	
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
@@ -154,6 +150,7 @@ Function UpdateFame()
 	If DecayCountdown <= 0
 		DecayFame()
 		DecayCountdown = (Config.DecayTimeNeeded) as Int
+		DecayDivisor = (Config.DecayTimeNeeded) as Int
 	EndIf
 	
 	If SpreadCountdown <= 0
@@ -477,6 +474,10 @@ Bool Function CanGainExhibitionistFame(String FameLocation)
 			return True
 		EndIf
 	EndIf
+	
+	If Sexlab.IsActorActive(PlayerRef) == True
+		return True
+	EndIf
 	return False
 EndFunction
 
@@ -501,7 +502,6 @@ EndFunction
 
 Bool Function CanGainAnalFame(String FameLocation)
 	;Check Anal Fame
-	
 	If Mods.IsANDInstalled == True
 		If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1 && PlayerRef.WornHasKeyword(Mods.DD_AnalPlug)
 			return True
@@ -602,7 +602,11 @@ Bool Function CanGainBoundFame(String FameLocation)
 		BondagePoints += 1
 	EndIf
 	
-	If PlayerRef.WornHasKeyword(Mods.DD_Gag) || PlayerRef.WornHasKeyword(Mods.DD_GagPanel)
+	If PlayerRef.WornHasKeyword(Mods.DD_Gag) || PlayerRef.WornHasKeyword(Mods.DD_GagPanel) 
+		BondagePoints += 1
+	EndIf
+	
+	If PlayerRef.WornHasKeyword(Mods.DD_Hood)
 		BondagePoints += 1
 	EndIf
 	
@@ -885,14 +889,13 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	
 	String[] RolledCategory = New String[25] ;Store which fame categories we roll in another array and check against them to prevent duplicate increases
 	Int CategoryRoll = 0
-	;Int TimesRolled = 0
-	Int PreviousRoll = 0
+	Int TimesRolled = 0
 	Bool FirstRoll = True
 	Bool DuplicateFameRolls = False
 	
-	While AppliedFameCount < GainedFameCount ;AppliedFameCount becomes our Index for the RolledCategory array
+	While AppliedFameCount < GainedFameCount && TimesRolled < 50 ;AppliedFameCount becomes our Index for the RolledCategory array. Sanity check of 50 maximum attempts to prevent script lag
 		CategoryRoll = Utility.RandomInt(0, (PossibleFameCount - 1)) ;We've already determined that PossibleFameCount is higher than 1, so the maximum will be at least 1. CategoryRoll becomes our PossibleFameArray Index
-		;TimesRolled += 1
+		TimesRolled += 1
 		
 		String CurrentlyRolledCategory = PossibleFameArray[CategoryRoll]
 		
@@ -914,7 +917,6 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 			GainFame(RolledCategory[AppliedFameCount], FameLocation, False)
 			AppliedFameCount += 1
 		Else
-			;TimesRolled -= 1 ;If there is a duplicate, reduce roll to prevent check ending early
 			DuplicateFameRolls = False
 		EndIf
 	EndWhile
@@ -1170,38 +1172,36 @@ Function SpreadFameRoll()
 	;Check if Fame Spread is not Paused, and perform spread operations if not.
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
-		;If DefaultLocationCanSpread[LocationIndex] == True
-			If Data.DefaultLocationHasSpreadableFame[LocationIndex] == True
-				SpreadChance = Config.DefaultLocationSpreadChance[LocationIndex]
-				If SpreadChance == 0
-					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
-				ElseIf SpreadChance == 100
+		If Data.DefaultLocationHasSpreadableFame[LocationIndex] == True
+			SpreadChance = Config.DefaultLocationSpreadChance[LocationIndex]
+			If SpreadChance == 0
+				Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
+			ElseIf SpreadChance == 100
+				SpreadFame(LocationManager.DefaultLocation[LocationIndex])
+				Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
+			ElseIf SpreadChance > 100 || SpreadChance < 0
+				If Config.EnableTracing == True
+					Debug.Trace("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+				EndIf
+				Config.DefaultLocationSpreadChance[LocationIndex] = 30
+			Else
+				FameSpreadRoll = Utility.RandomInt(1, 100)
+				If FameSpreadRoll <= SpreadChance
 					SpreadFame(LocationManager.DefaultLocation[LocationIndex])
 					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
-				ElseIf SpreadChance > 100 || SpreadChance < 0
-					If Config.EnableTracing == True
-						Debug.Trace("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
-					EndIf
-					Config.DefaultLocationSpreadChance[LocationIndex] = 30
 				Else
-					FameSpreadRoll = Utility.RandomInt(1, 100)
-					If FameSpreadRoll <= SpreadChance
-						SpreadFame(LocationManager.DefaultLocation[LocationIndex])
-						Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
-					Else
-						Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
-					EndIf
-				EndIf
-				
-				If Config.DefaultLocationSpreadChance[LocationIndex] < 0
-					Config.DefaultLocationSpreadChance[LocationIndex] = 0
-				EndIf
-				
-				If Config.DefaultLocationSpreadChance[LocationIndex] > 100
-					Config.DefaultLocationSpreadChance[LocationIndex] = 100
+					Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
 				EndIf
 			EndIf
-		;EndIf
+			
+			If Config.DefaultLocationSpreadChance[LocationIndex] < 0
+				Config.DefaultLocationSpreadChance[LocationIndex] = 0
+			EndIf
+			
+			If Config.DefaultLocationSpreadChance[LocationIndex] > 100
+				Config.DefaultLocationSpreadChance[LocationIndex] = 100
+			EndIf
+		EndIf
 		LocationIndex += 1
 	EndWhile
 	
@@ -1209,36 +1209,34 @@ Function SpreadFameRoll()
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	
 	While LocationIndex < CustomLocations
-		;If CustomLocationCanSpread[LocationIndex] == True
-			If Data.CustomLocationHasSpreadableFame[LocationIndex] == True
-				SpreadChance = Config.CustomLocationSpreadChance[LocationIndex]
-				If SpreadChance == 0
-					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
-				ElseIf SpreadChance == 100
+		If Data.CustomLocationHasSpreadableFame[LocationIndex] == True
+			SpreadChance = Config.CustomLocationSpreadChance[LocationIndex]
+			If SpreadChance == 0
+				Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
+			ElseIf SpreadChance == 100
+				SpreadFame(LocationManager.CustomLocation[LocationIndex])
+				Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
+			ElseIf SpreadChance > 100 || SpreadChance < 0
+				Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+				Config.CustomLocationSpreadChance[LocationIndex] = 30
+			Else
+				FameSpreadRoll = Utility.RandomInt(1, 100)
+				If FameSpreadRoll <= SpreadChance
 					SpreadFame(LocationManager.CustomLocation[LocationIndex])
 					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
-				ElseIf SpreadChance > 100 || SpreadChance < 0
-					Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
-					Config.CustomLocationSpreadChance[LocationIndex] = 30
 				Else
-					FameSpreadRoll = Utility.RandomInt(1, 100)
-					If FameSpreadRoll <= SpreadChance
-						SpreadFame(LocationManager.CustomLocation[LocationIndex])
-						Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
-					Else
-						Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
-					EndIf
-				EndIf
-				
-				If Config.CustomLocationSpreadChance[LocationIndex] < 0
-					Config.CustomLocationSpreadChance[LocationIndex] = 0
-				EndIf
-				
-				If Config.CustomLocationSpreadChance[LocationIndex] > 100
-					Config.CustomLocationSpreadChance[LocationIndex] = 100
+					Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] + Config.FailedSpreadIncrease) as Int
 				EndIf
 			EndIf
-		;EndIf
+			
+			If Config.CustomLocationSpreadChance[LocationIndex] < 0
+				Config.CustomLocationSpreadChance[LocationIndex] = 0
+			EndIf
+			
+			If Config.CustomLocationSpreadChance[LocationIndex] > 100
+				Config.CustomLocationSpreadChance[LocationIndex] = 100
+			EndIf
+		EndIf
 		LocationIndex += 1
 	EndWhile
 EndFunction
@@ -1249,7 +1247,7 @@ Function SpreadFame(String SpreadFromLocation)
 	Int SpreadableFame = 0
 	Int PossibleFameSpreadCategories = 0
 	Int PossibleFameSpreadIndex = 0
-	String[] PossibleCategoryList = Utility.CreateStringArray(FameType.Length, "-EMPTY-")
+	String[] PossibleCategoryList = New String[25] ;Utility.CreateStringArray(FameType.Length, "-EMPTY-")
 	
 	;Count possible categories & fill array
 	While PossibleFameSpreadIndex < FameType.Length
@@ -1270,19 +1268,12 @@ Function SpreadFame(String SpreadFromLocation)
 		return
 	EndIf
 	
-	String[] PossibleSpreadCategories = Utility.CreateStringArray(PossibleFameSpreadCategories, "-EMPTY-")
-	Int CopyIndex = 0
-	While CopyIndex < PossibleFameSpreadCategories
-		PossibleSpreadCategories[CopyIndex] = PossibleCategoryList[CopyIndex]
-		CopyIndex += 1
-	EndWhile
-	
 	;Get possible fame spread targets
 	Int DefaultLocations = LocationManager.DefaultLocation.Length
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	Int TotalLocations = DefaultLocations + CustomLocations
 	
-	PossibleSpreadTargets = Utility.CreateStringArray(TotalLocations)
+	String[] PossibleSpreadTargets = New String[42] ;21 default + 21 custom locations
 	
 	;Fill array with possible targets
 	Int PossibleLocationIndex = 0
@@ -1337,9 +1328,9 @@ Function SpreadFame(String SpreadFromLocation)
 	Int CategoryRoll = 0
 	
 	If PossibleFameSpreadCategories == 1
-		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[0])
+		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[0])
 		
-		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[0])
+		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[0])
 		;Fame spread is in steps of 10%, which is why we divide the MaximumSpreadPercentage by 10 and then divide the RandomInt by 10 again to total the overall division by 100, which gives us a percentage
 		
 		NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
@@ -1348,13 +1339,13 @@ Function SpreadFame(String SpreadFromLocation)
 			NewFame = 150
 		EndIf
 		
-		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[0], NewFame)
+		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[0], NewFame)
 	ElseIf NumberOfCategoriesToSpread == 1
 		CategoryRoll = Utility.RandomInt(0, (PossibleFameSpreadCategories - 1))
 		
-		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll])
+		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll])
 		
-		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[0])
+		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[0])
 		
 		NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
 		
@@ -1362,12 +1353,12 @@ Function SpreadFame(String SpreadFromLocation)
 			NewFame = 150
 		EndIf
 		
-		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll], NewFame)
+		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
 	ElseIf NumberOfCategoriesToSpread == PossibleFameSpreadCategories
 		While SuccessfulFameSpreads < PossibleFameSpreadCategories
-			TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[SuccessfulFameSpreads])
+			TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[SuccessfulFameSpreads])
 			
-			FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[SuccessfulFameSpreads])
+			FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[SuccessfulFameSpreads])
 			
 			NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
 			
@@ -1375,35 +1366,41 @@ Function SpreadFame(String SpreadFromLocation)
 				NewFame = 150
 			EndIf
 			
-			Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[SuccessfulFameSpreads], NewFame)
+			Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[SuccessfulFameSpreads], NewFame)
 			
 			SuccessfulFameSpreads += 1
 		EndWhile
 	Else
 		Int TimesRolled = 0
-		Int PreviousRoll = 0
+		Bool FirstRoll = True
 		Bool DuplicateFameRolls = False
-		String[] RolledCategory = Utility.CreateStringArray(NumberOfCategoriesToSpread)
+		String[] RolledCategory = New String[10] ;Hard Maximum of 10 categories
 		
-		While SuccessfulFameSpreads < NumberOfCategoriesToSpread
+		While (SuccessfulFameSpreads < NumberOfCategoriesToSpread) && (TimesRolled < 50) ;Sanity check of 50 maximum attempts to prevent script lag
 			CategoryRoll = Utility.RandomInt(0, (PossibleFameSpreadCategories - 1))
 			TimesRolled += 1
-			RolledCategory[SuccessfulFameSpreads] = PossibleSpreadCategories[CategoryRoll]
-			If TimesRolled > 1 ;If this isn't our first fame roll, check for duplicates
-				While PreviousRoll < TimesRolled && DuplicateFameRolls == False
-					If RolledCategory[SuccessfulFameSpreads] == RolledCategory[PreviousRoll] ;Check previous rolls for matching results
-						DuplicateFameRolls = True
-					EndIf
-					PreviousRoll += 1
-				EndWhile
-				PreviousRoll = 0
+			
+			String CurrentlyRolledCategory = PossibleCategoryList[CategoryRoll]
+			
+			If SuccessfulFameSpreads > 0
+				FirstRoll = False
+			EndIf
+			
+			If FirstRoll == False
+				Int DuplicateIndex = RolledCategory.Find(CurrentlyRolledCategory)
+			
+				If DuplicateIndex >= 0
+					DuplicateFameRolls = True
+				EndIf
 			EndIf
 			
 			If DuplicateFameRolls == False
-				;If there are no duplicates, apply our rolled fame.
-				TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll])
+				;If there are no duplicates, store and apply our rolled fame.
+				RolledCategory[SuccessfulFameSpreads] = PossibleCategoryList[CategoryRoll]
 				
-				FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleSpreadCategories[CategoryRoll])
+				TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll])
+				
+				FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[CategoryRoll])
 				
 				NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
 				
@@ -1411,11 +1408,10 @@ Function SpreadFame(String SpreadFromLocation)
 					NewFame = 150
 				EndIf
 				
-				Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleSpreadCategories[CategoryRoll], NewFame)
+				Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
 				
 				SuccessfulFameSpreads += 1
 			Else
-				TimesRolled -= 1 ;If there is a duplicate, reduce roll to prevent run-away index checks
 				DuplicateFameRolls = False
 			EndIf
 		EndWhile
@@ -1442,16 +1438,15 @@ EndFunction
 
 Int Function CalculateFameSpread(Int FromFame, Int TargetFame)
 	Int MaxRoll = (Config.MaximumSpreadPercentage as Int) / 10 ;Result should be 1, 2, 3, 4, or 5
-	Float SpreadRoll = 1.0
+	Int SpreadRoll = 1
 	
 	If MaxRoll > 1 ;If MaxRoll is 1, then roll doesn't matter
-		SpreadRoll = Utility.RandomInt(1, MaxRoll) as Float
+		SpreadRoll = Utility.RandomInt(1, MaxRoll)
 	EndIf
 	
-	Float fPrevious = FromFame as Float
-	Float fPercentage = (SpreadRoll / 10) as Float ;Result should be 0.1, 0.2, 0.3, 0.4, or 0.5 (10%, 20%, 30%, 40%, or 50%) based on roll
-	Float fSpreadValue = fPrevious * fPercentage ;Result should be a percentage of fame from the spreading location, minimum being 1
-	Int FinalFame = (TargetFame + fSpreadValue) as Int
+	Float Percentage = (SpreadRoll / 10) as Float ;Result should be 0.1, 0.2, 0.3, 0.4, or 0.5 (10%, 20%, 30%, 40%, or 50%) based on roll
+	Int SpreadValue = (FromFame * Percentage) as Int ;Result should be a percentage of fame from the spreading location, minimum being 1
+	Int FinalFame = TargetFame + SpreadValue
 	
 	return FinalFame
 EndFunction

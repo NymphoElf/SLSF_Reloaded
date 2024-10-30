@@ -124,26 +124,19 @@ Bool[] Property CumDumpFlags Auto Hidden
 Bool[] Property UnfaithfulFlags Auto Hidden
 Bool[] Property CuckFlags Auto Hidden
 Bool[] Property AirheadFlags Auto Hidden
-Bool[] Property WhoreEventFlags Auto Hidden
+Bool[] Property WhoreEventFlags Auto Hidden ;DEPRECATED
+Bool[] Property SexWorkerFlags Auto Hidden
 
-;Int SpreadableFameCheckDelay = 12
+Bool Property MaintenanceDone Auto Hidden
 
 Event OnInit()
 	SetDefaults()
+	MaintenanceDone = True
 EndEvent
 
 Function FameCheck()
 	FameOverviewCheck()
 	CheckSpreadableFame()
-	
-	;/
-	SpreadableFameCheckDelay -= 1
-	
-	If SpreadableFameCheckDelay <= 0
-		CheckSpreadableFame()
-		SpreadableFameCheckDelay = (Config.SpreadTimeNeeded / 4) as Int
-	EndIf
-	/;
 EndFunction
 
 Function SetDefaults()
@@ -173,7 +166,8 @@ Function SetDefaults()
 	UnfaithfulFlags = New Bool[100]
 	CuckFlags = New Bool[100]
 	AirheadFlags = New Bool[100]
-	WhoreEventFlags = New Bool[100]
+	WhoreEventFlags = New Bool[100] ;DEPRECATED
+	SexWorkerFlags = New Bool[100]
 	
 	Int ExternalModIndex = 0
 	While ExternalModIndex < ExternalMods.Length
@@ -197,112 +191,126 @@ Function SetDefaults()
 	
 EndFunction
 
+Function DataMaintenance()
+	If MaintenanceDone == False
+		Int Index = 0
+		While Index < WhoreEventFlags.Length
+			If WhoreEventFlags[Index] != SexWorkerFlags[Index]
+				SexWorkerFlags[Index] = WhoreEventFlags[Index]
+				WhoreEventFlags[Index] = False
+			EndIf
+			Index += 1
+		EndWhile
+	EndIf
+	MaintenanceDone = True
+EndFunction
+
 Function CheckSpreadableFame()
 	Int LocationIndex = 0
 	Bool SpreadableFameFound = False
 	
 	While LocationIndex < DefaultLocationHasSpreadableFame.Length
-		If LocationIndex == 0 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		If LocationIndex == 0 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If WhiterunSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 1 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 1 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If WinterholdSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 2 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 2 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If WindhelmSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 3 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 3 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If SolitudeSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 4 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 4 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If RiftenSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 5 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 5 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If MarkarthSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 6 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 6 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If MorthalSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 7 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 7 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If DawnstarSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 8 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 8 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If FalkreathSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 9 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 9 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If RavenRockSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 10 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 10 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If RiverwoodSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 11 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 11 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If RoriksteadSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 12 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 12 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If IvarsteadSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 13 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 13 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If ShorsStoneSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 14 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 14 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If DragonBridgeSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 15 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 15 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If KarthwastenSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 16 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 16 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If SkaalVillageSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 17 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 17 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If LargashburSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 18 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 18 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If DushnikhYalSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 19 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 19 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If MorKhazgurSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 20 && Config.HasFameAtDefaultLocation[LocationIndex] == True ;&& FameManager.DefaultLocationCanSpread[LocationIndex] == True
+		ElseIf LocationIndex == 20 && Config.HasFameAtDefaultLocation[LocationIndex] == True
 			If NarzulburSpreadFlags.Find(True) >= 0
 				DefaultLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
@@ -321,72 +329,72 @@ Function CheckSpreadableFame()
 	SpreadableFameFound = False
 		
 	While LocationIndex < CustomLocationHasSpreadableFame.Length
-		If LocationIndex == 0 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[0] == True
+		If LocationIndex == 0 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation1SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 1 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[1] == True
+		ElseIf LocationIndex == 1 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation2SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 2 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[2] == True
+		ElseIf LocationIndex == 2 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation3SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 3 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[3] == True
+		ElseIf LocationIndex == 3 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation4SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 4 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[4] == True
+		ElseIf LocationIndex == 4 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation5SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 5 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[5] == True
+		ElseIf LocationIndex == 5 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation6SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 6 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[6] == True
+		ElseIf LocationIndex == 6 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation7SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 7 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[7] == True
+		ElseIf LocationIndex == 7 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation8SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 8 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[8] == True
+		ElseIf LocationIndex == 8 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation9SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 9 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[9] == True
+		ElseIf LocationIndex == 9 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation10SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 10 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[10] == True
+		ElseIf LocationIndex == 10 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation11SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 11 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[11] == True
+		ElseIf LocationIndex == 11 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation12SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 12 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[12] == True
+		ElseIf LocationIndex == 12 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation13SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 13 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[13] == True
+		ElseIf LocationIndex == 13 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation14SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
@@ -1002,6 +1010,7 @@ Function UnregisterExternalMod(String ModName)
 		CuckFlags[ModIndex] = False
 		AirheadFlags[ModIndex] = False
 		WhoreEventFlags[ModIndex] = False
+		SexWorkerFlags[ModIndex] = False
 	EndIf
 EndFunction
 
@@ -1065,6 +1074,8 @@ Bool Function GetModFlagState(String ModName, String FlagName)
 		return CuckFlags[ModIndex]
 	ElseIf FlagName == "Airhead"
 		return AirheadFlags[ModIndex]
+	ElseIf FlagName == "Whore Event" || FlagName == "Sex Worker"
+		return SexWorkerFlags[ModIndex]
 	Else
 		If Config.EnableTracing == True
 			Debug.Trace("SLSF Reloaded Get Mod Flag State: Flag Name " + FlagName + " not found.")
@@ -1197,8 +1208,8 @@ Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
 		CuckFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Airhead"
 		AirheadFlags[ModIndex] = FlagValue
-	ElseIf FlagName == "Whore Event"
-		WhoreEventFlags[ModIndex] = FlagValue
+	ElseIf FlagName == "Sex Worker"
+		SexWorkerFlags[ModIndex] = FlagValue
 	Else
 		Debug.MessageBox("SLSF Reloaded - ERROR: External mod category " + FlagName + " is not valid!")
 	EndIf
@@ -1206,10 +1217,10 @@ Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
 	CheckFlags()
 EndFunction
 
-Bool Function CheckWhoreEvent()
-	Int WhoreEventIndex = WhoreEventFlags.Find(True)
+Bool Function CheckSexWorker()
+	Int SexWorkerIndex = SexWorkerFlags.Find(True)
 	
-	If WhoreEventIndex < 0
+	If SexWorkerIndex < 0
 		return False
 	EndIf
 	

@@ -37,6 +37,7 @@ Event OnPlayerLoadGame()
 	Mods.CheckInstalledMods()
 	Listener.RegisterExternalEvents()
 	Data.CleanExternalModList()
+	Data.DataMaintenance()
 	VisibilityManager.UpdateTattooSlots()
 	RegisterForModEvent("HookAnimationStart", "OnSexlabAnimationStart")
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
@@ -48,7 +49,7 @@ Event OnMenuClose(String MenuName)
 	If MenuName == "Sleep/Wait Menu"
 		Float Time = Utility.GetCurrentGameTime()
 		Float TimeDifference = Time - FameManager.LastCheckedTime
-		If TimeDifference >= 0.5
+		If TimeDifference >= 0.02 ;0.02 is the time amount for an in-game half-hour
 			FameManager.UpdateFame()
 		EndIf
 	EndIf
@@ -116,7 +117,7 @@ Function AnimationAnalyze(Int threadID)
 	Int MaleCount = Sexlab.MaleCount(Actors)
 	Int FemaleCount = Sexlab.FemaleCount(Actors)
 	
-	Bool IsWhoreEvent = Data.CheckWhoreEvent()
+	Bool IsSexWorker = Data.CheckSexWorker()
 	
 	If Actors.Length > 1
 		If PlayerController.Animation.HasTag("Oral")
@@ -132,7 +133,7 @@ Function AnimationAnalyze(Int threadID)
 		EndIf
 		
 		If !PlayerController.Animation.HasTag("Aggressive") && IsVictim == False && IsAggressor == False
-			If Mods.IsPublicWhore() == True || IsWhoreEvent == True
+			If Mods.IsPublicWhore() == True || IsSexWorker == True
 				FameManager.GainFame("Whore", PlayerLocation, Foreplay)
 			Else
 				FameManager.GainFame("Slut", PlayerLocation, Foreplay)
