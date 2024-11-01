@@ -124,14 +124,10 @@ Bool[] Property CumDumpFlags Auto Hidden
 Bool[] Property UnfaithfulFlags Auto Hidden
 Bool[] Property CuckFlags Auto Hidden
 Bool[] Property AirheadFlags Auto Hidden
-Bool[] Property WhoreEventFlags Auto Hidden ;DEPRECATED
 Bool[] Property SexWorkerFlags Auto Hidden
-
-Bool Property MaintenanceDone Auto Hidden
 
 Event OnInit()
 	SetDefaults()
-	MaintenanceDone = True
 EndEvent
 
 Function FameCheck()
@@ -166,7 +162,6 @@ Function SetDefaults()
 	UnfaithfulFlags = New Bool[100]
 	CuckFlags = New Bool[100]
 	AirheadFlags = New Bool[100]
-	WhoreEventFlags = New Bool[100] ;DEPRECATED
 	SexWorkerFlags = New Bool[100]
 	
 	Int ExternalModIndex = 0
@@ -189,20 +184,6 @@ Function SetDefaults()
 		LocationIndex += 1
 	EndWhile
 	
-EndFunction
-
-Function DataMaintenance()
-	If MaintenanceDone == False
-		Int Index = 0
-		While Index < WhoreEventFlags.Length
-			If WhoreEventFlags[Index] != SexWorkerFlags[Index]
-				SexWorkerFlags[Index] = WhoreEventFlags[Index]
-				WhoreEventFlags[Index] = False
-			EndIf
-			Index += 1
-		EndWhile
-	EndIf
-	MaintenanceDone = True
 EndFunction
 
 Function CheckSpreadableFame()
@@ -399,37 +380,37 @@ Function CheckSpreadableFame()
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 14 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[14] == True
+		ElseIf LocationIndex == 14 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation15SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 15 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[15] == True
+		ElseIf LocationIndex == 15 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation16SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 16 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[16] == True
+		ElseIf LocationIndex == 16 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation17SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 17 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[17] == True
+		ElseIf LocationIndex == 17 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation18SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 18 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[18] == True
+		ElseIf LocationIndex == 18 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation19SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 19 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[19] == True
+		ElseIf LocationIndex == 19 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation20SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
 			EndIf
-		ElseIf LocationIndex == 20 && Config.HasFameAtCustomLocation[LocationIndex] == True ;&& FameManager.CustomLocationCanSpread[20] == True
+		ElseIf LocationIndex == 20 && Config.HasFameAtCustomLocation[LocationIndex] == True
 			If CustomLocation21SpreadFlags.Find(True) >= 0
 				CustomLocationHasSpreadableFame[LocationIndex] = True
 				SpreadableFameFound = True
@@ -1009,7 +990,7 @@ Function UnregisterExternalMod(String ModName)
 		UnfaithfulFlags[ModIndex] = False
 		CuckFlags[ModIndex] = False
 		AirheadFlags[ModIndex] = False
-		WhoreEventFlags[ModIndex] = False
+		;WhoreEventFlags[ModIndex] = False
 		SexWorkerFlags[ModIndex] = False
 	EndIf
 EndFunction

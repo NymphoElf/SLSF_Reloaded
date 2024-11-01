@@ -2,6 +2,7 @@ ScriptName SLSF_Reloaded_PlayerScript extends ReferenceAlias
 
 SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_FameManager Property FameManager Auto
+SLSF_Reloaded_TimeManager Property TimeManager Auto
 SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_ModEventListener Property Listener Auto
@@ -37,7 +38,6 @@ Event OnPlayerLoadGame()
 	Mods.CheckInstalledMods()
 	Listener.RegisterExternalEvents()
 	Data.CleanExternalModList()
-	Data.DataMaintenance()
 	VisibilityManager.UpdateTattooSlots()
 	RegisterForModEvent("HookAnimationStart", "OnSexlabAnimationStart")
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
@@ -45,12 +45,11 @@ Event OnPlayerLoadGame()
 	RegisterForMenu("Sleep/Wait Menu")
 EndEvent
 
-Event OnMenuClose(String MenuName)
-	If MenuName == "Sleep/Wait Menu"
-		Float Time = Utility.GetCurrentGameTime()
-		Float TimeDifference = Time - FameManager.LastCheckedTime
-		If TimeDifference >= 0.02 ;0.02 is the time amount for an in-game half-hour
-			FameManager.UpdateFame()
+Event OnMenuClose(String MenuName) ;We only registered the Sleep/Wait Menu, so that's the only one we'll capture with this event
+	Float TimeDifference = Utility.GetCurrentGameTime() - FameManager.LastCheckedTime
+	If TimeDifference >= 0.0199 ;~0.0199 is the time amount for an in-game half-hour
+		If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
+			TimeManager.PeriodicFameTimer()
 		EndIf
 	EndIf
 EndEvent
@@ -229,7 +228,9 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 EndEvent
 
 Event OnUpdateGameTime()
-	FameManager.UpdateFame()
+	If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
+		TimeManager.PeriodicFameTimer()
+	EndIf
 	
 	Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
 	Int NewSkoomaValue = OldSkoomaValue - 2

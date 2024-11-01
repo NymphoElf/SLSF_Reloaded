@@ -18,7 +18,6 @@ String[] Property FameType Auto
 Int[] Property DefaultLocationDecayPauseTimer Auto 
 Int[] Property CustomLocationDecayPauseTimer Auto 
 Int Property DecayCountdown Auto Hidden
-Int Property DecayDivisor Auto Hidden
 Int Property SpreadCountdown Auto Hidden
 Int Property GainIterationMultiplier Auto Hidden
 Int Property DecayIterationMultiplier Auto Hidden
@@ -113,49 +112,49 @@ Function Startup()
 	
 	DecayCountdown = 24
 	SpreadCountdown = 48
-	LastCheckedTime = Utility.GetCurrentGameTime()
 	GainIterationMultiplier = 1
 	DecayIterationMultiplier = 1
 EndFunction
 
-Function UpdateFame()
-	Data.FameCheck()
-	
-	Float Time = Utility.GetCurrentGameTime()
-	Int CountdownChange = ((Time - LastCheckedTime) * 48) as Int ;Get the number of "half-hours" that have passed since last check
-	Int DecayIterations = (CountdownChange/DecayDivisor) as Int
-	;^^^(Default 24)- if 24 or more "half-hours" have passed, then 12 or more hours have passed. Get the number of 12-hour intervals that have passed. Max 2 (usually)
-	
-	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
-	
-	If CountdownChange < 1
-		CountdownChange = 1
-	EndIf
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded Fame Manager - Countdown Change = " + CountdownChange)
-	EndIf
-	
+Function UpdateFame(Int CountdownChange)
 	;Update countdown timers
 	DecayCountdown -= CountdownChange
 	SpreadCountdown -= CountdownChange
 	
-	;Minimum must be 1. If long time passes between checks, then multiply by larger number.
-	If DecayIterations < 1
-		DecayIterations = 1
-	EndIf
+	Data.FameCheck()
 	
-	GainIterationMultiplier = CountdownChange ;Multiply Fame Gains by the number or gains that should have happened normally
-	DecayIterationMultiplier = DecayIterations ;Multiply Fame Decays by the number of decays that should have happened normally
+	Int DecayIterations = 0
+	While DecayCountdown <= 0
+		DecayCountdown += (Config.DecayTimeNeeded) as Int ;Increase decay timer by time needed. Maintains carry-over time
+		DecayIterations += 1
+	EndWhile
 	
-	If DecayCountdown <= 0
+	If DecayIterations >= 1
+		DecayIterationMultiplier = DecayIterations
 		DecayFame()
-		DecayCountdown = (Config.DecayTimeNeeded) as Int
-		DecayDivisor = (Config.DecayTimeNeeded) as Int
+	Else
+		DecayIterationMultiplier = 1
 	EndIf
 	
 	If SpreadCountdown <= 0
+		SpreadCountdown += (Config.SpreadTimeNeeded) as Int ;Increase spread timer by time needed. Maintains carry-over time
 		SpreadFameRoll()
-		SpreadCountdown = (Config.SpreadTimeNeeded) as Int
+	EndIf
+	
+	;Multiply Fame Gains by the number of times NPC Scanning should have happened normally
+	GainIterationMultiplier = CountdownChange
+	
+	If VisibilityManager.IsPlayerAnonymous() == False
+		PlayerScript.RunNPCDetect()
+	EndIf
+	
+	;Reset Multipliers - Required to not improperly multiply other events
+	If GainIterationMultiplier != 1
+		GainIterationMultiplier = 1
+	EndIf
+	
+	If DecayIterationMultiplier != 1
+		DecayIterationMultiplier = 1
 	EndIf
 	
 	;Update Individual Decay Pause Timers
@@ -163,7 +162,7 @@ Function UpdateFame()
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationDecayPauseTimer[LocationIndex] > 0 && DefaultLocationCanDecay[LocationIndex] == False
 			Int CurrentDecayTimer = DefaultLocationDecayPauseTimer[LocationIndex]
-			Int NewDecayTimer = (CurrentDecayTimer - CountdownChange)
+			Int NewDecayTimer = (CurrentDecayTimer - CountdownChange) as Int
 			DefaultLocationDecayPauseTimer[LocationIndex] = NewDecayTimer
 		EndIf
 		If DefaultLocationDecayPauseTimer[LocationIndex] <= 0
@@ -174,11 +173,10 @@ Function UpdateFame()
 	EndWhile
 	
 	LocationIndex = 0
-	
-	While LocationIndex < CustomLocations
+	While LocationIndex < SLSF_Reloaded_CustomLocationCount.GetValue()
 		If CustomLocationDecayPauseTimer[LocationIndex] > 0 && CustomLocationCanDecay[LocationIndex] == False
 			Int CurrentDecayTimer = CustomLocationDecayPauseTimer[LocationIndex]
-			Int NewDecayTimer = (CurrentDecayTimer - CountdownChange)
+			Int NewDecayTimer = (CurrentDecayTimer - CountdownChange) as Int
 			CustomLocationDecayPauseTimer[LocationIndex] = NewDecayTimer
 		EndIf
 		If CustomLocationDecayPauseTimer[LocationIndex] <= 0
@@ -188,68 +186,51 @@ Function UpdateFame()
 		LocationIndex += 1
 	EndWhile
 	
-	LocationIndex = 0
-	
-	;Update last Checked Time now that Decay and Spread has been processed
-	LastCheckedTime = Time
-	
 	If Mods.IsFameCommentsInstalled == False && SLSFCFameTypesCleared == False
-		LocationIndex = 0
-		While LocationIndex < LocationManager.DefaultLocation.Length
-			Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Unfaithful", 0)
-			Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Cuck", 0)
-			LocationIndex += 1
-		EndWhile
-		
-		LocationIndex = 0
-		
-		While LocationIndex < CustomLocations
-			Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Unfaithful", 0)
-			Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Cuck", 0)
-			LocationIndex += 1
-		EndWhile
+		WipeFameComments()
 		SLSFCFameTypesCleared = True
 	ElseIf Mods.IsFameCommentsInstalled == True
 		SLSFCFameTypesCleared = False
 	EndIf
 	
 	If Mods.IsBimbosInstalled == False && AirheadFameCleared == False
-		LocationIndex = 0
-		While LocationIndex < LocationManager.DefaultLocation.Length
-			Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Airhead", 0)
-			LocationIndex += 1
-		EndWhile
-		
-		LocationIndex = 0
-		
-		While LocationIndex < CustomLocations
-			Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Airhead", 0)
-			LocationIndex += 1
-		EndWhile
+		WipeBimbos()
 		AirheadFameCleared = True
 	ElseIf Mods.IsBimbosInstalled == True
 		AirheadFameCleared = False
 	EndIf
+EndFunction
+
+Function WipeFameComments()
+	Int LocationIndex = 0
+	While LocationIndex < LocationManager.DefaultLocation.Length
+		Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Unfaithful", 0)
+		Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Cuck", 0)
+		LocationIndex += 1
+	EndWhile
 	
-	;Multiply Fame Gains by the number of times NPC Scanning should have happened
-	If CountdownChange > 1
-		GainIterationMultiplier = CountdownChange
-	Else
-		GainIterationMultiplier = 1
-	EndIf
+	LocationIndex = 0
 	
-	If VisibilityManager.IsPlayerAnonymous() == False
-		PlayerScript.RunNPCDetect()
-	EndIf
+	While LocationIndex < SLSF_Reloaded_CustomLocationCount.GetValue()
+		Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Unfaithful", 0)
+		Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Cuck", 0)
+		LocationIndex += 1
+	EndWhile
+EndFunction
+
+Function WipeBimbos()
+	Int LocationIndex = 0
+	While LocationIndex < LocationManager.DefaultLocation.Length
+		Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Airhead", 0)
+		LocationIndex += 1
+	EndWhile
 	
-	;Reset Multiplier - Required to not improperly multiply other events
-	If GainIterationMultiplier != 1
-		GainIterationMultiplier = 1
-	EndIf
+	LocationIndex = 0
 	
-	If DecayIterationMultiplier != 1
-		DecayIterationMultiplier = 1
-	EndIf
+	While LocationIndex < SLSF_Reloaded_CustomLocationCount.GetValue()
+		Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Airhead", 0)
+		LocationIndex += 1
+	EndWhile
 EndFunction
 
 Function CheckExternalFlags()
@@ -729,135 +710,135 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	EndIf
 	
 	Int PossibleFameCount = 0
-	String[] PossibleFameArray = New String[25]
+	String[] PossibleFameGain = New String[25]
 	
 	CheckExternalFlags()
 	
 	If CanGainAnalFame(FameLocation) == True || CheckTattooExtraFame("Anal") == True || ExternalAnalFlag == True
-		PossibleFameArray[PossibleFameCount] = "Anal"
+		PossibleFameGain[PossibleFameCount] = "Anal"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CanGainBoundFame(FameLocation) == True || CheckTattooExtraFame("Bound") == True || ExternalBoundFlag == True
-		PossibleFameArray[PossibleFameCount] = "Bound"
+		PossibleFameGain[PossibleFameCount] = "Bound"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CanGainCumDumpFame() == True || CheckTattooExtraFame("Cum Dump") == True || ExternalCumDumpFlag == True
-		PossibleFameArray[PossibleFameCount] = "Cum Dump"
+		PossibleFameGain[PossibleFameCount] = "Cum Dump"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CanGainExhibitionistFame(FameLocation) == True || CheckTattooExtraFame("Exhibitionist") == True || ExternalExhibitionistFlag == True
-		PossibleFameArray[PossibleFameCount] = "Exhibitionist"
+		PossibleFameGain[PossibleFameCount] = "Exhibitionist"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CanGainNastyFame(FameLocation) == True || CheckTattooExtraFame("Nasty") == True || ExternalNastyFlag == True
-		PossibleFameArray[PossibleFameCount] = "Nasty"
+		PossibleFameGain[PossibleFameCount] = "Nasty"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CanGainOralFame(FameLocation) == True || CheckTattooExtraFame("Oral") == True || ExternalOralFlag == True
-		PossibleFameArray[PossibleFameCount] = "Oral"
+		PossibleFameGain[PossibleFameCount] = "Oral"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CanGainPregnantFame(FameLocation) == True || CheckTattooExtraFame("Pregnant") == True || ExternalPregnantFlag == True
-		PossibleFameArray[PossibleFameCount] = "Pregnant"
+		PossibleFameGain[PossibleFameCount] = "Pregnant"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CanGainSlutFame(FameLocation) == True || CheckTattooExtraFame("Slut") == True || ExternalSlutFlag == True
-		PossibleFameArray[PossibleFameCount] = "Slut"
+		PossibleFameGain[PossibleFameCount] = "Slut"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CanGainTattooFame(FameLocation) == True || ExternalTattooFlag == True
-		PossibleFameArray[PossibleFameCount] = "Tattoo"
+		PossibleFameGain[PossibleFameCount] = "Tattoo"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CanGainWhoreFame() == True || CheckTattooExtraFame("Whore") == True || ExternalWhoreFlag == True
-		PossibleFameArray[PossibleFameCount] = "Whore"
+		PossibleFameGain[PossibleFameCount] = "Whore"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Dominant") == True || ExternalDominantFlag == True
-		PossibleFameArray[PossibleFameCount] = "Dominant"
+		PossibleFameGain[PossibleFameCount] = "Dominant"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Submissive") == True || ExternalSubmissiveFlag == True
-		PossibleFameArray[PossibleFameCount] = "Submissive"
+		PossibleFameGain[PossibleFameCount] = "Submissive"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Sadist") == True || ExternalSadistFlag == True
-		PossibleFameArray[PossibleFameCount] = "Sadist"
+		PossibleFameGain[PossibleFameCount] = "Sadist"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Masochist") == True || ExternalMasochistFlag == True
-		PossibleFameArray[PossibleFameCount] = "Masochist"
+		PossibleFameGain[PossibleFameCount] = "Masochist"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Gentle") == True || ExternalGentleFlag == True
-		PossibleFameArray[PossibleFameCount] = "Gentle"
+		PossibleFameGain[PossibleFameCount] = "Gentle"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Men") == True || ExternalLikesMenFlag == True
-		PossibleFameArray[PossibleFameCount] = "Likes Men"
+		PossibleFameGain[PossibleFameCount] = "Likes Men"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Women") == True || ExternalLikesWomenFlag == True
-		PossibleFameArray[PossibleFameCount] = "Likes Women"
+		PossibleFameGain[PossibleFameCount] = "Likes Women"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Orc") == True || ExternalLikesOrcFlag == True
-		PossibleFameArray[PossibleFameCount] = "Likes Orc"
+		PossibleFameGain[PossibleFameCount] = "Likes Orc"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Khajiit") == True || ExternalLikesKhajiitFlag == True
-		PossibleFameArray[PossibleFameCount] = "Likes Khajiit"
+		PossibleFameGain[PossibleFameCount] = "Likes Khajiit"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Argonian") == True || ExternalLikesArgonianFlag == True
-		PossibleFameArray[PossibleFameCount] = "Likes Argonian"
+		PossibleFameGain[PossibleFameCount] = "Likes Argonian"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Bestiality") == True || ExternalBestialityFlag == True
-		PossibleFameArray[PossibleFameCount] = "Bestiality"
+		PossibleFameGain[PossibleFameCount] = "Bestiality"
 		PossibleFameCount += 1
 	EndIf
 	
 	If CheckTattooExtraFame("Group") == True || ExternalGroupFlag == True
-		PossibleFameArray[PossibleFameCount] = "Group"
+		PossibleFameGain[PossibleFameCount] = "Group"
 		PossibleFameCount += 1
 	EndIf
 	
 	If Mods.IsFameCommentsInstalled == True
 		If CheckTattooExtraFame("Unfaithful") == True || ExternalUnfaithfulFlag == True
-			PossibleFameArray[PossibleFameCount] = "Unfaithful"
+			PossibleFameGain[PossibleFameCount] = "Unfaithful"
 			PossibleFameCount += 1
 		EndIf
 		
 		If CheckTattooExtraFame("Cuck") == True || ExternalCuckFlag == True
-			PossibleFameArray[PossibleFameCount] = "Cuck"
+			PossibleFameGain[PossibleFameCount] = "Cuck"
 			PossibleFameCount += 1
 		EndIf
 	EndIf
 	
 	If Mods.IsBimbosInstalled == True
 		If CheckTattooExtraFame("Airhead") == True || ExternalAirheadFlag == True
-			PossibleFameArray[PossibleFameCount] = "Airhead"
+			PossibleFameGain[PossibleFameCount] = "Airhead"
 			PossibleFameCount += 1
 		EndIf
 	EndIf
@@ -873,7 +854,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	If PossibleFameCount > 1
 		GainedFameCount = Utility.RandomInt(1, PossibleFameCount) ;Randomly Determine how many fame categories are increased
 	Else
-		GainFame(PossibleFameArray[0], FameLocation, False) ;If there is only one fame category to gain, apply it and end function
+		GainFame(PossibleFameGain[0], FameLocation, False) ;If there is only one fame category to gain, apply it and end function
 		return
 	EndIf
 	
@@ -881,7 +862,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	Int AppliedFameCount = 0
 	If GainedFameCount == PossibleFameCount ;If we gain fame in every possible category, send all increases
 		While AppliedFameCount < GainedFameCount
-			GainFame(PossibleFameArray[AppliedFameCount], FameLocation, False)
+			GainFame(PossibleFameGain[AppliedFameCount], FameLocation, False)
 			AppliedFameCount += 1
 		EndWhile
 		return ;end function after applying all fame
@@ -894,10 +875,10 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 	Bool DuplicateFameRolls = False
 	
 	While AppliedFameCount < GainedFameCount && TimesRolled < 50 ;AppliedFameCount becomes our Index for the RolledCategory array. Sanity check of 50 maximum attempts to prevent script lag
-		CategoryRoll = Utility.RandomInt(0, (PossibleFameCount - 1)) ;We've already determined that PossibleFameCount is higher than 1, so the maximum will be at least 1. CategoryRoll becomes our PossibleFameArray Index
+		CategoryRoll = Utility.RandomInt(0, (PossibleFameCount - 1)) ;We've already determined that PossibleFameCount is higher than 1, so the maximum will be at least 1. CategoryRoll becomes our PossibleFameGain Index
 		TimesRolled += 1
 		
-		String CurrentlyRolledCategory = PossibleFameArray[CategoryRoll]
+		String CurrentlyRolledCategory = PossibleFameGain[CategoryRoll]
 		
 		If AppliedFameCount > 0
 			FirstRoll = False
@@ -1242,22 +1223,24 @@ Function SpreadFameRoll()
 EndFunction
 
 Function SpreadFame(String SpreadFromLocation)
-
+	;Debug.Notification("Fame Spread From: " + SpreadFromLocation) ;Testing line - REMOVE WHEN DONE
+	
 	;Grab all fame values above the configured threshold from the source Location. If none exist, cancel fame spread operation
 	Int SpreadableFame = 0
 	Int PossibleFameSpreadCategories = 0
 	Int PossibleFameSpreadIndex = 0
-	String[] PossibleCategoryList = New String[25] ;Utility.CreateStringArray(FameType.Length, "-EMPTY-")
+	String[] PossibleCategoryList = New String[25]
 	
 	;Count possible categories & fill array
 	While PossibleFameSpreadIndex < FameType.Length
 		SpreadableFame = Data.GetFameValue(SpreadFromLocation, FameType[PossibleFameSpreadIndex])
-		
+		;Debug.Trace("SLSF Reloaded - Checking " + FameType[PossibleFameSpreadIndex] + " Fame. Fame Value is: " + SpreadableFame)
+		;Debug.Trace("SLSF Reloaded - Fame value requirement is: " + Config.MinimumFameToSpread)
 		If SpreadableFame >= Config.MinimumFameToSpread
 			PossibleFameSpreadCategories += 1
 			PossibleCategoryList[(PossibleFameSpreadCategories - 1)] = FameType[PossibleFameSpreadIndex]
+			;Debug.Trace("SLSF Reloaded - Possible Spread Category: " + PossibleCategoryList[(PossibleFameSpreadCategories - 1)] + " added to list.")
 		EndIf
-		
 		PossibleFameSpreadIndex += 1
 	EndWhile
 	
@@ -1288,6 +1271,7 @@ Function SpreadFame(String SpreadFromLocation)
 			PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.CustomLocation[CustomLocationIndex]
 			CustomLocationIndex += 1
 		EndIf
+		;Debug.Trace("SLSF Reloaded - PossibleSpreadTargets[" + PossibleLocationIndex + "]: " + PossibleSpreadTargets[PossibleLocationIndex])
 		PossibleLocationIndex += 1
 	EndWhile
 	
@@ -1297,26 +1281,37 @@ Function SpreadFame(String SpreadFromLocation)
 	
 	While TargetLocationValid == False
 		TargetLocationIndex = Utility.RandomInt(0, (TotalLocations - 1))
+		;Debug.Trace("SLSF Reloaded - Target Location Roll (Index): " + TargetLocationIndex)
+		;Debug.Trace("SLSF Reloaded - Target Location: " + PossibleSpreadTargets[TargetLocationIndex])
 		If SpreadFromLocation != PossibleSpreadTargets[TargetLocationIndex] ;ensure we are not trying to spread to the original location
+			;Debug.Trace("SLSF Reloaded - Target Location Valid!")
 			TargetLocationValid = True
+		Else
+			;Debug.Trace("SLSF Reloaded - Target Location NOT Valid. Rolling again...")
 		EndIf
 	EndWhile
-	
+	;Debug.Notification("SLSF Reloaded - Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex]) ;Testing line - REMOVE WHEN DONE
 	If Config.EnableTracing == True
-		Debug.Trace("Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
+		Debug.Trace("SLSF Reloaded - Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
 	EndIf
 	
 	;When valid target is found, randomize how many fame categories are spread and by how much, based on config values.
 	Int NumberOfCategoriesToSpread = 0
-	Float CategorySpreadPercentage = 0.0
+	;Float CategorySpreadPercentage = 0.0
 	
 	If Config.MaximumSpreadCategories > 1 && PossibleFameSpreadCategories > 1
+		;Debug.Trace("SLSF Reloaded - More than 1 category can be spread.")
 		If Config.MaximumSpreadCategories <= PossibleFameSpreadCategories
+			;Debug.Trace("SLSF Reloaded - More categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
 			NumberOfCategoriesToSpread = Utility.RandomInt(1, (Config.MaximumSpreadCategories as Int))
+			;Debug.Trace("SLSF Reloaded - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
 		Else
+			;Debug.Trace("SLSF Reloaded - Fewer or equal categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
 			NumberOfCategoriesToSpread = Utility.RandomInt(1, PossibleFameSpreadCategories)
+			;Debug.Trace("SLSF Reloaded - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
 		EndIf
 	Else
+		;Debug.Trace("SLSF Reloaded - Only 1 category can be spread. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
 		NumberOfCategoriesToSpread = 1
 	EndIf
 	
@@ -1328,6 +1323,7 @@ Function SpreadFame(String SpreadFromLocation)
 	Int CategoryRoll = 0
 	
 	If PossibleFameSpreadCategories == 1
+		;Debug.Trace("SLSF Reloaded - Only 1 possible fame spread category: " + PossibleCategoryList[0])
 		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[0])
 		
 		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[0])
@@ -1342,33 +1338,65 @@ Function SpreadFame(String SpreadFromLocation)
 		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[0], NewFame)
 	ElseIf NumberOfCategoriesToSpread == 1
 		CategoryRoll = Utility.RandomInt(0, (PossibleFameSpreadCategories - 1))
+		;Debug.Trace("SLSF Reloaded - Only chose to spread 1 category. Chose: " + PossibleCategoryList[CategoryRoll] + " from the possible list.")
 		
 		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll])
 		
-		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[0])
+		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[CategoryRoll])
 		
 		NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
 		
 		If NewFame > 150
 			NewFame = 150
 		EndIf
-		
+		;Debug.Notification("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame);Testing line - REMOVE WHEN DONE
 		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
-	ElseIf NumberOfCategoriesToSpread == PossibleFameSpreadCategories
-		While SuccessfulFameSpreads < PossibleFameSpreadCategories
-			TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[SuccessfulFameSpreads])
+	ElseIf NumberOfCategoriesToSpread == Config.MaximumSpreadCategories
+		;Debug.Trace("SLSF Reloaded - Chose to spread maximum possible categories. Maximum is: " + Config.MaximumSpreadCategories)
+		
+		Int TimesRolled = 0
+		Bool FirstRoll = True
+		Bool DuplicateFameRolls = False
+		String[] RolledCategory = New String[10] ;Hard Maximum of 10 categories
+		
+		While (SuccessfulFameSpreads < NumberOfCategoriesToSpread) && (TimesRolled < 50)
+			CategoryRoll = Utility.RandomInt(0, (PossibleFameSpreadCategories - 1))
+			TimesRolled += 1
 			
-			FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[SuccessfulFameSpreads])
+			String CurrentlyRolledCategory = PossibleCategoryList[CategoryRoll]
 			
-			NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
-			
-			If NewFame > 150
-				NewFame = 150
+			If SuccessfulFameSpreads > 0
+				FirstRoll = False
 			EndIf
 			
-			Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[SuccessfulFameSpreads], NewFame)
+			If FirstRoll == False
+				Int DuplicateIndex = RolledCategory.Find(CurrentlyRolledCategory)
 			
-			SuccessfulFameSpreads += 1
+				If DuplicateIndex >= 0
+					DuplicateFameRolls = True
+				EndIf
+			EndIf
+			
+			If DuplicateFameRolls == False
+				;If there are no duplicates, store and apply our rolled fame.
+				RolledCategory[SuccessfulFameSpreads] = CurrentlyRolledCategory
+				
+				TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll])
+				
+				FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[CategoryRoll])
+				
+				NewFame = CalculateFameSpread(FromFameValue, TargetFameValue)
+				
+				If NewFame > 150
+					NewFame = 150
+				EndIf
+				;Debug.Notification("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame) ;Testing line - REMOVE WHEN DONE
+				Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
+				
+				SuccessfulFameSpreads += 1
+			Else
+				DuplicateFameRolls = False
+			EndIf
 		EndWhile
 	Else
 		Int TimesRolled = 0
@@ -1396,7 +1424,7 @@ Function SpreadFame(String SpreadFromLocation)
 			
 			If DuplicateFameRolls == False
 				;If there are no duplicates, store and apply our rolled fame.
-				RolledCategory[SuccessfulFameSpreads] = PossibleCategoryList[CategoryRoll]
+				RolledCategory[SuccessfulFameSpreads] = CurrentlyRolledCategory
 				
 				TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll])
 				
@@ -1407,7 +1435,7 @@ Function SpreadFame(String SpreadFromLocation)
 				If NewFame > 150
 					NewFame = 150
 				EndIf
-				
+				;Debug.Notification("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame) ;Testing line - REMOVE WHEN DONE
 				Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
 				
 				SuccessfulFameSpreads += 1
@@ -1424,35 +1452,42 @@ Function SpreadFame(String SpreadFromLocation)
 	If Config.AllowLegacyOverwrite == True
 		LegacyOverwrite.OverwriteLegacyFame()
 	EndIf
+	
+	;Update pause timers because we treat fame spreads as a "gain"
+	DefaultLocationCanDecay[TargetLocationIndex] = False
+	DefaultLocationDecayPauseTimer[TargetLocationIndex] = (Config.DecayTimeNeeded as Int)
 EndFunction
 
 Function FameGainNotification(String Category)
-	;Placeholder - Will be refined after testing
 	Debug.Notification("SLSF Reloaded - Your " + Category + " fame has increased")
 EndFunction
 
 Function FameDecayNotification()
-	;Placeholder - Will be refined after testing
 	Debug.Notification("SLSF Reloaded - Your fame has decayed")
 EndFunction
 
-Int Function CalculateFameSpread(Int FromFame, Int TargetFame)
+Int Function CalculateFameSpread(Float FromFame, Float TargetFame) ;These must be floats for calculation purposes
 	Int MaxRoll = (Config.MaximumSpreadPercentage as Int) / 10 ;Result should be 1, 2, 3, 4, or 5
+	;Debug.Trace("SLSF Reloaded Fame Spread Calculation - Max Roll is: " + MaxRoll)
 	Int SpreadRoll = 1
 	
 	If MaxRoll > 1 ;If MaxRoll is 1, then roll doesn't matter
 		SpreadRoll = Utility.RandomInt(1, MaxRoll)
 	EndIf
 	
-	Float Percentage = (SpreadRoll / 10) as Float ;Result should be 0.1, 0.2, 0.3, 0.4, or 0.5 (10%, 20%, 30%, 40%, or 50%) based on roll
-	Int SpreadValue = (FromFame * Percentage) as Int ;Result should be a percentage of fame from the spreading location, minimum being 1
-	Int FinalFame = TargetFame + SpreadValue
+	;Debug.Trace("SLSF Reloaded Fame Spread Calculation - Spread Roll is: " + SpreadRoll)
+	
+	Float Percentage = ((SpreadRoll as Float) / 10) ;Result should be 0.1, 0.2, 0.3, 0.4, or 0.5 (10%, 20%, 30%, 40%, or 50%) based on roll. Must cast SpreadRoll as Float for calculation purposes
+		;Debug.Trace("SLSF Reloaded Fame Spread Calculation - Percentage is: " + Percentage)
+	Float SpreadValue = (FromFame * Percentage) ;Result should be a percentage of fame from the spreading location. Minimum should be 1
+		;Debug.Trace("SLSF Reloaded Fame Spread Calculation - From Fame is: " + FromFame + ". Spread Value is: " + SpreadValue)
+	Int FinalFame = (TargetFame + SpreadValue) as Int
+		;Debug.Trace("SLSF Reloaded Fame Spread Calculation - Target Fame is: " + TargetFame + ". Final Fame is: " + FinalFame)
 	
 	return FinalFame
 EndFunction
 
 Function FameSpreadNotification()
-	;Placeholder - Will be refined after testing
 	Debug.Notification("SLSF Reloaded - Your fame has spread")
 EndFunction
 

@@ -498,9 +498,9 @@ Bool Function IsHandTattooVisible(Int SlotNumber)
 		return False
 	Else
 		If CountAppliedTattoos("Hands") == 0 || HandTattooApplied[SlotNumber] == False || PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversHands)
-			If PlayerRef.GetEquippedArmorInSlot(33) != None && PlayerRef.GetEquippedArmorInSlot(33).HasKeyword(SLSF_Reloaded_DoesNotCoverHands) == False
-				return False
-			EndIf
+			return False
+		ElseIf PlayerRef.GetEquippedArmorInSlot(33) != None && PlayerRef.GetEquippedArmorInSlot(33).HasKeyword(SLSF_Reloaded_DoesNotCoverHands) == False
+			return False
 		EndIf
 	EndIf
 	return True
@@ -511,9 +511,9 @@ Bool Function IsFootTattooVisible(Int SlotNumber)
 		return False
 	Else
 		If CountAppliedTattoos("Feet") == 0 || FootTattooApplied[SlotNumber] == False || PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversFeet)
-			If PlayerRef.GetEquippedArmorInSlot(37) != None && PlayerRef.GetEquippedArmorInSlot(37).HasKeyword(SLSF_Reloaded_DoesNotCoverFeet) == False
-				return False
-			EndIf
+			return False
+		ElseIf PlayerRef.GetEquippedArmorInSlot(37) != None && PlayerRef.GetEquippedArmorInSlot(37).HasKeyword(SLSF_Reloaded_DoesNotCoverFeet) == False
+			return False
 		EndIf
 	EndIf
 	return True

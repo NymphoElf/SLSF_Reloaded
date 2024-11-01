@@ -767,17 +767,15 @@ Event OnPageReset(String page)
 			AddTextOption("Anal Cum Visible:", "No")
 		EndIf
 		
-		Float DecayTimeBase = (FameManager.DecayCountdown / 2)
-		Int DecayCountdownHours = DecayTimeBase as Int
-		Int DecayCountdownHalfHours = ((DecayTimeBase - DecayCountdownHours) * 10) as Int
+		Float DecayTimeBase = ((FameManager.DecayCountdown as Float) / 2)
+		Float DecayCountdownHalfHours = ((DecayTimeBase - (DecayTimeBase as Int)) * 10)
 		
-		Float SpreadTimeBase = (FameManager.SpreadCountdown / 2)
-		Int SpreadCountdownHours = SpreadTimeBase as Int
-		Int SpreadCountdownHalfHours = ((SpreadTimeBase - SpreadCountdownHours) * 10) as Int
+		Float SpreadTimeBase = ((FameManager.SpreadCountdown as Float) / 2)
+		Float SpreadCountdownHalfHours = ((SpreadTimeBase - (SpreadTimeBase as Int)) * 10)
 		
 		AddHeaderOption("Decay & Spread Timers")
-		AddTextOption("Time Until Decay:", DecayCountdownHours + "." + DecayCountdownHalfHours + " Hours")
-		AddTextOption("Time Until Spread:", SpreadCountdownHours + "." + SpreadCountdownHalfHours + " Hours")
+		AddTextOption("Time Until Decay:", (DecayTimeBase as Int) + "." + (DecayCountdownHalfHours as Int) + " Hours")
+		AddTextOption("Time Until Spread:", (SpreadTimeBase as Int) + "." + (SpreadCountdownHalfHours as Int) + " Hours")
 	
 	ElseIf (page == "Tattoo Info")
 		AddHeaderOption("Select Tattoo Area")
@@ -851,11 +849,10 @@ Event OnPageReset(String page)
 		EndIf
 	
 	ElseIf (page == "Decay Info")
-		Float TimeBase = (FameManager.DecayCountdown / 2)
-		Int CountdownHours = TimeBase as Int
-		Int CountdownHalfHours = ((TimeBase - CountdownHours) * 10) as Int
+		Float DecayTimeBase = ((FameManager.DecayCountdown as Float) / 2)
+		Float DecayCountdownHalfHours = ((DecayTimeBase - (DecayTimeBase as Int)) * 10)
 		
-		AddTextOption("Decay Countdown:", CountdownHours + "." + CountdownHalfHours + " Hours")
+		AddTextOption("Decay Countdown:", (DecayTimeBase as Int) + "." + (DecayCountdownHalfHours as Int) + " Hours")
 		AddHeaderOption("Default Locations")
 		Int LocationIndex = 0
 		While LocationIndex < LocationManager.DefaultLocation.Length
@@ -875,11 +872,10 @@ Event OnPageReset(String page)
 		EndWhile
 		
 	ElseIf (page == "Spread Info")
-		Float TimeBase = (FameManager.SpreadCountdown / 2)
-		Int CountdownHours = TimeBase as Int
-		Int CountdownHalfHours = ((TimeBase - CountdownHours) * 10) as Int
+		Float SpreadTimeBase = ((FameManager.SpreadCountdown as Float) / 2)
+		Float SpreadCountdownHalfHours = ((SpreadTimeBase - (SpreadTimeBase as Int)) * 10)
 		
-		AddTextOption("Spread Countdown:", CountdownHours + "." + CountdownHalfHours + " Hours")
+		AddTextOption("Spread Countdown:", (SpreadTimeBase as Int) + "." + (SpreadCountdownHalfHours as Int) + " Hours")
 		AddHeaderOption("Default Locations")
 		
 		Int LocationIndex = 0
