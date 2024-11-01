@@ -250,6 +250,19 @@ Event OnConfigOpen()
 		DominantDefault = False
 		SubmissiveDefault = False
 	EndIf
+	
+	If Mods.IsPWInstalled == False
+		DisableNakedCommentsWhilePW = False
+	EndIf
+	
+	If Mods.IsDDInstalled == False
+		AllowCollarBoundFame = False
+		AllowSLSCursedCollarBoundFame = False
+	EndIf
+	
+	If Mods.IsSLSInstalled == False
+		AllowSLSCursedCollarBoundFame = False
+	EndIf
 EndEvent
 
 Event OnConfigClose()
@@ -403,10 +416,10 @@ Event OnPageReset(String page)
 		AddTextOption("Sexlab P+ Installed:", (Mods.IsSexlabPlusInstalled) as String)
 		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Default to Submissive", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True || Mods.IsSexlabPlusInstalled == True))
 		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Default to Dominant", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True || Mods.IsSexlabPlusInstalled == True))
-		AddToggleOptionST("SLSF_Reloaded_DisableNakedCommentsWhilePWState", "No Naked Comments While Public Whore", DisableNakedCommentsWhilePW, GetDisabledOptionFlagIf(Mods.IsPWInstalled == False))
 		
-		AddHeaderOption("Fame Comments Settings")
+		AddHeaderOption("Comment Settings")
 		AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance:", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", GetDisabledOptionFlagIf(Mods.IsFameCommentsInstalled == False))
+		AddToggleOptionST("SLSF_Reloaded_DisableNakedCommentsWhilePWState", "No Naked Comments While Public Whore", DisableNakedCommentsWhilePW, GetDisabledOptionFlagIf(Mods.IsPWInstalled == False))
 		
 		SetCursorPosition(1)
 		AddHeaderOption("Notification Toggles")
@@ -1233,8 +1246,10 @@ State SLSF_Reloaded_TattooStatusState
 		TattooArea[2] = "Hands"
 		TattooArea[3] = "Feet"
 		
+		Int StartIndex = TattooArea.Find(TattooStatusSelect)
+		
 		SetMenuDialogOptions(TattooArea)
-		SetMenuDialogStartIndex(0)
+		SetMenuDialogStartIndex(StartIndex)
 		SetMenuDialogDefaultIndex(0)
 	EndEvent
 	
@@ -1482,9 +1497,7 @@ State SLSF_Reloaded_LocationDetailsState
 		Int TotalLocations = (LocationManager.DefaultLocation.Length + SLSF_Reloaded_CustomLocationCount.GetValue()) as Int
 		String[] Texts = Utility.CreateStringArray(TotalLocations)
 		
-		Int StartIndex = 0
 		Int FillIndex = 0
-		
 		While FillIndex < TotalLocations
 			If FillIndex < LocationManager.DefaultLocation.Length
 				Texts[FillIndex] = LocationManager.DefaultLocation[FillIndex]
@@ -1493,6 +1506,8 @@ State SLSF_Reloaded_LocationDetailsState
 			EndIf
 			FillIndex += 1
 		EndWhile
+		
+		Int StartIndex = Texts.Find(LocationDetailsSelected)
 		
 		SetMenuDialogOptions(Texts)
 		SetMenuDialogStartIndex(StartIndex)
