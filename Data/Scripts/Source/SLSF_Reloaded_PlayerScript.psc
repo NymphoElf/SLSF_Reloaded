@@ -117,6 +117,8 @@ Function AnimationAnalyze(Int threadID)
 	Int FemaleCount = Sexlab.FemaleCount(Actors)
 	
 	Bool IsSexWorker = Data.CheckSexWorker()
+	Bool IsSubmissive = False
+	Bool IsDominant = False
 	
 	If Actors.Length > 1
 		If PlayerController.Animation.HasTag("Oral")
@@ -142,24 +144,28 @@ Function AnimationAnalyze(Int threadID)
 		If Mods.IsSexlabPlusInstalled == True
 			If PlayerController.IsConsent() == True
 				If PlayerController.GetSubmissive(PlayerRef) == True
+					IsSubmissive = True
 					FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
 				Else
+					IsDominant = True
 					FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
 				EndIf
 			EndIf
 		Else
-			If Config.SubmissiveDefault == True || FameManager.CanGainBoundFame(PlayerLocation) || (PlayerSex == 1 && HasStrapon == False)
+			If (Config.SubmissiveDefault == True || FameManager.CanGainBoundFame(PlayerLocation) || (PlayerSex == 1 && HasStrapon == False)) && Config.DominantDefault == False
+				IsSubmissive = True
 				FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
-			ElseIf Config.DominantDefault == True || (PlayerSex == 1 && HasStrapon == True) || PlayerSex == 0
+			ElseIf (Config.DominantDefault == True || (PlayerSex == 1 && HasStrapon == True) || PlayerSex == 0) && Config.SubmissiveDefault == False
+				IsDominant = True
 				FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
 			EndIf
 		EndIf
 		
-		If (IsVictim == True && Config.VictimsAreMasochist == True) || FameManager.CanGainBoundFame(PlayerLocation)
+		If (IsVictim == True && Config.VictimsAreMasochist == True) || (FameManager.CanGainBoundFame(PlayerLocation) && IsDominant == False) || (PlayerController.Animation.HasTag("Aggressive") && IsVictim == False && IsSubmissive == True)
 			FameManager.GainFame("Masochist", PlayerLocation, Foreplay)
 		EndIf
 		
-		If IsAggressor == True
+		If IsAggressor == True || (PlayerController.Animation.HasTag("Aggressive") && IsDominant == True)
 			FameManager.GainFame("Sadist", PlayerLocation, Foreplay)
 		EndIf
 		

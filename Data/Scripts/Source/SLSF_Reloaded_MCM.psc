@@ -412,10 +412,10 @@ Event OnPageReset(String page)
 		AddHeaderOption("Legacy Overwrite")
 		AddToggleOptionST("SLSF_Reloaded_AllowLegacyOverwriteState", "Overwrite Legacy SLSF", AllowLegacyOverwrite, GetDisabledOptionFlagIf(Mods.IsLegacySLSFInstalled == False))
 		
-		AddHeaderOption("Dom/Sub Defaults")
+		AddHeaderOption("Dom/Sub Settings")
 		AddTextOption("Sexlab P+ Installed:", (Mods.IsSexlabPlusInstalled) as String)
-		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Default to Submissive", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True || Mods.IsSexlabPlusInstalled == True))
-		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Default to Dominant", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True || Mods.IsSexlabPlusInstalled == True))
+		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Submissive Only", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True || Mods.IsSexlabPlusInstalled == True))
+		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Dominant Only", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True || Mods.IsSexlabPlusInstalled == True))
 		
 		AddHeaderOption("Comment Settings")
 		AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance:", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", GetDisabledOptionFlagIf(Mods.IsFameCommentsInstalled == False))
