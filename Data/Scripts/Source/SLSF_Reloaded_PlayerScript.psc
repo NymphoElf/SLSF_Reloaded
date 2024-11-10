@@ -120,6 +120,9 @@ Function AnimationAnalyze(Int threadID)
 	Bool IsSubmissive = False
 	Bool IsDominant = False
 	
+	Bool GainedSadistFame = False
+	Bool GainedMasochistFame = False
+	
 	If Actors.Length > 1
 		If PlayerController.Animation.HasTag("Oral")
 			FameManager.GainFame("Oral", PlayerLocation, Foreplay)
@@ -163,10 +166,12 @@ Function AnimationAnalyze(Int threadID)
 		
 		If (IsVictim == True && Config.VictimsAreMasochist == True) || (FameManager.CanGainBoundFame(PlayerLocation) && IsDominant == False) || (PlayerController.Animation.HasTag("Aggressive") && IsVictim == False && IsSubmissive == True)
 			FameManager.GainFame("Masochist", PlayerLocation, Foreplay)
+			GainedMasochistFame = True
 		EndIf
 		
-		If IsAggressor == True || (PlayerController.Animation.HasTag("Aggressive") && IsDominant == True)
+		If (IsAggressor == True || (PlayerController.Animation.HasTag("Aggressive") && IsDominant == True)) && GainedMasochistFame == False
 			FameManager.GainFame("Sadist", PlayerLocation, Foreplay)
+			GainedSadistFame = True
 		EndIf
 		
 		If (PlayerSex == 1 && FemaleCount > 1) || (PlayerSex == 0 && FemaleCount > 0)
@@ -208,7 +213,8 @@ Function AnimationAnalyze(Int threadID)
 					EndIf
 				EndIf
 				
-				If Mods.IsDDInstalled == True && IsAggressor == False && Actors[ActorIndex].WornHasKeyword(Mods.DD_Lockable)
+				;We check if DD is installed, and the player has not gained masochist fame while also making sure the player has not already gained sadist fame, then check the NPC for DD Keywords
+				If Mods.IsDDInstalled == True && GainedMasochistFame == False && GainedSadistFame == False && Actors[ActorIndex].WornHasKeyword(Mods.DD_Lockable)
 					If Actors[ActorIndex].WornHasKeyword(Mods.DD_Hood) || Actors[ActorIndex].WornHasKeyword(Mods.DD_Harness) || Actors[ActorIndex].WornHasKeyword(Mods.DD_Belt) \
 					|| Actors[ActorIndex].WornHasKeyword(Mods.DD_Bra) || Actors[ActorIndex].WornHasKeyword(Mods.DD_HeavyBondage) || Actors[ActorIndex].WornHasKeyword(Mods.DD_ArmCuffs) \
 					|| Actors[ActorIndex].WornHasKeyword(Mods.DD_ArmCuffsFront) || Actors[ActorIndex].WornHasKeyword(Mods.DD_Armbinder) || Actors[ActorIndex].WornHasKeyword(Mods.DD_ArmbinderElbow) \
@@ -226,6 +232,8 @@ Function AnimationAnalyze(Int threadID)
 			RunNPCDetect()
 		EndIf
 	EndIf
+	
+	Data.FameCheck()
 EndFunction
 
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)

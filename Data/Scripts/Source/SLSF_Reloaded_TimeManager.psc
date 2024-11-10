@@ -25,17 +25,21 @@ Function PeriodicFameTimer()
 	Int CountdownChange = 0 ;Define and initialize CountdownChange
 	
 	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded Time Manager - Time Difference = " + TimeDifference)
+		Debug.Trace("SLSF Reloaded Time Manager - Time Difference is: " + TimeDifference + " (Need 0.0199 or more)")
 	EndIf
 	
 	While TimeDifference < 0.0199 ;Script delay can prevents the checked time from reaching 0.02, so we check a slightly lower number
 		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded Time Manager - Updated too soon. Waiting 5 in-game minutes...")
+			Debug.Trace("SLSF Reloaded Time Manager - Checked too soon. Waiting 5 in-game minutes...")
 		EndIf
 		
 		Utility.WaitGameTime(0.08) ;If we checked too soon, wait ~5 in-game minutes and check again
+		CurrentTime = Utility.GetCurrentGameTime()
 		
 		TimeDifference = (CurrentTime - LastCheckedTime)
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded Time Manager - Waited 5 in-game minutes. Time Difference is now: " + TimeDifference + " (Need 0.0199 or more)")
+		EndIf
 	EndWhile
 	
 	LastCheckedTime = CurrentTime ;Keep original checked time as Last Checked to prevent Time Manager always waiting 5 minutes
@@ -45,7 +49,9 @@ Function PeriodicFameTimer()
 		;Once the script gets this far, we know this should be at least 1
 		CountdownChange = 1
 	EndIf
-	
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded Time Manager - Update Fame. Countdown Change: " + CountdownChange)
+	EndIf
 	FameManager.UpdateFame(CountdownChange)
 	
 	TimeManagerRunning = False

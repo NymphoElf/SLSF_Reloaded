@@ -121,8 +121,6 @@ Function UpdateFame(Int CountdownChange)
 	DecayCountdown -= CountdownChange
 	SpreadCountdown -= CountdownChange
 	
-	Data.FameCheck()
-	
 	Int DecayIterations = 0
 	While DecayCountdown <= 0
 		DecayCountdown += (Config.DecayTimeNeeded) as Int ;Increase decay timer by time needed. Maintains carry-over time
@@ -144,7 +142,14 @@ Function UpdateFame(Int CountdownChange)
 	;Multiply Fame Gains by the number of times NPC Scanning should have happened normally
 	GainIterationMultiplier = CountdownChange
 	
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded Fame Manager - Anonymous Status: " + VisibilityManager.IsPlayerAnonymous())
+	EndIf
+	
 	If VisibilityManager.IsPlayerAnonymous() == False
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded Fame Manager - Run NPC Detect")
+		EndIf
 		PlayerScript.RunNPCDetect()
 	EndIf
 	
@@ -199,6 +204,8 @@ Function UpdateFame(Int CountdownChange)
 	ElseIf Mods.IsBimbosInstalled == True
 		AirheadFameCleared = False
 	EndIf
+	
+	Data.FameCheck()
 EndFunction
 
 Function WipeFameComments()
@@ -429,7 +436,10 @@ Bool Function CanGainSlutFame(String FameLocation)
 EndFunction
 
 Bool Function CanGainExhibitionistFame(String FameLocation)
-	;Check Exhibitionist Fame
+	If Sexlab.IsActorActive(PlayerRef) == True
+		return True
+	EndIf
+	
 	If Mods.IsANDInstalled == True
 		If PlayerRef.GetFactionRank(Mods.AND_Nude) == 1
 			return True
@@ -445,7 +455,7 @@ Bool Function CanGainExhibitionistFame(String FameLocation)
 			If Data.GetFameValue(FameLocation, "Exhibitionist") < 50
 				return True
 			EndIf
-		ElseIf PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear)  == 1
+		ElseIf PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
 			If Data.GetFameValue(FameLocation, "Exhibitionist") < 25
 				return True
 			EndIf
@@ -456,9 +466,6 @@ Bool Function CanGainExhibitionistFame(String FameLocation)
 		EndIf
 	EndIf
 	
-	If Sexlab.IsActorActive(PlayerRef) == True
-		return True
-	EndIf
 	return False
 EndFunction
 
@@ -534,8 +541,16 @@ EndFunction
 
 Bool Function CanGainPregnantFame(String FameLocation)
 	;Check Pregnant Fame
-	Int FertilityFactionRank = PlayerRef.GetFactionRank(Mods.FertilityFaction)
-	Int HentaiPregFactionRank = PlayerRef.GetFactionRank(Mods.HentaiPregFaction)
+	Int FertilityFactionRank = 0
+	Int HentaiPregFactionRank = 0
+	
+	If Mods.IsFMInstalled == True
+		FertilityFactionRank = PlayerRef.GetFactionRank(Mods.FertilityFaction)
+	EndIf
+	
+	If Mods.IsHentaiPregInstalled == True
+		HentaiPregFactionRank = PlayerRef.GetFactionRank(Mods.HentaiPregFaction)
+	EndIf
 	Int CurrentPregFame = Data.GetFameValue(FameLocation, "Pregnant")
 	
 	If FertilityFactionRank > 30 && FertilityFactionRank <= 60 && CurrentPregFame < 50
