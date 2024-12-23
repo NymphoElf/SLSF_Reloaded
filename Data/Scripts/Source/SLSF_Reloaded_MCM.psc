@@ -246,11 +246,6 @@ Event OnConfigOpen()
 	
 	VisibilityManager.RegisterForSingleUpdate(0.1)
 	
-	If Mods.IsSexlabPlusInstalled == True
-		DominantDefault = False
-		SubmissiveDefault = False
-	EndIf
-	
 	If Mods.IsPWInstalled == False
 		DisableNakedCommentsWhilePW = False
 	EndIf
@@ -413,9 +408,8 @@ Event OnPageReset(String page)
 		AddToggleOptionST("SLSF_Reloaded_AllowLegacyOverwriteState", "Overwrite Legacy SLSF", AllowLegacyOverwrite, GetDisabledOptionFlagIf(Mods.IsLegacySLSFInstalled == False))
 		
 		AddHeaderOption("Dom/Sub Settings")
-		AddTextOption("Sexlab P+ Installed:", (Mods.IsSexlabPlusInstalled) as String)
-		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Submissive Only", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True || Mods.IsSexlabPlusInstalled == True))
-		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Dominant Only", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True || Mods.IsSexlabPlusInstalled == True))
+		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Submissive Only", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True))
+		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Dominant Only", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True))
 		
 		AddHeaderOption("Comment Settings")
 		AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance:", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", GetDisabledOptionFlagIf(Mods.IsFameCommentsInstalled == False))
@@ -940,7 +934,7 @@ State SLSF_Reloaded_VictimsAreMasochistState
 			VictimsAreMasochist = False
 		EndIf
 		
-		SetToggleOptionValueST(VictimsAreMasochist)
+		SetToggleOptionValueST(VictimsAreMasochist, False, "SLSF_Reloaded_VictimsAreMasochistState")
 	EndEvent
 EndState
 
@@ -952,7 +946,7 @@ State SLSF_Reloaded_AllowBestialityWhenRapedState
 			AllowBestialityWhenRaped = False
 		EndIf
 		
-		SetToggleOptionValueST(AllowBestialityWhenRaped)
+		SetToggleOptionValueST(AllowBestialityWhenRaped, False, "SLSF_Reloaded_AllowBestialityWhenRapedState")
 	EndEvent
 EndState
 
@@ -964,7 +958,7 @@ State SLSF_Reloaded_DisableNakedCommentsWhilePWState
 			DisableNakedCommentsWhilePW = False
 		EndIf
 		
-		SetToggleOptionValueST(DisableNakedCommentsWhilePW)
+		SetToggleOptionValueST(DisableNakedCommentsWhilePW, False, "SLSF_Reloaded_DisableNakedCommentsWhilePWState")
 	EndEvent
 EndState
 
@@ -976,7 +970,7 @@ State SLSF_Reloaded_AllowLegacyOverwriteState
 			AllowLegacyOverwrite = False
 		EndIf
 		
-		SetToggleOptionValueST(AllowLegacyOverwrite)
+		SetToggleOptionValueST(AllowLegacyOverwrite, False, "SLSF_Reloaded_AllowLegacyOverwriteState")
 	EndEvent
 EndState
 
@@ -988,7 +982,7 @@ State SLSF_Reloaded_AllowCollarBoundFame
 			AllowCollarBoundFame = False
 		EndIf
 		
-		SetToggleOptionValueST(AllowCollarBoundFame)
+		SetToggleOptionValueST(AllowCollarBoundFame, False, "SLSF_Reloaded_AllowCollarBoundFame")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1001,7 +995,7 @@ State SLSF_Reloaded_AllowSLSCurseCollarBoundFameState
 			AllowSLSCursedCollarBoundFame = False
 		EndIf
 		
-		SetToggleOptionValueST(AllowSLSCursedCollarBoundFame)
+		SetToggleOptionValueST(AllowSLSCursedCollarBoundFame, False, "SLSF_Reloaded_AllowSLSCurseCollarBoundFameState")
 	EndEvent
 EndState
 
@@ -1222,7 +1216,7 @@ State SLSF_Reloaded_EnableTraceState
 			EnableTracing = False
 		EndIf
 		
-		SetToggleOptionValueST(EnableTracing)
+		SetToggleOptionValueST(EnableTracing, False, "SLSF_Reloaded_EnableTraceState")
 	EndEvent
 EndState
 
@@ -1234,7 +1228,7 @@ State SLSF_Reloaded_AllowLikeFameWhenRapedState
 			AllowLikeFameWhenRaped = False
 		EndIf
 		
-		SetToggleOptionValueST(AllowLikeFameWhenRaped)
+		SetToggleOptionValueST(AllowLikeFameWhenRaped, False, "SLSF_Reloaded_AllowLikeFameWhenRapedState")
 	EndEvent
 EndState
 
@@ -1260,7 +1254,7 @@ State SLSF_Reloaded_TattooStatusState
 		TattooArea[2] = "Hands"
 		TattooArea[3] = "Feet"
 		
-		SetMenuOptionValueST(TattooArea[AcceptedIndex])
+		SetMenuOptionValueST(TattooArea[AcceptedIndex], False, "SLSF_Reloaded_TattooStatusState")
 		TattooStatusSelect = TattooArea[AcceptedIndex]
 		ForcePageReset()
 	EndEvent
@@ -1283,7 +1277,7 @@ State SLSF_Reloaded_BodyTattooSlotState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		BodyTattooIndex = AcceptedIndex
-		SetMenuOptionValueST(BodyTattooIndex + 1)
+		SetMenuOptionValueST(BodyTattooIndex + 1, False, "SLSF_Reloaded_BodyTattooSlotState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1295,7 +1289,7 @@ State SLSF_Reloaded_ExcludeBodySlotState
 		Else
 			VisibilityManager.BodyTattooExcluded[BodyTattooIndex] = False
 		EndIf
-		SetToggleOptionValueST(VisibilityManager.BodyTattooExcluded[BodyTattooIndex])
+		SetToggleOptionValueST(VisibilityManager.BodyTattooExcluded[BodyTattooIndex], False, "SLSF_Reloaded_ExcludeBodySlotState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1310,7 +1304,7 @@ State SLSF_Reloaded_BodySlotFameState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
+		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex], False, "SLSF_Reloaded_BodySlotFameState")
 		VisibilityManager.BodyTattooExtraFameType[BodyTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
@@ -1340,7 +1334,7 @@ State SLSF_Reloaded_BodySlotSubcategoryState
 		Texts[3] = "Ass"
 		Texts[4] = "Back"
 		
-		SetMenuOptionValueST(Texts[AcceptedIndex])
+		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_BodySlotSubcategoryState")
 		VisibilityManager.BodyTattooSubcategory[BodyTattooIndex] = Texts[AcceptedIndex]
 	EndEvent
 EndState
@@ -1362,7 +1356,7 @@ State SLSF_Reloaded_FaceTattooSlotState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		FaceTattooIndex = AcceptedIndex
-		SetMenuOptionValueST(FaceTattooIndex + 1)
+		SetMenuOptionValueST(FaceTattooIndex + 1, False, "SLSF_Reloaded_FaceTattooSlotState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1374,7 +1368,7 @@ State SLSF_Reloaded_ExcludeFaceSlotState
 		Else
 			VisibilityManager.FaceTattooExcluded[FaceTattooIndex] = False
 		EndIf
-		SetToggleOptionValueST(VisibilityManager.FaceTattooExcluded[FaceTattooIndex])
+		SetToggleOptionValueST(VisibilityManager.FaceTattooExcluded[FaceTattooIndex], False, "SLSF_Reloaded_ExcludeFaceSlotState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1389,7 +1383,7 @@ State SLSF_Reloaded_FaceSlotFameState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
+		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex], False, "SLSF_Reloaded_FaceSlotFameState")
 		VisibilityManager.FaceTattooExtraFameType[FaceTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
@@ -1411,7 +1405,7 @@ State SLSF_Reloaded_HandTattooSlotState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		HandTattooIndex = AcceptedIndex
-		SetMenuOptionValueST(HandTattooIndex + 1)
+		SetMenuOptionValueST(HandTattooIndex + 1, False, "SLSF_Reloaded_HandTattooSlotState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1423,7 +1417,7 @@ State SLSF_Reloaded_ExcludeHandSlotState
 		Else
 			VisibilityManager.HandTattooExcluded[HandTattooIndex] = False
 		EndIf
-		SetToggleOptionValueST(VisibilityManager.HandTattooExcluded[HandTattooIndex])
+		SetToggleOptionValueST(VisibilityManager.HandTattooExcluded[HandTattooIndex], False, "SLSF_Reloaded_ExcludeHandSlotState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1438,7 +1432,7 @@ State SLSF_Reloaded_HandSlotFameState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
+		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex], False, "SLSF_Reloaded_HandSlotFameState")
 		VisibilityManager.HandTattooExtraFameType[HandTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
@@ -1460,7 +1454,7 @@ State SLSF_Reloaded_FootTattooSlotState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		FootTattooIndex = AcceptedIndex
-		SetMenuOptionValueST(FootTattooIndex + 1)
+		SetMenuOptionValueST(FootTattooIndex + 1, False, "SLSF_Reloaded_FootTattooSlotState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1472,7 +1466,7 @@ State SLSF_Reloaded_ExcludeFootSlotState
 		Else
 			VisibilityManager.FootTattooExcluded[FootTattooIndex] = False
 		EndIf
-		SetToggleOptionValueST(VisibilityManager.FootTattooExcluded[FootTattooIndex])
+		SetToggleOptionValueST(VisibilityManager.FootTattooExcluded[FootTattooIndex], False, "SLSF_Reloaded_ExcludeFootSlotState")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1487,7 +1481,7 @@ State SLSF_Reloaded_FootSlotFameState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex])
+		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex], False, "SLSF_Reloaded_FootSlotFameState")
 		VisibilityManager.FootTattooExtraFameType[FootTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState

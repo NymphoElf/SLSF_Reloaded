@@ -144,24 +144,12 @@ Function AnimationAnalyze(Int threadID)
 			EndIf
 		EndIf
 		
-		If Mods.IsSexlabPlusInstalled == True
-			If PlayerController.IsConsent() == True
-				If PlayerController.GetSubmissive(PlayerRef) == True
-					IsSubmissive = True
-					FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
-				Else
-					IsDominant = True
-					FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
-				EndIf
-			EndIf
-		Else
-			If (Config.SubmissiveDefault == True || FameManager.CanGainBoundFame(PlayerLocation) || (PlayerSex == 1 && HasStrapon == False)) && Config.DominantDefault == False
-				IsSubmissive = True
-				FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
-			ElseIf (Config.DominantDefault == True || (PlayerSex == 1 && HasStrapon == True) || PlayerSex == 0) && Config.SubmissiveDefault == False
-				IsDominant = True
-				FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
-			EndIf
+		If (Config.SubmissiveDefault == True || FameManager.CanGainBoundFame(PlayerLocation) || (PlayerSex == 1 && HasStrapon == False)) && Config.DominantDefault == False
+			IsSubmissive = True
+			FameManager.GainFame("Submissive", PlayerLocation, Foreplay)
+		ElseIf (Config.DominantDefault == True || (PlayerSex == 1 && HasStrapon == True) || PlayerSex == 0) && Config.SubmissiveDefault == False
+			IsDominant = True
+			FameManager.GainFame("Dominant", PlayerLocation, Foreplay)
 		EndIf
 		
 		If (IsVictim == True && Config.VictimsAreMasochist == True) || (FameManager.CanGainBoundFame(PlayerLocation) && IsDominant == False) || (PlayerController.Animation.HasTag("Aggressive") && IsVictim == False && IsSubmissive == True)

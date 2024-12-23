@@ -3,7 +3,6 @@ ScriptName SLSF_Reloaded_ModIntegration extends Quest
 SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
 SLSF_Reloaded_MCM Property Config Auto
 
-Bool Property IsSexlabPlusInstalled Auto Hidden
 Bool Property IsANDInstalled Auto Hidden
 Bool Property IsDDInstalled Auto Hidden
 Bool Property IsECInstalled Auto Hidden
@@ -17,10 +16,8 @@ Bool Property IsSLSInstalled Auto Hidden
 Bool Property IsFameCommentsInstalled Auto Hidden
 Bool Property IsBimbosInstalled Auto Hidden
 Bool Property IsSexlabApproachInstalled Auto Hidden
-Bool Property IsCOEInstalled Auto Hidden
 Bool Property IsLegacySLSFInstalled Auto Hidden
 
-SCO_CumHandler Property COE Auto Hidden
 sr_InflateQuest Property FHU Auto Hidden
 PW_TrackerScript Property PW_Tracker Auto Hidden
 SLSF_Configuration Property LegacyConfig Auto Hidden
@@ -92,11 +89,6 @@ GlobalVariable Property SLSF_CurrentFamePCLocation_Sub_Slave Auto Hidden
 GlobalVariable Property SLSF_CurrentFamePCLocation_Whore Auto Hidden
 
 Function CheckInstalledMods()
-	If SexlabUtil.GetVersion() > 20000
-		IsSexlabPlusInstalled = True
-	Else
-		IsSexlabPlusInstalled = False
-	EndIf
 	
 	If Game.GetModByName("Advanced Nudity Detection.esp") != 255
 		IsANDInstalled = True
@@ -219,6 +211,7 @@ Function CheckInstalledMods()
 	Else
 		IsPWInstalled = False
 		PW_Tracker = None
+		Config.DisableNakedCommentsWhilePW = False
 	EndIf
 	
 	If Game.GetModByName("Fertility Mode 3 Fixes and Updates.esp") != 255
@@ -273,14 +266,6 @@ Function CheckInstalledMods()
 		HentaiPregFaction = None
 	EndIf
 	
-	If Game.GetModByName("Sexlab - Cum Overlays.esp") != 255
-		IsCOEInstalled = True
-		COE = GetCOEData()
-	Else
-		IsCOEInstalled = False
-		COE = None
-	EndIf
-	
 	If Game.GetModByName("SexLab - Sexual Fame [SLSF].esm") != 255
 		IsLegacySLSFInstalled = True
 		LegacyConfig = GetLegacyConfig()
@@ -306,6 +291,7 @@ Function CheckInstalledMods()
 		SLSF_CurrentFamePCLocation_Sub_Slave = Game.GetFormFromFile(0x00024267, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
 		SLSF_CurrentFamePCLocation_Whore = Game.GetFormFromFile(0x00024268, "SexLab - Sexual Fame [SLSF].esm") as GlobalVariable
 	Else
+		Config.AllowLegacyOverwrite = False
 		IsLegacySLSFInstalled = False
 		LegacyConfig = None
 		
@@ -338,10 +324,6 @@ EndFunction
 
 PW_MainLoopScript Function GetPWData() Global
 	return Game.GetFormFromFile(0xD63, "Public Whore.esp") as PW_MainLoopScript
-EndFunction
-
-SCO_CumHandler Function GetCOEData() Global
-	return Game.GetFormFromFile(0xD62, "Sexlab - Cum Overlays.esp") as SCO_CumHandler
 EndFunction
 
 SLSF_Configuration Function GetLegacyConfig() Global
