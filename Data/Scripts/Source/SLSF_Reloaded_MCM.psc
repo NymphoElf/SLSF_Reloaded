@@ -7,6 +7,9 @@ SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_CommentManager Property Comments Auto
+SLSF_Reloaded_Data_Exporter Property DataExporter Auto
+SLSF_Reloaded_Data_Importer Property DataImporter Auto
+SLSF_Reloaded_Uninstall Property Uninstaller Auto
 
 Bool Property NPCNeedsLOS Auto Hidden
 Bool Property ReduceFameAtNight Auto Hidden
@@ -33,6 +36,10 @@ Bool Property AllowSLSCursedCollarBoundFame Auto Hidden
 Bool Property AllowCollarBoundFame Auto Hidden
 Bool Property AllowLegacyOverwrite Auto Hidden
 Bool Property DisableNakedCommentsWhilePW Auto Hidden
+Bool Property ExportData Auto Hidden
+Bool Property ImportData Auto Hidden
+Bool Property ArmUninstall Auto Hidden
+Bool Property ConfirmUninstall Auto Hidden
 
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
@@ -83,6 +90,8 @@ String Property LocationDetailsSelected Auto Hidden
 String Property UnregisterLocationSelection Auto Hidden
 Int Property UnregisterLocationIndex Auto Hidden
 
+String Property ExportName Auto Hidden
+
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 GlobalVariable Property SLSF_Reloaded_CommentFrequency Auto
 GlobalVariable Property IsVisiblyBound Auto
@@ -90,31 +99,31 @@ GlobalVariable Property WICommentChanceNaked Auto
 
 Event OnConfigInit()
 	Utility.Wait(1.0)
-	Debug.Notification("SLSF Reloaded MCM Initializing...")
+	Debug.Notification("$MCMInitializingMSG")
 	RegisterForSingleUpdate(1)
 EndEvent
 
 Event OnUpdate()
 	InstallMCM()
 	SetDefaults()
-	Debug.Notification("SLSF Reloaded MCM Ready!")
+	Debug.Notification("$MCMReadyMSG")
 EndEvent
 
 Function InstallMCM()
-	ModName = "SLSF Reloaded"
+	ModName = "$SLSFReloadedTitle"
 	Pages = New String[12]
-	Pages[0] = "Fame Overview"
-	Pages[1] = "Detailed Fame View"
-	Pages[2] = "General Settings"
-	Pages[3] = "Fame Settings"
-	Pages[4] = "Tattoo Settings"
-	Pages[5] = "Custom Locations"
-	Pages[6] = "General Info"
-	Pages[7] = "Tattoo Info"
-	Pages[8] = "Decay Info"
-	Pages[9] = "Spread Info"
-	Pages[10] = "Registered Mods"
-	Pages[11] = "Debug"
+	Pages[0] = "$FameOverviewPage"
+	Pages[1] = "$DetailedFameViewPage"
+	Pages[2] = "$GeneralSettingsPage"
+	Pages[3] = "$FameSettingsPage"
+	Pages[4] = "$TattooSettingsPage"
+	Pages[5] = "$CustomLocationsPage"
+	Pages[6] = "$GeneralInfoPage"
+	Pages[7] = "$TattooInfoPage"
+	Pages[8] = "$DecayInfoPage"
+	Pages[9] = "$SpreadInfoPage"
+	Pages[10] = "$RegisteredModsPage"
+	Pages[11] = "$MiscPage"
 EndFunction
 
 Function SetDefaults()
@@ -130,6 +139,7 @@ Function SetDefaults()
 	VictimsAreMasochist = False
 	AllowSLSCursedCollarBoundFame = False
 	AllowCollarBoundFame = False
+	
 	If Mods.IsLegacySLSFInstalled == True
 		AllowLegacyOverwrite = True
 	Else
@@ -149,7 +159,7 @@ Function SetDefaults()
 	FameChanceByNeutral = 75
 	FameChanceByFriend = 50
 	FameChanceByLover = 25
-	TattooStatusSelect = "Body"
+	TattooStatusSelect = "$BodyArea"
 	BodyTattooIndex = 0
 	FaceTattooIndex = 0
 	HandTattooIndex = 0
@@ -182,33 +192,55 @@ Function SetDefaults()
 	UnregisterLocationTrigger = False
 	UnregisterLocationConfirm = False
 	
-	UnregisterLocationSelection = "NONE"
+	UnregisterLocationSelection = ""
 	
 	ClearAllFameConfirm = False
 	ClearAllFameTrigger = False
 	
-	LocationDetailsSelected = "Whiterun"
+	LocationDetailsSelected = LocationManager.MajorLocations[0].GetName()
 	AllowForeplayFame = True
 	EnableTracing = False
 	
 	SLSF_Reloaded_CommentFrequency.SetValue(50)
+	
+	ExportData = False
+	ImportData = False
+	ExportName = ""
+	
+	ArmUninstall = False
+	ConfirmUninstall = False
 EndFunction
 
 Int Function PullFameSpreadChance(String LocationName)
-	Int DefaultLocationIndex = LocationManager.DefaultLocation.Find(LocationName)
-	Int CustomLocationIndex = LocationManager.CustomLocation.Find(LocationName)
-	If DefaultLocationIndex >= 0
-		return DefaultLocationSpreadChance[DefaultLocationIndex]
-	ElseIf CustomLocationIndex >= 0
-		return CustomLocationSpreadChance[CustomLocationIndex]
-	EndIf
+	Int DefaultLocationsNumber = LocationManager.DefaultLocation.Length
+	Int CustomLocationsNumber = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
+	Int TotalLocations = DefaultLocationsNumber + CustomLocationsNumber
+	Int LocationIndex = 0
+	
+	While LocationIndex < TotalLocations
+		If LocationIndex < DefaultLocationsNumber
+			If LocationIndex < LocationManager.MajorLocations.Length && LocationName == LocationManager.MajorLocations[LocationIndex].GetName()
+				return DefaultLocationSpreadChance[LocationIndex]
+			ElseIf LocationIndex >= LocationManager.MajorLocations.Length \
+			&& (LocationIndex - LocationManager.MajorLocations.Length) < LocationManager.MinorLocations.Length \
+			&& LocationName == LocationManager.MinorLocations[(LocationIndex - LocationManager.MajorLocations.Length)].GetName()
+				return DefaultLocationSpreadChance[LocationIndex]
+			EndIf
+		Else
+			If LocationName == LocationManager.CustomLocation[(LocationIndex - DefaultLocationsNumber)]
+				return CustomLocationSpreadChance[(LocationIndex - DefaultLocationsNumber)]
+			EndIf
+		EndIf
+		
+		LocationIndex += 1
+	EndWhile
 	return -1
 EndFunction
 
 Function CheckClearAllFame()
 	If ClearAllFameConfirm == True
 		Utility.Wait(1.0)
-		Debug.Notification("Clearing All Fame...")
+		Debug.Notification("$ClearAllFameMSG")
 		FameManager.ClearAllFame()
 	EndIf
 EndFunction
@@ -216,7 +248,7 @@ EndFunction
 Function CheckLocationRegister()
 	If RegisterLocationConfirm == True
 		Utility.Wait(1.0)
-		Debug.Notification("Attempting Location Registration...")
+		Debug.Notification("$RegisterLocationMSG")
 		LocationManager.RegisterCustomLocation()
 	EndIf
 EndFunction
@@ -224,25 +256,25 @@ EndFunction
 Function CheckLocationUnregister()
 	If UnregisterLocationConfirm == True
 		Utility.Wait(1.0)
-		Debug.Notification("Attempting Location Unregistration...")
+		Debug.Notification("$UnregisterLocationMSG")
 		LocationManager.UnregisterCustomLocation(UnregisterLocationIndex)
 	EndIf
 EndFunction
 
 Event OnConfigOpen()
 	Pages = New String[12]
-	Pages[0] = "Fame Overview"
-	Pages[1] = "Detailed Fame View"
-	Pages[2] = "General Settings"
-	Pages[3] = "Fame Settings"
-	Pages[4] = "Tattoo Settings"
-	Pages[5] = "Custom Locations"
-	Pages[6] = "General Info"
-	Pages[7] = "Tattoo Info"
-	Pages[8] = "Decay Info"
-	Pages[9] = "Spread Info"
-	Pages[10] = "Registered Mods"
-	Pages[11] = "Debug"
+	Pages[0] = "$FameOverviewPage"
+	Pages[1] = "$DetailedFameViewPage"
+	Pages[2] = "$GeneralSettingsPage"
+	Pages[3] = "$FameSettingsPage"
+	Pages[4] = "$TattooSettingsPage"
+	Pages[5] = "$CustomLocationsPage"
+	Pages[6] = "$GeneralInfoPage"
+	Pages[7] = "$TattooInfoPage"
+	Pages[8] = "$DecayInfoPage"
+	Pages[9] = "$SpreadInfoPage"
+	Pages[10] = "$RegisteredModsPage"
+	Pages[11] = "$MiscPage"
 	
 	VisibilityManager.RegisterForSingleUpdate(0.1)
 	
@@ -265,13 +297,29 @@ Event OnConfigClose()
 	CheckLocationRegister()
 	CheckLocationUnregister()
 	
+	If ExportData == True
+		DataExporter.RunExport(ExportName)
+	EndIf
+	
+	If ImportData == True
+		DataImporter.RunImport(ExportName)
+	EndIf
+	
+	If ArmUninstall == True && ConfirmUninstall == True
+		Uninstaller.RunUninstall()
+	EndIf
+	
+	ArmUninstall = False
+	ConfirmUninstall = False
+	ExportData = False
+	ImportData = False
 	ClearAllFameTrigger = False
 	ClearAllFameConfirm = False
 	RegisterLocationTrigger = False
 	RegisterLocationConfirm = False
 	UnregisterLocationTrigger = False
 	UnregisterLocationConfirm = False
-	UnregisterLocationSelection = "NONE"
+	UnregisterLocationSelection = ""
 EndEvent
 
 Event OnPageReset(String page)
@@ -286,62 +334,271 @@ Event OnPageReset(String page)
 	SetCursorFillMode(TOP_TO_BOTTOM)
 	SetCursorPosition(0)
 	
-	If (page == "Fame Overview")
-		AddHeaderOption("Default Locations With Fame")
-		AddTextOption(LocationManager.DefaultLocation[0], HasFameAtDefaultLocation[0] as String)
-		AddTextOption(LocationManager.DefaultLocation[1], HasFameAtDefaultLocation[1] as String)
-		AddTextOption(LocationManager.DefaultLocation[2], HasFameAtDefaultLocation[2] as String)
-		AddTextOption(LocationManager.DefaultLocation[3], HasFameAtDefaultLocation[3] as String)
-		AddTextOption(LocationManager.DefaultLocation[4], HasFameAtDefaultLocation[4] as String)
-		AddTextOption(LocationManager.DefaultLocation[5], HasFameAtDefaultLocation[5] as String)
-		AddTextOption(LocationManager.DefaultLocation[6], HasFameAtDefaultLocation[6] as String)
-		AddTextOption(LocationManager.DefaultLocation[7], HasFameAtDefaultLocation[7] as String)
-		AddTextOption(LocationManager.DefaultLocation[8], HasFameAtDefaultLocation[8] as String)
-		AddTextOption(LocationManager.DefaultLocation[9], HasFameAtDefaultLocation[9] as String)
-		AddTextOption(LocationManager.DefaultLocation[10], HasFameAtDefaultLocation[10] as String)
-		AddTextOption(LocationManager.DefaultLocation[11], HasFameAtDefaultLocation[11] as String)
-		AddTextOption(LocationManager.DefaultLocation[12], HasFameAtDefaultLocation[12] as String)
-		AddTextOption(LocationManager.DefaultLocation[13], HasFameAtDefaultLocation[13] as String)
-		AddTextOption(LocationManager.DefaultLocation[14], HasFameAtDefaultLocation[14] as String)
-		AddTextOption(LocationManager.DefaultLocation[15], HasFameAtDefaultLocation[15] as String)
-		AddTextOption(LocationManager.DefaultLocation[16], HasFameAtDefaultLocation[16] as String)
-		AddTextOption(LocationManager.DefaultLocation[17], HasFameAtDefaultLocation[17] as String)
-		AddTextOption(LocationManager.DefaultLocation[18], HasFameAtDefaultLocation[18] as String)
-		AddTextOption(LocationManager.DefaultLocation[19], HasFameAtDefaultLocation[19] as String)
-		AddTextOption(LocationManager.DefaultLocation[20], HasFameAtDefaultLocation[20] as String)
+	If (page == "$FameOverviewPage")
+		AddHeaderOption("$DefaultLocationWithFame")
+		If HasFameAtDefaultLocation[0] == True
+			AddTextOption(LocationManager.MajorLocations[0].GetName(), "$TrueText") ;Whiterun
+		Else
+			AddTextOption(LocationManager.MajorLocations[0].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[1] == True
+			AddTextOption(LocationManager.MajorLocations[1].GetName(), "$TrueText") ;Winterhold
+		Else
+			AddTextOption(LocationManager.MajorLocations[1].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[2] == True
+			AddTextOption(LocationManager.MajorLocations[2].GetName(), "$TrueText") ;Windhelm
+		Else
+			AddTextOption(LocationManager.MajorLocations[2].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[3] == True
+			AddTextOption(LocationManager.MajorLocations[3].GetName(), "$TrueText") ;Solitude
+		Else
+			AddTextOption(LocationManager.MajorLocations[3].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[4] == True
+			AddTextOption(LocationManager.MajorLocations[4].GetName(), "$TrueText") ;Riften
+		Else
+			AddTextOption(LocationManager.MajorLocations[4].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[5] == True
+			AddTextOption(LocationManager.MajorLocations[5].GetName(), "$TrueText") ;Markarth
+		Else
+			AddTextOption(LocationManager.MajorLocations[5].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[6] == True
+			AddTextOption(LocationManager.MajorLocations[6].GetName(), "$TrueText") ;Morthal
+		Else
+			AddTextOption(LocationManager.MajorLocations[6].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[7] == True
+			AddTextOption(LocationManager.MajorLocations[7].GetName(), "$TrueText") ;Dawnstar
+		Else
+			AddTextOption(LocationManager.MajorLocations[7].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[8] == True
+			AddTextOption(LocationManager.MajorLocations[8].GetName(), "$TrueText") ;Falkreath
+		Else
+			AddTextOption(LocationManager.MajorLocations[8].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[9] == True
+			AddTextOption(LocationManager.MajorLocations[9].GetName(), "$TrueText") ;Raven Rock
+		Else
+			AddTextOption(LocationManager.MajorLocations[9].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[10] == True
+			AddTextOption(LocationManager.MinorLocations[0].GetName(), "$TrueText") ;Riverwood
+		Else
+			AddTextOption(LocationManager.MinorLocations[0].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[11] == True
+			AddTextOption(LocationManager.MinorLocations[1].GetName(), "$TrueText") ;Rorikstead
+		Else
+			AddTextOption(LocationManager.MinorLocations[1].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[12] == True
+			AddTextOption(LocationManager.MinorLocations[2].GetName(), "$TrueText") ;Ivarstead
+		Else
+			AddTextOption(LocationManager.MinorLocations[2].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[13] == True
+			AddTextOption(LocationManager.MinorLocations[3].GetName(), "$TrueText") ;Shor's Stone
+		Else
+			AddTextOption(LocationManager.MinorLocations[3].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[14] == True
+			AddTextOption(LocationManager.MinorLocations[4].GetName(), "$TrueText") ;Dragon Bridge
+		Else
+			AddTextOption(LocationManager.MinorLocations[4].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[15] == True
+			AddTextOption(LocationManager.MinorLocations[5].GetName(), "$TrueText") ;Karthwasten
+		Else
+			AddTextOption(LocationManager.MinorLocations[5].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[16] == True
+			AddTextOption(LocationManager.MinorLocations[6].GetName(), "$TrueText") ;Skaal Village
+		Else
+			AddTextOption(LocationManager.MinorLocations[6].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[17] == True
+			AddTextOption(LocationManager.MinorLocations[7].GetName(), "$TrueText") ;Largashbur
+		Else
+			AddTextOption(LocationManager.MinorLocations[7].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[18] == True
+			AddTextOption(LocationManager.MinorLocations[8].GetName(), "$TrueText") ;Dushnikh Yal
+		Else
+			AddTextOption(LocationManager.MinorLocations[8].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[19] == True
+			AddTextOption(LocationManager.MinorLocations[9].GetName(), "$TrueText") ;Mor Khazgur
+		Else
+			AddTextOption(LocationManager.MinorLocations[9].GetName(), "$FalseText")
+		EndIf
+		
+		If HasFameAtDefaultLocation[20] == True
+			AddTextOption(LocationManager.MinorLocations[10].GetName(), "$TrueText") ;Narzulbur
+		Else
+			AddTextOption(LocationManager.MinorLocations[10].GetName(), "$FalseText")
+		EndIf
 		
 		SetCursorPosition(1)
-		AddHeaderOption("Custom Locations With Fame")
-		AddTextOption(LocationManager.CustomLocation[0], HasFameAtCustomLocation[0] as String)
-		AddTextOption(LocationManager.CustomLocation[1], HasFameAtCustomLocation[1] as String)
-		AddTextOption(LocationManager.CustomLocation[2], HasFameAtCustomLocation[2] as String)
-		AddTextOption(LocationManager.CustomLocation[3], HasFameAtCustomLocation[3] as String)
-		AddTextOption(LocationManager.CustomLocation[4], HasFameAtCustomLocation[4] as String)
-		AddTextOption(LocationManager.CustomLocation[5], HasFameAtCustomLocation[5] as String)
-		AddTextOption(LocationManager.CustomLocation[6], HasFameAtCustomLocation[6] as String)
-		AddTextOption(LocationManager.CustomLocation[7], HasFameAtCustomLocation[7] as String)
-		AddTextOption(LocationManager.CustomLocation[8], HasFameAtCustomLocation[8] as String)
-		AddTextOption(LocationManager.CustomLocation[9], HasFameAtCustomLocation[9] as String)
-		AddTextOption(LocationManager.CustomLocation[10], HasFameAtCustomLocation[10] as String)
-		AddTextOption(LocationManager.CustomLocation[11], HasFameAtCustomLocation[11] as String)
-		AddTextOption(LocationManager.CustomLocation[12], HasFameAtCustomLocation[12] as String)
-		AddTextOption(LocationManager.CustomLocation[13], HasFameAtCustomLocation[13] as String)
-		AddTextOption(LocationManager.CustomLocation[14], HasFameAtCustomLocation[14] as String)
-		AddTextOption(LocationManager.CustomLocation[15], HasFameAtCustomLocation[15] as String)
-		AddTextOption(LocationManager.CustomLocation[16], HasFameAtCustomLocation[16] as String)
-		AddTextOption(LocationManager.CustomLocation[17], HasFameAtCustomLocation[17] as String)
-		AddTextOption(LocationManager.CustomLocation[18], HasFameAtCustomLocation[18] as String)
-		AddTextOption(LocationManager.CustomLocation[19], HasFameAtCustomLocation[19] as String)
-		AddTextOption(LocationManager.CustomLocation[20], HasFameAtCustomLocation[20] as String)
+		AddHeaderOption("$CustomLocationWithFame")
 		
-	ElseIf (page == "Detailed Fame View")
-		AddHeaderOption("Current Location")
-		If LocationManager.CurrentLocation != None
-			AddTextOption("Detected Location:", LocationManager.CurrentLocation.GetName())
+		If HasFameAtCustomLocation[0] == True
+			AddTextOption(LocationManager.CustomLocation[0], "$TrueText")
 		Else
-			AddTextOption("Detected Location:", "-NONE-")
+			AddTextOption(LocationManager.CustomLocation[0], "$FalseText")
 		EndIf
-		String FameLocation = LocationManager.CurrentLocationName()
+		
+		If HasFameAtCustomLocation[1] == True
+			AddTextOption(LocationManager.CustomLocation[1], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[1], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[2] == True
+			AddTextOption(LocationManager.CustomLocation[2], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[2], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[3] == True
+			AddTextOption(LocationManager.CustomLocation[3], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[3], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[4] == True
+			AddTextOption(LocationManager.CustomLocation[4], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[4], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[5] == True
+			AddTextOption(LocationManager.CustomLocation[5], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[5], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[6] == True
+			AddTextOption(LocationManager.CustomLocation[6], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[6], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[7] == True
+			AddTextOption(LocationManager.CustomLocation[7], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[7], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[8] == True
+			AddTextOption(LocationManager.CustomLocation[8], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[8], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[9] == True
+			AddTextOption(LocationManager.CustomLocation[9], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[9], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[10] == True
+			AddTextOption(LocationManager.CustomLocation[10], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[10], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[11] == True
+			AddTextOption(LocationManager.CustomLocation[11], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[11], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[12] == True
+			AddTextOption(LocationManager.CustomLocation[12], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[12], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[13] == True
+			AddTextOption(LocationManager.CustomLocation[13], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[13], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[14] == True
+			AddTextOption(LocationManager.CustomLocation[14], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[14], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[15] == True
+			AddTextOption(LocationManager.CustomLocation[15], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[15], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[16] == True
+			AddTextOption(LocationManager.CustomLocation[16], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[16], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[17] == True
+			AddTextOption(LocationManager.CustomLocation[17], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[17], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[18] == True
+			AddTextOption(LocationManager.CustomLocation[18], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[18], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[19] == True
+			AddTextOption(LocationManager.CustomLocation[19], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[19], "$FalseText")
+		EndIf
+		
+		If HasFameAtCustomLocation[20] == True
+			AddTextOption(LocationManager.CustomLocation[20], "$TrueText")
+		Else
+			AddTextOption(LocationManager.CustomLocation[20], "$FalseText")
+		EndIf
+		
+	ElseIf (page == "$DetailedFameViewPage")
+		AddHeaderOption("$CurrentLocationHeader")
+		If LocationManager.CurrentLocation != None
+			AddTextOption("$DetectedLocation", LocationManager.CurrentLocation.GetName())
+		Else
+			AddTextOption("$DetectedLocation", "$NoneText")
+		EndIf
+		String FameLocation = LocationManager.GetLocalizedName(LocationManager.CurrentLocation)
 		If FameLocation == "Haafingar"
 			FameLocation = "Haafingar (Solitude)"
 		ElseIf FameLocation == "Eastmarch"
@@ -353,12 +610,12 @@ Event OnPageReset(String page)
 		ElseIf FameLocation == "the Rift"
 			FameLocation = "the Rift (Riften)"
 		EndIf
-		AddTextOption("Fame Location:", FameLocation)
+		AddTextOption("$FameLocation", FameLocation)
 		
 		SetCursorPosition(1)
-		AddHeaderOption("Selected Location")
-		AddMenuOptionST("SLSF_Reloaded_LocationDetailsState", "Showing: ", LocationDetailsSelected, 0)
-		AddTextOption("Location Chance to Spread:", PullFameSpreadChance(LocationDetailsSelected) + "%")
+		AddHeaderOption("$SelectedLocationHeader")
+		AddMenuOptionST("SLSF_Reloaded_LocationDetailsState", "$Showing", LocationDetailsSelected, 0)
+		AddTextOption("$ChanceToSpread", PullFameSpreadChance(LocationDetailsSelected) + "%")
 		
 		SetCursorPosition(6)
 		AddHeaderOption("")
@@ -366,412 +623,432 @@ Event OnPageReset(String page)
 		AddHeaderOption("")
 		
 		SetCursorPosition(8)
-		AddTextOption("Slut Fame: ", Data.GetFameValue(LocationDetailsSelected, "Slut") as String)
-		AddTextOption("Whore Fame: ", Data.GetFameValue(LocationDetailsSelected, "Whore") as String)
-		AddTextOption("Exhibitionist Fame: ", Data.GetFameValue(LocationDetailsSelected, "Exhibitionist") as String)
-		AddTextOption("Oral Fame: ", Data.GetFameValue(LocationDetailsSelected, "Oral") as String)
-		AddTextOption("Anal Fame: ", Data.GetFameValue(LocationDetailsSelected, "Anal") as String)
-		AddTextOption("Nasty Fame: ", Data.GetFameValue(LocationDetailsSelected, "Nasty") as String)
-		AddTextOption("Pregnant Fame: ", Data.GetFameValue(LocationDetailsSelected, "Pregnant") as String)
-		AddTextOption("Dominant Fame: ", Data.GetFameValue(LocationDetailsSelected, "Dominant") as String)
-		AddTextOption("Submissive Fame: ", Data.GetFameValue(LocationDetailsSelected, "Submissive") as String)
-		AddTextOption("Sadist Fame: ", Data.GetFameValue(LocationDetailsSelected, "Sadist") as String)
-		AddTextOption("Masochist Fame: ", Data.GetFameValue(LocationDetailsSelected, "Masochist") as String)
+		AddTextOption("$SlutFame", Data.GetFameValue(LocationDetailsSelected, "Slut") as String)
+		AddTextOption("$WhoreFame", Data.GetFameValue(LocationDetailsSelected, "Whore") as String)
+		AddTextOption("$ExhibitionistFame", Data.GetFameValue(LocationDetailsSelected, "Exhibitionist") as String)
+		AddTextOption("$OralFame", Data.GetFameValue(LocationDetailsSelected, "Oral") as String)
+		AddTextOption("$AnalFame", Data.GetFameValue(LocationDetailsSelected, "Anal") as String)
+		AddTextOption("$NastyFame", Data.GetFameValue(LocationDetailsSelected, "Nasty") as String)
+		AddTextOption("$PregnantFame", Data.GetFameValue(LocationDetailsSelected, "Pregnant") as String)
+		AddTextOption("$DominantFame", Data.GetFameValue(LocationDetailsSelected, "Dominant") as String)
+		AddTextOption("$SubmissiveFame", Data.GetFameValue(LocationDetailsSelected, "Submissive") as String)
+		AddTextOption("$SadistFame", Data.GetFameValue(LocationDetailsSelected, "Sadist") as String)
+		AddTextOption("$MasochistFame", Data.GetFameValue(LocationDetailsSelected, "Masochist") as String)
 		
 		If Mods.IsFameCommentsInstalled == True
-			AddTextOption("Unfaithful Fame:", Data.GetFameValue(LocationDetailsSelected, "Unfaithful") as String)
+			AddTextOption("$UnfaithfulFame", Data.GetFameValue(LocationDetailsSelected, "Unfaithful") as String)
 		EndIf
 		
 		If Mods.IsBimbosInstalled == True
-			AddTextOption("Airhead Fame:", Data.GetFameValue(LocationDetailsSelected, "Airhead") as String)
+			AddTextOption("$AirheadFame", Data.GetFameValue(LocationDetailsSelected, "Airhead") as String)
 		EndIf
 		
 		SetCursorPosition(9)
-		AddTextOption("Gentle Fame: ", Data.GetFameValue(LocationDetailsSelected, "Gentle") as String)
-		AddTextOption("Likes Men Fame: ", Data.GetFameValue(LocationDetailsSelected, "Likes Men") as String)
-		AddTextOption("Likes Women Fame: ", Data.GetFameValue(LocationDetailsSelected, "Likes Women") as String)
-		AddTextOption("Likes Orc Fame: ", Data.GetFameValue(LocationDetailsSelected, "Likes Orc") as String)
-		AddTextOption("Likes Khajiit Fame: ", Data.GetFameValue(LocationDetailsSelected, "Likes Khajiit") as String)
-		AddTextOption("Likes Argonian Fame: ", Data.GetFameValue(LocationDetailsSelected, "Likes Argonian") as String)
-		AddTextOption("Bestiality Fame: ", Data.GetFameValue(LocationDetailsSelected, "Bestiality") as String)
-		AddTextOption("Group Fame: ", Data.GetFameValue(LocationDetailsSelected, "Group") as String)
-		AddTextOption("Bound Fame: ", Data.GetFameValue(LocationDetailsSelected, "Bound") as String)
-		AddTextOption("Tattoo Fame: ", Data.GetFameValue(LocationDetailsSelected, "Tattoo") as String)
-		AddTextOption("Cum Dump Fame: ", Data.GetFameValue(LocationDetailsSelected, "Cum Dump") as String)
+		AddTextOption("$GentleFame", Data.GetFameValue(LocationDetailsSelected, "Gentle") as String)
+		AddTextOption("$LikesMenFame", Data.GetFameValue(LocationDetailsSelected, "Likes Men") as String)
+		AddTextOption("$LikesWomenFame", Data.GetFameValue(LocationDetailsSelected, "Likes Women") as String)
+		AddTextOption("$LikesOrcFame", Data.GetFameValue(LocationDetailsSelected, "Likes Orc") as String)
+		AddTextOption("$LikesKhajiitFame", Data.GetFameValue(LocationDetailsSelected, "Likes Khajiit") as String)
+		AddTextOption("$LikesArgonianFame", Data.GetFameValue(LocationDetailsSelected, "Likes Argonian") as String)
+		AddTextOption("$BestialityFame", Data.GetFameValue(LocationDetailsSelected, "Bestiality") as String)
+		AddTextOption("$GroupFame", Data.GetFameValue(LocationDetailsSelected, "Group") as String)
+		AddTextOption("$BoundFame", Data.GetFameValue(LocationDetailsSelected, "Bound") as String)
+		AddTextOption("$TattooFame", Data.GetFameValue(LocationDetailsSelected, "Tattoo") as String)
+		AddTextOption("$CumDumpFame", Data.GetFameValue(LocationDetailsSelected, "Cum Dump") as String)
 		
 		If Mods.IsFameCommentsInstalled == True
-			AddTextOption("Cuck Fame:", Data.GetFameValue(LocationDetailsSelected, "Cuck") as String)
+			AddTextOption("$CuckFame", Data.GetFameValue(LocationDetailsSelected, "Cuck") as String)
 		EndIf
 	
-	ElseIf (page == "General Settings")
-		AddHeaderOption("Legacy Overwrite")
-		AddToggleOptionST("SLSF_Reloaded_AllowLegacyOverwriteState", "Overwrite Legacy SLSF", AllowLegacyOverwrite, GetDisabledOptionFlagIf(Mods.IsLegacySLSFInstalled == False))
+	ElseIf (page == "$GeneralSettingsPage")
+		AddHeaderOption("$LegacyOverwriteHeader")
+		AddToggleOptionST("SLSF_Reloaded_AllowLegacyOverwriteState", "$LegacyOverwriteToggle", AllowLegacyOverwrite, GetDisabledOptionFlagIf(Mods.IsLegacySLSFInstalled == False))
 		
-		AddHeaderOption("Dom/Sub Settings")
-		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "Submissive Only", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True))
-		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "Dominant Only", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True))
+		AddHeaderOption("$DomSubHeader")
+		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "$SubOnly", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True))
+		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "$DomOnly", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True))
 		
-		AddHeaderOption("Comment Settings")
-		AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "Fame Comment Chance:", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", GetDisabledOptionFlagIf(Mods.IsFameCommentsInstalled == False))
-		AddToggleOptionST("SLSF_Reloaded_DisableNakedCommentsWhilePWState", "No Naked Comments While Public Whore", DisableNakedCommentsWhilePW, GetDisabledOptionFlagIf(Mods.IsPWInstalled == False))
-		
-		SetCursorPosition(1)
-		AddHeaderOption("Notification Toggles")
-		AddToggleOptionST("SLSF_Reloaded_NotifyFameIncreaseState", "Notify on Fame Increase", NotifyFameIncrease, 0)
-		AddToggleOptionST("SLSF_Reloaded_NotifyFameDecayState", "Notify on Fame Decay", NotifyFameDecay, 0)
-		AddToggleOptionST("SLSF_Reloaded_NotifyFameSpreadState", "Notify on Fame Spread", NotifyFameSpread, 0)
-		
-	ElseIf (page == "Fame Settings")
-		AddHeaderOption("Fame Gain Settings")
-		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "Player Can Be Anonymous", AnonymityEnabled, 0)
-		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "Allow Foreplay Fame Bonus", AllowForeplayFame, 0)
-		AddToggleOptionST("SLSF_Reloaded_AllowLikeFameWhenRapedState", "Allow 'Likes' Fame When Raped", AllowLikeFameWhenRaped, 0)
-		AddToggleOptionST("SLSF_Reloaded_AllowBestialityWhenRapedState", "Allow Bestiality Fame When Raped", AllowBestialityWhenRaped, 0)
-		AddToggleOptionST("SLSF_Reloaded_VictimsAreMasochistState", "Allow Masochist Fame When Raped", VictimsAreMasochist, 0)
-		AddToggleOptionST("SLSF_Reloaded_AllowCollarBoundFame", "Allow Bound Fame from Collars", AllowCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsDDInstalled == False))
-		AddToggleOptionST("SLSF_Reloaded_AllowSLSCurseCollarBoundFameState", "Allow SLS Cursed Collar Bound Fame", AllowSLSCursedCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsSLSInstalled == False || AllowCollarBoundFame == False))
-		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "Reduce Fame Gain at Night", ReduceFameAtNight, 0)
-		AddSliderOptionST("SLSF_Reloaded_NightStartState", "Night Starts at:", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
-		AddSliderOptionST("SLSF_Reloaded_NightEndState", "Night Ends at:", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
-		AddSliderOptionST("SLSF_Reloaded_FHUThresholdState", "FHU Inflation needed for Cum Dump:", CumDumpFHUReq, "{2}", GetDisabledOptionFlagIf(Mods.IsFHUInstalled == False))
-		AddSliderOptionST("SLSF_Reloaded_MaxVLowFameGainState", "Maximum Very Low Fame Gain:", MaxVLowFameGain, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaxLowFameGainState", "Maximum Low Fame Gain:", MaxLowFameGain, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaxMedFameGainState", "Maximum Medium Fame Gain:", MaxMedFameGain, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaxHighFameGainState", "Maximum High Fame Gain:", MaxHighFameGain, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaxVHighFameGainState", "Maximum Very High Fame Gain:", MaxVHighFameGain, "{0}", 0)
-		
-		AddHeaderOption("Fame Decay Settings")
-		AddSliderOptionST("SLSF_Reloaded_DecayTimeNeededState", "Time Between Decays (Hours):", (DecayTimeNeeded / 2), "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaxVLowFameDecayState", "Maximum Very Low Fame Decay:", MaxVLowFameDecay, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaxLowFameDecayState", "Maximum Low Fame Decay:", MaxLowFameDecay, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaxMedFameDecayState", "Maximum Medium Fame Decay:", MaxMedFameDecay, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaxHighFameDecayState", "Maximum High Fame Decay:", MaxHighFameDecay, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaxVHighFameDecayState", "Maximum Very High Fame Decay:", MaxVHighFameDecay, "{0}", 0)
-		
-		AddHeaderOption("Multiplier Settings")
-		AddToggleOptionST("SLSF_Reloaded_UseGlobalMultiplierState", "Use Global Multiplier", UseGlobalFameMultiplier, 0)
-		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "Global Fame Multiplier:", FameChangeMultiplier, "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == False))
-		
-		AddHeaderOption("Fame Spread Settings")
-		AddSliderOptionST("SLSF_Reloaded_SpreadTimeNeededState", "Time Between Spreads (Hours):", (SpreadTimeNeeded / 2), "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_FailedSpreadIncreaseState", "Chance Increase on Fail:", FailedSpreadIncrease, "{0}%", 0)
-		AddSliderOptionST("SLSF_Reloaded_SuccessfulSpreadDecreaseState", "Chance Decrease on Success:", SuccessfulSpreadReduction, "{0}%", 0)
-		AddSliderOptionST("SLSF_Reloaded_MinimumFameToSpreadState", "Minimum Category Fame:", MinimumFameToSpread, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadCategoriesState", "Maximum Spread Categories:", MaximumSpreadCategories, "{0}", 0)
-		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadPercentageState", "Maximum Spread Percentage:", MaximumSpreadPercentage, "{0}%", 0)
-		
-		AddHeaderOption("NPC Fame Chances")
-		AddToggleOptionST("SLSF_Reloaded_NPCNeedsLOSState", "NPCs Need Line of Sight", NPCNeedsLOS, 0)
-		AddSliderOptionST("SLSF_Reloaded_MinimumNPCLOSDistanceState", "Minimum NPC Distance for LOS:", MinimumNPCLOSDistance as Int, "{0}", GetDisabledOptionFlagIf(NPCNeedsLOS == False))
-		AddSliderOptionST("SLSF_Reloaded_FameChanceByEnemyState", "Enemy Fame Chance", FameChanceByEnemy, "{0}%", 0)
-		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "Neutral Fame Chance", FameChanceByNeutral, "{0}%", 0)
-		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "Friend Fame Chance", FameChanceByFriend, "{0}%", 0)
-		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "Lover Fame Chance", FameChanceByLover, "{0}%", 0)
-		
-		AddHeaderOption("Reset Fame")
-		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "Clear All Fame", ClearAllFameTrigger, 0)
-		AddToggleOptionST("SLSF_Reloaded_ClearAllFameConfirmState", "Confirm Clear All Fame", ClearAllFameConfirm, GetDisabledOptionFlagIf(ClearAllFameTrigger == False))
+		AddHeaderOption("$CommentSettingsHeader")
+		AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "$CommentChance", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", GetDisabledOptionFlagIf(Mods.IsFameCommentsInstalled == False))
+		AddToggleOptionST("SLSF_Reloaded_DisableNakedCommentsWhilePWState", "$NoCommentWhilePW", DisableNakedCommentsWhilePW, GetDisabledOptionFlagIf(Mods.IsPWInstalled == False))
 		
 		SetCursorPosition(1)
-		AddSliderOptionST("SLSF_Reloaded_WhoreMultiplierState", "Whore Multiplier:", FameCategoryMultiplier[0], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_SlutMultiplierState", "Slut Multiplier:", FameCategoryMultiplier[1], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_ExhibitionistMultiplierState", "Exhibitionist Multiplier:", FameCategoryMultiplier[2], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_OralMultiplierState", "Oral Multiplier:", FameCategoryMultiplier[3], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_AnalMultiplierState", "Anal Multiplier:", FameCategoryMultiplier[4], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_NastyMultiplierState", "Nasty Multiplier:", FameCategoryMultiplier[5], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_PregnantMultiplierState", "Pregnant Multiplier:", FameCategoryMultiplier[6], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_DominantMultiplierState", "Dominant Multiplier:", FameCategoryMultiplier[7], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_SubmissiveMultiplierState", "Submissive Multiplier:", FameCategoryMultiplier[8], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_SadistMultiplierState", "Sadist Multiplier:", FameCategoryMultiplier[9], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_MasochistMultiplierState", "Masochist Multiplier:", FameCategoryMultiplier[10], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_GentleMultiplierState", "Gentle Multiplier:", FameCategoryMultiplier[11], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_LikesMenMultiplierState", "Likes Men Multiplier:", FameCategoryMultiplier[12], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_LikesWomenMultiplierState", "Likes Women Multiplier:", FameCategoryMultiplier[13], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_LikesOrcMultiplierState", "Likes Orc Multiplier:", FameCategoryMultiplier[14], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_LikesKhajiitMultiplierState", "Likes Khajiit Multiplier:", FameCategoryMultiplier[15], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_LikesArgonianMultiplierState", "Likes Argonian Multiplier:", FameCategoryMultiplier[16], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_BestialityMultiplierState", "Bestiality Multiplier:", FameCategoryMultiplier[17], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_GroupMultiplierState", "Group Multiplier:", FameCategoryMultiplier[18], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_BoundMultiplierState", "Bound Multiplier:", FameCategoryMultiplier[19], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_TattooMultiplierState", "Tattoo Multiplier:", FameCategoryMultiplier[20], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_CumDumpMultiplierState", "Cum Dump Multiplier:", FameCategoryMultiplier[21], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddHeaderOption("$NotificationHeader")
+		AddToggleOptionST("SLSF_Reloaded_NotifyFameIncreaseState", "$NotifyIncrease", NotifyFameIncrease, 0)
+		AddToggleOptionST("SLSF_Reloaded_NotifyFameDecayState", "$NotifyDecay", NotifyFameDecay, 0)
+		AddToggleOptionST("SLSF_Reloaded_NotifyFameSpreadState", "$NotifySpread", NotifyFameSpread, 0)
+		
+	ElseIf (page == "$FameSettingsPage")
+		AddHeaderOption("$FameGainSettingsHeader")
+		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "$PlayerAnonymous", AnonymityEnabled, 0)
+		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "$ForeplayBonus", AllowForeplayFame, 0)
+		AddToggleOptionST("SLSF_Reloaded_AllowLikeFameWhenRapedState", "$LikeFameWhenRaped", AllowLikeFameWhenRaped, 0)
+		AddToggleOptionST("SLSF_Reloaded_AllowBestialityWhenRapedState", "$BestialityWhenRaped", AllowBestialityWhenRaped, 0)
+		AddToggleOptionST("SLSF_Reloaded_VictimsAreMasochistState", "$VictimMasochist", VictimsAreMasochist, 0)
+		AddToggleOptionST("SLSF_Reloaded_AllowCollarBoundFame", "$BoundFameFromCollar", AllowCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsDDInstalled == False))
+		AddToggleOptionST("SLSF_Reloaded_AllowSLSCurseCollarBoundFameState", "$SLSCollarFame", AllowSLSCursedCollarBoundFame, GetDisabledOptionFlagIf(Mods.IsSLSInstalled == False || AllowCollarBoundFame == False))
+		AddToggleOptionST("SLSF_Reloaded_ReduceFameAtNightState", "$NightReduction", ReduceFameAtNight, 0)
+		AddSliderOptionST("SLSF_Reloaded_NightStartState", "$NightStart", NightStart, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
+		AddSliderOptionST("SLSF_Reloaded_NightEndState", "$NightEnd", NightEnd, "{0}", GetDisabledOptionFlagIf(ReduceFameAtNight == False))
+		AddSliderOptionST("SLSF_Reloaded_FHUThresholdState", "$InflationForCumDump", CumDumpFHUReq, "{2}", GetDisabledOptionFlagIf(Mods.IsFHUInstalled == False))
+		AddSliderOptionST("SLSF_Reloaded_MaxVLowFameGainState", "$VeryLowFameGain", MaxVLowFameGain, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxLowFameGainState", "$LowFameGain", MaxLowFameGain, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxMedFameGainState", "$MediumFameGain", MaxMedFameGain, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxHighFameGainState", "$HighFameGain", MaxHighFameGain, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxVHighFameGainState", "$VeryHighFameGain", MaxVHighFameGain, "{0}", 0)
+		
+		AddHeaderOption("$FameDecaySettingsHeader")
+		AddSliderOptionST("SLSF_Reloaded_DecayTimeNeededState", "$TimeBetweenDecay", (DecayTimeNeeded / 2), "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxVLowFameDecayState", "$VeryLowFameDecay", MaxVLowFameDecay, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxLowFameDecayState", "$LowFameDecay", MaxLowFameDecay, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxMedFameDecayState", "$MediumFameDecay", MaxMedFameDecay, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxHighFameDecayState", "$HighFameDecay", MaxHighFameDecay, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaxVHighFameDecayState", "$VeryHighFameDecay", MaxVHighFameDecay, "{0}", 0)
+		
+		AddHeaderOption("$MultiplierHeader")
+		AddToggleOptionST("SLSF_Reloaded_UseGlobalMultiplierState", "$UseGlobalMultiplier", UseGlobalFameMultiplier, 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "$GlobalMultiplier", FameChangeMultiplier, "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == False))
+		
+		AddHeaderOption("$FameSpreadSettingsHeader")
+		AddSliderOptionST("SLSF_Reloaded_SpreadTimeNeededState", "$TimeBetweenSpread", (SpreadTimeNeeded / 2), "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_FailedSpreadIncreaseState", "$ChanceOnFail", FailedSpreadIncrease, "{0}%", 0)
+		AddSliderOptionST("SLSF_Reloaded_SuccessfulSpreadDecreaseState", "$ChanceOnSuccess", SuccessfulSpreadReduction, "{0}%", 0)
+		AddSliderOptionST("SLSF_Reloaded_MinimumFameToSpreadState", "$FameSpreadMinimum", MinimumFameToSpread, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadCategoriesState", "$MaximumSpreadCategories", MaximumSpreadCategories, "{0}", 0)
+		AddSliderOptionST("SLSF_Reloaded_MaximumSpreadPercentageState", "$MaximumSpreadPercentage", MaximumSpreadPercentage, "{0}%", 0)
+		
+		AddHeaderOption("$NPCFameHeader")
+		AddToggleOptionST("SLSF_Reloaded_NPCNeedsLOSState", "$NeedsLOS", NPCNeedsLOS, 0)
+		AddSliderOptionST("SLSF_Reloaded_MinimumNPCLOSDistanceState", "$MinimumLOS", MinimumNPCLOSDistance as Int, "{0}", GetDisabledOptionFlagIf(NPCNeedsLOS == False))
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByEnemyState", "$EnemyChance", FameChanceByEnemy, "{0}%", 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "$NeutralChance", FameChanceByNeutral, "{0}%", 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "$FriendChance", FameChanceByFriend, "{0}%", 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "$LoverChance", FameChanceByLover, "{0}%", 0)
+		
+		AddHeaderOption("$ResetFameHeader")
+		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "$ClearAllFame", ClearAllFameTrigger, 0)
+		AddToggleOptionST("SLSF_Reloaded_ClearAllFameConfirmState", "$ConfirmClearAllFame", ClearAllFameConfirm, GetDisabledOptionFlagIf(ClearAllFameTrigger == False))
+		
+		SetCursorPosition(1)
+		AddSliderOptionST("SLSF_Reloaded_WhoreMultiplierState", "$WhoreMult", FameCategoryMultiplier[0], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_SlutMultiplierState", "$SlutMult", FameCategoryMultiplier[1], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_ExhibitionistMultiplierState", "$ExhibMult", FameCategoryMultiplier[2], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_OralMultiplierState", "$OralMult", FameCategoryMultiplier[3], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_AnalMultiplierState", "$AnalMult", FameCategoryMultiplier[4], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_NastyMultiplierState", "$NastyMult", FameCategoryMultiplier[5], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_PregnantMultiplierState", "$PregMult", FameCategoryMultiplier[6], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_DominantMultiplierState", "$DomMult", FameCategoryMultiplier[7], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_SubmissiveMultiplierState", "$SubMult", FameCategoryMultiplier[8], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_SadistMultiplierState", "$SadMult", FameCategoryMultiplier[9], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_MasochistMultiplierState", "$MasMult", FameCategoryMultiplier[10], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_GentleMultiplierState", "$GenMult", FameCategoryMultiplier[11], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesMenMultiplierState", "$LkMMult", FameCategoryMultiplier[12], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesWomenMultiplierState", "$LkWMult", FameCategoryMultiplier[13], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesOrcMultiplierState", "$LkOMult", FameCategoryMultiplier[14], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesKhajiitMultiplierState", "$LkKMult", FameCategoryMultiplier[15], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_LikesArgonianMultiplierState", "$LkAMult", FameCategoryMultiplier[16], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_BestialityMultiplierState", "$BesMult", FameCategoryMultiplier[17], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_GroupMultiplierState", "$GrpMult", FameCategoryMultiplier[18], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_BoundMultiplierState", "$BndMult", FameCategoryMultiplier[19], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_TattooMultiplierState", "$TatMult", FameCategoryMultiplier[20], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		AddSliderOptionST("SLSF_Reloaded_CumDumpMultiplierState", "$DmpMult", FameCategoryMultiplier[21], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		
 		If Mods.IsFameCommentsInstalled == True
-			AddSliderOptionST("SLSF_Reloaded_UnfaithfulMultiplierState", "Unfaithful Multiplier:", FameCategoryMultiplier[22], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-			AddSliderOptionST("SLSF_Reloaded_CuckMultiplierState", "Cuck Multiplier:", FameCategoryMultiplier[23], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+			AddSliderOptionST("SLSF_Reloaded_UnfaithfulMultiplierState", "$UnfMult", FameCategoryMultiplier[22], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+			AddSliderOptionST("SLSF_Reloaded_CuckMultiplierState", "$CukMult", FameCategoryMultiplier[23], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		EndIf
 		
 		If Mods.IsBimbosInstalled == True
-			AddSliderOptionST("SLSF_Reloaded_AirheadMultiplierState", "Airhead Multiplier", FameCategoryMultiplier[24], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+			AddSliderOptionST("SLSF_Reloaded_AirheadMultiplierState", "$AirMult", FameCategoryMultiplier[24], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		EndIf
 	
-	ElseIf (page == "Tattoo Settings")
-		AddHeaderOption("Body Tattoos")
-		AddMenuOptionST("SLSF_Reloaded_BodyTattooSlotState", "Body Tattoo Slot", (BodyTattooIndex + 1), 0)
-		AddToggleOptionST("SLSF_Reloaded_ExcludeBodySlotState", "Exclude From Fame", VisibilityManager.BodyTattooExcluded[BodyTattooIndex], 0)
+	ElseIf (page == "$TattooSettingsPage")
+		AddHeaderOption("$BodyTatHeader")
+		AddMenuOptionST("SLSF_Reloaded_BodyTattooSlotState", "$BodyTatSlot", (BodyTattooIndex + 1), 0)
+		AddToggleOptionST("SLSF_Reloaded_ExcludeBodySlotState", "$ExcludeSlot", VisibilityManager.BodyTattooExcluded[BodyTattooIndex], 0)
 		If VisibilityManager.BodyTattooApplied[BodyTattooIndex] == True
 			If VisibilityManager.BodyTattooExcluded[BodyTattooIndex] == True
-				AddTextOption("Slot Used:", "Yes (Excluded)")
+				AddTextOption("$SlotUsed", "$YesExcluded")
 			Else
-				AddTextOption("Slot Used:", "Yes")
+				AddTextOption("$SlotUsed", "$Yes")
 			EndIf
 			If VisibilityManager.IsBodyTattooVisible(BodyTattooIndex) == True
-				AddTextOption("Slot Visible:", "Yes")
+				AddTextOption("$SlotVisible", "$Yes")
 			Else
-				AddTextOption("Slot Visible:", "No")
+				AddTextOption("$SlotVisible", "$No")
 			EndIf
 		Else
 			If VisibilityManager.BodyTattooExcluded[BodyTattooIndex] == True
-				AddTextOption("Slot Used:", "No (Excluded)")
+				AddTextOption("$SlotUsed", "$NoExcluded")
 			Else
-				AddTextOption("Slot Used:", "No")
+				AddTextOption("$SlotUsed", "$No")
 			EndIf
-			AddTextOption("Slot Visible:", "No (Unused)")
+			AddTextOption("$SlotVisible", "$NoUnused")
 		EndIf
-		AddMenuOptionST("SLSF_Reloaded_BodySlotFameState", "Extra Fame", VisibilityManager.BodyTattooExtraFameType[BodyTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[BodyTattooIndex] == False))
-		AddMenuOptionST("SLSF_Reloaded_BodySlotSubcategoryState", "Subcategory", VisibilityManager.BodyTattooSubcategory[BodyTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[BodyTattooIndex] == False))
+		AddMenuOptionST("SLSF_Reloaded_BodySlotFameState", "$ExtraFame", VisibilityManager.BodyTattooExtraFameType[BodyTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[BodyTattooIndex] == False))
+		AddMenuOptionST("SLSF_Reloaded_BodySlotSubcategoryState", "$Subcategory", VisibilityManager.BodyTattooSubcategory[BodyTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.BodyTattooApplied[BodyTattooIndex] == False))
 		
-		AddHeaderOption("Hand Tattoos")
-		AddMenuOptionST("SLSF_Reloaded_HandTattooSlotState", "Hand Tattoo Slot", (HandTattooIndex + 1), 0)
-		AddToggleOptionST("SLSF_Reloaded_ExcludeHandSlotState", "Exclude From Fame", VisibilityManager.HandTattooExcluded[HandTattooIndex], 0)
+		AddHeaderOption("$HandTatHeader")
+		AddMenuOptionST("SLSF_Reloaded_HandTattooSlotState", "$HandTatSlot", (HandTattooIndex + 1), 0)
+		AddToggleOptionST("SLSF_Reloaded_ExcludeHandSlotState", "$ExcludeSlot", VisibilityManager.HandTattooExcluded[HandTattooIndex], 0)
 		If VisibilityManager.HandTattooApplied[HandTattooIndex] == True
 			If VisibilityManager.HandTattooExcluded[HandTattooIndex]
-				AddTextOption("Slot Used:", "Yes (Excluded)")
+				AddTextOption("$SlotUsed", "$YesExcluded")
 			Else
-				AddTextOption("Slot Used:", "Yes")
+				AddTextOption("$SlotUsed", "$Yes")
 			EndIf
 			If VisibilityManager.IsHandTattooVisible(HandTattooIndex) == True
-				AddTextOption("Slot Visible:", "Yes")
+				AddTextOption("$SlotVisible", "$Yes")
 			Else
-				AddTextOption("Slot Visible:", "No")
+				AddTextOption("$SlotVisible", "$No")
 			EndIf
 		Else
 			If VisibilityManager.HandTattooExcluded[HandTattooIndex] == True
-				AddTextOption("Slot Used:", "No (Excluded)")
+				AddTextOption("$SlotUsed", "$NoExcluded")
 			Else
-				AddTextOption("Slot Used:", "No")
+				AddTextOption("$SlotUsed", "$No")
 			EndIf
-			AddTextOption("Slot Visible:", "No (Unused)")
+			AddTextOption("$SlotVisible", "$NoUnused")
 		EndIf
-		AddMenuOptionST("SLSF_Reloaded_HandSlotFameState", "Extra Fame", VisibilityManager.HandTattooExtraFameType[HandTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[HandTattooIndex] == False))
+		AddMenuOptionST("SLSF_Reloaded_HandSlotFameState", "$ExtraFame", VisibilityManager.HandTattooExtraFameType[HandTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.HandTattooApplied[HandTattooIndex] == False))
 		
 		SetCursorPosition(1)
-		AddHeaderOption("Face Tattoos")
-		AddMenuOptionST("SLSF_Reloaded_FaceTattooSlotState", "Face Tattoo Slot", (FaceTattooIndex + 1), 0)
-		AddToggleOptionST("SLSF_Reloaded_ExcludeFaceSlotState", "Exclude From Fame", VisibilityManager.FaceTattooExcluded[FaceTattooIndex], 0)
+		AddHeaderOption("$FaceTatHeader")
+		AddMenuOptionST("SLSF_Reloaded_FaceTattooSlotState", "$FaceTatSlot", (FaceTattooIndex + 1), 0)
+		AddToggleOptionST("SLSF_Reloaded_ExcludeFaceSlotState", "$ExcludeSlot", VisibilityManager.FaceTattooExcluded[FaceTattooIndex], 0)
 		If VisibilityManager.FaceTattooApplied[FaceTattooIndex] == True
 			If VisibilityManager.FaceTattooExcluded[FaceTattooIndex]
-				AddTextOption("Slot Used:", "Yes (Excluded)")
+				AddTextOption("$SlotUsed", "$YesExcluded")
 			Else
-				AddTextOption("Slot Used:", "Yes")
+				AddTextOption("$SlotUsed", "$Yes")
 			EndIf
 			If VisibilityManager.IsFaceTattooVisible(FaceTattooIndex) == True
-				AddTextOption("Slot Visible:", "Yes")
+				AddTextOption("$SlotVisible", "$Yes")
 			Else
-				AddTextOption("Slot Visible:", "No")
+				AddTextOption("$SlotVisible", "$No")
 			EndIf
 		Else
 			If VisibilityManager.FaceTattooExcluded[FaceTattooIndex] == True
-				AddTextOption("Slot Used:", "No (Excluded)")
+				AddTextOption("$SlotUsed", "$NoExcluded")
 			Else
-				AddTextOption("Slot Used:", "No")
+				AddTextOption("$SlotUsed", "$No")
 			EndIf
-			AddTextOption("Slot Visible:", "No (Unused)")
+			AddTextOption("$SlotVisible", "$NoUnused")
 		EndIf
-		AddMenuOptionST("SLSF_Reloaded_FaceSlotFameState", "Extra Fame", VisibilityManager.FaceTattooExtraFameType[FaceTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[FaceTattooIndex] == False))
+		AddMenuOptionST("SLSF_Reloaded_FaceSlotFameState", "$ExtraFame", VisibilityManager.FaceTattooExtraFameType[FaceTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.FaceTattooApplied[FaceTattooIndex] == False))
 		
 		AddEmptyOption()
-		AddHeaderOption("Foot Tattoos")
-		AddMenuOptionST("SLSF_Reloaded_FootTattooSlotState", "Foot Tattoo Slot", (FootTattooIndex + 1), 0)
-		AddToggleOptionST("SLSF_Reloaded_ExcludeFootSlotState", "Exclude From Fame", VisibilityManager.FootTattooExcluded[FootTattooIndex], 0)
+		AddHeaderOption("$FootTatHeader")
+		AddMenuOptionST("SLSF_Reloaded_FootTattooSlotState", "$FootTatSlot", (FootTattooIndex + 1), 0)
+		AddToggleOptionST("SLSF_Reloaded_ExcludeFootSlotState", "$ExcludeSlot", VisibilityManager.FootTattooExcluded[FootTattooIndex], 0)
 		If VisibilityManager.FootTattooApplied[FootTattooIndex] == True
 			If VisibilityManager.FootTattooExcluded[FootTattooIndex]
-				AddTextOption("Slot Used:", "Yes (Excluded)")
+				AddTextOption("$SlotUsed", "$YesExcluded")
 			Else
-				AddTextOption("Slot Used:", "Yes")
+				AddTextOption("$SlotUsed", "$Yes")
 			EndIf
 			If VisibilityManager.IsFootTattooVisible(FootTattooIndex) == True
-				AddTextOption("Slot Visible:", "Yes")
+				AddTextOption("$SlotVisible", "$Yes")
 			Else
-				AddTextOption("Slot Visible:", "No")
+				AddTextOption("$SlotVisible", "$No")
 			EndIf
 		Else
 			If VisibilityManager.FootTattooExcluded[FootTattooIndex] == True
-				AddTextOption("Slot Used:", "No (Excluded)")
+				AddTextOption("$SlotUsed", "$NoExcluded")
 			Else
-				AddTextOption("Slot Used:", "No")
+				AddTextOption("$SlotUsed", "$No")
 			EndIf
-			AddTextOption("Slot Visible:", "No (Unused)")
+			AddTextOption("$SlotVisible", "$NoUnused")
 		EndIf
-		AddMenuOptionST("SLSF_Reloaded_FootSlotFameState", "Extra Fame", VisibilityManager.FootTattooExtraFameType[FootTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[FootTattooIndex] == False))
+		AddMenuOptionST("SLSF_Reloaded_FootSlotFameState", "$ExtraFame", VisibilityManager.FootTattooExtraFameType[FootTattooIndex], GetDisabledOptionFlagIf(VisibilityManager.FootTattooApplied[FootTattooIndex] == False))
 		
-	ElseIf (page == "Custom Locations")
-		AddHeaderOption("Register Location")
+	ElseIf (page == "$CustomLocationsPage")
+		AddHeaderOption("$RegisterLocationHeader")
 		If LocationManager.CurrentLocation != None
-			AddTextOption("Detected Location:", LocationManager.CurrentLocation.GetName())
+			AddTextOption("$DetectedLocation", LocationManager.CurrentLocation.GetName())
 		Else
-			AddTextOption("Detected Location:", "-NONE-")
+			AddTextOption("$DetectedLocation", "$NoneText")
 		EndIf
-		AddToggleOptionST("SLSF_Reloaded_RegisterLocationState", "Register Location", RegisterLocationTrigger, 0)
-		AddToggleOptionST("SLSF_Reloaded_RegisterLocationConfirmState", "Confirm Location Register", RegisterLocationConfirm, GetDisabledOptionFlagIf(RegisterLocationTrigger == False))
-		AddHeaderOption("Unregister Location")
-		AddMenuOptionST("SLSF_Reloaded_UnregisterLocationSelectState", "Location to Unregister:", UnregisterLocationSelection, 0)
-		AddToggleOptionST("SLSF_Reloaded_UnregisterLocationState", "Unregister Location", UnregisterLocationTrigger, GetDisabledOptionFlagIf(UnregisterLocationSelection == "NONE"))
-		AddToggleOptionST("SLSF_Reloaded_UnregisterLocationConfirmState", "Confirm Unregister Location", UnregisterLocationConfirm, GetDisabledOptionFlagIf(UnregisterLocationTrigger == False))
+		AddToggleOptionST("SLSF_Reloaded_RegisterLocationState", "$RegisterLocation", RegisterLocationTrigger, 0)
+		AddToggleOptionST("SLSF_Reloaded_RegisterLocationConfirmState", "$ConfirmRegisterLocation", RegisterLocationConfirm, GetDisabledOptionFlagIf(RegisterLocationTrigger == False))
+		AddHeaderOption("$UnregisterLocationHeader")
+		AddMenuOptionST("SLSF_Reloaded_UnregisterLocationSelectState", "$UnregisterSelection", UnregisterLocationSelection, 0)
+		AddToggleOptionST("SLSF_Reloaded_UnregisterLocationState", "$UnregisterLocation", UnregisterLocationTrigger, GetDisabledOptionFlagIf(UnregisterLocationSelection == ""))
+		AddToggleOptionST("SLSF_Reloaded_UnregisterLocationConfirmState", "$ConfirmUnregisterLocation", UnregisterLocationConfirm, GetDisabledOptionFlagIf(UnregisterLocationTrigger == False))
 		
 		SetCursorPosition(1)
-		AddHeaderOption("Registered Locations")
-		AddTextOption("Slot 1:", LocationManager.CustomLocation[0])
-		AddTextOption("Slot 2:", LocationManager.CustomLocation[1])
-		AddTextOption("Slot 3:", LocationManager.CustomLocation[2])
-		AddTextOption("Slot 4:", LocationManager.CustomLocation[3])
-		AddTextOption("Slot 5:", LocationManager.CustomLocation[4])
-		AddTextOption("Slot 6:", LocationManager.CustomLocation[5])
-		AddTextOption("Slot 7:", LocationManager.CustomLocation[6])
-		AddTextOption("Slot 8:", LocationManager.CustomLocation[7])
-		AddTextOption("Slot 9:", LocationManager.CustomLocation[8])
-		AddTextOption("Slot 10:", LocationManager.CustomLocation[9])
-		AddTextOption("Slot 11:", LocationManager.CustomLocation[10])
-		AddTextOption("Slot 12:", LocationManager.CustomLocation[11])
-		AddTextOption("Slot 13:", LocationManager.CustomLocation[12])
-		AddTextOption("Slot 14:", LocationManager.CustomLocation[13])
-		AddTextOption("Slot 15:", LocationManager.CustomLocation[14])
-		AddTextOption("Slot 16:", LocationManager.CustomLocation[15])
-		AddTextOption("Slot 17:", LocationManager.CustomLocation[16])
-		AddTextOption("Slot 18:", LocationManager.CustomLocation[17])
-		AddTextOption("Slot 19:", LocationManager.CustomLocation[18])
-		AddTextOption("Slot 20:", LocationManager.CustomLocation[19])
-		AddTextOption("Slot 21:", LocationManager.CustomLocation[20])
+		AddHeaderOption("$RegisteredLocationsHeader")
+		AddTextOption("", LocationManager.CustomLocation[0])
+		AddTextOption("", LocationManager.CustomLocation[1])
+		AddTextOption("", LocationManager.CustomLocation[2])
+		AddTextOption("", LocationManager.CustomLocation[3])
+		AddTextOption("", LocationManager.CustomLocation[4])
+		AddTextOption("", LocationManager.CustomLocation[5])
+		AddTextOption("", LocationManager.CustomLocation[6])
+		AddTextOption("", LocationManager.CustomLocation[7])
+		AddTextOption("", LocationManager.CustomLocation[8])
+		AddTextOption("", LocationManager.CustomLocation[9])
+		AddTextOption("", LocationManager.CustomLocation[10])
+		AddTextOption("", LocationManager.CustomLocation[11])
+		AddTextOption("", LocationManager.CustomLocation[12])
+		AddTextOption("", LocationManager.CustomLocation[13])
+		AddTextOption("", LocationManager.CustomLocation[14])
+		AddTextOption("", LocationManager.CustomLocation[15])
+		AddTextOption("", LocationManager.CustomLocation[16])
+		AddTextOption("", LocationManager.CustomLocation[17])
+		AddTextOption("", LocationManager.CustomLocation[18])
+		AddTextOption("", LocationManager.CustomLocation[19])
+		AddTextOption("", LocationManager.CustomLocation[20])
 	
-	ElseIf (page == "General Info")
-		AddHeaderOption("Detected Mods")
+	ElseIf (page == "$GeneralInfoPage")
+		AddHeaderOption("$DetectedModsHeader")
 		If Mods.IsANDInstalled == True
-			AddTextOption("Advanced Nudity Detection", "True")
+			AddTextOption("Advanced Nudity Detection", "$TrueText")
 		Else
-			AddTextOption("Advanced Nudity Detection", "False")
+			AddTextOption("Advanced Nudity Detection", "$FalseText")
 		EndIf
 		
 		If Mods.IsDDInstalled == True
-			AddTextOption("Devious Devices", "True")
+			AddTextOption("Devious Devices", "$TrueText")
 		Else
-			AddTextOption("Devious Devices", "False")
+			AddTextOption("Devious Devices", "$FalseText")
 		EndIf
 		
 		If Mods.IsECInstalled == True
-			AddTextOption("Estrus Chaurus", "True")
+			AddTextOption("Estrus Chaurus", "$TrueText")
 		Else
-			AddTextOption("Estrus Chaurus", "False")
+			AddTextOption("Estrus Chaurus", "$FalseText")
 		EndIf
 		
 		If Mods.IsESInstalled == True
-			AddTextOption("Estrus Spider", "True")
+			AddTextOption("Estrus Spider", "$TrueText")
 		Else
-			AddTextOption("Estrus Spider", "False")
+			AddTextOption("Estrus Spider", "$FalseText")
 		EndIf
 		
 		If Mods.IsPWInstalled == True
-			AddTextOption("Public Whore", "True")
+			AddTextOption("Public Whore", "$TrueText")
 		Else
-			AddTextOption("Public Whore", "False")
+			AddTextOption("Public Whore", "$FalseText")
 		EndIf
 		
 		If Mods.IsFMInstalled == True
-			AddTextOption("Fertility Mode", "True")
+			AddTextOption("Fertility Mode", "$TrueText")
 		Else
-			AddTextOption("Fertility Mode", "False")
+			AddTextOption("Fertility Mode", "$FalseText")
 		EndIf
 		
 		If Mods.IsFHUInstalled == True
-			AddTextOption("Fill Her Up", "True")
+			AddTextOption("Fill Her Up", "$TrueText")
 		Else
-			AddTextOption("Fill Her Up", "False")
+			AddTextOption("Fill Her Up", "$FalseText")
 		EndIf
 		
 		If Mods.IsHentaiPregInstalled == True
-			AddTextOption("Hentai Pregnancy", "True")
+			AddTextOption("Hentai Pregnancy", "$TrueText")
 		Else
-			AddTextOption("Hentai Pregnancy", "False")
+			AddTextOption("Hentai Pregnancy", "$FalseText")
 		EndIf
 		
 		If Mods.IsSlaveTatsInstalled == True
-			AddTextOption("Slave Tats", "True")
+			AddTextOption("Slave Tats", "$TrueText")
 		Else
-			AddTextOption("Slave Tats", "False")
+			AddTextOption("Slave Tats", "$FalseText")
 		EndIf
 		
 		If Mods.IsSLSInstalled == True
-			AddTextOption("Sexlab Survival", "True")
+			AddTextOption("Sexlab Survival", "$TrueText")
 		Else
-			AddTextOption("Sexlab Survival", "False")
+			AddTextOption("Sexlab Survival", "$FalseText")
 		EndIf
 		
 		If Mods.IsFameCommentsInstalled == True
-			AddTextOption("SLSF Fame Comments", "True")
+			AddTextOption("SLSF Fame Comments", "$TrueText")
 		Else
-			AddTextOption("SLSF Fame Comments", "False")
+			AddTextOption("SLSF Fame Comments", "$FalseText")
 		EndIf
 		
 		If Mods.IsBimbosInstalled == True
-			AddTextOption("Bimbos of Skyrim", "True")
+			AddTextOption("Bimbos of Skyrim", "$TrueText")
 		Else
-			AddTextOption("Bimbos of Skyrim", "False")
+			AddTextOption("Bimbos of Skyrim", "$FalseText")
 		EndIf
 		
 		If Mods.IsLegacySLSFInstalled == True
-			AddTextOption("Legacy SLSF", "True")
+			AddTextOption("Legacy SLSF", "$TrueText")
 		Else
-			AddTextOption("Legacy SLSF", "False")
+			AddTextOption("Legacy SLSF", "$FalseText")
 		EndIf
 		
 		SetCursorPosition(1)
-		AddHeaderOption("Detected Conditions")
-		AddTextOption("Player is Anonymous:", VisibilityManager.IsPlayerAnonymous() as String)
+		AddHeaderOption("$DetectedConditionsHeader")
+		AddTextOption("$AnonymousCondition", VisibilityManager.IsPlayerAnonymous() as String)
 		
 		If Mods.IsECInstalled == True
-			AddTextOption("Player is Chaurus Pregnant:", Mods.IsECPregnant(PlayerScript.PlayerRef) as String)
+			If Mods.IsECPregnant(PlayerScript.PlayerRef) == True
+				AddTextOption("$ChaurusPregCondition", "$TrueText")
+			Else
+				AddTextOption("$ChaurusPregCondition", "$FalseText")
+			EndIf
 		EndIf
 		If Mods.IsESInstalled == True
-			AddTextOption("Player is Spider Pregnant:", Mods.IsESPregnant(PlayerScript.PlayerRef) as String)
+			If Mods.IsESPregnant(PlayerScript.PlayerRef) == True
+				AddTextOption("$SpiderPregCondition", "$TrueText")
+			Else
+				AddTextOption("$SpiderPregCondition", "$FalseText")
+			EndIf
 		EndIf
 		If Mods.IsFMInstalled == True
-			AddTextOption("Player is Fertility Mode Pregnant:", Mods.IsFMPregnant(PlayerScript.PlayerRef) as String)
+			If Mods.IsFMPregnant(PlayerScript.PlayerRef) == True
+				AddTextOption("$FMPregCondition", "$TrueText")
+			Else
+				AddTextOption("$FMPregCondition", "$FalseText")
+			EndIf
 		EndIf
 		If Mods.IsHentaiPregInstalled == True
-			AddTextOption("Player is Hentai Pregnant:", Mods.IsHentaiPregnant(PlayerScript.PlayerRef) as String)
+			If Mods.IsHentaiPregnant(PlayerScript.PlayerRef) == True
+				AddTextOption("$HentaiPregCondition", "$TrueText")
+			Else
+				AddTextOption("$HentaiPregCondition", "$FalseText")
+			EndIf
 		EndIf
 		If Mods.IsPWInstalled == True
-			AddTextOption("Player is Public Whore:", Mods.IsPublicWhore() as String)
+			If Mods.IsPublicWhore() == True
+				AddTextOption("$PublicWhoreCondition", "$TrueText")
+			Else
+				AddTextOption("$PublicWhoreCondition", "$FalseText")
+			EndIf
 		EndIf
 		If Mods.IsFHUInstalled == True
-			AddTextOption("Player's FHU Inflation:", Mods.GetFHUInflation(PlayerScript.PlayerRef) as String)
+			AddTextOption("$FHUCondition", Mods.GetFHUInflation(PlayerScript.PlayerRef) as String)
 		EndIf
 		
-		AddTextOption("Total Visible Tattoos:", VisibilityManager.CountVisibleTattoos() as String)
+		AddTextOption("$VisibleTatsCondition", VisibilityManager.CountVisibleTattoos() as String)
 		
 		If IsVisiblyBound.GetValue() == 1
-			AddTextOption("Visibly Bound:", "Yes")
+			AddTextOption("$VisiblyBoundCondition", "$Yes")
 		Else
-			AddTextOption("Visibly Bound:", "No")
+			AddTextOption("$VisiblyBoundCondition", "$No")
 		EndIf
 		
 		If VisibilityManager.IsOralCumVisible() == True
-			AddTextOption("Oral Cum Visible:", "Yes")
+			AddTextOption("$OralCumCondition", "$Yes")
 		Else
-			AddTextOption("Oral Cum Visible:", "No")
+			AddTextOption("$OralCumCondition", "$No")
 		EndIf
 		
 		If PlayerScript.PlayerRef.GetActorBase().GetSex() == 0
-			AddTextOption("Vaginal Cum Visible:", "N/A")
+			AddTextOption("$VaginalCumCondition", "$No")
 		ElseIf VisibilityManager.IsVaginalCumVisible() == True
-			AddTextOption("Vaginal Cum Visible:", "Yes")
+			AddTextOption("$VaginalCumCondition", "$Yes")
 		Else
-			AddTextOption("Vaginal Cum Visible:", "No")
+			AddTextOption("$VaginalCumCondition", "$No")
 		EndIf
 		
 		If VisibilityManager.IsAssCumVisible() == True
-			AddTextOption("Anal Cum Visible:", "Yes")
+			AddTextOption("$AnalCumCondition", "$Yes")
 		Else
-			AddTextOption("Anal Cum Visible:", "No")
+			AddTextOption("$AnalCumCondition", "$No")
 		EndIf
 		
 		Float DecayTimeBase = ((FameManager.DecayCountdown as Float) / 2)
@@ -780,90 +1057,105 @@ Event OnPageReset(String page)
 		Float SpreadTimeBase = ((FameManager.SpreadCountdown as Float) / 2)
 		Float SpreadCountdownHalfHours = ((SpreadTimeBase - (SpreadTimeBase as Int)) * 10)
 		
-		AddHeaderOption("Decay & Spread Timers")
-		AddTextOption("Time Until Decay:", (DecayTimeBase as Int) + "." + (DecayCountdownHalfHours as Int) + " Hours")
-		AddTextOption("Time Until Spread:", (SpreadTimeBase as Int) + "." + (SpreadCountdownHalfHours as Int) + " Hours")
+		AddHeaderOption("$DecaySpreadTimerHeader")
+		AddTextOption("$TimeToDecay", (DecayTimeBase as Int) + "." + (DecayCountdownHalfHours as Int))
+		AddTextOption("$TimeToSpread", (SpreadTimeBase as Int) + "." + (SpreadCountdownHalfHours as Int))
 	
-	ElseIf (page == "Tattoo Info")
-		AddHeaderOption("Select Tattoo Area")
-		AddMenuOptionST("SLSF_Reloaded_TattooStatusState", "Tattoo Area:", TattooStatusSelect, 0)
+	ElseIf (page == "$TattooInfoPage")
+		AddHeaderOption("$SelectTattooHeader")
+		AddMenuOptionST("SLSF_Reloaded_TattooStatusState", "$TattooArea", TattooStatusSelect, 0)
 		
-		AddHeaderOption("Visibility Status")
+		AddHeaderOption("$VisibilityHeader")
 		Int TattooIndex = 0
 		Int SlotNumber = 1
-		If TattooStatusSelect == "Body"
+		;String SlotString = "$SlotText"
+		If TattooStatusSelect == "$BodyArea"
 			While TattooIndex < BodyTattooSlots
 				If BodyTattooSlots > 8 && TattooIndex == (BodyTattooSlots / 2)
 					SetCursorPosition(7)
 				EndIf
 				
 				If VisibilityManager.IsBodyTattooVisible(TattooIndex) == True
-					AddTextOption("Slot " + SlotNumber, "Yes")
+					AddTextOption(SlotNumber, "$Yes")
 				Else
-					AddTextOption("Slot " + SlotNumber, "No")
+					AddTextOption(SlotNumber, "$No")
 				EndIf
 				TattooIndex += 1
 				SlotNumber += 1
 			EndWhile
 		EndIf
 		
-		If TattooStatusSelect == "Face"
+		If TattooStatusSelect == "$FaceArea"
 			While TattooIndex < FaceTattooSlots
 				If FaceTattooSlots > 8 && TattooIndex == (FaceTattooSlots / 2)
 					SetCursorPosition(7)
 				EndIf
 				
 				If VisibilityManager.IsFaceTattooVisible(TattooIndex) == True
-					AddTextOption("Slot " + SlotNumber, "Yes")
+					AddTextOption(SlotNumber, "$Yes")
 				Else
-					AddTextOption("Slot " + SlotNumber, "No")
+					AddTextOption(SlotNumber, "$No")
 				EndIf
 				TattooIndex += 1
 				SlotNumber += 1
 			EndWhile
 		EndIf
 		
-		If TattooStatusSelect == "Hands"
+		If TattooStatusSelect == "$HandArea"
 			While TattooIndex < HandTattooSlots
 				If HandTattooSlots > 8 && TattooIndex == (HandTattooSlots / 2)
 					SetCursorPosition(7)
 				EndIf
 				
 				If VisibilityManager.IsHandTattooVisible(TattooIndex) == True
-					AddTextOption("Slot " + SlotNumber, "Yes")
+					AddTextOption(SlotNumber, "$Yes")
 				Else
-					AddTextOption("Slot " + SlotNumber, "No")
+					AddTextOption(SlotNumber, "$No")
 				EndIf
 				TattooIndex += 1
 				SlotNumber += 1
 			EndWhile
 		EndIf
 		
-		If TattooStatusSelect == "Feet"
+		If TattooStatusSelect == "$FootArea"
 			While TattooIndex < FootTattooSlots
 				If FootTattooSlots > 8 && TattooIndex == (FootTattooSlots / 2)
 					SetCursorPosition(7)
 				EndIf
 				
 				If VisibilityManager.IsFootTattooVisible(TattooIndex) == True
-					AddTextOption("Slot " + SlotNumber, "Yes")
+					AddTextOption(SlotNumber, "$Yes")
 				Else
-					AddTextOption("Slot " + SlotNumber, "No")
+					AddTextOption(SlotNumber, "$No")
 				EndIf
 				TattooIndex += 1
 				SlotNumber += 1
 			EndWhile
 		EndIf
 	
-	ElseIf (page == "Decay Info")
+	ElseIf (page == "$DecayInfoPage")
 		Float DecayTimeBase = ((FameManager.DecayCountdown as Float) / 2)
 		Float DecayCountdownHalfHours = ((DecayTimeBase - (DecayTimeBase as Int)) * 10)
+		;String CanDecay = "$CanDecayText"
 		
-		AddTextOption("Decay Countdown:", (DecayTimeBase as Int) + "." + (DecayCountdownHalfHours as Int) + " Hours")
-		AddHeaderOption("Default Locations")
+		AddTextOption("$TimeToDecay", (DecayTimeBase as Int) + "." + (DecayCountdownHalfHours as Int))
+		;AddTextOption("$DecayCountdown", (DecayTimeBase as Int) + "." + (DecayCountdownHalfHours as Int) + " " + "$HoursText")
+		AddHeaderOption("$DefaultLocationsCanDecayHeader")
 		Int LocationIndex = 0
 		While LocationIndex < LocationManager.DefaultLocation.Length
-			AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Can Decay:", (FameManager.DefaultLocationCanDecay[LocationIndex] && HasFameAtDefaultLocation[LocationIndex]) as String)
+			If (FameManager.DefaultLocationCanDecay[LocationIndex] && HasFameAtDefaultLocation[LocationIndex]) == True
+				If LocationIndex < LocationManager.MajorLocations.Length
+					AddTextOption(LocationManager.MajorLocations[LocationIndex].GetName(), "$TrueText")
+				ElseIf LocationIndex >= LocationManager.MajorLocations.Length && (LocationIndex - 10) < LocationManager.MinorLocations.Length
+					AddTextOption(LocationManager.MinorLocations[(LocationIndex - 10)].GetName(), "$TrueText")
+				EndIf
+			Else
+				If LocationIndex < LocationManager.MajorLocations.Length
+					AddTextOption(LocationManager.MajorLocations[LocationIndex].GetName(), "$FalseText")
+				ElseIf LocationIndex >= LocationManager.MajorLocations.Length && (LocationIndex - 10) < LocationManager.MinorLocations.Length
+					AddTextOption(LocationManager.MinorLocations[(LocationIndex - 10)].GetName(), "$FalseText")
+				EndIf
+			EndIf
 			;AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[LocationIndex] as String)
 			LocationIndex += 1
 		EndWhile
@@ -871,41 +1163,65 @@ Event OnPageReset(String page)
 		LocationIndex = 0
 		
 		SetCursorPosition(3)
-		AddHeaderOption("Custom Locations")
+		AddHeaderOption("$CustomLocationsCanDecayHeader")
 		While LocationIndex < LocationManager.CustomLocation.Length
-			AddTextOption(LocationManager.CustomLocation[LocationIndex] + " Can Decay:", (FameManager.CustomLocationCanDecay[LocationIndex] && HasFameAtCustomLocation[LocationIndex]) as String)
+			If (FameManager.CustomLocationCanDecay[LocationIndex] && HasFameAtCustomLocation[LocationIndex]) == True
+				AddTextOption(LocationManager.CustomLocation[LocationIndex], "$TrueText")
+			Else
+				AddTextOption(LocationManager.CustomLocation[LocationIndex], "$FalseText")
+			EndIf
 			;AddTextOption(LocationManager.CustomLocation[LocationIndex] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[LocationIndex] as String)
 			LocationIndex += 1
 		EndWhile
 		
-	ElseIf (page == "Spread Info")
+	ElseIf (page == "$SpreadInfoPage")
 		Float SpreadTimeBase = ((FameManager.SpreadCountdown as Float) / 2)
 		Float SpreadCountdownHalfHours = ((SpreadTimeBase - (SpreadTimeBase as Int)) * 10)
+		;String CanSpread = "$CanSpreadText"
+		;String HoursString = "$HoursText"
 		
-		AddTextOption("Spread Countdown:", (SpreadTimeBase as Int) + "." + (SpreadCountdownHalfHours as Int) + " Hours")
-		AddHeaderOption("Default Locations")
+		AddTextOption("$TimeToSpread", (SpreadTimeBase as Int) + "." + (SpreadCountdownHalfHours as Int))
+		;AddTextOption("$SpreadCountdown", (SpreadTimeBase as Int) + "." + (SpreadCountdownHalfHours as Int) + " " + HoursString)
+		AddHeaderOption("$DefaultLocationsSpreadHeader")
 		
 		Int LocationIndex = 0
 		While LocationIndex < LocationManager.DefaultLocation.Length
-			AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Can Spread:", Data.DefaultLocationHasSpreadableFame[LocationIndex] as String)
+			If Data.DefaultLocationHasSpreadableFame[LocationIndex] == True
+				If LocationIndex < LocationManager.MajorLocations.Length
+					AddTextOption(LocationManager.MajorLocations[LocationIndex].GetName(), "$TrueText")
+				ElseIf LocationIndex >= LocationManager.MajorLocations.Length && (LocationIndex - 10) < LocationManager.MinorLocations.Length
+					AddTextOption(LocationManager.MinorLocations[(LocationIndex - 10)].GetName(), "$TrueText")
+				EndIf
+			Else
+				If LocationIndex < LocationManager.MajorLocations.Length
+					AddTextOption(LocationManager.MajorLocations[LocationIndex].GetName(), "$FalseText")
+				ElseIf LocationIndex >= LocationManager.MajorLocations.Length && (LocationIndex - 10) < LocationManager.MinorLocations.Length
+					AddTextOption(LocationManager.MinorLocations[(LocationIndex - 10)].GetName(), "$FalseText")
+				EndIf
+			EndIf
 			;AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[LocationIndex] as String)
 			LocationIndex += 1
 		EndWhile
 		
 		LocationIndex = 0
 		SetCursorPosition(3)
-		AddHeaderOption("Custom Locations")
+		AddHeaderOption("$CustomLocationsSpreadHeader")
 		While LocationIndex < LocationManager.CustomLocation.Length
-			AddTextOption(LocationManager.CustomLocation[LocationIndex] + " Can Spread:", Data.CustomLocationHasSpreadableFame[LocationIndex] as String)
+			 If Data.CustomLocationHasSpreadableFame[LocationIndex] == True
+				AddTextOption(LocationManager.CustomLocation[LocationIndex], "$TrueText")
+			Else
+				AddTextOption(LocationManager.CustomLocation[LocationIndex], "$FalseText")
+			EndIf
 			;AddTextOption(LocationManager.CustomLocation[LocationIndex] + " Spread Pause Timer:", FameManager.CustomLocationSpreadPauseTimer[LocationIndex] as String)
 			LocationIndex += 1
 		EndWhile
 		
-	ElseIf (page == "Registered Mods")
+	ElseIf (page == "$RegisteredModsPage")
 		Int PageFillIndex = 0
 		Int ModCount = Data.CountExternalMods()
-		AddTextOption("Number of Mods:", ModCount + " (" + Data.ExternalMods.Length + " Max)")
-		AddHeaderOption("Registered Mod List")
+		;String MaxString = "$MaximumText"
+		AddTextOption("$ModNumberText", ModCount + "/" + Data.ExternalMods.Length)
+		AddHeaderOption("$RegisteredModHeader")
 		While PageFillIndex < ModCount
 			If PageFillIndex == (Data.ExternalMods.Length / 2)
 				SetCursorPosition(5)
@@ -913,8 +1229,19 @@ Event OnPageReset(String page)
 			AddTextOption(Data.ExternalMods[PageFillIndex], "")
 			PageFillIndex += 1
 		EndWhile
-	ElseIf (page == "Debug")
-		AddToggleOptionST("SLSF_Reloaded_EnableTraceState", "Enable Tracing", EnableTracing, 0)
+	ElseIf (page == "$MiscPage")
+		AddHeaderOption("$ImportExportHeader")
+		AddInputOptionST("SLSF_Reloaded_ExportNameState", "$ExportName", ExportName, 0)
+		AddToggleOptionST("SLSF_Reloaded_DataExportState", "$ExportData", ExportData, GetDisabledOptionFlagIf(ImportData == True))
+		AddToggleOptionST("SLSF_Reloaded_DataImportState", "$ImportData", ImportData, GetDisabledOptionFlagIf(ExportData == True))
+		
+		AddHeaderOption("$UninstallHeader")
+		AddToggleOptionST("SLSF_Reloaded_ArmUninstall_State", "$ArmUninstall", ArmUninstall, GetDisabledOptionFlagIf(ConfirmUninstall == True))
+		AddToggleOptionST("SLSF_Reloaded_ConfirmUninstall_State", "$ConfirmUninstall", ConfirmUninstall, GetDisabledOptionFlagIf(ArmUninstall == False))
+		
+		SetCursorPosition(1)
+		AddHeaderOption("$DebuggingHeader")
+		AddToggleOptionST("SLSF_Reloaded_EnableTraceState", "$EnableTrace", EnableTracing, 0)
 	EndIf
 EndEvent
 
@@ -925,6 +1252,94 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 		return 0
 	EndIf
 EndFunction
+
+State SLSF_Reloaded_ArmUninstall_State
+	Event OnSelectST()
+		If ArmUninstall == False
+			ArmUninstall = True
+		Else
+			ArmUninstall = False
+		EndIf
+		
+		SetToggleOptionValueST(ArmUninstall, False, "SLSF_Reloaded_ArmUninstall_State")
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_ConfirmUninstall_State
+	Event OnSelectST()
+		If ConfirmUninstall == False
+			ConfirmUninstall = True
+		Else
+			ConfirmUninstall = False
+		EndIf
+		
+		SetToggleOptionValueST(ConfirmUninstall, False, "SLSF_Reloaded_ConfirmUninstall_State")
+		Debug.MessageBox("$UninstallReadyMSG")
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_ExportNameState
+	Event OnInputOpenST()
+		SetInputDialogStartText(ExportName)
+	EndEvent
+	
+	Event OnInputAcceptST(string a_input)
+		ExportName = a_input
+		SetInputOptionValueST(ExportName, False, "SLSF_Reloaded_ExportNameState")
+	EndEvent 
+
+	Event OnDefaultST()
+		ExportName = ""
+		SetInputOptionValueST("", False, "SLSF_Reloaded_ExportNameState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$ExportNameTooltip")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_DataExportState
+	Event OnSelectST()
+		If ExportData == False
+			ExportData = True
+		Else
+			ExportData = False
+		EndIf
+		
+		SetToggleOptionValueST(ExportData, False, "SLSF_Reloaded_DataExportState")
+		
+		If ExportData == True
+			;Debug.MessageBox("If you want to export your custom locations, you MUST check the box next to each location you want to export! If you forgot to do that, you may still do it BEFORE closing the MCM.")
+			Debug.MessageBox("$ExportReadyMSG")
+		EndIf
+		
+		ForcePageReset()
+	EndEvent
+EndState
+
+State SLSF_Reloaded_DataImportState
+	Event OnSelectST()
+		If ImportData == False
+			ImportData = True
+		Else
+			ImportData = False
+		EndIf
+		
+		SetToggleOptionValueST(ImportData, False, "SLSF_Reloaded_DataImportState")
+		
+		If ImportData == True
+			Debug.MessageBox("$ImportReadyMSG")
+		EndIf
+		
+		ForcePageReset()
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$ImportDataTooltip")
+	EndEvent
+EndState
 
 State SLSF_Reloaded_VictimsAreMasochistState
 	Event OnSelectST()
@@ -1016,6 +1431,10 @@ State SLSF_Reloaded_MaxVLowFameGainState
 		MaxVLowFameGain = 10
 		SetSliderOptionValueST(MaxVLowFameGain, "{0}", False, "SLSF_Reloaded_MaxVLowFameGainState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$VeryLowFameGainTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_MaxLowFameGainState
@@ -1034,6 +1453,10 @@ State SLSF_Reloaded_MaxLowFameGainState
 	Event OnDefaultST()
 		MaxLowFameGain = 8
 		SetSliderOptionValueST(MaxLowFameGain, "{0}", False, "SLSF_Reloaded_MaxLowFameGainState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$LowFameGainTooltip")
 	EndEvent
 EndState
 
@@ -1054,6 +1477,10 @@ State SLSF_Reloaded_MaxMedFameGainState
 		MaxMedFameGain = 6
 		SetSliderOptionValueST(MaxMedFameGain, "{0}", False, "SLSF_Reloaded_MaxMedFameGainState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$MediumFameGainTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_MaxHighFameGainState
@@ -1072,6 +1499,10 @@ State SLSF_Reloaded_MaxHighFameGainState
 	Event OnDefaultST()
 		MaxHighFameGain = 4
 		SetSliderOptionValueST(MaxHighFameGain, "{0}", False, "SLSF_Reloaded_MaxHighFameGainState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$HighFameGainTooltip")
 	EndEvent
 EndState
 
@@ -1092,6 +1523,10 @@ State SLSF_Reloaded_MaxVHighFameGainState
 		MaxVHighFameGain = 2
 		SetSliderOptionValueST(MaxVHighFameGain, "{0}", False, "SLSF_Reloaded_MaxVHighFameGainState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$VeryHighFameGainTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_MaxVLowFameDecayState
@@ -1110,6 +1545,10 @@ State SLSF_Reloaded_MaxVLowFameDecayState
 	Event OnDefaultST()
 		MaxVLowFameDecay = 5
 		SetSliderOptionValueST(MaxVLowFameDecay, "{0}", False, "SLSF_Reloaded_MaxVLowFameDecayState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$VeryLowFameDecayTooltip")
 	EndEvent
 EndState
 
@@ -1130,6 +1569,10 @@ State SLSF_Reloaded_MaxLowFameDecayState
 		MaxLowFameDecay = 4
 		SetSliderOptionValueST(MaxLowFameDecay, "{0}", False, "SLSF_Reloaded_MaxLowFameDecayState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$LowFameDecayTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_MaxMedFameDecayState
@@ -1148,6 +1591,10 @@ State SLSF_Reloaded_MaxMedFameDecayState
 	Event OnDefaultST()
 		MaxMedFameDecay = 3
 		SetSliderOptionValueST(MaxMedFameDecay, "{0}", False, "SLSF_Reloaded_MaxMedFameDecayState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$MediumFameDecayTooltip")
 	EndEvent
 EndState
 
@@ -1168,6 +1615,10 @@ State SLSF_Reloaded_MaxHighFameDecayState
 		MaxHighFameDecay = 4
 		SetSliderOptionValueST(MaxHighFameDecay, "{0}", False, "SLSF_Reloaded_MaxHighFameDecayState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$HighFameDecayTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_MaxVHighFameDecayState
@@ -1186,6 +1637,10 @@ State SLSF_Reloaded_MaxVHighFameDecayState
 	Event OnDefaultST()
 		MaxVHighFameDecay = 2
 		SetSliderOptionValueST(MaxVHighFameDecay, "{0}", False, "SLSF_Reloaded_MaxVHighFameDecayState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$VeryHighFameDecayTooltip")
 	EndEvent
 EndState
 
@@ -1235,10 +1690,10 @@ EndState
 State SLSF_Reloaded_TattooStatusState
 	Event OnMenuOpenST()
 		String[] TattooArea = New String[4]
-		TattooArea[0] = "Body"
-		TattooArea[1] = "Face"
-		TattooArea[2] = "Hands"
-		TattooArea[3] = "Feet"
+		TattooArea[0] = "$BodyArea"
+		TattooArea[1] = "$FaceArea"
+		TattooArea[2] = "$HandArea"
+		TattooArea[3] = "$FootArea"
 		
 		Int StartIndex = TattooArea.Find(TattooStatusSelect)
 		
@@ -1249,10 +1704,10 @@ State SLSF_Reloaded_TattooStatusState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		String[] TattooArea = New String[4]
-		TattooArea[0] = "Body"
-		TattooArea[1] = "Face"
-		TattooArea[2] = "Hands"
-		TattooArea[3] = "Feet"
+		TattooArea[0] = "$BodyArea"
+		TattooArea[1] = "$FaceArea"
+		TattooArea[2] = "$HandArea"
+		TattooArea[3] = "$FootArea"
 		
 		SetMenuOptionValueST(TattooArea[AcceptedIndex], False, "SLSF_Reloaded_TattooStatusState")
 		TattooStatusSelect = TattooArea[AcceptedIndex]
@@ -1266,7 +1721,7 @@ State SLSF_Reloaded_BodyTattooSlotState
 		
 		Int ArrayIndex = 0
 		While ArrayIndex < BodyTattooSlots
-			BodySlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
+			BodySlotIndex[ArrayIndex] = (ArrayIndex + 1)
 			ArrayIndex += 1
 		EndWhile
 		
@@ -1314,11 +1769,11 @@ State SLSF_Reloaded_BodySlotSubcategoryState
 		Int StartIndex = 0
 		String[] Texts = New String[5]
 		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
+		Texts[0] = "$NoneText"
+		Texts[1] = "$ChestArea"
+		Texts[2] = "$PelvisArea"
+		Texts[3] = "$AssArea"
+		Texts[4] = "$BackArea"
 		
 		SetMenuDialogOptions(Texts)
 		SetMenuDialogStartIndex(StartIndex)
@@ -1328,11 +1783,11 @@ State SLSF_Reloaded_BodySlotSubcategoryState
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		String[] Texts = New String[5]
 		
-		Texts[0] = "(None)"
-		Texts[1] = "Chest"
-		Texts[2] = "Pelvis"
-		Texts[3] = "Ass"
-		Texts[4] = "Back"
+		Texts[0] = "$NoneText"
+		Texts[1] = "$ChestArea"
+		Texts[2] = "$PelvisArea"
+		Texts[3] = "$AssArea"
+		Texts[4] = "$BackArea"
 		
 		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_BodySlotSubcategoryState")
 		VisibilityManager.BodyTattooSubcategory[BodyTattooIndex] = Texts[AcceptedIndex]
@@ -1345,7 +1800,7 @@ State SLSF_Reloaded_FaceTattooSlotState
 		
 		Int ArrayIndex = 0
 		While ArrayIndex < FaceTattooSlots
-			FaceSlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
+			FaceSlotIndex[ArrayIndex] = (ArrayIndex + 1)
 			ArrayIndex += 1
 		EndWhile
 		
@@ -1394,7 +1849,7 @@ State SLSF_Reloaded_HandTattooSlotState
 		
 		Int ArrayIndex = 0
 		While ArrayIndex < HandTattooSlots
-			HandSlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
+			HandSlotIndex[ArrayIndex] = (ArrayIndex + 1)
 			ArrayIndex += 1
 		EndWhile
 		
@@ -1443,7 +1898,7 @@ State SLSF_Reloaded_FootTattooSlotState
 		
 		Int ArrayIndex = 0
 		While ArrayIndex < FootTattooSlots
-			FootSlotIndex[ArrayIndex] = "Slot " + (ArrayIndex + 1)
+			FootSlotIndex[ArrayIndex] = (ArrayIndex + 1)
 			ArrayIndex += 1
 		EndWhile
 		
@@ -1493,8 +1948,10 @@ State SLSF_Reloaded_LocationDetailsState
 		
 		Int FillIndex = 0
 		While FillIndex < TotalLocations
-			If FillIndex < LocationManager.DefaultLocation.Length
-				Texts[FillIndex] = LocationManager.DefaultLocation[FillIndex]
+			If FillIndex < LocationManager.MajorLocations.Length
+				Texts[FillIndex] = LocationManager.MajorLocations[FillIndex].GetName()
+			ElseIf (FillIndex - 10) < LocationManager.MinorLocations.Length
+				Texts[FillIndex] = LocationManager.MinorLocations[(FillIndex - 10)].GetName()
 			Else
 				Texts[FillIndex] = LocationManager.CustomLocation[(FillIndex - LocationManager.DefaultLocation.Length)]
 			EndIf
@@ -1515,8 +1972,10 @@ State SLSF_Reloaded_LocationDetailsState
 		Int FillIndex = 0
 		
 		While FillIndex < TotalLocations
-			If FillIndex < LocationManager.DefaultLocation.Length
-				Texts[FillIndex] = LocationManager.DefaultLocation[FillIndex]
+			If FillIndex < LocationManager.MajorLocations.Length
+				Texts[FillIndex] = LocationManager.MajorLocations[FillIndex].GetName()
+			ElseIf (FillIndex - 10) < LocationManager.MinorLocations.Length
+				Texts[FillIndex] = LocationManager.MinorLocations[(FillIndex - 10)].GetName()
 			Else
 				Texts[FillIndex] = LocationManager.CustomLocation[(FillIndex - LocationManager.DefaultLocation.Length)]
 			EndIf
@@ -1642,6 +2101,10 @@ State SLSF_Reloaded_ReduceFameAtNightState
 		SetToggleOptionValueST(ReduceFameAtNight, False, "SLSF_Reloaded_ReduceFameAtNightState")
 		ForcePageReset()
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$ReduceAtNightTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_NightStartState
@@ -1699,6 +2162,10 @@ State SLSF_Reloaded_FailedSpreadIncreaseState
 		FailedSpreadIncrease = 10
 		SetSliderOptionValueST(10, "{0}", False, "SLSF_Reloaded_FailedSpreadIncreaseState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$SpreadFailedIncreaseTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_SuccessfulSpreadDecreaseState
@@ -1717,6 +2184,10 @@ State SLSF_Reloaded_SuccessfulSpreadDecreaseState
 	Event OnDefaultST()
 		SuccessfulSpreadReduction = 10
 		SetSliderOptionValueST(10, "{0}", False, "SLSF_Reloaded_SuccessfulSpreadDecreaseState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$SpreadSuccessDecreaseTooltip")
 	EndEvent
 EndState
 
@@ -1737,6 +2208,10 @@ State SLSF_Reloaded_MinimumFameToSpreadState
 		MinimumFameToSpread = 30
 		SetSliderOptionValueST(30, "{0}%", False, "SLSF_Reloaded_MinimumFameToSpreadState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$MinimumFameToSpreadTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_MaximumSpreadCategoriesState
@@ -1756,6 +2231,10 @@ State SLSF_Reloaded_MaximumSpreadCategoriesState
 		MaximumSpreadCategories = 5
 		SetSliderOptionValueST(5, "{0}", False, "SLSF_Reloaded_MaximumSpreadCategoriesState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$MaximumSpreadCategoriesTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_MaximumSpreadPercentageState
@@ -1774,6 +2253,10 @@ State SLSF_Reloaded_MaximumSpreadPercentageState
 	Event OnDefaultST()
 		MaximumSpreadPercentage = 30
 		SetSliderOptionValueST(30, "{0}", False, "SLSF_Reloaded_MaximumSpreadPercentageState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$MaximumSpreadPercentageTooltip")
 	EndEvent
 EndState
 
@@ -1843,6 +2326,10 @@ State SLSF_Reloaded_ForeplayFameState
 		EndIf
 		SetToggleOptionValueST(AllowForeplayFame, False, "SLSF_Reloaded_ForeplayFameState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$ForeplayFameTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_FameChanceByEnemyState
@@ -1861,6 +2348,10 @@ State SLSF_Reloaded_FameChanceByEnemyState
 	Event OnDefaultST()
 		FameChanceByEnemy = 100
 		SetSliderOptionValueST(100, "{0}%", False, "SLSF_Reloaded_FameChanceByEnemyState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$EnemyFameTooltip")
 	EndEvent
 EndState
 
@@ -1881,6 +2372,10 @@ State SLSF_Reloaded_FameChanceByNeutralState
 		FameChanceByNeutral = 75
 		SetSliderOptionValueST(75, "{0}%", False, "SLSF_Reloaded_FameChanceByNeutralState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$NeutralFameTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_FameChanceByFriendState
@@ -1900,6 +2395,10 @@ State SLSF_Reloaded_FameChanceByFriendState
 		FameChanceByFriend = 50
 		SetSliderOptionValueST(50, "{0}%", False, "SLSF_Reloaded_FameChanceByFriendState")
 	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$FriendFameTooltip")
+	EndEvent
 EndState
 
 State SLSF_Reloaded_FameChanceByLoverState
@@ -1918,6 +2417,10 @@ State SLSF_Reloaded_FameChanceByLoverState
 	Event OnDefaultST()
 		FameChanceByLover = 25
 		SetSliderOptionValueST(25, "{0}%", False, "SLSF_Reloaded_FameChanceByLoverState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$LoverFameTooltip")
 	EndEvent
 EndState
 

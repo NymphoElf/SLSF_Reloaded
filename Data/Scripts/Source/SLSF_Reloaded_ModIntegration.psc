@@ -129,7 +129,7 @@ Function CheckInstalledMods()
 	If DD_ModuleCount == 3
 		IsDDInstalled = True
 	ElseIf DD_ModuleCount > 0 && DD_ModuleCount < 3
-		Debug.MessageBox("You are missing one or more Devious Devices plugins! (Assets, Integration, and Expansion) Devious Devices will not be considered installed by SLSF Reloaded unless you have all of these!")
+		Debug.MessageBox("$DDModulesMissingMSG")
 		IsDDInstalled = False
 	Else
 		IsDDInstalled = False

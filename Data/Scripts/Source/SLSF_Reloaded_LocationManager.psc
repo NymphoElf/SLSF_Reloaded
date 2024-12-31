@@ -7,14 +7,14 @@ Location[] Property MajorLocations Auto
 Location[] Property MinorLocations Auto
 Location[] Property CustomLocationRef Auto
 String[] Property DefaultLocation Auto ;Size 21
-String[] Property CustomLocation Auto ;Size 21 | "-EMPTY-" by Default
+String[] Property CustomLocation Auto ;Size 21 | "---" by Default
 
 Bool Property CustomLocationsFull Auto Hidden
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 
 Bool Function IsLocationValid(String CheckedLocation)
-	If CheckedLocation == "-NONE-"
+	If CheckedLocation == "$NoneText"
 		return False
 	EndIf
 	
@@ -58,7 +58,7 @@ EndFunction
 Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRegister = False)
 	If ExternalRegister == False
 		If CustomLocationsFull == True
-			Debug.MessageBox("SLSF Reloaded - Cannot Register Custom Location: " + LocationToRegister + ". Custom Location List is Full.")
+			Debug.MessageBox("$CustomLocationListFullMSG")
 			return False
 		EndIf
 		
@@ -66,16 +66,16 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 			If IsLocationValid(LocationToRegister) == False
 				return True
 			Else
-				Debug.MessageBox("SLSF Reloaded - Location is already registered.")
+				Debug.MessageBox("$CustomLocationRepeatMSG")
 				return False
 			EndIf
 		Else
-			Debug.MessageBox("SLSF Reloaded - Cannot register Custom Location. Location is invalid.")
+			Debug.MessageBox("$CustomLocationInvalidMSG")
 			return False
 		EndIf
 	Else
 		If CustomLocationsFull == True
-			Debug.MessageBox("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location: " + LocationToRegister + ". Custom Location List is Full.")
+			Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location: " + LocationToRegister + ". Custom Location List is Full.")
 			return False
 		EndIf
 		
@@ -83,11 +83,11 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 			If IsLocationValid(LocationToRegister) == False
 				return True
 			Else
-				Debug.MessageBox("SLSF Reloaded (External Mod Event) - Location is already registered.")
+				Debug.Trace("SLSF Reloaded (External Mod Event) - Location is already registered.")
 				return False
 			EndIf
 		Else
-			Debug.MessageBox("SLSF Reloaded (External Mod Event) - Cannot register Custom Location. Location is invalid.")
+			Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot register Custom Location. Location is invalid.")
 			return False
 		EndIf
 	EndIf
@@ -98,7 +98,7 @@ Function UpdateCustomLocationCount()
 	Int LocationCount = 0
 	
 	While LocationIndex < CustomLocation.Length
-		If CustomLocation[LocationIndex] != "-EMPTY-"
+		If CustomLocation[LocationIndex] != "---" && CustomLocation[LocationIndex] != "-EMPTY-"
 			LocationCount += 1
 		EndIf
 		LocationIndex += 1
@@ -115,14 +115,14 @@ EndFunction
 
 String Function FetchLocationName(Location LocationRef)
 	If LocationRef == None
-		return "-NONE-"
+		return "$NoneText"
 	EndIf
 	return LocationRef.GetName()
 EndFunction
 
 String Function CurrentLocationName()
 	If CurrentLocation == None
-		return "-NONE-"
+		return "$NoneText"
 	EndIf
 	
 	String LocationParent = CurrentLocationParent(CurrentLocation)
@@ -134,7 +134,7 @@ String Function CurrentLocationName()
 	return CurrentLocation.GetName()
 EndFunction
 
-String Function CurrentLocationParent(Location LocationRef)
+String Function GetLocalizedName(Location LocationRef)
 	Int CustomLocationCount = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	Int LocationIndex = 0
 	
@@ -164,16 +164,49 @@ String Function CurrentLocationParent(Location LocationRef)
 		EndIf
 		LocationIndex += 1
 	EndWhile
+	return "$NoneText"
+EndFunction
+
+String Function CurrentLocationParent(Location LocationRef)
+	Int CustomLocationCount = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
+	Int LocationIndex = 0
+	
+	;Check Custom Locations First. Minor and Major locations may have a Custom Location as a Child Location as well.
+	While LocationIndex < CustomLocationCount
+		If CustomLocationRef[LocationIndex].IsChild(LocationRef)
+			return CustomLocation[LocationIndex]
+		EndIf
+		LocationIndex += 1
+	EndWhile
+	
+	LocationIndex = 0
+	
+	;Check Minor Locations next, because Major Locations have some Minor Locations as a Child Location as well.
+	While LocationIndex < MinorLocations.Length
+		If MinorLocations[LocationIndex].IsChild(LocationRef)
+			return DefaultLocation[LocationIndex + 10]
+		EndIf
+		LocationIndex += 1
+	EndWhile
+	
+	LocationIndex = 0
+	
+	While LocationIndex < MajorLocations.Length
+		If MajorLocations[LocationIndex].IsChild(LocationRef)
+			return DefaultLocation[LocationIndex]
+		EndIf
+		LocationIndex += 1
+	EndWhile
 	return "Null"
 EndFunction
 
 Function RegisterCustomLocation()
 	String LocationToRegister = FetchLocationName(CurrentLocation)
 	
-	Debug.Notification("Attempting to register " + LocationToRegister + ". Please wait...")
+	Debug.Notification("$CustomLocationRegisterStartMSG")
 	
-	If LocationToRegister == "-NONE-"
-		Debug.MessageBox("SLSF Reloaded - Cannot Register Custom Location. Location invalid.")
+	If LocationToRegister == "$NoneText"
+		Debug.MessageBox("$CustomLocationInvalidMSG")
 		return
 	EndIf
 	
@@ -181,17 +214,23 @@ Function RegisterCustomLocation()
 		return
 	EndIf
 	
-	Int EmptyIndex = CustomLocation.Find("-EMPTY-")
+	Int EmptyIndex = CustomLocation.Find("---")
 	
 	If EmptyIndex >= 0 && EmptyIndex < CustomLocation.Length
 		CustomLocation[EmptyIndex] = LocationToRegister
 		CustomLocationRef[EmptyIndex] = CurrentLocation
 	Else
-		Debug.MessageBox("SLSF Reloaded ERROR: Empty Location Index not found despite other checks allowing registration. Location Registration Failed.")
-		return
+		EmptyIndex = CustomLocation.Find("-EMPTY-")
+		If EmptyIndex >= 0 && EmptyIndex < CustomLocation.Length
+			CustomLocation[EmptyIndex] = LocationToRegister
+			CustomLocationRef[EmptyIndex] = CurrentLocation
+		Else
+			Debug.MessageBox("$CustomLocationNoEmptyIndexERROR")
+			return
+		EndIf
 	EndIf
 	
-	Debug.Notification("Location " + LocationToRegister + " registered!")
+	Debug.Notification("$CustomLocationRegisterCompleteMSG")
 	
 	UpdateCustomLocationCount()
 EndFunction
@@ -199,11 +238,16 @@ EndFunction
 Function UnregisterCustomLocation(Int LocationIndexToUnregister)
 	String UnregisteredLocation = CustomLocation[LocationIndexToUnregister]
 	
-	Debug.Notification("Unregistering " + UnregisteredLocation + ". Please wait...")
+	Debug.Notification("$CustomLocationUnregisterStartMSG")
+	
+	If UnregisteredLocation == "---" || UnregisteredLocation == "-EMPTY-"
+		Debug.Notification("$CustomLocationUnregisterInvalidMSG")
+		return
+	EndIf
 	
 	FameManager.ClearFame(CustomLocation[LocationIndexToUnregister])
 	
-	CustomLocation[LocationIndexToUnregister] = "-EMPTY-"
+	CustomLocation[LocationIndexToUnregister] = "---"
 	CustomLocationRef[LocationIndexToUnregister] = None
 	
 	;Compact Custom Location Indexes - Required to keep other functions functional
@@ -211,11 +255,11 @@ Function UnregisterCustomLocation(Int LocationIndexToUnregister)
 	Int IndexLimit = (CustomLocation.Length) - 1 ;Stop 1 index below length because we'd check beyond the Array length otherwise
 	
 	While LocationIndex < IndexLimit 
-		If CustomLocation[LocationIndex] == "-EMPTY-" && CustomLocation[LocationIndex + 1] != "-EMPTY-"
+		If CustomLocation[LocationIndex] == "---" && CustomLocation[LocationIndex + 1] != "---"
 			CustomLocation[LocationIndex] = CustomLocation[LocationIndex + 1]
 			CustomLocationRef[LocationIndex] = CustomLocationRef[LocationIndex + 1]
 			
-			CustomLocation[LocationIndex + 1] = "-EMPTY-"
+			CustomLocation[LocationIndex + 1] = "---"
 			CustomLocationRef[LocationIndex + 1] = None
 		EndIf
 		LocationIndex += 1
@@ -223,35 +267,36 @@ Function UnregisterCustomLocation(Int LocationIndexToUnregister)
 	
 	UpdateCustomLocationCount()
 	
-	Debug.Notification("Location " + UnregisteredLocation + " Unregistered.")
+	Debug.Notification("$CustomLocationUnregisterCompleteMSG")
 EndFunction
 
 Function RegisterCustomLocationExternal(String LocationToRegister, Location LocationRefToRegister)
-	Debug.Notification("Attempting to register " + LocationToRegister + ". Please wait...")
+	Debug.Notification("$CustomLocationRegisterStartMSG")
 	Int LocationIndex = 0
 	Bool EmptyIndexFound = False
 	
 	If CustomLocationsFull == True
-		Debug.MessageBox("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location List is Full.")
+		Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location List is Full.")
 		return
 	EndIf
 	
-	Int EmptyIndex = CustomLocation.Find("-EMPTY-")
+	Int EmptyIndex = CustomLocation.Find("---")
 	
 	If EmptyIndex >= 0 && EmptyIndex < CustomLocation.Length
 		CustomLocation[EmptyIndex] = LocationToRegister
 		CustomLocationRef[EmptyIndex] = LocationRefToRegister
 	Else
-		Debug.MessageBox("SLSF Reloaded (External Mod Event) ERROR: Empty Location Index not found despite other checks allowing registration. Location Registration Failed.")
+		Debug.Trace("SLSF Reloaded (External Mod Event) ERROR - Empty Location Index not found despite other checks allowing registration. Location Registration Failed.")
 		return
 	EndIf
 	
-	Debug.Notification("Location " + LocationToRegister + " registered!")
+	Debug.Notification("$CustomLocationRegisterCompleteMSG")
 	
 	UpdateCustomLocationCount()
 EndFunction
 
 Function UnregisterCustomLocationExternal(String LocationToUnregister)
+	Debug.Notification("$CustomLocationUnregisterStartMSG")
 	Bool LocationFound = False
 	Int LocationIndex = 0
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
@@ -264,10 +309,28 @@ Function UnregisterCustomLocationExternal(String LocationToUnregister)
 	EndWhile
 	
 	If LocationFound == False
-		Debug.MessageBox("SLSF Reloaded - UnregisterCustomLocationExternal - Could not find " + LocationToUnregister + " to Unregister.")
+		Debug.Trace("SLSF Reloaded - UnregisterCustomLocationExternal - Could not find " + LocationToUnregister + " to Unregister.")
 	Else
-		Debug.Notification("Location " + LocationToUnregister + " Unregistered.")
+		Debug.Notification("$CustomLocationUnregisterCompleteMSG")
 	EndIf
 	
 	UpdateCustomLocationCount()
+EndFunction
+
+Function CustomLocationCleanup()
+	Int LocationIndex = 0
+	
+	While LocationIndex < (SLSF_Reloaded_CustomLocationCount.GetValue() as Int)
+		If CustomLocation[LocationIndex] == "-EMPTY-"
+			CustomLocation[LocationIndex] = "---"
+		EndIf
+		
+		If CustomLocation[LocationIndex] == "---"
+			If CustomLocationRef[LocationIndex] != None
+				CustomLocationRef[LocationIndex] = None
+			EndIf
+		EndIf
+		
+		LocationIndex += 1
+	EndWhile
 EndFunction

@@ -983,7 +983,8 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 		
 		If LocationIndex < 0
 			;Still could not find Location Index. Location must not exist.
-			Debug.MessageBox("SLSF Reloaded - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!")
+			Debug.MessageBox("$FameLocationNotFoundERROR")
+			Debug.Trace("SLSF Reloaded - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!")
 			return
 		Else
 			CustomLocationCanDecay[LocationIndex] = False
@@ -1209,7 +1210,7 @@ Function SpreadFameRoll()
 				SpreadFame(LocationManager.CustomLocation[LocationIndex])
 				Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 			ElseIf SpreadChance > 100 || SpreadChance < 0
-				Debug.MessageBox("SLSF Reloaded: ERROR - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+				Debug.Trace("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
 				Config.CustomLocationSpreadChance[LocationIndex] = 30
 			Else
 				FameSpreadRoll = Utility.RandomInt(1, 100)
@@ -1470,11 +1471,11 @@ Function SpreadFame(String SpreadFromLocation)
 EndFunction
 
 Function FameGainNotification(String Category)
-	Debug.Notification("SLSF Reloaded - Your " + Category + " fame has increased")
+	Debug.Notification("$FameIncreaseMSG")
 EndFunction
 
 Function FameDecayNotification()
-	Debug.Notification("SLSF Reloaded - Your fame has decayed")
+	Debug.Notification("$FameDecayMSG")
 EndFunction
 
 Int Function CalculateFameSpread(Float FromFame, Float TargetFame) ;These must be floats for calculation purposes
@@ -1499,7 +1500,7 @@ Int Function CalculateFameSpread(Float FromFame, Float TargetFame) ;These must b
 EndFunction
 
 Function FameSpreadNotification()
-	Debug.Notification("SLSF Reloaded - Your fame has spread")
+	Debug.Notification("$FameSpreadMSG")
 EndFunction
 
 Function ClearFame(String LocationToClear)
@@ -1508,7 +1509,7 @@ Function ClearFame(String LocationToClear)
 		Data.SetFameValue(LocationToClear, FameType[TypeIndex], 0)
 		TypeIndex += 1
 	EndWhile
-	Debug.MessageBox(LocationToClear + " fame has been cleared.")
+	Debug.Trace(LocationToClear + " fame has been cleared.")
 EndFunction
 
 Function ClearAllFame()
@@ -1565,7 +1566,7 @@ Function ClearAllFame()
 		LegacyOverwrite.OverwriteLegacyFame()
 	EndIf
 	
-	Debug.MessageBox("All fame has been cleared.")
+	Debug.MessageBox("$AllFameClearCompleteMSG")
 EndFunction
 
 Function UpdateGlobals()

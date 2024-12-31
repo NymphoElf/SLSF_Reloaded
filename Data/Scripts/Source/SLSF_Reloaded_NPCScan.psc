@@ -59,22 +59,22 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 	If Relationship < 0	;Enemy
 		FameChance = Config.FameChanceByEnemy as Int
 		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is ENEMY.")
+			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is ENEMY. Value: " + Relationship)
 		EndIf
 	ElseIf Relationship == 0 ;Neutral
 		FameChance = Config.FameChanceByNeutral as Int
 		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is NEUTRAL.")
+			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is NEUTRAL. Value: " + Relationship)
 		EndIf
 	ElseIf Relationship >= 1 && Relationship < 4 ;Friend
 		FameChance = Config.FameChanceByFriend as Int
 		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is FRIEND.")
+			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is FRIEND. Value: " + Relationship)
 		EndIf
 	Else ;Relationship == 4 ;Lover
 		FameChance = Config.FameChanceByLover as Int
 		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is LOVER.")
+			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is LOVER. Value: " + Relationship)
 		EndIf
 	EndIf
 	

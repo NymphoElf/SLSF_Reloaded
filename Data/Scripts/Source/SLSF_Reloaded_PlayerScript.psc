@@ -14,6 +14,7 @@ SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
 Actor Property PlayerRef Auto
 
 Bool Property SexSceneEnded Auto Hidden
+Bool Property CustomLocationsCleaned Auto Hidden
 
 Spell Property NPCScanSpell Auto
 
@@ -43,6 +44,10 @@ Event OnPlayerLoadGame()
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
 	RegisterForMenu("Sleep/Wait Menu")
+	If CustomLocationsCleaned == False
+		LocationManager.CustomLocationCleanup()
+		CustomLocationsCleaned = True
+	EndIf
 EndEvent
 
 Event OnMenuClose(String MenuName) ;We only registered the Sleep/Wait Menu, so that's the only one we'll capture with this event
