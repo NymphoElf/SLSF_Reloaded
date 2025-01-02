@@ -58,7 +58,7 @@ EndFunction
 Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRegister = False)
 	If ExternalRegister == False
 		If CustomLocationsFull == True
-			Debug.MessageBox("$CustomLocationListFullMSG")
+			Debug.MessageBox("SLSF Reloaded - Cannot Register Custom Location. Custom Location List is Full.")
 			return False
 		EndIf
 		
@@ -66,16 +66,16 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 			If IsLocationValid(LocationToRegister) == False
 				return True
 			Else
-				Debug.MessageBox("$CustomLocationRepeatMSG")
+				Debug.MessageBox("SLSF Reloaded - Location is already registered.")
 				return False
 			EndIf
 		Else
-			Debug.MessageBox("$CustomLocationInvalidMSG")
+			Debug.MessageBox("SLSF Reloaded - Cannot register " + LocationToRegister + ". Location is invalid.")
 			return False
 		EndIf
 	Else
 		If CustomLocationsFull == True
-			Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location: " + LocationToRegister + ". Custom Location List is Full.")
+			Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot Register " + LocationToRegister + ". Custom Location List is Full.")
 			return False
 		EndIf
 		
@@ -87,7 +87,7 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 				return False
 			EndIf
 		Else
-			Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot register Custom Location. Location is invalid.")
+			Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot register " + LocationToRegister + ". Location is invalid.")
 			return False
 		EndIf
 	EndIf
@@ -206,7 +206,7 @@ Function RegisterCustomLocation()
 	Debug.Notification("$CustomLocationRegisterStartMSG")
 	
 	If LocationToRegister == "$NoneText"
-		Debug.MessageBox("$CustomLocationInvalidMSG")
+		Debug.MessageBox("SLSF Reloaded - Cannot register " + LocationToRegister + ". Location is invalid.")
 		return
 	EndIf
 	
@@ -225,7 +225,7 @@ Function RegisterCustomLocation()
 			CustomLocation[EmptyIndex] = LocationToRegister
 			CustomLocationRef[EmptyIndex] = CurrentLocation
 		Else
-			Debug.MessageBox("$CustomLocationNoEmptyIndexERROR")
+			Debug.MessageBox("SLSF Reloaded ERROR - Empty Location Index not found despite other checks allowing registration. Location Registration Failed.")
 			return
 		EndIf
 	EndIf

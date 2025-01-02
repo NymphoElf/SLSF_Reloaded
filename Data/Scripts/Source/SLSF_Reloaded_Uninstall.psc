@@ -26,5 +26,5 @@ Function RunUninstall()
 	
 	Utility.Wait(15.0)
 	
-	Debug.Messagebox("$UninstallCompleteMSG")
+	Debug.Messagebox("SLSF Reloaded Uninstall Finished. Save and Quit to Desktop.")
 EndFunction

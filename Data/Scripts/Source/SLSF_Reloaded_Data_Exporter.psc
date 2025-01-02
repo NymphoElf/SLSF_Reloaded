@@ -5,6 +5,7 @@ Import JsonUtil
 SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_DataManager Property DataManager Auto
 SLSF_Reloaded_FameManager Property FameManager Auto
+SLSF_Reloaded_MCM Property Config Auto
 
 GlobalVariable Property CustomLocations Auto
 
@@ -63,6 +64,17 @@ Function ExportData(String FileName)
 		DefaultLocationIndex = 0
 		CustomLocationIndex = 0
 		FameIndex += 1
+	EndWhile
+	
+	;EXPORT FAME SPREAD CHANCES
+	While DefaultLocationIndex < LocationManager.DefaultLocation.Length
+		SetIntValue("SLSF_Reloaded/" + FileName + " SLSF Reloaded Data", LocationManager.DefaultLocation[DefaultLocationIndex] + ".famespreadchance", Config.DefaultLocationSpreadChance[DefaultLocationIndex])
+		DefaultLocationIndex += 1
+	EndWhile
+	
+	While CustomLocationIndex < (CustomLocations.GetValue() as Int)
+		SetIntValue("SLSF_Reloaded/" + FileName + " SLSF Reloaded Data", LocationManager.CustomLocation[CustomLocationIndex] + ".famespreadchance", Config.CustomLocationSpreadChance[CustomLocationIndex])
+		CustomLocationIndex += 1
 	EndWhile
 	
 	;EXPORT MOD DATA

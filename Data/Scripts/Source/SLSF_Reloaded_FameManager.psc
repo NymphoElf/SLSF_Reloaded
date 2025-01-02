@@ -983,7 +983,7 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 		
 		If LocationIndex < 0
 			;Still could not find Location Index. Location must not exist.
-			Debug.MessageBox("$FameLocationNotFoundERROR")
+			Debug.MessageBox("SLSF Reloaded - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!")
 			Debug.Trace("SLSF Reloaded - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!")
 			return
 		Else
@@ -1566,7 +1566,7 @@ Function ClearAllFame()
 		LegacyOverwrite.OverwriteLegacyFame()
 	EndIf
 	
-	Debug.MessageBox("$AllFameClearCompleteMSG")
+	Debug.MessageBox("All fame has been cleared.")
 EndFunction
 
 Function UpdateGlobals()

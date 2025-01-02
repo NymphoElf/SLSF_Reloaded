@@ -19,7 +19,7 @@ Function RunImport(String FileName)
 		ImportData(FileName)
 		ImportSucceeded = True
 	Else
-		Debug.MessageBox("$DataImportFileMissingERRORMSG")
+		Debug.MessageBox(FileName + ".json does not exist! Import failed!")
 		return
 	EndIf
 	
@@ -45,6 +45,8 @@ Function ImportData(String FileName)
 	Int DefaultLocationIndex = 0
 	Int CustomLocationIndex = 0
 	Int ImportedFameValue = 0
+	
+	Int ImportedFameSpreadValue = 0
 	
 	;IMPORT LOCATION DATA
 	While LocationIndex < LocationsToImport
@@ -119,5 +121,18 @@ Function ImportData(String FileName)
 		DefaultLocationIndex = 0
 		CustomLocationIndex = 0
 		FameIndex += 1
+	EndWhile
+	
+	;IMPORT FAME SPREAD CHANCES
+	While DefaultLocationIndex < LocationManager.DefaultLocation.Length
+		ImportedFameSpreadValue = GetIntValue("SLSF_Reloaded/" + FileName + " SLSF Reloaded Data", LocationManager.DefaultLocation[DefaultLocationIndex] + ".famespreadchance")
+		Config.DefaultLocationSpreadChance[DefaultLocationIndex] = ImportedFameSpreadValue
+		DefaultLocationIndex += 1
+	EndWhile
+	
+	While CustomLocationIndex < (CustomLocations.GetValue() as Int)
+		ImportedFameSpreadValue = GetIntValue("SLSF_Reloaded/" + FileName + " SLSF Reloaded Data", LocationManager.CustomLocation[CustomLocationIndex] + ".famespreadchance")
+		Config.CustomLocationSpreadChance[CustomLocationIndex] = ImportedFameSpreadValue
+		CustomLocationIndex += 1
 	EndWhile
 EndFunction

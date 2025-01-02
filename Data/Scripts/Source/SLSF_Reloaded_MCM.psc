@@ -82,6 +82,7 @@ Int Property MaxLowFameDecay Auto Hidden
 Int Property MaxMedFameDecay Auto Hidden
 Int Property MaxHighFameDecay Auto Hidden
 Int Property MaxVHighFameDecay Auto Hidden
+Int Property LocationDetailsIndex Auto Hidden
 
 String Property TattooStatusSelect Auto Hidden
 
@@ -235,6 +236,14 @@ Int Function PullFameSpreadChance(String LocationName)
 		LocationIndex += 1
 	EndWhile
 	return -1
+EndFunction
+
+String Function LocationDetailsLookup()
+	If LocationDetailsIndex < LocationManager.DefaultLocation.Length
+		return LocationManager.DefaultLocation[LocationDetailsIndex]
+	Else
+		return LocationManager.CustomLocation[(LocationDetailsIndex - LocationManager.DefaultLocation.Length)]
+	EndIf
 EndFunction
 
 Function CheckClearAllFame()
@@ -617,47 +626,49 @@ Event OnPageReset(String page)
 		AddMenuOptionST("SLSF_Reloaded_LocationDetailsState", "$Showing", LocationDetailsSelected, 0)
 		AddTextOption("$ChanceToSpread", PullFameSpreadChance(LocationDetailsSelected) + "%")
 		
+		String DataLocation = LocationDetailsLookup()
+		
 		SetCursorPosition(6)
 		AddHeaderOption("")
 		SetCursorPosition(7)
 		AddHeaderOption("")
 		
 		SetCursorPosition(8)
-		AddTextOption("$SlutFame", Data.GetFameValue(LocationDetailsSelected, "Slut") as String)
-		AddTextOption("$WhoreFame", Data.GetFameValue(LocationDetailsSelected, "Whore") as String)
-		AddTextOption("$ExhibitionistFame", Data.GetFameValue(LocationDetailsSelected, "Exhibitionist") as String)
-		AddTextOption("$OralFame", Data.GetFameValue(LocationDetailsSelected, "Oral") as String)
-		AddTextOption("$AnalFame", Data.GetFameValue(LocationDetailsSelected, "Anal") as String)
-		AddTextOption("$NastyFame", Data.GetFameValue(LocationDetailsSelected, "Nasty") as String)
-		AddTextOption("$PregnantFame", Data.GetFameValue(LocationDetailsSelected, "Pregnant") as String)
-		AddTextOption("$DominantFame", Data.GetFameValue(LocationDetailsSelected, "Dominant") as String)
-		AddTextOption("$SubmissiveFame", Data.GetFameValue(LocationDetailsSelected, "Submissive") as String)
-		AddTextOption("$SadistFame", Data.GetFameValue(LocationDetailsSelected, "Sadist") as String)
-		AddTextOption("$MasochistFame", Data.GetFameValue(LocationDetailsSelected, "Masochist") as String)
+		AddTextOption("$SlutFame", Data.GetFameValue(DataLocation, "Slut") as String)
+		AddTextOption("$WhoreFame", Data.GetFameValue(DataLocation, "Whore") as String)
+		AddTextOption("$ExhibitionistFame", Data.GetFameValue(DataLocation, "Exhibitionist") as String)
+		AddTextOption("$OralFame", Data.GetFameValue(DataLocation, "Oral") as String)
+		AddTextOption("$AnalFame", Data.GetFameValue(DataLocation, "Anal") as String)
+		AddTextOption("$NastyFame", Data.GetFameValue(DataLocation, "Nasty") as String)
+		AddTextOption("$PregnantFame", Data.GetFameValue(DataLocation, "Pregnant") as String)
+		AddTextOption("$DominantFame", Data.GetFameValue(DataLocation, "Dominant") as String)
+		AddTextOption("$SubmissiveFame", Data.GetFameValue(DataLocation, "Submissive") as String)
+		AddTextOption("$SadistFame", Data.GetFameValue(DataLocation, "Sadist") as String)
+		AddTextOption("$MasochistFame", Data.GetFameValue(DataLocation, "Masochist") as String)
 		
 		If Mods.IsFameCommentsInstalled == True
-			AddTextOption("$UnfaithfulFame", Data.GetFameValue(LocationDetailsSelected, "Unfaithful") as String)
+			AddTextOption("$UnfaithfulFame", Data.GetFameValue(DataLocation, "Unfaithful") as String)
 		EndIf
 		
 		If Mods.IsBimbosInstalled == True
-			AddTextOption("$AirheadFame", Data.GetFameValue(LocationDetailsSelected, "Airhead") as String)
+			AddTextOption("$AirheadFame", Data.GetFameValue(DataLocation, "Airhead") as String)
 		EndIf
 		
 		SetCursorPosition(9)
-		AddTextOption("$GentleFame", Data.GetFameValue(LocationDetailsSelected, "Gentle") as String)
-		AddTextOption("$LikesMenFame", Data.GetFameValue(LocationDetailsSelected, "Likes Men") as String)
-		AddTextOption("$LikesWomenFame", Data.GetFameValue(LocationDetailsSelected, "Likes Women") as String)
-		AddTextOption("$LikesOrcFame", Data.GetFameValue(LocationDetailsSelected, "Likes Orc") as String)
-		AddTextOption("$LikesKhajiitFame", Data.GetFameValue(LocationDetailsSelected, "Likes Khajiit") as String)
-		AddTextOption("$LikesArgonianFame", Data.GetFameValue(LocationDetailsSelected, "Likes Argonian") as String)
-		AddTextOption("$BestialityFame", Data.GetFameValue(LocationDetailsSelected, "Bestiality") as String)
-		AddTextOption("$GroupFame", Data.GetFameValue(LocationDetailsSelected, "Group") as String)
-		AddTextOption("$BoundFame", Data.GetFameValue(LocationDetailsSelected, "Bound") as String)
-		AddTextOption("$TattooFame", Data.GetFameValue(LocationDetailsSelected, "Tattoo") as String)
-		AddTextOption("$CumDumpFame", Data.GetFameValue(LocationDetailsSelected, "Cum Dump") as String)
+		AddTextOption("$GentleFame", Data.GetFameValue(DataLocation, "Gentle") as String)
+		AddTextOption("$LikesMenFame", Data.GetFameValue(DataLocation, "Likes Men") as String)
+		AddTextOption("$LikesWomenFame", Data.GetFameValue(DataLocation, "Likes Women") as String)
+		AddTextOption("$LikesOrcFame", Data.GetFameValue(DataLocation, "Likes Orc") as String)
+		AddTextOption("$LikesKhajiitFame", Data.GetFameValue(DataLocation, "Likes Khajiit") as String)
+		AddTextOption("$LikesArgonianFame", Data.GetFameValue(DataLocation, "Likes Argonian") as String)
+		AddTextOption("$BestialityFame", Data.GetFameValue(DataLocation, "Bestiality") as String)
+		AddTextOption("$GroupFame", Data.GetFameValue(DataLocation, "Group") as String)
+		AddTextOption("$BoundFame", Data.GetFameValue(DataLocation, "Bound") as String)
+		AddTextOption("$TattooFame", Data.GetFameValue(DataLocation, "Tattoo") as String)
+		AddTextOption("$CumDumpFame", Data.GetFameValue(DataLocation, "Cum Dump") as String)
 		
 		If Mods.IsFameCommentsInstalled == True
-			AddTextOption("$CuckFame", Data.GetFameValue(LocationDetailsSelected, "Cuck") as String)
+			AddTextOption("$CuckFame", Data.GetFameValue(DataLocation, "Cuck") as String)
 		EndIf
 	
 	ElseIf (page == "$GeneralSettingsPage")
@@ -1275,7 +1286,7 @@ State SLSF_Reloaded_ConfirmUninstall_State
 		EndIf
 		
 		SetToggleOptionValueST(ConfirmUninstall, False, "SLSF_Reloaded_ConfirmUninstall_State")
-		Debug.MessageBox("$UninstallReadyMSG")
+		Debug.MessageBox("SLSF Reloaded Uninstaller ready! Exit to game to uninstall! If this is a mistake, uncheck Confirm!!!")
 		ForcePageReset()
 	EndEvent
 EndState
@@ -1311,8 +1322,7 @@ State SLSF_Reloaded_DataExportState
 		SetToggleOptionValueST(ExportData, False, "SLSF_Reloaded_DataExportState")
 		
 		If ExportData == True
-			;Debug.MessageBox("If you want to export your custom locations, you MUST check the box next to each location you want to export! If you forgot to do that, you may still do it BEFORE closing the MCM.")
-			Debug.MessageBox("$ExportReadyMSG")
+			Debug.MessageBox("Ready to export your SLSF Reloaded Data! Close the MCM to start the export! If this is a mistake, uncheck Export SLSFR Data NOW!")
 		EndIf
 		
 		ForcePageReset()
@@ -1330,7 +1340,7 @@ State SLSF_Reloaded_DataImportState
 		SetToggleOptionValueST(ImportData, False, "SLSF_Reloaded_DataImportState")
 		
 		If ImportData == True
-			Debug.MessageBox("$ImportReadyMSG")
+			Debug.MessageBox("Ready to import your SLSF Reloaded Data! Close the MCM to start the import! WARNING: THIS WILL OVERWRITE ALL OF YOUR CURRENT DATA!!! If this is a mistake, uncheck Import SLSFR Data NOW!!!")
 		EndIf
 		
 		ForcePageReset()
@@ -1984,6 +1994,7 @@ State SLSF_Reloaded_LocationDetailsState
 		
 		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_LocationDetailsState")
 		LocationDetailsSelected = Texts[AcceptedIndex]
+		LocationDetailsIndex = AcceptedIndex
 		ForcePageReset()
 	EndEvent
 EndState
