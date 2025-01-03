@@ -1871,6 +1871,7 @@ State SLSF_Reloaded_FriendsBetrayFromHighFameState
 		EndIf
 		
 		SetToggleOptionValueST(FriendsBetrayFromHighFame, False, "SLSF_Reloaded_FriendsBetrayFromHighFameState")
+		ForcePageReset()
 	EndEvent
 	
 	Event OnHighlightST()
@@ -1910,6 +1911,7 @@ State SLSF_Reloaded_LoversBetrayFromHighFameState
 		EndIf
 		
 		SetToggleOptionValueST(LoversBetrayFromHighFame, False, "SLSF_Reloaded_LoversBetrayFromHighFameState")
+		ForcePageReset()
 	EndEvent
 	
 	Event OnHighlightST()
