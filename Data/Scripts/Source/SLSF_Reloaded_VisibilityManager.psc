@@ -84,7 +84,7 @@ Function Startup()
 	
 	Int BodySlotIndex = 0
 	While BodySlotIndex < BodyTattooSubcategory.Length
-		BodyTattooSubcategory[BodySlotIndex] = "$NoneText"
+		BodyTattooSubcategory[BodySlotIndex] = "-NONE-"
 		BodySlotIndex += 1
 	EndWhile
 EndFunction
@@ -321,7 +321,7 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 	EndIf
 	
 	If Mods.IsSLSInstalled == True && Mods.IsANDInstalled == True
-		If BodyTattooSubcategory[SlotNumber] == "$NoneText"
+		If BodyTattooSubcategory[SlotNumber] == "-NONE-"
 			If PlayerRef.GetEquippedArmorInSlot(32) != None
 				If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 \
 				|| PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
@@ -332,19 +332,19 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 					return True
 				EndIf
 			EndIf
-		ElseIf BodyTattooSubcategory[SlotNumber] == "$ChestArea"
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Chest"
 			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
 				return True
 			EndIf
-		ElseIf BodyTattooSubcategory[SlotNumber] == "$PelvisArea"
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Pelvis"
 			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
 				return True
 			EndIf
-		ElseIf BodyTattooSubcategory[SlotNumber] == "$AssArea"
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Ass"
 			If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
 				return True
 			EndIf
-		ElseIf BodyTattooSubcategory[SlotNumber] == "$BackArea"
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Back"
 			If !PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversBack)
 				If PlayerRef.GetEquippedArmorInSlot(32) != None 
 					If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
@@ -364,23 +364,23 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 			Debug.MessageBox("SLSF Reloaded - ERROR: Body Tattoo Subcategory is invalid.")
 		EndIf
 	ElseIf Mods.IsSLSInstalled == False && Mods.IsANDInstalled == True
-		If BodyTattooSubcategory[SlotNumber] == "$NoneText"
+		If BodyTattooSubcategory[SlotNumber] == "-NONE-"
 			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
 				return True
 			EndIf
-		ElseIf BodyTattooSubcategory[SlotNumber] == "$ChestArea"
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Chest"
 			If PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1
 				return True
 			EndIf
-		ElseIf BodyTattooSubcategory[SlotNumber] == "$PelvisArea"
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Pelvis"
 			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1 || PlayerRef.GetFactionRank(Mods.AND_Underwear) == 1
 				return True
 			EndIf
-		ElseIf BodyTattooSubcategory[SlotNumber] == "$AssArea"
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Ass"
 			If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
 				return True
 			EndIf
-		ElseIf BodyTattooSubcategory[SlotNumber] == "$BackArea"
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Back"
 			If !PlayerRef.WornHasKeyword(SLSF_Reloaded_CoversBack) && (PlayerRef.GetFactionRank(Mods.AND_Chest) == 1 || PlayerRef.GetFactionRank(Mods.AND_Bra) == 1)
 				If (PlayerRef.GetEquippedArmorInSlot(46) == None || PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(SLSF_Reloaded_DoesNotCoverBack)) && (PlayerRef.GetEquippedArmorInSlot(47) == None || PlayerRef.GetEquippedArmorInSlot(47).HasKeyword(SLSF_Reloaded_DoesNotCoverBack))
 					return True

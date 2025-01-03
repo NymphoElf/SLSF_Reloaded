@@ -59,6 +59,7 @@ Bool Property ExternalCumDumpFlag Auto Hidden
 Bool Property ExternalUnfaithfulFlag Auto Hidden
 Bool Property ExternalCuckFlag Auto Hidden
 Bool Property ExternalAirheadFlag Auto Hidden
+Bool Property FameGainNotifyCooldown Auto Hidden
 
 ;Globals for SLSF Fame Comments
 GlobalVariable Property SlutGlobal Auto
@@ -701,7 +702,7 @@ Bool Function CheckTattooExtraFame(String ExtraFame)
 	return False
 EndFunction
 
-Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
+Function FameGainRoll(String FameLocation, Bool CalledExternally = False, Bool FameFromFriend = False, Bool FameFromLover = False)
 	If LocationManager.IsLocationValid(FameLocation) == False
 		If Config.EnableTracing == True
 			If CalledExternally == True
@@ -720,137 +721,465 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False)
 		return
 	EndIf
 	
+	Int FriendLoverBetrayRoll = Utility.RandomInt(1, 100)
+	Int BetrayRollModifier = 0
+	
 	Int PossibleFameCount = 0
 	String[] PossibleFameGain = New String[25]
 	
 	CheckExternalFlags()
 	
-	If CanGainAnalFame(FameLocation) == True || CheckTattooExtraFame("Anal") == True || ExternalAnalFlag == True
-		PossibleFameGain[PossibleFameCount] = "Anal"
-		PossibleFameCount += 1
-	EndIf
-	
-	If CanGainBoundFame(FameLocation) == True || CheckTattooExtraFame("Bound") == True || ExternalBoundFlag == True
-		PossibleFameGain[PossibleFameCount] = "Bound"
-		PossibleFameCount += 1
-	EndIf
-	
-	If CanGainCumDumpFame() == True || CheckTattooExtraFame("Cum Dump") == True || ExternalCumDumpFlag == True
-		PossibleFameGain[PossibleFameCount] = "Cum Dump"
-		PossibleFameCount += 1
-	EndIf
-	
-	If CanGainExhibitionistFame(FameLocation) == True || CheckTattooExtraFame("Exhibitionist") == True || ExternalExhibitionistFlag == True
-		PossibleFameGain[PossibleFameCount] = "Exhibitionist"
-		PossibleFameCount += 1
-	EndIf
-	
-	If CanGainNastyFame(FameLocation) == True || CheckTattooExtraFame("Nasty") == True || ExternalNastyFlag == True
-		PossibleFameGain[PossibleFameCount] = "Nasty"
-		PossibleFameCount += 1
-	EndIf
-	
-	If CanGainOralFame(FameLocation) == True || CheckTattooExtraFame("Oral") == True || ExternalOralFlag == True
-		PossibleFameGain[PossibleFameCount] = "Oral"
-		PossibleFameCount += 1
-	EndIf
-	
-	If CanGainPregnantFame(FameLocation) == True || CheckTattooExtraFame("Pregnant") == True || ExternalPregnantFlag == True
-		PossibleFameGain[PossibleFameCount] = "Pregnant"
-		PossibleFameCount += 1
+	If CanGainWhoreFame() == True || CheckTattooExtraFame("Whore") == True || ExternalWhoreFlag == True
+		Int WhoreFame = Data.GetFameValue(FameLocation, "Whore")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && WhoreFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = WhoreFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && WhoreFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = WhoreFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[0] == False) || (FameFromLover == True && Config.FameForbiddenByLover[0] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[0] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[0] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+		
+			PossibleFameGain[PossibleFameCount] = "Whore"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CanGainSlutFame(FameLocation) == True || CheckTattooExtraFame("Slut") == True || ExternalSlutFlag == True
-		PossibleFameGain[PossibleFameCount] = "Slut"
-		PossibleFameCount += 1
+		Int SlutFame = Data.GetFameValue(FameLocation, "Slut")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && SlutFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = SlutFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && SlutFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = SlutFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[1] == False) || (FameFromLover == True && Config.FameForbiddenByLover[1] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[1] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[1] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Slut"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
-	If CanGainTattooFame(FameLocation) == True || ExternalTattooFlag == True
-		PossibleFameGain[PossibleFameCount] = "Tattoo"
-		PossibleFameCount += 1
+	If CanGainExhibitionistFame(FameLocation) == True || CheckTattooExtraFame("Exhibitionist") == True || ExternalExhibitionistFlag == True
+		Int ExhibitionistFame = Data.GetFameValue(FameLocation, "Exhibitionist")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && ExhibitionistFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = ExhibitionistFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && ExhibitionistFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = ExhibitionistFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[2] == False) || (FameFromLover == True && Config.FameForbiddenByLover[2] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[2] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[2] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Exhibitionist"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
-	If CanGainWhoreFame() == True || CheckTattooExtraFame("Whore") == True || ExternalWhoreFlag == True
-		PossibleFameGain[PossibleFameCount] = "Whore"
-		PossibleFameCount += 1
+	If CanGainOralFame(FameLocation) == True || CheckTattooExtraFame("Oral") == True || ExternalOralFlag == True
+		Int OralFame = Data.GetFameValue(FameLocation, "Oral")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && OralFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = OralFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && OralFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = OralFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[3] == False) || (FameFromLover == True && Config.FameForbiddenByLover[3] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[3] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[3] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Oral"
+			PossibleFameCount += 1
+		EndIf
+	EndIf
+	
+	If CanGainAnalFame(FameLocation) == True || CheckTattooExtraFame("Anal") == True || ExternalAnalFlag == True
+		Int AnalFame = Data.GetFameValue(FameLocation, "Anal")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && AnalFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = AnalFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && AnalFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = AnalFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[4] == False) || (FameFromLover == True && Config.FameForbiddenByLover[4] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[4] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[4] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Anal"
+			PossibleFameCount += 1
+		EndIf
+	EndIf
+	
+	If CanGainNastyFame(FameLocation) == True || CheckTattooExtraFame("Nasty") == True || ExternalNastyFlag == True
+		Int NastyFame = Data.GetFameValue(FameLocation, "Nasty")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && NastyFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = NastyFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && NastyFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = NastyFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[5] == False) || (FameFromLover == True && Config.FameForbiddenByLover[5] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[5] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[5] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Nasty"
+			PossibleFameCount += 1
+		EndIf
+	EndIf
+	
+	If CanGainPregnantFame(FameLocation) == True || CheckTattooExtraFame("Pregnant") == True || ExternalPregnantFlag == True
+		Int PregnantFame = Data.GetFameValue(FameLocation, "Pregnant")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && PregnantFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = PregnantFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && PregnantFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = PregnantFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[6] == False) || (FameFromLover == True && Config.FameForbiddenByLover[6] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[6] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[6] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Pregnant"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Dominant") == True || ExternalDominantFlag == True
-		PossibleFameGain[PossibleFameCount] = "Dominant"
-		PossibleFameCount += 1
+		Int DominantFame = Data.GetFameValue(FameLocation, "Dominant")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && DominantFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = DominantFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && DominantFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = DominantFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[7] == False) || (FameFromLover == True && Config.FameForbiddenByLover[7] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[7] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[7] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Dominant"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Submissive") == True || ExternalSubmissiveFlag == True
-		PossibleFameGain[PossibleFameCount] = "Submissive"
-		PossibleFameCount += 1
+		Int SubmissiveFame = Data.GetFameValue(FameLocation, "Submissive")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && SubmissiveFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = SubmissiveFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && SubmissiveFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = SubmissiveFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[8] == False) || (FameFromLover == True && Config.FameForbiddenByLover[8] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[8] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[8] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Submissive"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Sadist") == True || ExternalSadistFlag == True
-		PossibleFameGain[PossibleFameCount] = "Sadist"
-		PossibleFameCount += 1
+		Int SadistFame = Data.GetFameValue(FameLocation, "Sadist")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && SadistFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = SadistFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && SadistFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = SadistFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[9] == False) || (FameFromLover == True && Config.FameForbiddenByLover[9] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[9] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[9] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Sadist"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Masochist") == True || ExternalMasochistFlag == True
-		PossibleFameGain[PossibleFameCount] = "Masochist"
-		PossibleFameCount += 1
+		Int MasochistFame = Data.GetFameValue(FameLocation, "Masochist")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && MasochistFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = MasochistFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && MasochistFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = MasochistFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[10] == False) || (FameFromLover == True && Config.FameForbiddenByLover[10] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[10] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[10] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Masochist"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Gentle") == True || ExternalGentleFlag == True
-		PossibleFameGain[PossibleFameCount] = "Gentle"
-		PossibleFameCount += 1
+		Int GentleFame = Data.GetFameValue(FameLocation, "Gentle")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && GentleFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = GentleFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && GentleFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = GentleFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[11] == False) || (FameFromLover == True && Config.FameForbiddenByLover[11] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[11] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[11] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Gentle"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Men") == True || ExternalLikesMenFlag == True
-		PossibleFameGain[PossibleFameCount] = "Likes Men"
-		PossibleFameCount += 1
+		Int LikesMenFame = Data.GetFameValue(FameLocation, "Likes Men")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && LikesMenFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = LikesMenFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && LikesMenFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = LikesMenFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[12] == False) || (FameFromLover == True && Config.FameForbiddenByLover[12] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[12] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[12] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Likes Men"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Women") == True || ExternalLikesWomenFlag == True
-		PossibleFameGain[PossibleFameCount] = "Likes Women"
-		PossibleFameCount += 1
+		Int LikesWomenFame = Data.GetFameValue(FameLocation, "Likes Women")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && LikesWomenFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = LikesWomenFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && LikesWomenFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = LikesWomenFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[13] == False) || (FameFromLover == True && Config.FameForbiddenByLover[13] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[13] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[13] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+		
+			PossibleFameGain[PossibleFameCount] = "Likes Women"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Orc") == True || ExternalLikesOrcFlag == True
-		PossibleFameGain[PossibleFameCount] = "Likes Orc"
-		PossibleFameCount += 1
+		Int LikesOrcFame = Data.GetFameValue(FameLocation, "Likes Orc")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && LikesOrcFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = LikesOrcFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && LikesOrcFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = LikesOrcFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[14] == False) || (FameFromLover == True && Config.FameForbiddenByLover[14] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[14] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[14] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Likes Orc"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Khajiit") == True || ExternalLikesKhajiitFlag == True
-		PossibleFameGain[PossibleFameCount] = "Likes Khajiit"
-		PossibleFameCount += 1
+		Int LikesKhajiitFame = Data.GetFameValue(FameLocation, "Likes Khajiit")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && LikesKhajiitFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = LikesKhajiitFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && LikesKhajiitFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = LikesKhajiitFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[15] == False) || (FameFromLover == True && Config.FameForbiddenByLover[15] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[15] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[15] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Likes Khajiit"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Likes Argonian") == True || ExternalLikesArgonianFlag == True
-		PossibleFameGain[PossibleFameCount] = "Likes Argonian"
-		PossibleFameCount += 1
+		Int LikesArgonianFame = Data.GetFameValue(FameLocation, "Likes Argonian")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && LikesArgonianFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = LikesArgonianFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && LikesArgonianFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = LikesArgonianFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[16] == False) || (FameFromLover == True && Config.FameForbiddenByLover[16] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[16] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[16] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Likes Argonian"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Bestiality") == True || ExternalBestialityFlag == True
-		PossibleFameGain[PossibleFameCount] = "Bestiality"
-		PossibleFameCount += 1
+		Int BestialityFame = Data.GetFameValue(FameLocation, "Bestiality")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && BestialityFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = BestialityFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && BestialityFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = BestialityFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[17] == False) || (FameFromLover == True && Config.FameForbiddenByLover[17] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[17] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[17] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Bestiality"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If CheckTattooExtraFame("Group") == True || ExternalGroupFlag == True
-		PossibleFameGain[PossibleFameCount] = "Group"
-		PossibleFameCount += 1
+		Int GroupFame = Data.GetFameValue(FameLocation, "Group")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && GroupFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = GroupFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && GroupFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = GroupFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[18] == False) || (FameFromLover == True && Config.FameForbiddenByLover[18] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[18] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[18] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Group"
+			PossibleFameCount += 1
+		EndIf
+	EndIf
+	
+	If CanGainBoundFame(FameLocation) == True || CheckTattooExtraFame("Bound") == True || ExternalBoundFlag == True
+		Int BoundFame = Data.GetFameValue(FameLocation, "Bound")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && BoundFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = BoundFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && BoundFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = BoundFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[19] == False) || (FameFromLover == True && Config.FameForbiddenByLover[19] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[19] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[19] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Bound"
+			PossibleFameCount += 1
+		EndIf
+	EndIf
+	
+	If CanGainTattooFame(FameLocation) == True || ExternalTattooFlag == True
+		Int TattooFame = Data.GetFameValue(FameLocation, "Tattoo")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && TattooFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = TattooFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && TattooFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = TattooFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[20] == False) || (FameFromLover == True && Config.FameForbiddenByLover[20] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[20] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[20] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Tattoo"
+			PossibleFameCount += 1
+		EndIf
+	EndIf
+	
+	If CanGainCumDumpFame() == True || CheckTattooExtraFame("Cum Dump") == True || ExternalCumDumpFlag == True
+		Int CumDumpFame = Data.GetFameValue(FameLocation, "Cum Dump")
+		If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && CumDumpFame >= Config.FriendHighFameThreshold
+			BetrayRollModifier = CumDumpFame / 2
+		ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && CumDumpFame >= Config.LoverHighFameThreshold
+			BetrayRollModifier = CumDumpFame / 4
+		EndIf
+		
+		If (FameFromFriend == True && Config.FameForbiddenByFriend[21] == False) || (FameFromLover == True && Config.FameForbiddenByLover[21] == False) \
+		|| ((FameFromFriend == True && Config.FameForbiddenByFriend[21] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+		|| ((FameFromLover == True && Config.FameForbiddenByLover[21] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+		|| (FameFromFriend == False && FameFromLover == False)
+			
+			PossibleFameGain[PossibleFameCount] = "Cum Dump"
+			PossibleFameCount += 1
+		EndIf
 	EndIf
 	
 	If Mods.IsFameCommentsInstalled == True
 		If CheckTattooExtraFame("Unfaithful") == True || ExternalUnfaithfulFlag == True
-			PossibleFameGain[PossibleFameCount] = "Unfaithful"
-			PossibleFameCount += 1
+			Int UnfaithfulFame = Data.GetFameValue(FameLocation, "Unfaithful")
+			If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && UnfaithfulFame >= Config.FriendHighFameThreshold
+				BetrayRollModifier = UnfaithfulFame / 2
+			ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && UnfaithfulFame >= Config.LoverHighFameThreshold
+				BetrayRollModifier = UnfaithfulFame / 4
+			EndIf
+			
+			If (FameFromFriend == True && Config.FameForbiddenByFriend[22] == False) || (FameFromLover == True && Config.FameForbiddenByLover[22] == False) \
+			|| ((FameFromFriend == True && Config.FameForbiddenByFriend[22] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+			|| ((FameFromLover == True && Config.FameForbiddenByLover[22] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+			|| (FameFromFriend == False && FameFromLover == False)
+				
+				PossibleFameGain[PossibleFameCount] = "Unfaithful"
+				PossibleFameCount += 1
+			EndIf
 		EndIf
 		
 		If CheckTattooExtraFame("Cuck") == True || ExternalCuckFlag == True
-			PossibleFameGain[PossibleFameCount] = "Cuck"
-			PossibleFameCount += 1
+			Int CuckFame = Data.GetFameValue(FameLocation, "Cuck")
+			If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && CuckFame >= Config.FriendHighFameThreshold
+				BetrayRollModifier = CuckFame / 2
+			ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && CuckFame >= Config.LoverHighFameThreshold
+				BetrayRollModifier = CuckFame / 4
+			EndIf
+			
+			If (FameFromFriend == True && Config.FameForbiddenByFriend[23] == False) || (FameFromLover == True && Config.FameForbiddenByLover[23] == False) \
+			|| ((FameFromFriend == True && Config.FameForbiddenByFriend[23] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+			|| ((FameFromLover == True && Config.FameForbiddenByLover[23] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+			|| (FameFromFriend == False && FameFromLover == False)
+				
+				PossibleFameGain[PossibleFameCount] = "Cuck"
+				PossibleFameCount += 1
+			EndIf
 		EndIf
 	EndIf
 	
 	If Mods.IsBimbosInstalled == True
 		If CheckTattooExtraFame("Airhead") == True || ExternalAirheadFlag == True
-			PossibleFameGain[PossibleFameCount] = "Airhead"
-			PossibleFameCount += 1
+			Int AirheadFame = Data.GetFameValue(FameLocation, "Airhead")
+			If FameFromFriend == True && Config.FriendsBetrayFromHighFame == True && AirheadFame >= Config.FriendHighFameThreshold
+				BetrayRollModifier = AirheadFame / 2
+			ElseIf FameFromLover == True && Config.LoversBetrayFromHighFame == True && AirheadFame >= Config.LoverHighFameThreshold
+				BetrayRollModifier = AirheadFame / 4
+			EndIf
+			
+			If (FameFromFriend == True && Config.FameForbiddenByFriend[24] == False) || (FameFromLover == True && Config.FameForbiddenByLover[24] == False) \
+			|| ((FameFromFriend == True && Config.FameForbiddenByFriend[24] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.FriendBetrayChance) \
+			|| ((FameFromLover == True && Config.FameForbiddenByLover[24] == True) && (FriendLoverBetrayRoll - BetrayRollModifier) <= Config.LoverBetrayChance) \
+			|| (FameFromFriend == False && FameFromLover == False)
+				
+				PossibleFameGain[PossibleFameCount] = "Airhead"
+				PossibleFameCount += 1
+			EndIf
 		EndIf
 	EndIf
 	
@@ -995,8 +1324,8 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 		DefaultLocationDecayPauseTimer[LocationIndex] = (Config.DecayTimeNeeded) as Int
 	EndIf
 	
-	If Config.NotifyFameIncrease == True
-		FameGainNotification(Category)
+	If Config.NotifyFameIncrease == True && FameGainNotifyCooldown == False
+		FameGainNotification()
 	EndIf
 	
 	If Config.AllowLegacyOverwrite == True
@@ -1470,8 +1799,11 @@ Function SpreadFame(String SpreadFromLocation)
 	DefaultLocationDecayPauseTimer[TargetLocationIndex] = (Config.DecayTimeNeeded as Int)
 EndFunction
 
-Function FameGainNotification(String Category)
+Function FameGainNotification()
 	Debug.Notification("$FameIncreaseMSG")
+	FameGainNotifyCooldown = True
+	Utility.WaitMenuMode(30.0)
+	FameGainNotifyCooldown = False
 EndFunction
 
 Function FameDecayNotification()

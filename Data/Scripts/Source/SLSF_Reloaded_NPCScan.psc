@@ -55,6 +55,8 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 	Int FameChance = 0
 	Int Relationship = akTarget.GetRelationshipRank(PlayerRef)
 	Int FameRoll = Utility.RandomInt(1, 100)
+	Bool IsFriend = False
+	Bool IsLover = False
 
 	If Relationship < 0	;Enemy
 		FameChance = Config.FameChanceByEnemy as Int
@@ -66,13 +68,15 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 		If Config.EnableTracing == True
 			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is NEUTRAL. Value: " + Relationship)
 		EndIf
-	ElseIf Relationship >= 1 && Relationship < 4 ;Friend
+	ElseIf Relationship > 0 && Relationship < 4 ;Friend
 		FameChance = Config.FameChanceByFriend as Int
+		IsFriend = True
 		If Config.EnableTracing == True
 			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is FRIEND. Value: " + Relationship)
 		EndIf
 	Else ;Relationship == 4 ;Lover
 		FameChance = Config.FameChanceByLover as Int
+		IsLover = True
 		If Config.EnableTracing == True
 			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " reltionship is LOVER. Value: " + Relationship)
 		EndIf
@@ -83,7 +87,7 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " succeeded fame gain roll. Fame Roll was: " + FameRoll + ". Needed to be equal or lower than: " + FameChance)
 		EndIf
 		SLSF_Reloaded_NPCScanSucess.SetValue(1)
-		FameManager.FameGainRoll(CurrentLocation)
+		FameManager.FameGainRoll(CurrentLocation, False, IsFriend, IsLover)
 	Else
 		If Config.EnableTracing == True
 			If SLSF_Reloaded_NPCScanSucess.GetValue() == 0

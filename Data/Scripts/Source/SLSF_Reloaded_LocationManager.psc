@@ -135,6 +135,10 @@ String Function CurrentLocationName()
 EndFunction
 
 String Function GetLocalizedName(Location LocationRef)
+	If LocationRef == None
+		return "$NoneText"
+	EndIf
+	
 	Int CustomLocationCount = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	Int LocationIndex = 0
 	

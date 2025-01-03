@@ -40,9 +40,13 @@ Bool Property ExportData Auto Hidden
 Bool Property ImportData Auto Hidden
 Bool Property ArmUninstall Auto Hidden
 Bool Property ConfirmUninstall Auto Hidden
+Bool Property FriendsBetrayFromHighFame Auto Hidden
+Bool Property LoversBetrayFromHighFame Auto Hidden
 
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
+Bool[] Property FameForbiddenByFriend Auto
+Bool[] Property FameForbiddenByLover Auto
 
 Float Property NightStart Auto Hidden
 Float Property NightEnd Auto Hidden
@@ -56,7 +60,9 @@ Float Property SpreadTimeNeeded Auto Hidden
 Float Property FameChanceByEnemy Auto Hidden
 Float Property FameChanceByNeutral Auto Hidden
 Float Property FameChanceByFriend Auto Hidden
+Float Property SexFameChanceByFriend Auto Hidden
 Float Property FameChanceByLover Auto Hidden
+Float Property SexFameChanceByLover Auto Hidden
 Float Property MinimumNPCLOSDistance Auto Hidden
 Float Property FameChangeMultiplier Auto Hidden
 Float[] Property FameCategoryMultiplier Auto
@@ -83,6 +89,11 @@ Int Property MaxMedFameDecay Auto Hidden
 Int Property MaxHighFameDecay Auto Hidden
 Int Property MaxVHighFameDecay Auto Hidden
 Int Property LocationDetailsIndex Auto Hidden
+Int Property FriendBetrayChance Auto Hidden
+Int Property FriendHighFameThreshold Auto Hidden
+Int Property LoverBetrayChance Auto Hidden
+Int Property LoverHighFameThreshold Auto Hidden
+Int[] Property OptionID Auto Hidden
 
 String Property TattooStatusSelect Auto Hidden
 
@@ -112,19 +123,20 @@ EndEvent
 
 Function InstallMCM()
 	ModName = "$SLSFReloadedTitle"
-	Pages = New String[12]
+	Pages = New String[13]
 	Pages[0] = "$FameOverviewPage"
 	Pages[1] = "$DetailedFameViewPage"
 	Pages[2] = "$GeneralSettingsPage"
 	Pages[3] = "$FameSettingsPage"
-	Pages[4] = "$TattooSettingsPage"
-	Pages[5] = "$CustomLocationsPage"
-	Pages[6] = "$GeneralInfoPage"
-	Pages[7] = "$TattooInfoPage"
-	Pages[8] = "$DecayInfoPage"
-	Pages[9] = "$SpreadInfoPage"
-	Pages[10] = "$RegisteredModsPage"
-	Pages[11] = "$MiscPage"
+	Pages[4] = "$FriendLoverSettingsPage"
+	Pages[5] = "$TattooSettingsPage"
+	Pages[6] = "$CustomLocationsPage"
+	Pages[7] = "$GeneralInfoPage"
+	Pages[8] = "$TattooInfoPage"
+	Pages[9] = "$DecayInfoPage"
+	Pages[10] = "$SpreadInfoPage"
+	Pages[11] = "$RegisteredModsPage"
+	Pages[12] = "$MiscPage"
 EndFunction
 
 Function SetDefaults()
@@ -159,7 +171,9 @@ Function SetDefaults()
 	FameChanceByEnemy = 100
 	FameChanceByNeutral = 75
 	FameChanceByFriend = 50
+	SexFameChanceByFriend = 50
 	FameChanceByLover = 25
+	SexFameChanceByLover = 25
 	TattooStatusSelect = "$BodyArea"
 	BodyTattooIndex = 0
 	FaceTattooIndex = 0
@@ -175,6 +189,8 @@ Function SetDefaults()
 	MaxMedFameDecay = 3
 	MaxHighFameDecay = 2
 	MaxVHighFameDecay = 1
+	FriendBetrayChance = 50
+	LoverBetrayChance = 25
 	
 	UseGlobalFameMultiplier = True
 	FameChangeMultiplier = 1.0
@@ -210,6 +226,11 @@ Function SetDefaults()
 	
 	ArmUninstall = False
 	ConfirmUninstall = False
+	
+	FriendsBetrayFromHighFame = True
+	LoversBetrayFromHighFame = True
+	FriendHighFameThreshold = 0
+	LoverHighFameThreshold = 50
 EndFunction
 
 Int Function PullFameSpreadChance(String LocationName)
@@ -271,19 +292,20 @@ Function CheckLocationUnregister()
 EndFunction
 
 Event OnConfigOpen()
-	Pages = New String[12]
+	Pages = New String[13]
 	Pages[0] = "$FameOverviewPage"
 	Pages[1] = "$DetailedFameViewPage"
 	Pages[2] = "$GeneralSettingsPage"
 	Pages[3] = "$FameSettingsPage"
-	Pages[4] = "$TattooSettingsPage"
-	Pages[5] = "$CustomLocationsPage"
-	Pages[6] = "$GeneralInfoPage"
-	Pages[7] = "$TattooInfoPage"
-	Pages[8] = "$DecayInfoPage"
-	Pages[9] = "$SpreadInfoPage"
-	Pages[10] = "$RegisteredModsPage"
-	Pages[11] = "$MiscPage"
+	Pages[4] = "$FriendLoverSettingsPage"
+	Pages[5] = "$TattooSettingsPage"
+	Pages[6] = "$CustomLocationsPage"
+	Pages[7] = "$GeneralInfoPage"
+	Pages[8] = "$TattooInfoPage"
+	Pages[9] = "$DecayInfoPage"
+	Pages[10] = "$SpreadInfoPage"
+	Pages[11] = "$RegisteredModsPage"
+	Pages[12] = "$MiscPage"
 	
 	VisibilityManager.RegisterForSingleUpdate(0.1)
 	
@@ -339,6 +361,8 @@ Event OnPageReset(String page)
 	Else
 		UnloadCustomContent()
 	EndIf
+	
+	OptionID = New Int[50]
 	
 	SetCursorFillMode(TOP_TO_BOTTOM)
 	SetCursorPosition(0)
@@ -716,10 +740,6 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_MaxHighFameDecayState", "$HighFameDecay", MaxHighFameDecay, "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_MaxVHighFameDecayState", "$VeryHighFameDecay", MaxVHighFameDecay, "{0}", 0)
 		
-		AddHeaderOption("$MultiplierHeader")
-		AddToggleOptionST("SLSF_Reloaded_UseGlobalMultiplierState", "$UseGlobalMultiplier", UseGlobalFameMultiplier, 0)
-		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "$GlobalMultiplier", FameChangeMultiplier, "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == False))
-		
 		AddHeaderOption("$FameSpreadSettingsHeader")
 		AddSliderOptionST("SLSF_Reloaded_SpreadTimeNeededState", "$TimeBetweenSpread", (SpreadTimeNeeded / 2), "{0}", 0)
 		AddSliderOptionST("SLSF_Reloaded_FailedSpreadIncreaseState", "$ChanceOnFail", FailedSpreadIncrease, "{0}%", 0)
@@ -734,13 +754,15 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByEnemyState", "$EnemyChance", FameChanceByEnemy, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByNeutralState", "$NeutralChance", FameChanceByNeutral, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByFriendState", "$FriendChance", FameChanceByFriend, "{0}%", 0)
+		AddSliderOptionST("SLSF_Reloaded_SexFameChanceByFriendState", "$FriendSexChance", SexFameChanceByFriend, "{0}%", 0)
 		AddSliderOptionST("SLSF_Reloaded_FameChanceByLoverState", "$LoverChance", FameChanceByLover, "{0}%", 0)
-		
-		AddHeaderOption("$ResetFameHeader")
-		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "$ClearAllFame", ClearAllFameTrigger, 0)
-		AddToggleOptionST("SLSF_Reloaded_ClearAllFameConfirmState", "$ConfirmClearAllFame", ClearAllFameConfirm, GetDisabledOptionFlagIf(ClearAllFameTrigger == False))
+		AddSliderOptionST("SLSF_Reloaded_SexFameChanceByLoverState", "$LoverSexChance", SexFameChanceByLover, "{0}%", 0)
 		
 		SetCursorPosition(1)
+		AddHeaderOption("$MultiplierHeader")
+		AddToggleOptionST("SLSF_Reloaded_UseGlobalMultiplierState", "$UseGlobalMultiplier", UseGlobalFameMultiplier, 0)
+		AddSliderOptionST("SLSF_Reloaded_FameChangeMultiplierState", "$GlobalMultiplier", FameChangeMultiplier, "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == False))
+		AddHeaderOption("$CategoryMultipliers")
 		AddSliderOptionST("SLSF_Reloaded_WhoreMultiplierState", "$WhoreMult", FameCategoryMultiplier[0], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		AddSliderOptionST("SLSF_Reloaded_SlutMultiplierState", "$SlutMult", FameCategoryMultiplier[1], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		AddSliderOptionST("SLSF_Reloaded_ExhibitionistMultiplierState", "$ExhibMult", FameCategoryMultiplier[2], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
@@ -772,6 +794,10 @@ Event OnPageReset(String page)
 		If Mods.IsBimbosInstalled == True
 			AddSliderOptionST("SLSF_Reloaded_AirheadMultiplierState", "$AirMult", FameCategoryMultiplier[24], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		EndIf
+		
+		AddHeaderOption("$ResetFameHeader")
+		AddToggleOptionST("SLSF_Reloaded_ClearAllFameState", "$ClearAllFame", ClearAllFameTrigger, 0)
+		AddToggleOptionST("SLSF_Reloaded_ClearAllFameConfirmState", "$ConfirmClearAllFame", ClearAllFameConfirm, GetDisabledOptionFlagIf(ClearAllFameTrigger == False))
 	
 	ElseIf (page == "$TattooSettingsPage")
 		AddHeaderOption("$BodyTatHeader")
@@ -880,7 +906,7 @@ Event OnPageReset(String page)
 		Else
 			AddTextOption("$DetectedLocation", "$NoneText")
 		EndIf
-		AddToggleOptionST("SLSF_Reloaded_RegisterLocationState", "$RegisterLocation", RegisterLocationTrigger, 0)
+		AddToggleOptionST("SLSF_Reloaded_RegisterLocationState", "$RegisterLocation", RegisterLocationTrigger, GetDisabledOptionFlagIf((LocationManager.CurrentLocation == None) || (LocationManager.CurrentLocation.GetName() == "$NoneText")))
 		AddToggleOptionST("SLSF_Reloaded_RegisterLocationConfirmState", "$ConfirmRegisterLocation", RegisterLocationConfirm, GetDisabledOptionFlagIf(RegisterLocationTrigger == False))
 		AddHeaderOption("$UnregisterLocationHeader")
 		AddMenuOptionST("SLSF_Reloaded_UnregisterLocationSelectState", "$UnregisterSelection", UnregisterLocationSelection, 0)
@@ -1079,7 +1105,6 @@ Event OnPageReset(String page)
 		AddHeaderOption("$VisibilityHeader")
 		Int TattooIndex = 0
 		Int SlotNumber = 1
-		;String SlotString = "$SlotText"
 		If TattooStatusSelect == "$BodyArea"
 			While TattooIndex < BodyTattooSlots
 				If BodyTattooSlots > 8 && TattooIndex == (BodyTattooSlots / 2)
@@ -1147,10 +1172,8 @@ Event OnPageReset(String page)
 	ElseIf (page == "$DecayInfoPage")
 		Float DecayTimeBase = ((FameManager.DecayCountdown as Float) / 2)
 		Float DecayCountdownHalfHours = ((DecayTimeBase - (DecayTimeBase as Int)) * 10)
-		;String CanDecay = "$CanDecayText"
 		
 		AddTextOption("$TimeToDecay", (DecayTimeBase as Int) + "." + (DecayCountdownHalfHours as Int))
-		;AddTextOption("$DecayCountdown", (DecayTimeBase as Int) + "." + (DecayCountdownHalfHours as Int) + " " + "$HoursText")
 		AddHeaderOption("$DefaultLocationsCanDecayHeader")
 		Int LocationIndex = 0
 		While LocationIndex < LocationManager.DefaultLocation.Length
@@ -1167,7 +1190,6 @@ Event OnPageReset(String page)
 					AddTextOption(LocationManager.MinorLocations[(LocationIndex - 10)].GetName(), "$FalseText")
 				EndIf
 			EndIf
-			;AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Decay Pause Timer:", FameManager.DefaultLocationDecayPauseTimer[LocationIndex] as String)
 			LocationIndex += 1
 		EndWhile
 		
@@ -1181,18 +1203,14 @@ Event OnPageReset(String page)
 			Else
 				AddTextOption(LocationManager.CustomLocation[LocationIndex], "$FalseText")
 			EndIf
-			;AddTextOption(LocationManager.CustomLocation[LocationIndex] + " Decay Pause Timer:", FameManager.CustomLocationDecayPauseTimer[LocationIndex] as String)
 			LocationIndex += 1
 		EndWhile
 		
 	ElseIf (page == "$SpreadInfoPage")
 		Float SpreadTimeBase = ((FameManager.SpreadCountdown as Float) / 2)
 		Float SpreadCountdownHalfHours = ((SpreadTimeBase - (SpreadTimeBase as Int)) * 10)
-		;String CanSpread = "$CanSpreadText"
-		;String HoursString = "$HoursText"
 		
 		AddTextOption("$TimeToSpread", (SpreadTimeBase as Int) + "." + (SpreadCountdownHalfHours as Int))
-		;AddTextOption("$SpreadCountdown", (SpreadTimeBase as Int) + "." + (SpreadCountdownHalfHours as Int) + " " + HoursString)
 		AddHeaderOption("$DefaultLocationsSpreadHeader")
 		
 		Int LocationIndex = 0
@@ -1210,7 +1228,6 @@ Event OnPageReset(String page)
 					AddTextOption(LocationManager.MinorLocations[(LocationIndex - 10)].GetName(), "$FalseText")
 				EndIf
 			EndIf
-			;AddTextOption(LocationManager.DefaultLocation[LocationIndex] + " Spread Pause Timer:", FameManager.DefaultLocationSpreadPauseTimer[LocationIndex] as String)
 			LocationIndex += 1
 		EndWhile
 		
@@ -1253,6 +1270,83 @@ Event OnPageReset(String page)
 		SetCursorPosition(1)
 		AddHeaderOption("$DebuggingHeader")
 		AddToggleOptionST("SLSF_Reloaded_EnableTraceState", "$EnableTrace", EnableTracing, 0)
+	
+	ElseIf (page == "$FriendLoverSettingsPage")
+		AddHeaderOption("$FameFromFriendsHeader")
+		AddSliderOptionST("SLSF_Reloaded_FriendBetrayChanceState", "$FriendsIgnoreForbiddenChance", FriendBetrayChance, "{0}%", 0)
+		AddToggleOptionST("SLSF_Reloaded_FriendsBetrayFromHighFameState", "$FameIncreasesFriendIgnoreChance", FriendsBetrayFromHighFame, 0)
+		AddSliderOptionST("SLSF_Reloaded_FriendHighFameMinimumState", "$MinimumHighFameThreshold", FriendHighFameThreshold, GetDisabledOptionFlagIf(FriendsBetrayFromHighFame == False))
+		AddHeaderOption("")
+		OptionID[0] = AddToggleOption("$ForbidWhore", FameForbiddenByFriend[0], 0)
+		OptionID[1] = AddToggleOption("$ForbidSlut", FameForbiddenByFriend[1], 0)
+		OptionID[2] = AddToggleOption("$ForbidExhib", FameForbiddenByFriend[2], 0)
+		OptionID[3] = AddToggleOption("$ForbidOral", FameForbiddenByFriend[3], 0)
+		OptionID[4] = AddToggleOption("$ForbidAnal", FameForbiddenByFriend[4], 0)
+		OptionID[5] = AddToggleOption("$ForbidNasty", FameForbiddenByFriend[5], 0)
+		OptionID[6] = AddToggleOption("$ForbidPreg", FameForbiddenByFriend[6], 0)
+		OptionID[7] = AddToggleOption("$ForbidDom", FameForbiddenByFriend[7], 0)
+		OptionID[8] = AddToggleOption("$ForbidSub", FameForbiddenByFriend[8], 0)
+		OptionID[9] = AddToggleOption("$ForbidSad", FameForbiddenByFriend[9], 0)
+		OptionID[10] = AddToggleOption("$ForbidMas", FameForbiddenByFriend[10], 0)
+		OptionID[11] = AddToggleOption("$ForbidGen", FameForbiddenByFriend[11], 0)
+		OptionID[12] = AddToggleOption("$ForbidMen", FameForbiddenByFriend[12], 0)
+		OptionID[13] = AddToggleOption("$ForbidWom", FameForbiddenByFriend[13], 0)
+		OptionID[14] = AddToggleOption("$ForbidOrc", FameForbiddenByFriend[14], 0)
+		OptionID[15] = AddToggleOption("$ForbidKha", FameForbiddenByFriend[15], 0)
+		OptionID[16] = AddToggleOption("$ForbidArg", FameForbiddenByFriend[16], 0)
+		OptionID[17] = AddToggleOption("$ForbidBes", FameForbiddenByFriend[17], 0)
+		OptionID[18] = AddToggleOption("$ForbidGrp", FameForbiddenByFriend[18], 0)
+		OptionID[19] = AddToggleOption("$ForbidBnd", FameForbiddenByFriend[19], 0)
+		OptionID[20] = AddToggleOption("$ForbidTat", FameForbiddenByFriend[20], 0)
+		OptionID[21] = AddToggleOption("$ForbidDmp", FameForbiddenByFriend[21], 0)
+		
+		If Mods.IsFameCommentsInstalled == True
+			OptionID[22] = AddToggleOption("$ForbidUnf", FameForbiddenByFriend[22], 0)
+			OptionID[23] = AddToggleOption("$ForbidCuk", FameForbiddenByFriend[23], 0)
+		EndIf
+		
+		If Mods.IsBimbosInstalled == True
+			OptionID[24] = AddToggleOption("$ForbidAir", FameForbiddenByFriend[24], 0)
+		EndIf
+		
+		SetCursorPosition(1)
+		AddHeaderOption("$FameFromLoversHeader")
+		AddSliderOptionST("SLSF_Reloaded_LoverBetrayChanceState", "$LoversIgnoreForbiddenChance", LoverBetrayChance, "{0}%", 0)
+		AddToggleOptionST("SLSF_Reloaded_LoversBetrayFromHighFameState", "$FameIncreasesLoverIgnoreChance", LoversBetrayFromHighFame, 0)
+		AddSliderOptionST("SLSF_REloaded_LoverHighFameMinimumState", "$MinimumHighFameThreshold", LoverHighFameThreshold, GetDisabledOptionFlagIf(LoversBetrayFromHighFame == False))
+		AddHeaderOption("")
+		OptionID[25] = AddToggleOption("$ForbidWhore", FameForbiddenByLover[0], 0)
+		OptionID[26] = AddToggleOption("$ForbidSlut", FameForbiddenByLover[1], 0)
+		OptionID[27] = AddToggleOption("$ForbidExhib", FameForbiddenByLover[2], 0)
+		OptionID[28] = AddToggleOption("$ForbidOral", FameForbiddenByLover[3], 0)
+		OptionID[29] = AddToggleOption("$ForbidAnal", FameForbiddenByLover[4], 0)
+		OptionID[30] = AddToggleOption("$ForbidNasty", FameForbiddenByLover[5], 0)
+		OptionID[31] = AddToggleOption("$ForbidPreg", FameForbiddenByLover[6], 0)
+		OptionID[32] = AddToggleOption("$ForbidDom", FameForbiddenByLover[7], 0)
+		OptionID[33] = AddToggleOption("$ForbidSub", FameForbiddenByLover[8], 0)
+		OptionID[34] = AddToggleOption("$ForbidSad", FameForbiddenByLover[9], 0)
+		OptionID[35] = AddToggleOption("$ForbidMas", FameForbiddenByLover[10], 0)
+		OptionID[36] = AddToggleOption("$ForbidGen", FameForbiddenByLover[11], 0)
+		OptionID[37] = AddToggleOption("$ForbidMen", FameForbiddenByLover[12], 0)
+		OptionID[38] = AddToggleOption("$ForbidWom", FameForbiddenByLover[13], 0)
+		OptionID[39] = AddToggleOption("$ForbidOrc", FameForbiddenByLover[14], 0)
+		OptionID[40] = AddToggleOption("$ForbidKha", FameForbiddenByLover[15], 0)
+		OptionID[41] = AddToggleOption("$ForbidArg", FameForbiddenByLover[16], 0)
+		OptionID[42] = AddToggleOption("$ForbidBes", FameForbiddenByLover[17], 0)
+		OptionID[43] = AddToggleOption("$ForbidGrp", FameForbiddenByLover[18], 0)
+		OptionID[44] = AddToggleOption("$ForbidBnd", FameForbiddenByLover[19], 0)
+		OptionID[45] = AddToggleOption("$ForbidTat", FameForbiddenByLover[20], 0)
+		OptionID[46] = AddToggleOption("$ForbidDmp", FameForbiddenByLover[21], 0)
+		
+		If Mods.IsFameCommentsInstalled == True
+			OptionID[47] = AddToggleOption("$ForbidUnf", FameForbiddenByLover[22], 0)
+			OptionID[48] = AddToggleOption("$ForbidCuk", FameForbiddenByLover[23], 0)
+		EndIf
+		
+		If Mods.IsBimbosInstalled == True
+			OptionID[49] = AddToggleOption("$ForbidAir", FameForbiddenByLover[24], 0)
+		EndIf
+	
 	EndIf
 EndEvent
 
@@ -1263,6 +1357,588 @@ Int Function GetDisabledOptionFlagIf(Bool Condition)
 		return 0
 	EndIf
 EndFunction
+
+Event OnOptionSelect(Int Option)
+	If Option == OptionID[0]
+		If FameForbiddenByFriend[0] == False
+			FameForbiddenByFriend[0] = True
+		Else
+			FameForbiddenByFriend[0] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[0])
+	ElseIf Option == OptionID[1]
+		If FameForbiddenByFriend[1] == False
+			FameForbiddenByFriend[1] = True
+		Else
+			FameForbiddenByFriend[1] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[1])
+	ElseIf Option == OptionID[2]
+		If FameForbiddenByFriend[2] == False
+			FameForbiddenByFriend[2] = True
+		Else
+			FameForbiddenByFriend[2] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[2])
+	ElseIf Option == OptionID[3]
+		If FameForbiddenByFriend[3] == False
+			FameForbiddenByFriend[3] = True
+		Else
+			FameForbiddenByFriend[3] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[3])
+	ElseIf Option == OptionID[4]
+		If FameForbiddenByFriend[4] == False
+			FameForbiddenByFriend[4] = True
+		Else
+			FameForbiddenByFriend[4] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[4])
+	ElseIf Option == OptionID[5]
+		If FameForbiddenByFriend[5] == False
+			FameForbiddenByFriend[5] = True
+		Else
+			FameForbiddenByFriend[5] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[5])
+	ElseIf Option == OptionID[6]
+		If FameForbiddenByFriend[6] == False
+			FameForbiddenByFriend[6] = True
+		Else
+			FameForbiddenByFriend[6] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[6])
+	ElseIf Option == OptionID[7]
+		If FameForbiddenByFriend[7] == False
+			FameForbiddenByFriend[7] = True
+		Else
+			FameForbiddenByFriend[7] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[7])
+	ElseIf Option == OptionID[8]
+		If FameForbiddenByFriend[8] == False
+			FameForbiddenByFriend[8] = True
+		Else
+			FameForbiddenByFriend[8] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[8])
+	ElseIf Option == OptionID[9]
+		If FameForbiddenByFriend[9] == False
+			FameForbiddenByFriend[9] = True
+		Else
+			FameForbiddenByFriend[9] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[9])
+	ElseIf Option == OptionID[10]
+		If FameForbiddenByFriend[10] == False
+			FameForbiddenByFriend[10] = True
+		Else
+			FameForbiddenByFriend[10] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[10])
+	ElseIf Option == OptionID[11]
+		If FameForbiddenByFriend[11] == False
+			FameForbiddenByFriend[11] = True
+		Else
+			FameForbiddenByFriend[11] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[11])
+	ElseIf Option == OptionID[12]
+		If FameForbiddenByFriend[12] == False
+			FameForbiddenByFriend[12] = True
+		Else
+			FameForbiddenByFriend[12] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[12])
+	ElseIf Option == OptionID[13]
+		If FameForbiddenByFriend[13] == False
+			FameForbiddenByFriend[13] = True
+		Else
+			FameForbiddenByFriend[13] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[13])
+	ElseIf Option == OptionID[14]
+		If FameForbiddenByFriend[14] == False
+			FameForbiddenByFriend[14] = True
+		Else
+			FameForbiddenByFriend[14] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[14])
+	ElseIf Option == OptionID[15]
+		If FameForbiddenByFriend[15] == False
+			FameForbiddenByFriend[15] = True
+		Else
+			FameForbiddenByFriend[15] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[15])
+	ElseIf Option == OptionID[16]
+		If FameForbiddenByFriend[16] == False
+			FameForbiddenByFriend[16] = True
+		Else
+			FameForbiddenByFriend[16] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[16])
+	ElseIf Option == OptionID[17]
+		If FameForbiddenByFriend[17] == False
+			FameForbiddenByFriend[17] = True
+		Else
+			FameForbiddenByFriend[17] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[17])
+	ElseIf Option == OptionID[18]
+		If FameForbiddenByFriend[18] == False
+			FameForbiddenByFriend[18] = True
+		Else
+			FameForbiddenByFriend[18] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[18])
+	ElseIf Option == OptionID[19]
+		If FameForbiddenByFriend[19] == False
+			FameForbiddenByFriend[19] = True
+		Else
+			FameForbiddenByFriend[19] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[19])
+	ElseIf Option == OptionID[20]
+		If FameForbiddenByFriend[20] == False
+			FameForbiddenByFriend[20] = True
+		Else
+			FameForbiddenByFriend[20] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[20])
+	ElseIf Option == OptionID[21]
+		If FameForbiddenByFriend[21] == False
+			FameForbiddenByFriend[21] = True
+		Else
+			FameForbiddenByFriend[21] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[21])
+	ElseIf Option == OptionID[22]
+		If FameForbiddenByFriend[22] == False
+			FameForbiddenByFriend[22] = True
+		Else
+			FameForbiddenByFriend[22] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[22])
+	ElseIf Option == OptionID[23]
+		If FameForbiddenByFriend[23] == False
+			FameForbiddenByFriend[23] = True
+		Else
+			FameForbiddenByFriend[23] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[23])
+	ElseIf Option == OptionID[24]
+		If FameForbiddenByFriend[24] == False
+			FameForbiddenByFriend[24] = True
+		Else
+			FameForbiddenByFriend[24] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByFriend[24])
+	ElseIf Option == OptionID[25]
+		If FameForbiddenByLover[0] == False
+			FameForbiddenByLover[0] = True
+		Else
+			FameForbiddenByLover[0] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[0])
+	ElseIf Option == OptionID[26]
+		If FameForbiddenByLover[1] == False
+			FameForbiddenByLover[1] = True
+		Else
+			FameForbiddenByLover[1] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[1])
+	ElseIf Option == OptionID[27]
+		If FameForbiddenByLover[2] == False
+			FameForbiddenByLover[2] = True
+		Else
+			FameForbiddenByLover[2] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[2])
+	ElseIf Option == OptionID[28]
+		If FameForbiddenByLover[3] == False
+			FameForbiddenByLover[3] = True
+		Else
+			FameForbiddenByLover[3] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[3])
+	ElseIf Option == OptionID[29]
+		If FameForbiddenByLover[4] == False
+			FameForbiddenByLover[4] = True
+		Else
+			FameForbiddenByLover[4] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[4])
+	ElseIf Option == OptionID[30]
+		If FameForbiddenByLover[5] == False
+			FameForbiddenByLover[5] = True
+		Else
+			FameForbiddenByLover[5] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[5])
+	ElseIf Option == OptionID[31]
+		If FameForbiddenByLover[6] == False
+			FameForbiddenByLover[6] = True
+		Else
+			FameForbiddenByLover[6] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[6])
+	ElseIf Option == OptionID[32]
+		If FameForbiddenByLover[7] == False
+			FameForbiddenByLover[7] = True
+		Else
+			FameForbiddenByLover[7] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[7])
+	ElseIf Option == OptionID[33]
+		If FameForbiddenByLover[8] == False
+			FameForbiddenByLover[8] = True
+		Else
+			FameForbiddenByLover[8] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[8])
+	ElseIf Option == OptionID[34]
+		If FameForbiddenByLover[9] == False
+			FameForbiddenByLover[9] = True
+		Else
+			FameForbiddenByLover[9] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[9])
+	ElseIf Option == OptionID[35]
+		If FameForbiddenByLover[10] == False
+			FameForbiddenByLover[10] = True
+		Else
+			FameForbiddenByLover[10] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[10])
+	ElseIf Option == OptionID[36]
+		If FameForbiddenByLover[11] == False
+			FameForbiddenByLover[11] = True
+		Else
+			FameForbiddenByLover[11] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[11])
+	ElseIf Option == OptionID[37]
+		If FameForbiddenByLover[12] == False
+			FameForbiddenByLover[12] = True
+		Else
+			FameForbiddenByLover[12] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[12])
+	ElseIf Option == OptionID[38]
+		If FameForbiddenByLover[13] == False
+			FameForbiddenByLover[13] = True
+		Else
+			FameForbiddenByLover[13] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[13])
+	ElseIf Option == OptionID[39]
+		If FameForbiddenByLover[14] == False
+			FameForbiddenByLover[14] = True
+		Else
+			FameForbiddenByLover[14] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[14])
+	ElseIf Option == OptionID[40]
+		If FameForbiddenByLover[15] == False
+			FameForbiddenByLover[15] = True
+		Else
+			FameForbiddenByLover[15] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[15])
+	ElseIf Option == OptionID[41]
+		If FameForbiddenByLover[16] == False
+			FameForbiddenByLover[16] = True
+		Else
+			FameForbiddenByLover[16] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[16])
+	ElseIf Option == OptionID[42]
+		If FameForbiddenByLover[17] == False
+			FameForbiddenByLover[17] = True
+		Else
+			FameForbiddenByLover[17] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[17])
+	ElseIf Option == OptionID[43]
+		If FameForbiddenByLover[18] == False
+			FameForbiddenByLover[18] = True
+		Else
+			FameForbiddenByLover[18] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[18])
+	ElseIf Option == OptionID[44]
+		If FameForbiddenByLover[19] == False
+			FameForbiddenByLover[19] = True
+		Else
+			FameForbiddenByLover[19] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[19])
+	ElseIf Option == OptionID[45]
+		If FameForbiddenByLover[20] == False
+			FameForbiddenByLover[20] = True
+		Else
+			FameForbiddenByLover[20] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[20])
+	ElseIf Option == OptionID[46]
+		If FameForbiddenByLover[21] == False
+			FameForbiddenByLover[21] = True
+		Else
+			FameForbiddenByLover[21] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[21])
+	ElseIf Option == OptionID[47]
+		If FameForbiddenByLover[22] == False
+			FameForbiddenByLover[22] = True
+		Else
+			FameForbiddenByLover[22] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[22])
+	ElseIf Option == OptionID[48]
+		If FameForbiddenByLover[23] == False
+			FameForbiddenByLover[23] = True
+		Else
+			FameForbiddenByLover[23] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[23])
+	ElseIf Option == OptionID[49]
+		If FameForbiddenByLover[24] == False
+			FameForbiddenByLover[24] = True
+		Else
+			FameForbiddenByLover[24] = False
+		EndIf
+		SetToggleOptionValue(Option, FameForbiddenByLover[24])
+	EndIf
+EndEvent
+
+Event OnOptionHightlight(Int Option)
+	If Option == OptionID[0]
+		SetInfoText("$FriendForbidWhoreTooltip")
+	ElseIf Option == OptionID[1]
+		SetInfoText("$FriendForbidSlutTooltip")
+	ElseIf Option == OptionID[2]
+		SetInfoText("$FriendForbidExhibitionistTooltip")
+	ElseIf Option == OptionID[3]
+		SetInfoText("$FriendForbidOralTooltip")
+	ElseIf Option == OptionID[4]
+		SetInfoText("$FriendForbidAnalTooltip")
+	ElseIf Option == OptionID[5]
+		SetInfoText("$FriendForbidNastyTooltip")
+	ElseIf Option == OptionID[6]
+		SetInfoText("$FriendForbidPregnantTooltip")
+	ElseIf Option == OptionID[7]
+		SetInfoText("$FriendForbidDominantTooltip")
+	ElseIf Option == OptionID[8]
+		SetInfoText("$FriendForbidSubmissiveTooltip")
+	ElseIf Option == OptionID[9]
+		SetInfoText("$FriendForbidSadistTooltip")
+	ElseIf Option == OptionID[10]
+		SetInfoText("$FriendForbidMasochistTooltip")
+	ElseIf Option == OptionID[11]
+		SetInfoText("$FriendForbidGentleTooltip")
+	ElseIf Option == OptionID[12]
+		SetInfoText("$FriendForbidLikesMenTooltip")
+	ElseIf Option == OptionID[13]
+		SetInfoText("$FriendForbidLikesWomenTooltip")
+	ElseIf Option == OptionID[14]
+		SetInfoText("$FriendForbidLikesOrcTooltip")
+	ElseIf Option == OptionID[15]
+		SetInfoText("$FriendForbidLikesKhajiitTooltip")
+	ElseIf Option == OptionID[16]
+		SetInfoText("$FriendForbidLikesArgonianTooltip")
+	ElseIf Option == OptionID[17]
+		SetInfoText("$FriendForbidBestialityTooltip")
+	ElseIf Option == OptionID[18]
+		SetInfoText("$FriendForbidGroupTooltip")
+	ElseIf Option == OptionID[19]
+		SetInfoText("$FriendForbidBoundTooltip")
+	ElseIf Option == OptionID[20]
+		SetInfoText("$FriendForbidTattooTooltip")
+	ElseIf Option == OptionID[21]
+		SetInfoText("$FriendForbidCumDumpTooltip")
+	ElseIf Option == OptionID[22]
+		SetInfoText("$FriendForbidUnfaithfulTooltip")
+	ElseIf Option == OptionID[23]
+		SetInfoText("$FriendForbidCuckTooltip")
+	ElseIf Option == OptionID[24]
+		SetInfoText("$FriendForbidAirheadTooltip")
+	ElseIf Option == OptionID[25]
+		SetInfoText("$LoverForbidWhoreTooltip")
+	ElseIf Option == OptionID[26]
+		SetInfoText("$LoverForbidSlutTooltip")
+	ElseIf Option == OptionID[27]
+		SetInfoText("$LoverForbidExhibitionistTooltip")
+	ElseIf Option == OptionID[28]
+		SetInfoText("$LoverForbidOralTooltip")
+	ElseIf Option == OptionID[29]
+		SetInfoText("$LoverForbidAnalTooltip")
+	ElseIf Option == OptionID[30]
+		SetInfoText("$LoverForbidNastyTooltip")
+	ElseIf Option == OptionID[31]
+		SetInfoText("$LoverForbidPregnantTooltip")
+	ElseIf Option == OptionID[32]
+		SetInfoText("$LoverForbidDominantTooltip")
+	ElseIf Option == OptionID[33]
+		SetInfoText("$LoverForbidSubmissiveTooltip")
+	ElseIf Option == OptionID[34]
+		SetInfoText("$LoverForbidSadistTooltip")
+	ElseIf Option == OptionID[35]
+		SetInfoText("$LoverForbidMasochistTooltip")
+	ElseIf Option == OptionID[36]
+		SetInfoText("$LoverForbidGentleTooltip")
+	ElseIf Option == OptionID[37]
+		SetInfoText("$LoverForbidLikesMenTooltip")
+	ElseIf Option == OptionID[38]
+		SetInfoText("$LoverForbidLikesWomenTooltip")
+	ElseIf Option == OptionID[39]
+		SetInfoText("$LoverForbidLikesOrcTooltip")
+	ElseIf Option == OptionID[40]
+		SetInfoText("$LoverForbidLikesKhajiitTooltip")
+	ElseIf Option == OptionID[41]
+		SetInfoText("$LoverForbidLikesArgonianTooltip")
+	ElseIf Option == OptionID[42]
+		SetInfoText("$LoverForbidBestialityTooltip")
+	ElseIf Option == OptionID[43]
+		SetInfoText("$LoverForbidGroupTooltip")
+	ElseIf Option == OptionID[44]
+		SetInfoText("$LoverForbidBoundTooltip")
+	ElseIf Option == OptionID[45]
+		SetInfoText("$LoverForbidTattooTooltip")
+	ElseIf Option == OptionID[46]
+		SetInfoText("$LoverForbidCumDumpTooltip")
+	ElseIf Option == OptionID[47]
+		SetInfoText("$LoverForbidUnfaithfulTooltip")
+	ElseIf Option == OptionID[48]
+		SetInfoText("$LoverForbidCuckTooltip")
+	ElseIf Option == OptionID[49]
+		SetInfoText("$LoverForbidAirheadTooltip")
+	EndIf
+EndEvent
+
+State SLSF_Reloaded_FriendBetrayChanceState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FriendBetrayChance)
+		SetSliderDialogDefaultValue(50)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FriendBetrayChance = value as Int
+		SetSliderOptionValueST(FriendBetrayChance, "{0}", False, "SLSF_Reloaded_FriendBetrayChanceState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FriendBetrayChance = 50
+		SetSliderOptionValueST(FriendBetrayChance, "{0}", False, "SLSF_Reloaded_FriendBetrayChanceState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$FriendBetrayChanceTooltip")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_LoverBetrayChanceState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(LoverBetrayChance)
+		SetSliderDialogDefaultValue(25)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		LoverBetrayChance = value as Int
+		SetSliderOptionValueST(LoverBetrayChance, "{0}", False, "SLSF_Reloaded_LoverBetrayChanceState")
+	EndEvent
+	
+	Event OnDefaultST()
+		LoverBetrayChance = 25
+		SetSliderOptionValueST(LoverBetrayChance, "{0}", False, "SLSF_Reloaded_LoverBetrayChanceState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$LoverBetrayChanceTooltip")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_FriendsBetrayFromHighFameState
+	Event OnSelectST()
+		If FriendsBetrayFromHighFame == False
+			FriendsBetrayFromHighFame = True
+		Else
+			FriendsBetrayFromHighFame = False
+		EndIf
+		
+		SetToggleOptionValueST(FriendsBetrayFromHighFame, False, "SLSF_Reloaded_FriendsBetrayFromHighFameState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$FriendsBetrayFromFameTooltip")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_FriendHighFameMinimumState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(FriendHighFameThreshold)
+		SetSliderDialogDefaultValue(0)
+		SetSliderDialogRange(0,100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		FriendHighFameThreshold = value as Int
+		SetSliderOptionValueST(FriendHighFameThreshold, "{0}", False, "SLSF_Reloaded_FriendHighFameMinimumState")
+	EndEvent
+	
+	Event OnDefaultST()
+		FriendHighFameThreshold = 0
+		SetSliderOptionValueST(FriendHighFameThreshold, "{0}", False, "SLSF_Reloaded_FriendHighFameMinimumState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$FriendHighFameThresholdTooltip")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_LoversBetrayFromHighFameState
+	Event OnSelectST()
+		If LoversBetrayFromHighFame == False
+			LoversBetrayFromHighFame = True
+		Else
+			LoversBetrayFromHighFame = False
+		EndIf
+		
+		SetToggleOptionValueST(LoversBetrayFromHighFame, False, "SLSF_Reloaded_LoversBetrayFromHighFameState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$LoversBetrayFromFameTooltip")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_LoverHighFameMinimumState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(LoverHighFameThreshold)
+		SetSliderDialogDefaultValue(0)
+		SetSliderDialogRange(0,100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		LoverHighFameThreshold = value as Int
+		SetSliderOptionValueST(LoverHighFameThreshold, "{0}", False, "SLSF_Reloaded_LoverHighFameMinimumState")
+	EndEvent
+	
+	Event OnDefaultST()
+		LoverHighFameThreshold = 0
+		SetSliderOptionValueST(LoverHighFameThreshold, "{0}", False, "SLSF_Reloaded_LoverHighFameMinimumState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$LoverHighFameThresholdTooltip")
+	EndEvent
+EndState
 
 State SLSF_Reloaded_ArmUninstall_State
 	Event OnSelectST()
@@ -1763,13 +2439,69 @@ State SLSF_Reloaded_BodySlotFameState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
 		
-		SetMenuDialogOptions(FameManager.FameType)
+		String[] FameTexts = New String[25]
+		
+		FameTexts[0] = "$WhoreText"
+		FameTexts[1] = "$SlutText"
+		FameTexts[2] = "$ExhibitionistText"
+		FameTexts[3] = "$OralText"
+		FameTexts[4] = "$AnalText"
+		FameTexts[5] = "$NastyText"
+		FameTexts[6] = "$PregnantText"
+		FameTexts[7] = "$DominantText"
+		FameTexts[8] = "$SubmissiveText"
+		FameTexts[9] = "$SadistText"
+		FameTexts[10] = "$MasochistText"
+		FameTexts[11] = "$GentleText"
+		FameTexts[12] = "$LikesMenText"
+		FameTexts[13] = "$LikesWomenText"
+		FameTexts[14] = "$LikesOrcText"
+		FameTexts[15] = "$LikesKhajiitText"
+		FameTexts[16] = "$LikesArgonianText"
+		FameTexts[17] = "$BestialityText"
+		FameTexts[18] = "$GroupText"
+		FameTexts[19] = "$BoundText"
+		FameTexts[20] = "$TattooText"
+		FameTexts[21] = "$CumDumpText"
+		FameTexts[22] = "$UnfaithfulText"
+		FameTexts[23] = "$CuckText"
+		FameTexts[24] = "$AirheadText"
+		
+		SetMenuDialogOptions(FameTexts)
 		SetMenuDialogStartIndex(StartIndex)
 		SetMenuDialogDefaultIndex(StartIndex)
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex], False, "SLSF_Reloaded_BodySlotFameState")
+		String[] FameTexts = New String[25]
+		
+		FameTexts[0] = "$WhoreText"
+		FameTexts[1] = "$SlutText"
+		FameTexts[2] = "$ExhibitionistText"
+		FameTexts[3] = "$OralText"
+		FameTexts[4] = "$AnalText"
+		FameTexts[5] = "$NastyText"
+		FameTexts[6] = "$PregnantText"
+		FameTexts[7] = "$DominantText"
+		FameTexts[8] = "$SubmissiveText"
+		FameTexts[9] = "$SadistText"
+		FameTexts[10] = "$MasochistText"
+		FameTexts[11] = "$GentleText"
+		FameTexts[12] = "$LikesMenText"
+		FameTexts[13] = "$LikesWomenText"
+		FameTexts[14] = "$LikesOrcText"
+		FameTexts[15] = "$LikesKhajiitText"
+		FameTexts[16] = "$LikesArgonianText"
+		FameTexts[17] = "$BestialityText"
+		FameTexts[18] = "$GroupText"
+		FameTexts[19] = "$BoundText"
+		FameTexts[20] = "$TattooText"
+		FameTexts[21] = "$CumDumpText"
+		FameTexts[22] = "$UnfaithfulText"
+		FameTexts[23] = "$CuckText"
+		FameTexts[24] = "$AirheadText"
+		
+		SetMenuOptionValueST(FameTexts[AcceptedIndex], False, "SLSF_Reloaded_BodySlotFameState")
 		VisibilityManager.BodyTattooExtraFameType[BodyTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
@@ -1792,6 +2524,7 @@ State SLSF_Reloaded_BodySlotSubcategoryState
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
 		String[] Texts = New String[5]
+		String[] TranslatedText = New String[5]
 		
 		Texts[0] = "$NoneText"
 		Texts[1] = "$ChestArea"
@@ -1799,8 +2532,15 @@ State SLSF_Reloaded_BodySlotSubcategoryState
 		Texts[3] = "$AssArea"
 		Texts[4] = "$BackArea"
 		
+		;We need an english return for the Visibility Manager to function properly
+		TranslatedText[0] = "-NONE-"
+		TranslatedText[1] = "Chest"
+		TranslatedText[2] = "Pelvis"
+		TranslatedText[3] = "Ass"
+		TranslatedText[4] = "Back"
+		
 		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_BodySlotSubcategoryState")
-		VisibilityManager.BodyTattooSubcategory[BodyTattooIndex] = Texts[AcceptedIndex]
+		VisibilityManager.BodyTattooSubcategory[BodyTattooIndex] = TranslatedText[AcceptedIndex]
 	EndEvent
 EndState
 
@@ -1842,13 +2582,69 @@ State SLSF_Reloaded_FaceSlotFameState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
 		
-		SetMenuDialogOptions(FameManager.FameType)
+		String[] FameTexts = New String[25]
+		
+		FameTexts[0] = "$WhoreText"
+		FameTexts[1] = "$SlutText"
+		FameTexts[2] = "$ExhibitionistText"
+		FameTexts[3] = "$OralText"
+		FameTexts[4] = "$AnalText"
+		FameTexts[5] = "$NastyText"
+		FameTexts[6] = "$PregnantText"
+		FameTexts[7] = "$DominantText"
+		FameTexts[8] = "$SubmissiveText"
+		FameTexts[9] = "$SadistText"
+		FameTexts[10] = "$MasochistText"
+		FameTexts[11] = "$GentleText"
+		FameTexts[12] = "$LikesMenText"
+		FameTexts[13] = "$LikesWomenText"
+		FameTexts[14] = "$LikesOrcText"
+		FameTexts[15] = "$LikesKhajiitText"
+		FameTexts[16] = "$LikesArgonianText"
+		FameTexts[17] = "$BestialityText"
+		FameTexts[18] = "$GroupText"
+		FameTexts[19] = "$BoundText"
+		FameTexts[20] = "$TattooText"
+		FameTexts[21] = "$CumDumpText"
+		FameTexts[22] = "$UnfaithfulText"
+		FameTexts[23] = "$CuckText"
+		FameTexts[24] = "$AirheadText"
+		
+		SetMenuDialogOptions(FameTexts)
 		SetMenuDialogStartIndex(StartIndex)
 		SetMenuDialogDefaultIndex(StartIndex)
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex], False, "SLSF_Reloaded_FaceSlotFameState")
+		String[] FameTexts = New String[25]
+		
+		FameTexts[0] = "$WhoreText"
+		FameTexts[1] = "$SlutText"
+		FameTexts[2] = "$ExhibitionistText"
+		FameTexts[3] = "$OralText"
+		FameTexts[4] = "$AnalText"
+		FameTexts[5] = "$NastyText"
+		FameTexts[6] = "$PregnantText"
+		FameTexts[7] = "$DominantText"
+		FameTexts[8] = "$SubmissiveText"
+		FameTexts[9] = "$SadistText"
+		FameTexts[10] = "$MasochistText"
+		FameTexts[11] = "$GentleText"
+		FameTexts[12] = "$LikesMenText"
+		FameTexts[13] = "$LikesWomenText"
+		FameTexts[14] = "$LikesOrcText"
+		FameTexts[15] = "$LikesKhajiitText"
+		FameTexts[16] = "$LikesArgonianText"
+		FameTexts[17] = "$BestialityText"
+		FameTexts[18] = "$GroupText"
+		FameTexts[19] = "$BoundText"
+		FameTexts[20] = "$TattooText"
+		FameTexts[21] = "$CumDumpText"
+		FameTexts[22] = "$UnfaithfulText"
+		FameTexts[23] = "$CuckText"
+		FameTexts[24] = "$AirheadText"
+		
+		SetMenuOptionValueST(FameTexts[AcceptedIndex], False, "SLSF_Reloaded_FaceSlotFameState")
 		VisibilityManager.FaceTattooExtraFameType[FaceTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
@@ -1891,13 +2687,69 @@ State SLSF_Reloaded_HandSlotFameState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
 		
-		SetMenuDialogOptions(FameManager.FameType)
+		String[] FameTexts = New String[25]
+		
+		FameTexts[0] = "$WhoreText"
+		FameTexts[1] = "$SlutText"
+		FameTexts[2] = "$ExhibitionistText"
+		FameTexts[3] = "$OralText"
+		FameTexts[4] = "$AnalText"
+		FameTexts[5] = "$NastyText"
+		FameTexts[6] = "$PregnantText"
+		FameTexts[7] = "$DominantText"
+		FameTexts[8] = "$SubmissiveText"
+		FameTexts[9] = "$SadistText"
+		FameTexts[10] = "$MasochistText"
+		FameTexts[11] = "$GentleText"
+		FameTexts[12] = "$LikesMenText"
+		FameTexts[13] = "$LikesWomenText"
+		FameTexts[14] = "$LikesOrcText"
+		FameTexts[15] = "$LikesKhajiitText"
+		FameTexts[16] = "$LikesArgonianText"
+		FameTexts[17] = "$BestialityText"
+		FameTexts[18] = "$GroupText"
+		FameTexts[19] = "$BoundText"
+		FameTexts[20] = "$TattooText"
+		FameTexts[21] = "$CumDumpText"
+		FameTexts[22] = "$UnfaithfulText"
+		FameTexts[23] = "$CuckText"
+		FameTexts[24] = "$AirheadText"
+		
+		SetMenuDialogOptions(FameTexts)
 		SetMenuDialogStartIndex(StartIndex)
 		SetMenuDialogDefaultIndex(StartIndex)
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex], False, "SLSF_Reloaded_HandSlotFameState")
+		String[] FameTexts = New String[25]
+		
+		FameTexts[0] = "$WhoreText"
+		FameTexts[1] = "$SlutText"
+		FameTexts[2] = "$ExhibitionistText"
+		FameTexts[3] = "$OralText"
+		FameTexts[4] = "$AnalText"
+		FameTexts[5] = "$NastyText"
+		FameTexts[6] = "$PregnantText"
+		FameTexts[7] = "$DominantText"
+		FameTexts[8] = "$SubmissiveText"
+		FameTexts[9] = "$SadistText"
+		FameTexts[10] = "$MasochistText"
+		FameTexts[11] = "$GentleText"
+		FameTexts[12] = "$LikesMenText"
+		FameTexts[13] = "$LikesWomenText"
+		FameTexts[14] = "$LikesOrcText"
+		FameTexts[15] = "$LikesKhajiitText"
+		FameTexts[16] = "$LikesArgonianText"
+		FameTexts[17] = "$BestialityText"
+		FameTexts[18] = "$GroupText"
+		FameTexts[19] = "$BoundText"
+		FameTexts[20] = "$TattooText"
+		FameTexts[21] = "$CumDumpText"
+		FameTexts[22] = "$UnfaithfulText"
+		FameTexts[23] = "$CuckText"
+		FameTexts[24] = "$AirheadText"
+		
+		SetMenuOptionValueST(FameTexts[AcceptedIndex], False, "SLSF_Reloaded_HandSlotFameState")
 		VisibilityManager.HandTattooExtraFameType[HandTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
@@ -1940,13 +2792,69 @@ State SLSF_Reloaded_FootSlotFameState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
 		
-		SetMenuDialogOptions(FameManager.FameType)
+		String[] FameTexts = New String[25]
+		
+		FameTexts[0] = "$WhoreText"
+		FameTexts[1] = "$SlutText"
+		FameTexts[2] = "$ExhibitionistText"
+		FameTexts[3] = "$OralText"
+		FameTexts[4] = "$AnalText"
+		FameTexts[5] = "$NastyText"
+		FameTexts[6] = "$PregnantText"
+		FameTexts[7] = "$DominantText"
+		FameTexts[8] = "$SubmissiveText"
+		FameTexts[9] = "$SadistText"
+		FameTexts[10] = "$MasochistText"
+		FameTexts[11] = "$GentleText"
+		FameTexts[12] = "$LikesMenText"
+		FameTexts[13] = "$LikesWomenText"
+		FameTexts[14] = "$LikesOrcText"
+		FameTexts[15] = "$LikesKhajiitText"
+		FameTexts[16] = "$LikesArgonianText"
+		FameTexts[17] = "$BestialityText"
+		FameTexts[18] = "$GroupText"
+		FameTexts[19] = "$BoundText"
+		FameTexts[20] = "$TattooText"
+		FameTexts[21] = "$CumDumpText"
+		FameTexts[22] = "$UnfaithfulText"
+		FameTexts[23] = "$CuckText"
+		FameTexts[24] = "$AirheadText"
+		
+		SetMenuDialogOptions(FameTexts)
 		SetMenuDialogStartIndex(StartIndex)
 		SetMenuDialogDefaultIndex(StartIndex)
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		SetMenuOptionValueST(FameManager.FameType[AcceptedIndex], False, "SLSF_Reloaded_FootSlotFameState")
+		String[] FameTexts = New String[25]
+		
+		FameTexts[0] = "$WhoreText"
+		FameTexts[1] = "$SlutText"
+		FameTexts[2] = "$ExhibitionistText"
+		FameTexts[3] = "$OralText"
+		FameTexts[4] = "$AnalText"
+		FameTexts[5] = "$NastyText"
+		FameTexts[6] = "$PregnantText"
+		FameTexts[7] = "$DominantText"
+		FameTexts[8] = "$SubmissiveText"
+		FameTexts[9] = "$SadistText"
+		FameTexts[10] = "$MasochistText"
+		FameTexts[11] = "$GentleText"
+		FameTexts[12] = "$LikesMenText"
+		FameTexts[13] = "$LikesWomenText"
+		FameTexts[14] = "$LikesOrcText"
+		FameTexts[15] = "$LikesKhajiitText"
+		FameTexts[16] = "$LikesArgonianText"
+		FameTexts[17] = "$BestialityText"
+		FameTexts[18] = "$GroupText"
+		FameTexts[19] = "$BoundText"
+		FameTexts[20] = "$TattooText"
+		FameTexts[21] = "$CumDumpText"
+		FameTexts[22] = "$UnfaithfulText"
+		FameTexts[23] = "$CuckText"
+		FameTexts[24] = "$AirheadText"
+		
+		SetMenuOptionValueST(FameTexts[AcceptedIndex], False, "SLSF_Reloaded_FootSlotFameState")
 		VisibilityManager.FootTattooExtraFameType[FootTattooIndex] = FameManager.FameType[AcceptedIndex]
 	EndEvent
 EndState
@@ -2412,6 +3320,29 @@ State SLSF_Reloaded_FameChanceByFriendState
 	EndEvent
 EndState
 
+State SLSF_Reloaded_SexFameChanceByFriendState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(SexFameChanceByFriend)
+		SetSliderDialogDefaultValue(50)
+		SetSliderDialogRange(0,100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		SexFameChanceByFriend = value
+		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_SexFameChanceByFriendState")
+	EndEvent
+	
+	Event OnDefaultST()
+		SexFameChanceByFriend = 50
+		SetSliderOptionValueST(50, "{0}%", False, "SLSF_Reloaded_SexFameChanceByFriendState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$FriendSexFameTooltip")
+	EndEvent
+EndState
+
 State SLSF_Reloaded_FameChanceByLoverState
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(FameChanceByLover)
@@ -2432,6 +3363,29 @@ State SLSF_Reloaded_FameChanceByLoverState
 	
 	Event OnHighlightST()
 		SetInfoText("$LoverFameTooltip")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_SexFameChanceByLoverState
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(SexFameChanceByLover)
+		SetSliderDialogDefaultValue(25)
+		SetSliderDialogRange(0,100)
+		SetSliderDialogInterval(1)
+	EndEvent
+	
+	Event OnSliderAcceptST(float value)
+		SexFameChanceByLover = value
+		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_SexFameChanceByLoverState")
+	EndEvent
+	
+	Event OnDefaultST()
+		SexFameChanceByLover = 25
+		SetSliderOptionValueST(25, "{0}%", False, "SLSF_Reloaded_SexFameChanceByLoverState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$LoverSexFameTooltip")
 	EndEvent
 EndState
 

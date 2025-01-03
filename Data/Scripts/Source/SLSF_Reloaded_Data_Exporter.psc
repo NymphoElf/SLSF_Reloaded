@@ -108,7 +108,7 @@ Function ExportData(String FileName)
 		LocationIndex += 1
 	EndWhile
 	
-	SetIntValue("SLSF_Reloaded/LocationData", "LocationTotal", CustomLocations.GetValue() as Int)
+	SetIntValue("SLSF_Reloaded/" + FileName + " SLSF Reloaded Data", "LocationTotal", CustomLocations.GetValue() as Int)
 	
 	Save("SLSF_Reloaded/" + FileName + " SLSF Reloaded Data")
 EndFunction
