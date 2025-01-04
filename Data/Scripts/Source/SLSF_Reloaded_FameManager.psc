@@ -22,8 +22,6 @@ Int Property SpreadCountdown Auto Hidden
 Int Property GainIterationMultiplier Auto Hidden
 Int Property DecayIterationMultiplier Auto Hidden
 
-Float Property LastCheckedTime Auto Hidden
-
 Keyword Property SLSF_Reloaded_NipplePiercing Auto
 Keyword Property SLSF_Reloaded_VaginalPiercing Auto
 

@@ -47,7 +47,7 @@ Event OnPlayerLoadGame()
 EndEvent
 
 Event OnMenuClose(String MenuName) ;We only registered the Sleep/Wait Menu, so that's the only one we'll capture with this event
-	Float TimeDifference = Utility.GetCurrentGameTime() - FameManager.LastCheckedTime
+	Float TimeDifference = Utility.GetCurrentGameTime() - TimeManager.LastCheckedTime
 	If TimeDifference >= 0.0199 ;~0.0199 is the time amount for an in-game half-hour
 		If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
 			TimeManager.PeriodicFameTimer()

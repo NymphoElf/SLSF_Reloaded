@@ -13,7 +13,8 @@ EndEvent
 
 Function Startup()
 	TimeManagerRunning = False
-	LastCheckedTime = 0
+	;Always set the default LastCheckedTime as the initialized game-time. This is necessary to prevent the scripts going crazy when installing mid-playthrough or updating
+	LastCheckedTime = Utility.GetCurrentGameTime()
 EndFunction
 
 Function PeriodicFameTimer()
