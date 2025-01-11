@@ -9,19 +9,30 @@ Bool Property TimeManagerRunning Auto Hidden
 
 Event OnInit()
 	Startup()
+	Debug.Trace("SLSF Reloaded - TimeManager Initialized")
 EndEvent
 
 Function Startup()
 	TimeManagerRunning = False
 	;Always set the default LastCheckedTime as the initialized game-time. This is necessary to prevent the scripts going crazy when installing mid-playthrough or updating
 	LastCheckedTime = Utility.GetCurrentGameTime()
+	Debug.Trace("SLSF Reloaded - TimeManager Startup: TimeManagerRunning is " + TimeManagerRunning)
+	Debug.Trace("SLSF Reloaded - TimeManager Startup: LastCheckedTime is " + LastCheckedTime)
 EndFunction
 
 Function PeriodicFameTimer()
 	TimeManagerRunning = True
 	
 	Float CurrentTime = Utility.GetCurrentGameTime()
-	Float TimeDifference = (CurrentTime - LastCheckedTime) ;check the time difference since last check. 
+	Float TimeDifference = (CurrentTime - LastCheckedTime) ;check the time difference since last check.
+	
+	;Check for Negative Countdown, which should be 'impossible'. If it is negative, reset LastCheckedTime to current time and terminate
+	If TimeDifference < 0
+		LastCheckedTime = CurrentTime
+		TimeManagerRunning = False
+		Debug.Trace("SLSF Reloaded Time Manager - Time Difference is negative. Reset LastCheckedTime to CurrentTime.")
+		return
+	EndIf
 	
 	Int CountdownChange = 0 ;Define and initialize CountdownChange
 	

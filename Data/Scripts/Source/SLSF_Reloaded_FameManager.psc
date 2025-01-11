@@ -659,8 +659,6 @@ Bool Function CanGainCumDumpFame()
 	;Check Cum Dump Fame
 	If Mods.IsFHUInstalled == True && Mods.GetFHUInflation(PlayerRef) >= Config.CumDumpFHUReq
 		return True
-	ElseIf Mods.IsHentaiPregInstalled == True && PlayerRef.GetFactionRank(Mods.HentaiPregFaction) == 1
-		return True
 	EndIf
 	return False
 EndFunction

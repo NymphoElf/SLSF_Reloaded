@@ -689,7 +689,10 @@ Event OnPageReset(String page)
 		AddTextOption("$GroupFame", Data.GetFameValue(DataLocation, "Group") as String)
 		AddTextOption("$BoundFame", Data.GetFameValue(DataLocation, "Bound") as String)
 		AddTextOption("$TattooFame", Data.GetFameValue(DataLocation, "Tattoo") as String)
-		AddTextOption("$CumDumpFame", Data.GetFameValue(DataLocation, "Cum Dump") as String)
+		
+		If Mods.IsFHUInstalled == True
+			AddTextOption("$CumDumpFame", Data.GetFameValue(DataLocation, "Cum Dump") as String)
+		EndIf
 		
 		If Mods.IsFameCommentsInstalled == True
 			AddTextOption("$CuckFame", Data.GetFameValue(DataLocation, "Cuck") as String)
@@ -784,7 +787,10 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_GroupMultiplierState", "$GrpMult", FameCategoryMultiplier[18], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		AddSliderOptionST("SLSF_Reloaded_BoundMultiplierState", "$BndMult", FameCategoryMultiplier[19], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		AddSliderOptionST("SLSF_Reloaded_TattooMultiplierState", "$TatMult", FameCategoryMultiplier[20], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
-		AddSliderOptionST("SLSF_Reloaded_CumDumpMultiplierState", "$DmpMult", FameCategoryMultiplier[21], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		
+		If Mods.IsFHUInstalled == True
+			AddSliderOptionST("SLSF_Reloaded_CumDumpMultiplierState", "$DmpMult", FameCategoryMultiplier[21], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		EndIf
 		
 		If Mods.IsFameCommentsInstalled == True
 			AddSliderOptionST("SLSF_Reloaded_UnfaithfulMultiplierState", "$UnfMult", FameCategoryMultiplier[22], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))

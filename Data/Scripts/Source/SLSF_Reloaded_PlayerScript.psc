@@ -32,6 +32,7 @@ Event OnInit()
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
 	RegisterForMenu("Sleep/Wait Menu")
+	Debug.Trace("SLSF Reloaded - Player Script Initialized")
 EndEvent
 
 Event OnPlayerLoadGame()
@@ -44,51 +45,89 @@ Event OnPlayerLoadGame()
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
 	RegisterForMenu("Sleep/Wait Menu")
 	LocationManager.CustomLocationCleanup()
+	Debug.Trace("SLSF Reloaded - Player Script: Load Game Complete")
 EndEvent
 
 Event OnMenuClose(String MenuName) ;We only registered the Sleep/Wait Menu, so that's the only one we'll capture with this event
 	Float TimeDifference = Utility.GetCurrentGameTime() - TimeManager.LastCheckedTime
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - Sleep/Wait Menu Closed")
+		Debug.Trace("SLSF Reloaded - Sleep/Wait Menu Time Check. Curent Game Time is: " + Utility.GetCurrentGameTime())
+		Debug.Trace("SLSF Reloaded - Sleep/Wait Menu Time Check. TimeManager Last Checked Time is: " + TimeManager.LastCheckedTime)
+		Debug.Trace("SLSF Reloaded - Sleep/Wait Menu Time Check. Difference is: " + TimeDifference)
+	EndIf
 	If TimeDifference >= 0.0199 ;~0.0199 is the time amount for an in-game half-hour
 		If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
+			Debug.Trace("SLSF Reloaded - Sleep/Wait Menu tiggers TimeManager")
 			TimeManager.PeriodicFameTimer()
 		EndIf
 	EndIf
 EndEvent
 
 Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - Sexlab Animation started")
+	EndIf
 	If hasPlayer == True
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - Sexlab Animation has player")
+		EndIf
 		SexSceneEnded = False
 		AnimationAnalyze(threadID)
 	EndIf
 EndEvent
 
 Event OnSexlabForeplayEnd(Int threadID, Bool hasPlayer)
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - Foreplay Animation ended")
+	EndIf
 	If hasPlayer == True
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - Foreplay Animation has player")
+		EndIf
 		SexSceneEnded = False
 		AnimationAnalyze(threadID)
 	EndIf
 EndEvent
 
 Event OnSexlabAnimationEnd(Int threadID, Bool hasPlayer)
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - Sexlab Animation ended")
+	EndIf
 	If hasPlayer == True
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - Sexlab Animation has player")
+		EndIf
 		SexSceneEnded = True
 	EndIf
 EndEvent
 
 Function AnimationAnalyze(Int threadID)
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - Animation Analyze started")
+	EndIf
 	If VisibilityManager.IsPlayerAnonymous() == True
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - Animation Analyze: Player is Anonymous. Analyze Stopped.")
+		EndIf
 		return
 	EndIf
 	
 	String PlayerLocation = LocationManager.CurrentLocationName()
 	
 	If LocationManager.IsLocationValid(PlayerLocation) == False
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - Animation Analyze: Location is Invalid. Analyze Stopped.")
+		EndIf
 		return
 	EndIf
 	
 	Utility.Wait(10.0) ;Give the player a short time to change the animation (or cancel it) if needed before grabbing information about the animation. Tried to account for possible starting lag as well.
 	
 	If SexSceneEnded == True
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - Animation Analyze: 'SexSceneEnded' detected as TRUE. Analyze Stopped.")
+		EndIf
 		return
 	EndIf
 	
@@ -96,6 +135,9 @@ Function AnimationAnalyze(Int threadID)
 	sslThreadController PlayerController = Sexlab.GetController(PlayerThread)
 	
 	If PlayerController.Animation.HasTag("BodySearch")
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - Animation Analyze: Detected BodySearch animation. Analyze Stopped.")
+		EndIf
 		return ;Ignore BodySearch Animations
 	EndIf
 	
@@ -104,6 +146,9 @@ Function AnimationAnalyze(Int threadID)
 	If PlayerController.Animation.HasTag("LeadIn") && Config.AllowForeplayFame == True
 		Foreplay = True
 	ElseIf PlayerController.Animation.HasTag("LeadIn") && Config.AllowForeplayFame == False
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - Animation Analyze: Detected LeadIn animation and AllowForeplayFame is FALSE. Analyze Stopped.")
+		EndIf
 		return
 	EndIf
 	
@@ -128,6 +173,9 @@ Function AnimationAnalyze(Int threadID)
 	Bool GainedMasochistFame = False
 	
 	If Actors.Length > 1
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - Animation Analyze: Actor Length is more than 1")
+		EndIf
 		Int PartnerIndex = 0
 		Int KissAndTellRoll = Utility.RandomInt(1,100)
 		Int FriendKissAndTell = Config.SexFameChanceByFriend as Int
@@ -135,19 +183,39 @@ Function AnimationAnalyze(Int threadID)
 		Bool StopPartnerCheck = False
 		
 		While PartnerIndex < Actors.Length && StopPartnerCheck == False
+			If Config.EnableTracing == True
+				Debug.Trace("SLSF Reloaded - Animation Analyze: PartnerIndex is " + PartnerIndex)
+			EndIf
 			If Actors[PartnerIndex] != PlayerRef
 				PartnerRelationship = Actors[PartnerIndex].GetRelationshipRank(PlayerRef)
+				If Config.EnableTracing == True
+					Debug.Trace("SLSF Reloaded - Animation Analyze: Checked partner relationship is " + PartnerRelationship)
+				EndIf
 				If PartnerRelationship < 1
 					StopPartnerCheck = True
 					AllPartnersAreFriends = False
 					AllPartnersAreLovers = False
+					If Config.EnableTracing == True
+						Debug.Trace("SLSF Reloaded - Animation Analyze: At least one partner is not a Friend or Lover. Partner Check will end.")
+					EndIf
 				ElseIf PartnerRelationship > 0 && PartnerRelationship < 4
 					AllPartnersAreFriends = True
 					AllPartnersAreLovers = False
+					If Config.EnableTracing == True
+						Debug.Trace("SLSF Reloaded - Animation Analyze: Currently all partners are at least FRIEND")
+					EndIf
 				ElseIf PartnerRelationship > 3 && AllPartnersAreFriends == False
 					AllPartnersAreLovers = True
+					If Config.EnableTracing == True
+						Debug.Trace("SLSF Reloaded - Animation Analyze: Currently all partners are LOVER")
+					EndIf
+				EndIf
+			Else
+				If Config.EnableTracing == True
+					Debug.Trace("SLSF Reloaded - Animation Analyze: Partner index is PLAYER. Relationship check skipped.")
 				EndIf
 			EndIf
+			PartnerIndex += 1
 		EndWhile
 		
 		If (AllPartnersAreFriends == False && AllPartnersAreLovers == False)
@@ -515,6 +583,9 @@ Function AnimationAnalyze(Int threadID)
 	EndIf
 	
 	Data.FameCheck()
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - Animation Analyze finished.")
+	EndIf
 EndFunction
 
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
@@ -523,8 +594,18 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 EndEvent
 
 Event OnUpdateGameTime()
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime started.")
+	EndIf
 	If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is not already running.")
+		EndIf
 		TimeManager.PeriodicFameTimer()
+	Else
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is already running. Skipped TimeManager call.")
+		EndIf
 	EndIf
 	
 	Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
@@ -537,7 +618,14 @@ Event OnUpdateGameTime()
 	SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
 	
 	If Config.AllowLegacyOverwrite == True
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is TRUE")
+		EndIf
 		LegacyOverwrite.OverwriteLegacyFame()
+	Else
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is FALSE")
+		EndIf
 	EndIf
 EndEvent
 
@@ -548,7 +636,14 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		ObjectName = akBaseObject.GetName()
 	EndIf
 	
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - PlayerScript OnObjectEquipped: ObjectName is: " + ObjectName)
+	EndIf
+	
 	If (akBaseObject == none || ObjectName == "")
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - PlayerScript OnObjectEquipped: Object is Null or has blank name. Event terminated.")
+		EndIf
 		return
 	ElseIf (ObjectName == "Skooma" || ObjectName == "Kordir's Skooma" || ObjectName == "Redwater Skooma" || ObjectName == "Double-Distilled Skooma")
 		Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
@@ -561,11 +656,27 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
 	EndIf
 	
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - PlayerScript OnObjectEquipped: Register VisibilityManager for Single Update")
+	EndIf
 	VisibilityManager.RegisterForSingleUpdate(0.1)
 EndEvent
 
 Event OnObjectUnequipped(Form akBaseObject, ObjectReference akReference)
+	String ObjectName = ""
+	
+	If akBaseObject != none
+		ObjectName = akBaseObject.GetName()
+	EndIf
+	
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - PlayerScript OnObjectUnequipped: Object name is: " + ObjectName)
+	EndIf
+	
 	If (akBaseObject == none || akBaseObject.GetName() == "")
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded - PlayerScript OnObjectUnequipped: Object is Null or has blank name. Event terminated.")
+		EndIf
 		return
 	EndIf
 	

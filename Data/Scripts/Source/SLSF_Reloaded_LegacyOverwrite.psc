@@ -1,10 +1,13 @@
 ScriptName SLSF_Reloaded_LegacyOverwrite extends Quest
 
+SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_LocationManager Property LocationManager Auto
 
 Function OverwriteLegacyFame()
+	Bool ResetLegacyWarningDisplayed = False
+	
 	Mods.OverwriteLegacyConfig()
 	
 	Int LocationIndex = 0 ;The Location Index from Legacy SLSF
@@ -15,6 +18,9 @@ Function OverwriteLegacyFame()
 	String LegacyString = "-EMPTY-" ;The Storage Util string we need to set for overwriting Legacy SLSF
 	
 	String PlayerLocation = LocationManager.CurrentLocationName()
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - Legacy Overwrite: Grabbed Player Location is " + PlayerLocation)
+	EndIf
 	If	PlayerLocation == "Haafingar"
 		PlayerLocation = "Solitude"
 	ElseIf PlayerLocation == "Eastmarch"
@@ -25,6 +31,10 @@ Function OverwriteLegacyFame()
 		PlayerLocation = "Markarth"
 	ElseIf PlayerLocation == "the Rift"
 		PlayerLocation = "Riften"
+	EndIf
+	
+	If Config.EnableTracing == True
+		Debug.Trace("SLSF Reloaded - Legacy Overwrite: Converted Player Location is " + PlayerLocation)
 	EndIf
 	
 	While LocationIndex < 24
@@ -137,13 +147,45 @@ Function OverwriteLegacyFame()
 				LegacyString = "SLSF.LocationsFame.PC.Whore"
 			EndIf
 			
-			If LocationIndex == 21 || LocationIndex == 20 || LocationIndex == 15 || FameIndex == 16
-				FameValue = 0
-			Else
-				FameValue = Data.GetFameValue(LocationName, FameType)
+			If Config.EnableTracing == True
+				Debug.Trace("SLSF Reloaded - Legacy Overwrite: Fame Type = " + FameType)
 			EndIf
 			
+			If LocationIndex == 21 || LocationIndex == 20 || LocationIndex == 15 || FameIndex == 16
+				FameValue = 0
+				If Config.EnableTracing == True
+					If FameIndex == 16
+						Debug.Trace("SLSF Reloaded - Legacy Overwrite: Unused Legacy Fame (Skooma). Returning Fame Value of 0.")
+					Else
+						Debug.Trace("SLSF Reloaded - Legacy Overwrite: Unused Legacy Location. Returning Fame Value of 0.")
+					EndIf
+				EndIf
+			Else
+				FameValue = Data.GetFameValue(LocationName, FameType)
+				If Config.EnableTracing == True
+					Debug.Trace("SLSF Reloaded - Legacy Overwrite: Location = " + LocationName)
+					Debug.Trace("SLSF Reloaded - Legacy Overwrite: Grabbed Fame Value = " + FameValue)
+				EndIf
+			EndIf
+			
+			If Config.EnableTracing == True
+				Debug.Trace("SLSF Reloaded - Legacy Overwrite: IntListSet: Legacy String = " + LegacyString)
+				Debug.Trace("SLSF Reloaded - Legacy Overwrite: IntListSet: LocationIndex = " + LocationIndex + " (Location Name Comparison = " + LocationName +")")
+				Debug.Trace("SLSF Reloaded - Legacy Overwrite: IntListSet: Fame Value = " + FameValue)
+			EndIf
 			StorageUtil.IntListSet(None, LegacyString, LocationIndex, FameValue)
+			
+			Int DebugInt = StorageUtil.IntListGet(None, LegacyString, LocationIndex)
+			If Config.EnableTracing == True
+				Debug.Trace("SLSF Reloaded - Legacy Overwrite: Debug Int List: Returned Value of Set Int = " + DebugInt)
+			EndIf
+			
+			If FameValue > 0 && DebugInt == 0 && ResetLegacyWarningDisplayed == False
+				Debug.MessageBox("SLSF Reloaded WARNING: Your Fame did not properly overwrite. You must reset Legacy SLSF Papyrus Storage. Legacy Overwrite will not work until you do!")
+				Utility.Wait(0.5)
+				Debug.MessageBox("SLSF Reloaded MESSAGE: Reset Legacy SLSF Papyrus Storage in Legacy SLSF's MCM, then Save and Quit to Desktop. Then load your game.")
+				ResetLegacyWarningDisplayed = True
+			EndIf
 			
 			If LocationName == PlayerLocation
 				If FameType == "Anal"
