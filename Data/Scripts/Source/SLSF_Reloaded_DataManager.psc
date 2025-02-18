@@ -48,6 +48,9 @@ Bool[] Property DushnikhYalSpreadFlags Auto
 Bool[] Property MorKhazgurSpreadFlags Auto
 Bool[] Property NarzulburSpreadFlags Auto
 
+Bool[] Property DefaultLocationDynamicAnonymityFlag Auto
+Bool[] Property CustomLocationDynamicAnonymityFlag Auto
+
 Int[] Property CustomLocation1Fame Auto
 Int[] Property CustomLocation2Fame Auto
 Int[] Property CustomLocation3Fame Auto
@@ -538,12 +541,9 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			WhiterunSpreadFlags[FameIndex] = False
 		EndIf
-	ElseIf LocationName == "Windhelm" || LocationName == "Eastmarch"
-		WindhelmFame[FameIndex] = FameValue
-		If FameValue >= Config.MinimumFameToSpread
-			WindhelmSpreadFlags[FameIndex] = True
-		Else
-			WindhelmSpreadFlags[FameIndex] = False
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[0] = False
 		EndIf
 	ElseIf LocationName == "Winterhold"
 		WinterholdFame[FameIndex] = FameValue
@@ -552,12 +552,31 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			WinterholdSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[1] = False
+		EndIf
+	ElseIf LocationName == "Windhelm" || LocationName == "Eastmarch"
+		WindhelmFame[FameIndex] = FameValue
+		If FameValue >= Config.MinimumFameToSpread
+			WindhelmSpreadFlags[FameIndex] = True
+		Else
+			WindhelmSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[2] = False
+		EndIf
 	ElseIf LocationName == "Solitude" || LocationName == "Haafingar"
 		SolitudeFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
 			SolitudeSpreadFlags[FameIndex] = True
 		Else
 			SolitudeSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[3] = False
 		EndIf
 	ElseIf LocationName == "Riften" || LocationName == "the Rift"
 		RiftenFame[FameIndex] = FameValue
@@ -566,12 +585,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			RiftenSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[4] = False
+		EndIf
 	ElseIf LocationName == "Markarth" || LocationName == "the Reach"
 		MarkarthFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
 			MarkarthSpreadFlags[FameIndex] = True
 		Else
 			MarkarthSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[5] = False
 		EndIf
 	ElseIf LocationName == "Morthal" || LocationName == "Hjaalmarch"
 		MorthalFame[FameIndex] = FameValue
@@ -580,12 +607,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			MorthalSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[6] = False
+		EndIf
 	ElseIf LocationName == "Dawnstar" || LocationName == "the Pale"
 		DawnstarFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
 			DawnstarSpreadFlags[FameIndex] = True
 		Else
 			DawnstarSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[7] = False
 		EndIf
 	ElseIf LocationName == "Falkreath"
 		FalkreathFame[FameIndex] = FameValue
@@ -594,12 +629,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			FalkreathSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[8] = False
+		EndIf
 	ElseIf LocationName == "Raven Rock"
 		RavenRockFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
 			RavenRockSpreadFlags[FameIndex] = True
 		Else
 			RavenRockSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[9] = False
 		EndIf
 	ElseIf LocationName == "Riverwood"
 		RiverwoodFame[FameIndex] = FameValue
@@ -608,12 +651,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			RiverwoodSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[10] = False
+		EndIf
 	ElseIf LocationName == "Rorikstead"
 		RoriksteadFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
 			RoriksteadSpreadFlags[FameIndex] = True
 		Else
 			RoriksteadSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[11] = False
 		EndIf
 	ElseIf LocationName == "Ivarstead"
 		IvarsteadFame[FameIndex] = FameValue
@@ -622,12 +673,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			IvarsteadSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[12] = False
+		EndIf
 	ElseIf LocationName == "Shor's Stone"
 		ShorsStoneFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
 			ShorsStoneSpreadFlags[FameIndex] = True
 		Else
 			ShorsStoneSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[13] = False
 		EndIf
 	ElseIf LocationName == "Dragon Bridge"
 		DragonBridgeFame[FameIndex] = FameValue
@@ -636,12 +695,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			DragonBridgeSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[14] = False
+		EndIf
 	ElseIf LocationName == "Karthwasten"
 		KarthwastenFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
 			KarthwastenSpreadFlags[FameIndex] = True
 		Else
 			KarthwastenSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[15] = False
 		EndIf
 	ElseIf LocationName == "Skaal Village"
 		SkaalVillageFame[FameIndex] = FameValue
@@ -650,12 +717,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			SkaalVillageSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[16] = False
+		EndIf
 	ElseIf LocationName == "Largashbur"
 		LargashburFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
 			LargashburSpreadFlags[FameIndex] = True
 		Else
 			LargashburSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[17] = False
 		EndIf
 	ElseIf LocationName == "Dushnikh Yal"
 		DushnikhYalFame[FameIndex] = FameValue
@@ -664,6 +739,10 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			DushnikhYalSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[18] = False
+		EndIf
 	ElseIf LocationName == "Mor Khazgur"
 		MorKhazgurFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
@@ -671,12 +750,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 		Else
 			MorKhazgurSpreadFlags[FameIndex] = False
 		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[19] = False
+		EndIf
 	ElseIf LocationName == "Narzulbur"
 		NarzulburFame[FameIndex] = FameValue
 		If FameValue >= Config.MinimumFameToSpread
 			NarzulburSpreadFlags[FameIndex] = True
 		Else
 			NarzulburSpreadFlags[FameIndex] = False
+		EndIf
+		
+		If FameValue >= Config.DynamicAnonymityFameCutoff
+			DefaultLocationDynamicAnonymityFlag[20] = False
 		EndIf
 	Else
 		CustomLocationIndex = LocationManager.CustomLocation.Find(LocationName)
@@ -687,12 +774,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation1SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[0] = False
+			EndIf
 		ElseIf CustomLocationIndex == 1
 			CustomLocation2Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation2SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation2SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[1] = False
 			EndIf
 		ElseIf CustomLocationIndex == 2
 			CustomLocation3Fame[FameIndex] = FameValue
@@ -701,12 +796,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation3SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[2] = False
+			EndIf
 		ElseIf CustomLocationIndex == 3
 			CustomLocation4Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation4SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation4SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[3] = False
 			EndIf
 		ElseIf CustomLocationIndex == 4
 			CustomLocation5Fame[FameIndex] = FameValue
@@ -715,12 +818,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation5SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[4] = False
+			EndIf
 		ElseIf CustomLocationIndex == 5
 			CustomLocation6Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation6SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation6SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[5] = False
 			EndIf
 		ElseIf CustomLocationIndex == 6
 			CustomLocation7Fame[FameIndex] = FameValue
@@ -729,12 +840,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation7SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[6] = False
+			EndIf
 		ElseIf CustomLocationIndex == 7
 			CustomLocation8Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation8SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation8SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[7] = False
 			EndIf
 		ElseIf CustomLocationIndex == 8
 			CustomLocation9Fame[FameIndex] = FameValue
@@ -743,12 +862,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation9SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[8] = False
+			EndIf
 		ElseIf CustomLocationIndex == 9
 			CustomLocation10Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation10SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation10SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[9] = False
 			EndIf
 		ElseIf CustomLocationIndex == 10
 			CustomLocation11Fame[FameIndex] = FameValue
@@ -757,12 +884,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation11SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[10] = False
+			EndIf
 		ElseIf CustomLocationIndex == 11
 			CustomLocation12Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation12SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation12SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[11] = False
 			EndIf
 		ElseIf CustomLocationIndex == 12
 			CustomLocation13Fame[FameIndex] = FameValue
@@ -771,12 +906,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation13SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[12] = False
+			EndIf
 		ElseIf CustomLocationIndex == 13
 			CustomLocation14Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation14SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation14SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[13] = False
 			EndIf
 		ElseIf CustomLocationIndex == 14
 			CustomLocation15Fame[FameIndex] = FameValue
@@ -785,12 +928,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation15SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[14] = False
+			EndIf
 		ElseIf CustomLocationIndex == 15
 			CustomLocation16Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation16SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation16SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[15] = False
 			EndIf
 		ElseIf CustomLocationIndex == 16
 			CustomLocation17Fame[FameIndex] = FameValue
@@ -799,12 +950,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation17SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[16] = False
+			EndIf
 		ElseIf CustomLocationIndex == 17
 			CustomLocation18Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation18SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation18SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[17] = False
 			EndIf
 		ElseIf CustomLocationIndex == 18
 			CustomLocation19Fame[FameIndex] = FameValue
@@ -813,12 +972,20 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation19SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[18] = False
+			EndIf
 		ElseIf CustomLocationIndex == 19
 			CustomLocation20Fame[FameIndex] = FameValue
 			If FameValue >= Config.MinimumFameToSpread
 				CustomLocation20SpreadFlags[FameIndex] = True
 			Else
 				CustomLocation20SpreadFlags[FameIndex] = False
+			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[19] = False
 			EndIf
 		ElseIf CustomLocationIndex == 20
 			CustomLocation21Fame[FameIndex] = FameValue
@@ -827,9 +994,402 @@ Function SetFameValue(String LocationName, String FameCategory, Int FameValue)
 			Else
 				CustomLocation21SpreadFlags[FameIndex] = False
 			EndIf
+			
+			If FameValue >= Config.DynamicAnonymityFameCutoff
+				CustomLocationDynamicAnonymityFlag[20] = False
+			EndIf
 		Else
 			Debug.MessageBox("SLSF Reloaded - ERROR: Could not set Fame Value for " + LocationName + "!")
 			return
+		EndIf
+	EndIf
+EndFunction
+
+Function DecayDynamicAnonymityCheck(Int LocationIndex, Bool IsDefaultLocation)
+	Int FameIndex = 0
+	Bool CanBeAnonymous = True
+	
+	If IsDefaultLocation == True
+		If LocationIndex == 0 ;Whiterun
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If WhiterunFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 1
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If WinterholdFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 2
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If WindhelmFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 3
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If SolitudeFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 4
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If RiftenFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 5
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If MarkarthFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 6
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If MorthalFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 7
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If DawnstarFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 8
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If FalkreathFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 9
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If RavenRockFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 10
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If RiverwoodFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 11
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If RoriksteadFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 12
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If IvarsteadFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 13
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If ShorsStoneFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 14
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If DragonBridgeFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 15
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If KarthwastenFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 16
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If SkaalVillageFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 17
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If LargashburFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 18
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If DushnikhYalFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 19
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If MorKhazgurFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 20
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If NarzulburFame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			DefaultLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		EndIf
+	Else
+		If LocationIndex == 0
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation1Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 1
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation2Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 2
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation3Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 3
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation4Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 4
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation5Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 5
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation6Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 6
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation7Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 7
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation8Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 8
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation9Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 9
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation10Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 10
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation11Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 11
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation12Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 12
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation13Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 13
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation14Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 14
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation15Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 15
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation16Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 16
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation17Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 17
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation18Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 18
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation19Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 19
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation20Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
+		ElseIf LocationIndex == 20
+			While FameIndex < FameManager.FameType.Length && CanBeAnonymous == True
+				If CustomLocation21Fame[FameIndex] >= Config.DynamicAnonymityFameCutoff
+					CanBeAnonymous = False
+				EndIf
+				FameIndex += 1
+			EndWhile
+			
+			CustomLocationDynamicAnonymityFlag[LocationIndex] = CanBeAnonymous
 		EndIf
 	EndIf
 EndFunction

@@ -40,7 +40,7 @@ Function PeriodicFameTimer()
 		Debug.Trace("SLSF Reloaded Time Manager - Time Difference is: " + TimeDifference + " (Need 0.0199 or more)")
 	EndIf
 	
-	While TimeDifference < 0.0199 ;Script delay can prevents the checked time from reaching 0.02, so we check a slightly lower number
+	While TimeDifference < 0.0199 ;Script delay can prevent the checked time from reaching 0.02, so we check a slightly lower number
 		If Config.EnableTracing == True
 			Debug.Trace("SLSF Reloaded Time Manager - Checked too soon. Waiting 5 in-game minutes...")
 		EndIf

@@ -2,6 +2,7 @@ Scriptname SLSF_Reloaded_CommentManager extends Quest
 
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_MCM Property Config Auto
+SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 
 GlobalVariable Property SLSF_AllowComment Auto
 GlobalVariable Property SLSF_Reloaded_CommentFrequency Auto
@@ -15,6 +16,12 @@ EndEvent
 
 Event OnUpdate()
 	NakedCommentPublicWhoreCheck()
+	
+	If VisibilityManager.IsPlayerAnonymous() == True
+		SLSF_AllowComment.SetValue(0.0)
+		RegisterForSingleUpdate(10.0)
+		return
+	EndIf
 	
     If PlayerRef.GetCombatState() != 0
         RegisterForSingleUpdate(6.0)

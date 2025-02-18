@@ -17,10 +17,12 @@ Bool Property IsFameCommentsInstalled Auto Hidden
 Bool Property IsBimbosInstalled Auto Hidden
 Bool Property IsSexlabApproachInstalled Auto Hidden
 Bool Property IsLegacySLSFInstalled Auto Hidden
+Bool Property IsSLACSInstalled Auto Hidden
 
 sr_InflateQuest Property FHU Auto Hidden
 PW_TrackerScript Property PW_Tracker Auto Hidden
 SLSF_Configuration Property LegacyConfig Auto Hidden
+SLACS_main Property SLACS Auto Hidden
 
 Keyword Property DD_Lockable Auto Hidden
 Keyword Property DD_Collar Auto Hidden
@@ -316,6 +318,14 @@ Function CheckInstalledMods()
 		SLSF_CurrentFamePCLocation_Sub_Slave = None
 		SLSF_CurrentFamePCLocation_Whore = None
 	EndIf
+	
+	If Game.GetModByName("SLACS.esp") != 255
+		IsSLACSInstalled = True
+		SLACS = Game.GetFormFromFile(0x005557, "SLACS.esp") as SLACS_main
+	Else
+		IsSLACSInstalled = False
+		SLACS = None
+	EndIf
 EndFunction
 
 sr_InflateQuest Function GetFHUData() Global
@@ -339,7 +349,7 @@ Function OverwriteLegacyConfig()
 	LegacyConfig.DisableTutorial = True
 	LegacyConfig.NotificationIncrease = False
 	LegacyConfig.AllowCommentProbability = (SLSF_Reloaded_CommentFrequency.GetValue() / 100)
-	LegacyConfig.CommentProbabilityRepository = LegacyConfig.AllowCommentProbability
+	LegacyConfig.CommentProbabilityRepository = 0
 EndFunction
 
 Bool Function IsFMPregnant(Actor actorRef)

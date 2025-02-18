@@ -1402,7 +1402,10 @@ Function DecayFame()
 				EndIf
 				TypeIndex += 1
 			EndWhile
+			
+			;Data.DecayDynamicAnonymityCheck(LocationIndex, True)
 		EndIf
+		
 		TypeIndex = 0
 		LocationIndex += 1
 	EndWhile
@@ -1469,6 +1472,7 @@ Function DecayFame()
 				EndIf
 				TypeIndex += 1
 			EndWhile
+			;Data.DecayDynamicAnonymityCheck(LocationIndex, True)
 		EndIf
 		TypeIndex = 0
 		LocationIndex += 1
@@ -1486,9 +1490,8 @@ EndFunction
 Function SpreadFameRoll()
 	Int FameSpreadRoll = 0
 	Int SpreadChance = 0
-	
-	;Check if Fame Spread is not Paused, and perform spread operations if not.
 	Int LocationIndex = 0
+	
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If Data.DefaultLocationHasSpreadableFame[LocationIndex] == True
 			SpreadChance = Config.DefaultLocationSpreadChance[LocationIndex]
@@ -1591,7 +1594,7 @@ Function SpreadFame(String SpreadFromLocation)
 	;Get possible fame spread targets
 	Int DefaultLocations = LocationManager.DefaultLocation.Length
 	Int CustomLocations = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
-	Int TotalLocations = DefaultLocations + CustomLocations
+	Int TotalLocations = 0
 	
 	String[] PossibleSpreadTargets = New String[42] ;21 default + 21 custom locations
 	
@@ -1600,26 +1603,289 @@ Function SpreadFame(String SpreadFromLocation)
 	Int DefaultLocationIndex = 0
 	Int CustomLocationIndex = 0
 	
-	While PossibleLocationIndex < TotalLocations
-		If DefaultLocationIndex < DefaultLocations
-			PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.DefaultLocation[DefaultLocationIndex]
-			DefaultLocationIndex += 1
-		ElseIf CustomLocationIndex < CustomLocations
-			PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.CustomLocation[CustomLocationIndex]
-			CustomLocationIndex += 1
-		EndIf
-		;Debug.Trace("SLSF Reloaded - PossibleSpreadTargets[" + PossibleLocationIndex + "]: " + PossibleSpreadTargets[PossibleLocationIndex])
-		PossibleLocationIndex += 1
-	EndWhile
-	
-	;Roll Target location index based on number of total locations
 	Int TargetLocationIndex = 0
 	Bool TargetLocationValid = False
+	Bool SpreadingFromCustomLocation = False
 	
+	If Config.FameSpreadRestrictions == True
+		If SpreadFromLocation == "Whiterun"
+			PossibleSpreadTargets[0] = "Dawnstar"
+			PossibleSpreadTargets[1] = "Windhelm"
+			PossibleSpreadTargets[2] = "Riverwood"
+			PossibleSpreadTargets[3] = "Rorikstead"
+			PossibleSpreadTargets[4] = "Ivarstead"
+			PossibleSpreadTargets[5] = "Falkreath"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[6 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 6 + CustomLocations
+		ElseIf SpreadFromLocation == "Winterhold"
+			PossibleSpreadTargets[0] = "Dawnstar"
+			PossibleSpreadTargets[1] = "Windhelm"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 2 + CustomLocations
+		ElseIf SpreadFromLocation == "Windhelm"
+			PossibleSpreadTargets[0] = "Whiterun"
+			PossibleSpreadTargets[1] = "Winterhold"
+			PossibleSpreadTargets[2] = "Shor's Stone"
+			PossibleSpreadTargets[3] = "Narzulbur"
+			PossibleSpreadTargets[4] = "Raven Rock"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[5 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 5 + CustomLocations
+		ElseIf SpreadFromLocation == "Solitude"
+			PossibleSpreadTargets[0] = "Dragon Bridge"
+			PossibleSpreadTargets[1] = "Morthal"
+			PossibleSpreadTargets[2] = "Dawnstar"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[3 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 3 + CustomLocations
+		ElseIf SpreadFromLocation == "Riften"
+			PossibleSpreadTargets[0] = "Shor's Stone"
+			PossibleSpreadTargets[1] = "Ivarstead"
+			PossibleSpreadTargets[2] = "Largashbur"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[3 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 3 + CustomLocations
+		ElseIf SpreadFromLocation == "Markarth"
+			PossibleSpreadTargets[0] = "Karthwasten"
+			PossibleSpreadTargets[1] = "Rorikstead"
+			PossibleSpreadTargets[2] = "Dushnikh Yal"
+			PossibleSpreadTargets[3] = "Falkreath"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 4 + CustomLocations
+		ElseIf SpreadFromLocation == "Morthal"
+			PossibleSpreadTargets[0] = "Dawnstar"
+			PossibleSpreadTargets[1] = "Solitude"
+			PossibleSpreadTargets[2] = "Dragon Bridge"
+			PossibleSpreadTargets[3] = "Rorikstead"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 4 + CustomLocations
+		ElseIf SpreadFromLocation == "Dawnstar"
+			PossibleSpreadTargets[0] = "Morthal"
+			PossibleSpreadTargets[1] = "Solitude"
+			PossibleSpreadTargets[2] = "Winterhold"
+			PossibleSpreadTargets[3] = "Whiterun"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 4 + CustomLocations
+		ElseIf SpreadFromLocation == "Falkreath"
+			PossibleSpreadTargets[0] = "Whiterun"
+			PossibleSpreadTargets[1] = "Riverwood"
+			PossibleSpreadTargets[2] = "Ivarstead"
+			PossibleSpreadTargets[3] = "Rorikstead"
+			PossibleSpreadTargets[4] = "Markarth"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[5 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 5 + CustomLocations
+		ElseIf SpreadFromLocation == "Raven Rock"
+			PossibleSpreadTargets[0] = "Windhelm"
+			PossibleSpreadTargets[1] = "Skaal Village"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 2 + CustomLocations
+		ElseIf SpreadFromLocation == "Riverwood"
+			PossibleSpreadTargets[0] = "Whiterun"
+			PossibleSpreadTargets[1] = "Falkreath"
+			PossibleSpreadTargets[2] = "Rorikstead"
+			PossibleSpreadTargets[3] = "Ivarstead"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 4 + CustomLocations
+		ElseIf SpreadFromLocation == "Rorikstead"
+			PossibleSpreadTargets[0] = "Whiterun"
+			PossibleSpreadTargets[1] = "Riverwood"
+			PossibleSpreadTargets[2] = "Falkreath"
+			PossibleSpreadTargets[3] = "Dushnikh Yal"
+			PossibleSpreadTargets[4] = "Markarth"
+			PossibleSpreadTargets[5] = "Karthwasten"
+			PossibleSpreadTargets[6] = "Dragon Bridge"
+			PossibleSpreadTargets[7] = "Morthal"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[8 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 8 + CustomLocations
+		ElseIf SpreadFromLocation == "Ivarstead"
+			PossibleSpreadTargets[0] = "Riften"
+			PossibleSpreadTargets[1] = "Shor's Stone"
+			PossibleSpreadTargets[2] = "Whiterun"
+			PossibleSpreadTargets[3] = "Riverwood"
+			PossibleSpreadTargets[4] = "Falkreath"
+			PossibleSpreadTargets[5] = "Largashbur"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[6 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 6 + CustomLocations
+		ElseIf SpreadFromLocation == "Shor's Stone"
+			PossibleSpreadTargets[0] = "Riften"
+			PossibleSpreadTargets[1] = "Ivarstead"
+			PossibleSpreadTargets[2] = "Windhelm"
+			PossibleSpreadTargets[3] = "Narzulbur"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 4 + CustomLocations
+		ElseIf SpreadFromLocation == "Dragon Bridge"
+			PossibleSpreadTargets[0] = "Solitude"
+			PossibleSpreadTargets[1] = "Morthal"
+			PossibleSpreadTargets[2] = "Karthwasten"
+			PossibleSpreadTargets[3] = "Rorikstead"
+			PossibleSpreadTargets[4] = "Mor Khazgur"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[5 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 5 + CustomLocations
+		ElseIf SpreadFromLocation == "Karthwasten"
+			PossibleSpreadTargets[0] = "Markarth"
+			PossibleSpreadTargets[1] = "Dragon Bridge"
+			PossibleSpreadTargets[2] = "Rorikstead"
+			PossibleSpreadTargets[3] = "Mor Khazgur"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 4 + CustomLocations
+		ElseIf SpreadFromLocation == "Skaal Village"
+			PossibleSpreadTargets[0] = "Raven Rock"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[1 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 1 + CustomLocations
+		ElseIf SpreadFromLocation == "Largashbur"
+			PossibleSpreadTargets[0] = "Riften"
+			PossibleSpreadTargets[1] = "Ivarstead"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 2 + CustomLocations
+		ElseIf SpreadFromLocation == "Dushnikh Yal"
+			PossibleSpreadTargets[0] = "Markarth"
+			PossibleSpreadTargets[1] = "Rorikstead"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 2 + CustomLocations
+		ElseIf SpreadFromLocation == "Mor Khazgur"
+			PossibleSpreadTargets[0] = "Dragon Bridge"
+			PossibleSpreadTargets[1] = "Karthwasten"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 2 + CustomLocations
+		ElseIf SpreadFromLocation == "Narzulbur"
+			PossibleSpreadTargets[0] = "Windhelm"
+			PossibleSpreadTargets[1] = "Shor's Stone"
+			
+			While PossibleLocationIndex < CustomLocations
+				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
+				PossibleLocationIndex += 1
+			EndWhile
+			
+			TotalLocations = 2 + CustomLocations
+		Else
+			SpreadingFromCustomLocation = True
+		EndIf
+	EndIf
+	
+	If Config.FameSpreadRestrictions == False || SpreadingFromCustomLocation == True
+		TotalLocations = DefaultLocations + CustomLocations
+		While PossibleLocationIndex < TotalLocations
+			If DefaultLocationIndex < DefaultLocations
+				PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.DefaultLocation[DefaultLocationIndex]
+				DefaultLocationIndex += 1
+			ElseIf CustomLocationIndex < CustomLocations
+				PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.CustomLocation[CustomLocationIndex]
+				CustomLocationIndex += 1
+			EndIf
+			;Debug.Trace("SLSF Reloaded - PossibleSpreadTargets[" + PossibleLocationIndex + "]: " + PossibleSpreadTargets[PossibleLocationIndex])
+			PossibleLocationIndex += 1
+		EndWhile
+	EndIf
+	
+	;Roll Target location index based on number of total locations
 	While TargetLocationValid == False
-		TargetLocationIndex = Utility.RandomInt(0, (TotalLocations - 1))
+		If Config.FameSpreadRestrictions == True && SpreadFromLocation == "Skaal Village" && TotalLocations == 1
+			TargetLocationIndex = 0
+			TargetLocationValid = True
+		Else
+			TargetLocationIndex = Utility.RandomInt(0, (TotalLocations - 1))
+		EndIf
+		
 		;Debug.Trace("SLSF Reloaded - Target Location Roll (Index): " + TargetLocationIndex)
 		;Debug.Trace("SLSF Reloaded - Target Location: " + PossibleSpreadTargets[TargetLocationIndex])
+		
 		If SpreadFromLocation != PossibleSpreadTargets[TargetLocationIndex] ;ensure we are not trying to spread to the original location
 			;Debug.Trace("SLSF Reloaded - Target Location Valid!")
 			TargetLocationValid = True
@@ -1627,7 +1893,7 @@ Function SpreadFame(String SpreadFromLocation)
 			;Debug.Trace("SLSF Reloaded - Target Location NOT Valid. Rolling again...")
 		EndIf
 	EndWhile
-	;Debug.Notification("SLSF Reloaded - Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex]) ;Testing line - REMOVE WHEN DONE
+	
 	If Config.EnableTracing == True
 		Debug.Trace("SLSF Reloaded - Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
 	EndIf

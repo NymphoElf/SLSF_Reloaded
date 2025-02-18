@@ -1,13 +1,19 @@
 ScriptName SLSF_Reloaded_LocationManager extends Quest
 
 SLSF_Reloaded_FameManager Property FameManager Auto
+SLSF_Reloaded_DataManager Property DataManager Auto
+SLSF_Reloaded_DynamicAnonymity Property DynamicAnonymityScript Auto
 
 Location Property CurrentLocation Auto Hidden
 Location[] Property MajorLocations Auto
 Location[] Property MinorLocations Auto
 Location[] Property CustomLocationRef Auto
+
 String[] Property DefaultLocation Auto ;Size 21
 String[] Property CustomLocation Auto ;Size 21 | "---" by Default
+
+Keyword[] Property ExcludedLocations Auto ;NordicRuin, FalmerHive, HagravenNest, Cave, AnimalDen, DwarvenRuin, ForswornCamp
+Keyword[] Property OverrideExcludedLocation Auto ;BanditCamp, VampireLiar, WarlockLair, MilitaryFort, MilitaryCamp
 
 Bool Property CustomLocationsFull Auto Hidden
 
@@ -63,6 +69,11 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 		EndIf
 		
 		If LocationToRegister != "" && LocationToRegister != "Wilderness" && CurrentLocation != None
+			If IsLocationExcluded(CurrentLocation) == True
+				Debug.MessageBox("SLSF Reloaded - Location is marked as EXCLUDED. Location not registered.")
+				return False
+			EndIf
+			
 			If IsLocationValid(LocationToRegister) == False
 				return True
 			Else
@@ -114,7 +125,7 @@ Function UpdateCustomLocationCount()
 EndFunction
 
 String Function FetchLocationName(Location LocationRef)
-	If LocationRef == None
+	If LocationRef == None || LocationRef.GetName() == ""
 		return "$NoneText"
 	EndIf
 	return LocationRef.GetName()
@@ -125,17 +136,17 @@ String Function CurrentLocationName()
 		return "$NoneText"
 	EndIf
 	
-	String LocationParent = CurrentLocationParent(CurrentLocation)
+	String FameLocation = GetFameLocation(CurrentLocation)
 	
-	If LocationParent != "Null"
-		return LocationParent
+	If FameLocation != "Null"
+		return FameLocation
 	EndIf
 	
 	return CurrentLocation.GetName()
 EndFunction
 
-String Function GetLocalizedName(Location LocationRef)
-	If LocationRef == None
+String Function GetLocalizedFameLocation(Location LocationRef)
+	If LocationRef == None || IsLocationExcluded(LocationRef) == True
 		return "$NoneText"
 	EndIf
 	
@@ -144,7 +155,7 @@ String Function GetLocalizedName(Location LocationRef)
 	
 	;Check Custom Locations First. Minor and Major locations may have a Custom Location as a Child Location as well.
 	While LocationIndex < CustomLocationCount
-		If CustomLocationRef[LocationIndex].IsChild(LocationRef)
+		If CustomLocationRef[LocationIndex].IsChild(LocationRef) || CustomLocationRef[LocationIndex].GetName() == LocationRef.GetName()
 			return CustomLocation[LocationIndex]
 		EndIf
 		LocationIndex += 1
@@ -154,7 +165,7 @@ String Function GetLocalizedName(Location LocationRef)
 	
 	;Check Minor Locations next, because Major Locations have some Minor Locations as a Child Location as well.
 	While LocationIndex < MinorLocations.Length
-		If MinorLocations[LocationIndex].IsChild(LocationRef)
+		If MinorLocations[LocationIndex].IsChild(LocationRef) || MinorLocations[LocationIndex].GetName() == LocationRef.GetName()
 			return MinorLocations[LocationIndex].GetName()
 		EndIf
 		LocationIndex += 1
@@ -171,13 +182,17 @@ String Function GetLocalizedName(Location LocationRef)
 	return "$NoneText"
 EndFunction
 
-String Function CurrentLocationParent(Location LocationRef)
+String Function GetFameLocation(Location LocationRef)
+	If LocationRef == None || IsLocationExcluded(LocationRef) == True
+		return "Null"
+	EndIf
+	
 	Int CustomLocationCount = SLSF_Reloaded_CustomLocationCount.GetValue() as Int
 	Int LocationIndex = 0
 	
 	;Check Custom Locations First. Minor and Major locations may have a Custom Location as a Child Location as well.
 	While LocationIndex < CustomLocationCount
-		If CustomLocationRef[LocationIndex].IsChild(LocationRef)
+		If CustomLocationRef[LocationIndex].IsChild(LocationRef) || CustomLocationRef[LocationIndex].GetName() == LocationRef.GetName()
 			return CustomLocation[LocationIndex]
 		EndIf
 		LocationIndex += 1
@@ -187,7 +202,7 @@ String Function CurrentLocationParent(Location LocationRef)
 	
 	;Check Minor Locations next, because Major Locations have some Minor Locations as a Child Location as well.
 	While LocationIndex < MinorLocations.Length
-		If MinorLocations[LocationIndex].IsChild(LocationRef)
+		If MinorLocations[LocationIndex].IsChild(LocationRef) || MinorLocations[LocationIndex].GetName() == LocationRef.GetName()
 			return DefaultLocation[LocationIndex + 10]
 		EndIf
 		LocationIndex += 1
@@ -202,6 +217,31 @@ String Function CurrentLocationParent(Location LocationRef)
 		LocationIndex += 1
 	EndWhile
 	return "Null"
+EndFunction
+
+;Filter Dungeons by Keywords - Dungeons should not be valid Fame locations
+Bool Function IsLocationExcluded(Location LocationRef)
+	Int ExcludedKeywordIndex = 0
+	Int OverrideKeywordIndex = 0
+	Bool ValidExclusion = False
+	Bool ExclusionOverridden = False
+	
+	While ExcludedKeywordIndex < ExcludedLocations.Length && ValidExclusion == False && ExclusionOverridden == False
+		If LocationRef.HasKeyword(ExcludedLocations[ExcludedKeywordIndex])
+			While OverrideKeywordIndex < OverrideExcludedLocation.Length && ExclusionOverridden == False
+				If LocationRef.HasKeyword(OverrideExcludedLocation[OverrideKeywordIndex])
+					ValidExclusion = False
+					ExclusionOverridden = True
+				Else
+					ValidExclusion = True
+				EndIf
+				OverrideKeywordIndex += 1
+			EndWhile
+		EndIf
+		ExcludedKeywordIndex += 1
+	EndWhile
+	
+	return ValidExclusion
 EndFunction
 
 Function RegisterCustomLocation()
@@ -257,6 +297,7 @@ Function UnregisterCustomLocation(Int LocationIndexToUnregister)
 	;Compact Custom Location Indexes - Required to keep other functions functional
 	Int LocationIndex = 0
 	Int IndexLimit = (CustomLocation.Length) - 1 ;Stop 1 index below length because we'd check beyond the Array length otherwise
+	Int FameIndex = 0
 	
 	While LocationIndex < IndexLimit 
 		If CustomLocation[LocationIndex] == "---" && CustomLocation[LocationIndex + 1] != "---"
@@ -266,6 +307,75 @@ Function UnregisterCustomLocation(Int LocationIndexToUnregister)
 			CustomLocation[LocationIndex + 1] = "---"
 			CustomLocationRef[LocationIndex + 1] = None
 		EndIf
+		LocationIndex += 1
+	EndWhile
+	
+	LocationIndex = 0
+	;Shift Fame Data and Anonymity Data, then set last index to 0
+	While LocationIndex < 21
+		While FameIndex < FameManager.FameType.Length
+			If LocationIndex == 0
+				DataManager.CustomLocation1Fame[FameIndex] = DataManager.CustomLocation2Fame[FameIndex]
+			ElseIf LocationIndex == 1
+				DataManager.CustomLocation2Fame[FameIndex] = DataManager.CustomLocation3Fame[FameIndex]
+			ElseIf LocationIndex == 2
+				DataManager.CustomLocation3Fame[FameIndex] = DataManager.CustomLocation4Fame[FameIndex]
+			ElseIf LocationIndex == 3
+				DataManager.CustomLocation4Fame[FameIndex] = DataManager.CustomLocation5Fame[FameIndex]
+			ElseIf LocationIndex == 4
+				DataManager.CustomLocation5Fame[FameIndex] = DataManager.CustomLocation6Fame[FameIndex]
+			ElseIf LocationIndex == 5
+				DataManager.CustomLocation6Fame[FameIndex] = DataManager.CustomLocation7Fame[FameIndex]
+			ElseIf LocationIndex == 6
+				DataManager.CustomLocation7Fame[FameIndex] = DataManager.CustomLocation8Fame[FameIndex]
+			ElseIf LocationIndex == 7
+				DataManager.CustomLocation8Fame[FameIndex] = DataManager.CustomLocation9Fame[FameIndex]
+			ElseIf LocationIndex == 8
+				DataManager.CustomLocation9Fame[FameIndex] = DataManager.CustomLocation10Fame[FameIndex]
+			ElseIf LocationIndex == 9
+				DataManager.CustomLocation10Fame[FameIndex] = DataManager.CustomLocation11Fame[FameIndex]
+			ElseIf LocationIndex == 10
+				DataManager.CustomLocation11Fame[FameIndex] = DataManager.CustomLocation12Fame[FameIndex]
+			ElseIf LocationIndex == 11
+				DataManager.CustomLocation12Fame[FameIndex] = DataManager.CustomLocation13Fame[FameIndex]
+			ElseIf LocationIndex == 12
+				DataManager.CustomLocation13Fame[FameIndex] = DataManager.CustomLocation14Fame[FameIndex]
+			ElseIf LocationIndex == 13
+				DataManager.CustomLocation14Fame[FameIndex] = DataManager.CustomLocation15Fame[FameIndex]
+			ElseIf LocationIndex == 14
+				DataManager.CustomLocation15Fame[FameIndex] = DataManager.CustomLocation16Fame[FameIndex]
+			ElseIf LocationIndex == 15
+				DataManager.CustomLocation16Fame[FameIndex] = DataManager.CustomLocation17Fame[FameIndex]
+			ElseIf LocationIndex == 16
+				DataManager.CustomLocation17Fame[FameIndex] = DataManager.CustomLocation18Fame[FameIndex]
+			ElseIf LocationIndex == 17
+				DataManager.CustomLocation18Fame[FameIndex] = DataManager.CustomLocation19Fame[FameIndex]
+			ElseIf LocationIndex == 18
+				DataManager.CustomLocation19Fame[FameIndex] = DataManager.CustomLocation20Fame[FameIndex]
+			ElseIf LocationIndex == 19
+				DataManager.CustomLocation20Fame[FameIndex] = DataManager.CustomLocation21Fame[FameIndex]
+			ElseIf LocationIndex == 20
+				DataManager.CustomLocation21Fame[FameIndex] = 0
+			EndIf
+			FameIndex += 1
+		EndWhile
+		
+		If LocationIndex < 20
+			DynamicAnonymityScript.CustomLocationLastEnterTime[LocationIndex] = DynamicAnonymityScript.CustomLocationLastEnterTime[LocationIndex + 1]
+			DynamicAnonymityScript.CustomLocationLastExitTime[LocationIndex] = DynamicAnonymityScript.CustomLocationLastExitTime[LocationIndex + 1]
+			DynamicAnonymityScript.CustomLocationVisitTime[LocationIndex] = DynamicAnonymityScript.CustomLocationVisitTime[LocationIndex + 1]
+			DynamicAnonymityScript.CustomLocationRecognitionTime[LocationIndex] = DynamicAnonymityScript.CustomLocationRecognitionTime[LocationIndex + 1]
+			DynamicAnonymityScript.CustomLocationLocalAnonymityFlag[LocationIndex] = DynamicAnonymityScript.CustomLocationLocalAnonymityFlag[LocationIndex + 1]
+			DataManager.CustomLocationDynamicAnonymityFlag[LocationIndex] = DataManager.CustomLocationDynamicAnonymityFlag[LocationIndex + 1]
+		Else
+			DynamicAnonymityScript.CustomLocationLastEnterTime[LocationIndex] = 0
+			DynamicAnonymityScript.CustomLocationLastExitTime[LocationIndex] = 0
+			DynamicAnonymityScript.CustomLocationVisitTime[LocationIndex] = 0
+			DynamicAnonymityScript.CustomLocationRecognitionTime[LocationIndex] = 7
+			DynamicAnonymityScript.CustomLocationLocalAnonymityFlag[LocationIndex] = True
+			DataManager.CustomLocationDynamicAnonymityFlag[LocationIndex] = True
+		EndIf
+		
 		LocationIndex += 1
 	EndWhile
 	
@@ -319,22 +429,4 @@ Function UnregisterCustomLocationExternal(String LocationToUnregister)
 	EndIf
 	
 	UpdateCustomLocationCount()
-EndFunction
-
-Function CustomLocationCleanup()
-	Int LocationIndex = 0
-	
-	While LocationIndex < (SLSF_Reloaded_CustomLocationCount.GetValue() as Int)
-		If CustomLocation[LocationIndex] == "-EMPTY-"
-			CustomLocation[LocationIndex] = "---"
-		EndIf
-		
-		If CustomLocation[LocationIndex] == "---"
-			If CustomLocationRef[LocationIndex] != None
-				CustomLocationRef[LocationIndex] = None
-			EndIf
-		EndIf
-		
-		LocationIndex += 1
-	EndWhile
 EndFunction
