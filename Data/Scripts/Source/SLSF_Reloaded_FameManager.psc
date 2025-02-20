@@ -1602,13 +1602,15 @@ Function SpreadFame(String SpreadFromLocation)
 	Int PossibleLocationIndex = 0
 	Int DefaultLocationIndex = 0
 	Int CustomLocationIndex = 0
+	Int FillIndex = 0
 	
 	Int TargetLocationIndex = 0
 	Bool TargetLocationValid = False
-	Bool SpreadingFromCustomLocation = False
+	Bool SpreadingFromUndefinedLocation = False
 	
 	If Config.FameSpreadRestrictions == True
 		If SpreadFromLocation == "Whiterun"
+			
 			PossibleSpreadTargets[0] = "Dawnstar"
 			PossibleSpreadTargets[1] = "Windhelm"
 			PossibleSpreadTargets[2] = "Riverwood"
@@ -1616,22 +1618,50 @@ Function SpreadFame(String SpreadFromLocation)
 			PossibleSpreadTargets[4] = "Ivarstead"
 			PossibleSpreadTargets[5] = "Falkreath"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[6 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 6
+			
+			While FillIndex < LocationManager.WhiterunLocationList.Length
+				If LocationManager.WhiterunLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.WhiterunLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 6 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Winterhold"
 			PossibleSpreadTargets[0] = "Dawnstar"
 			PossibleSpreadTargets[1] = "Windhelm"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 2
+			
+			While FillIndex < LocationManager.WinterholdLocationList.Length
+				If LocationManager.WinterholdLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.WinterholdLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 2 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Windhelm"
 			PossibleSpreadTargets[0] = "Whiterun"
 			PossibleSpreadTargets[1] = "Winterhold"
@@ -1639,70 +1669,154 @@ Function SpreadFame(String SpreadFromLocation)
 			PossibleSpreadTargets[3] = "Narzulbur"
 			PossibleSpreadTargets[4] = "Raven Rock"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[5 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 5
+			
+			While FillIndex < LocationManager.EastmarchLocationList.Length
+				If LocationManager.EastmarchLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.EastmarchLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 5 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Solitude"
 			PossibleSpreadTargets[0] = "Dragon Bridge"
 			PossibleSpreadTargets[1] = "Morthal"
 			PossibleSpreadTargets[2] = "Dawnstar"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[3 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 3
+			
+			While FillIndex < LocationManager.HaafingarLocationList.Length
+				If LocationManager.HaafingarLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.HaafingarLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 3 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Riften"
 			PossibleSpreadTargets[0] = "Shor's Stone"
 			PossibleSpreadTargets[1] = "Ivarstead"
 			PossibleSpreadTargets[2] = "Largashbur"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[3 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 3
+			
+			While FillIndex < LocationManager.RiftLocationList.Length
+				If LocationManager.RiftLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.RiftLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 3 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Markarth"
 			PossibleSpreadTargets[0] = "Karthwasten"
 			PossibleSpreadTargets[1] = "Rorikstead"
 			PossibleSpreadTargets[2] = "Dushnikh Yal"
 			PossibleSpreadTargets[3] = "Falkreath"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 4
+			
+			While FillIndex < LocationManager.ReachLocationList.Length
+				If LocationManager.ReachLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.ReachLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 4 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Morthal"
 			PossibleSpreadTargets[0] = "Dawnstar"
 			PossibleSpreadTargets[1] = "Solitude"
 			PossibleSpreadTargets[2] = "Dragon Bridge"
 			PossibleSpreadTargets[3] = "Rorikstead"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 4
+			
+			While FillIndex < LocationManager.HjaalmarchLocationList.Length
+				If LocationManager.HjaalmarchLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.HjaalmarchLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 4 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Dawnstar"
 			PossibleSpreadTargets[0] = "Morthal"
 			PossibleSpreadTargets[1] = "Solitude"
 			PossibleSpreadTargets[2] = "Winterhold"
 			PossibleSpreadTargets[3] = "Whiterun"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 4
+			
+			While FillIndex < LocationManager.PaleLocationList.Length
+				If LocationManager.PaleLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.PaleLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 4 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Falkreath"
 			PossibleSpreadTargets[0] = "Whiterun"
 			PossibleSpreadTargets[1] = "Riverwood"
@@ -1710,34 +1824,76 @@ Function SpreadFame(String SpreadFromLocation)
 			PossibleSpreadTargets[3] = "Rorikstead"
 			PossibleSpreadTargets[4] = "Markarth"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[5 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 5
+			
+			While FillIndex < LocationManager.FalkreathLocationList.Length
+				If LocationManager.FalkreathLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.FalkreathLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 5 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Raven Rock"
 			PossibleSpreadTargets[0] = "Windhelm"
 			PossibleSpreadTargets[1] = "Skaal Village"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 2
+			
+			While FillIndex < LocationManager.SolstheimLocationList.Length
+				If LocationManager.SolstheimLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.SolstheimLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 2 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Riverwood"
 			PossibleSpreadTargets[0] = "Whiterun"
 			PossibleSpreadTargets[1] = "Falkreath"
 			PossibleSpreadTargets[2] = "Rorikstead"
 			PossibleSpreadTargets[3] = "Ivarstead"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 4
+			
+			While FillIndex < LocationManager.WhiterunLocationList.Length
+				If LocationManager.WhiterunLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.WhiterunLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 4 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Rorikstead"
 			PossibleSpreadTargets[0] = "Whiterun"
 			PossibleSpreadTargets[1] = "Riverwood"
@@ -1748,12 +1904,26 @@ Function SpreadFame(String SpreadFromLocation)
 			PossibleSpreadTargets[6] = "Dragon Bridge"
 			PossibleSpreadTargets[7] = "Morthal"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[8 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 8
+			
+			While FillIndex < LocationManager.WhiterunLocationList.Length
+				If LocationManager.WhiterunLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.WhiterunLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 8 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Ivarstead"
 			PossibleSpreadTargets[0] = "Riften"
 			PossibleSpreadTargets[1] = "Shor's Stone"
@@ -1762,24 +1932,52 @@ Function SpreadFame(String SpreadFromLocation)
 			PossibleSpreadTargets[4] = "Falkreath"
 			PossibleSpreadTargets[5] = "Largashbur"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[6 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 6
+			
+			While FillIndex < LocationManager.RiftLocationList.Length
+				If LocationManager.RiftLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.RiftLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 6 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Shor's Stone"
 			PossibleSpreadTargets[0] = "Riften"
 			PossibleSpreadTargets[1] = "Ivarstead"
 			PossibleSpreadTargets[2] = "Windhelm"
 			PossibleSpreadTargets[3] = "Narzulbur"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 4
+			
+			While FillIndex < LocationManager.RiftLocationList.Length
+				If LocationManager.RiftLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.RiftLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 4 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Dragon Bridge"
 			PossibleSpreadTargets[0] = "Solitude"
 			PossibleSpreadTargets[1] = "Morthal"
@@ -1787,79 +1985,397 @@ Function SpreadFame(String SpreadFromLocation)
 			PossibleSpreadTargets[3] = "Rorikstead"
 			PossibleSpreadTargets[4] = "Mor Khazgur"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[5 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 5
+			
+			While FillIndex < LocationManager.HaafingarLocationList.Length
+				If LocationManager.HaafingarLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.HaafingarLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 5 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Karthwasten"
 			PossibleSpreadTargets[0] = "Markarth"
 			PossibleSpreadTargets[1] = "Dragon Bridge"
 			PossibleSpreadTargets[2] = "Rorikstead"
 			PossibleSpreadTargets[3] = "Mor Khazgur"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[4 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 4
+			
+			While FillIndex < LocationManager.ReachLocationList.Length
+				If LocationManager.ReachLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.ReachLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 4 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Skaal Village"
 			PossibleSpreadTargets[0] = "Raven Rock"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[1 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 1
+			
+			While FillIndex < LocationManager.SolstheimLocationList.Length
+				If LocationManager.SolstheimLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.SolstheimLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 1 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Largashbur"
 			PossibleSpreadTargets[0] = "Riften"
 			PossibleSpreadTargets[1] = "Ivarstead"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 2
+			
+			While FillIndex < LocationManager.RiftLocationList.Length
+				If LocationManager.RiftLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.RiftLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 2 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Dushnikh Yal"
 			PossibleSpreadTargets[0] = "Markarth"
 			PossibleSpreadTargets[1] = "Rorikstead"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 2
+			
+			While FillIndex < LocationManager.ReachLocationList.Length
+				If LocationManager.ReachLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.ReachLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 2 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Mor Khazgur"
 			PossibleSpreadTargets[0] = "Dragon Bridge"
 			PossibleSpreadTargets[1] = "Karthwasten"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 2
+			
+			While FillIndex < LocationManager.HaafingarLocationList.Length
+				If LocationManager.HaafingarLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.HaafingarLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 2 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		ElseIf SpreadFromLocation == "Narzulbur"
 			PossibleSpreadTargets[0] = "Windhelm"
 			PossibleSpreadTargets[1] = "Shor's Stone"
 			
-			While PossibleLocationIndex < CustomLocations
-				PossibleSpreadTargets[2 + PossibleLocationIndex] = LocationManager.CustomLocation[PossibleLocationIndex]
-				PossibleLocationIndex += 1
+			PossibleLocationIndex = 2
+			
+			While FillIndex < LocationManager.EastmarchLocationList.Length
+				If LocationManager.EastmarchLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.EastmarchLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
 			EndWhile
 			
-			TotalLocations = 2 + CustomLocations
+			FillIndex = 0
+			While FillIndex < LocationManager.UndefinedLocationList.Length
+				If LocationManager.UndefinedLocationList[FillIndex] != "---"
+					PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+					PossibleLocationIndex += 1
+				EndIf
+				FillIndex += 1
+			EndWhile
+			
+			TotalLocations = PossibleLocationIndex
 		Else
-			SpreadingFromCustomLocation = True
+			If LocationManager.WhiterunLocationList.Find(SpreadFromLocation) >= 0
+				PossibleSpreadTargets[0] = "Whiterun"
+				PossibleSpreadTargets[1] = "Rorikstead"
+				PossibleSpreadTargets[2] = "Riverwood"
+				
+				PossibleLocationIndex = 3
+				
+				While FillIndex < LocationManager.WhiterunLocationList.Length
+					If LocationManager.WhiterunLocationList[FillIndex] != "---" && LocationManager.WhiterunLocationList[FillIndex] != SpreadFromLocation
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.WhiterunLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				FillIndex = 0
+				While FillIndex < LocationManager.UndefinedLocationList.Length
+					If LocationManager.UndefinedLocationList[FillIndex] != "---"
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				TotalLocations = PossibleLocationIndex
+			ElseIf LocationManager.WinterholdLocationList.Find(SpreadFromLocation) >= 0
+				PossibleSpreadTargets[0] = "Winterhold"
+				
+				PossibleLocationIndex = 1
+				
+				While FillIndex < LocationManager.WinterholdLocationList.Length
+					If LocationManager.WinterholdLocationList[FillIndex] != "---" && LocationManager.WinterholdLocationList[FillIndex] != SpreadFromLocation
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.WinterholdLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				FillIndex = 0
+				While FillIndex < LocationManager.UndefinedLocationList.Length
+					If LocationManager.UndefinedLocationList[FillIndex] != "---"
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				TotalLocations = PossibleLocationIndex
+			ElseIf LocationManager.EastmarchLocationList.Find(SpreadFromLocation) >= 0
+				PossibleSpreadTargets[0] = "Windhelm"
+				PossibleSpreadTargets[1] = "Narzulbur"
+				
+				PossibleLocationIndex = 2
+				
+				While FillIndex < LocationManager.EastmarchLocationList.Length
+					If LocationManager.EastmarchLocationList[FillIndex] != "---" && LocationManager.EastmarchLocationList[FillIndex] != SpreadFromLocation
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.EastmarchLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				FillIndex = 0
+				While FillIndex < LocationManager.UndefinedLocationList.Length
+					If LocationManager.UndefinedLocationList[FillIndex] != "---"
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				TotalLocations = PossibleLocationIndex
+			ElseIf LocationManager.HaafingarLocationList.Find(SpreadFromLocation) >= 0
+				PossibleSpreadTargets[0] = "Solitude"
+				PossibleSpreadTargets[1] = "Dragon Bridge"
+				PossibleSpreadTargets[2] = "Mor Khazgur"
+				
+				PossibleLocationIndex = 3
+				
+				While FillIndex < LocationManager.HaafingarLocationList.Length
+					If LocationManager.HaafingarLocationList[FillIndex] != "---" && LocationManager.HaafingarLocationList[FillIndex] != SpreadFromLocation
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.HaafingarLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				FillIndex = 0
+				While FillIndex < LocationManager.UndefinedLocationList.Length
+					If LocationManager.UndefinedLocationList[FillIndex] != "---"
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				TotalLocations = PossibleLocationIndex
+			ElseIf LocationManager.HjaalmarchLocationList.Find(SpreadFromLocation) >= 0
+				PossibleSpreadTargets[0] = "Morthal"
+				
+				PossibleLocationIndex = 1
+				
+				While FillIndex < LocationManager.HjaalmarchLocationList.Length
+					If LocationManager.HjaalmarchLocationList[FillIndex] != "---" && LocationManager.HjaalmarchLocationList[FillIndex] != SpreadFromLocation
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.HjaalmarchLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				FillIndex = 0
+				While FillIndex < LocationManager.UndefinedLocationList.Length
+					If LocationManager.UndefinedLocationList[FillIndex] != "---"
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				TotalLocations = PossibleLocationIndex
+			ElseIf LocationManager.RiftLocationList.Find(SpreadFromLocation) >= 0
+				PossibleSpreadTargets[0] = "Riften"
+				PossibleSpreadTargets[1] = "Ivarstead"
+				PossibleSpreadTargets[2] = "Shor's Stone"
+				PossibleSpreadTargets[3] = "Largashbur"
+				
+				PossibleLocationIndex = 4
+				
+				While FillIndex < LocationManager.RiftLocationList.Length
+					If LocationManager.RiftLocationList[FillIndex] != "---" && LocationManager.RiftLocationList[FillIndex] != SpreadFromLocation
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.RiftLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				FillIndex = 0
+				While FillIndex < LocationManager.UndefinedLocationList.Length
+					If LocationManager.UndefinedLocationList[FillIndex] != "---"
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				TotalLocations = PossibleLocationIndex
+			ElseIf LocationManager.ReachLocationList.Find(SpreadFromLocation) >= 0
+				PossibleSpreadTargets[0] = "Markarth"
+				PossibleSpreadTargets[1] = "Karthwasten"
+				PossibleSpreadTargets[2] = "Dushnikh Yal"
+				
+				PossibleLocationIndex = 3
+				
+				While FillIndex < LocationManager.ReachLocationList.Length
+					If LocationManager.ReachLocationList[FillIndex] != "---" && LocationManager.ReachLocationList[FillIndex] != SpreadFromLocation
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.ReachLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				FillIndex = 0
+				While FillIndex < LocationManager.UndefinedLocationList.Length
+					If LocationManager.UndefinedLocationList[FillIndex] != "---"
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				TotalLocations = PossibleLocationIndex
+			ElseIf LocationManager.PaleLocationList.Find(SpreadFromLocation) >= 0
+				PossibleSpreadTargets[0] = "Dawnstar"
+				
+				PossibleLocationIndex = 1
+				
+				While FillIndex < LocationManager.PaleLocationList.Length
+					If LocationManager.PaleLocationList[FillIndex] != "---" && LocationManager.PaleLocationList[FillIndex] != SpreadFromLocation
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.PaleLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				FillIndex = 0
+				While FillIndex < LocationManager.UndefinedLocationList.Length
+					If LocationManager.UndefinedLocationList[FillIndex] != "---"
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				TotalLocations = PossibleLocationIndex
+			ElseIf LocationManager.SolstheimLocationList.Find(SpreadFromLocation) >= 0
+				PossibleSpreadTargets[0] = "Raven Rock"
+				PossibleSpreadTargets[1] = "Skaal Village"
+				
+				PossibleLocationIndex = 2
+				
+				While FillIndex < LocationManager.SolstheimLocationList.Length
+					If LocationManager.SolstheimLocationList[FillIndex] != "---" && LocationManager.SolstheimLocationList[FillIndex] != SpreadFromLocation
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.SolstheimLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				FillIndex = 0
+				While FillIndex < LocationManager.UndefinedLocationList.Length
+					If LocationManager.UndefinedLocationList[FillIndex] != "---"
+						PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.UndefinedLocationList[FillIndex]
+						PossibleLocationIndex += 1
+					EndIf
+					FillIndex += 1
+				EndWhile
+				
+				TotalLocations = PossibleLocationIndex
+			Else
+				SpreadingFromUndefinedLocation = True
+			EndIf
 		EndIf
 	EndIf
 	
-	If Config.FameSpreadRestrictions == False || SpreadingFromCustomLocation == True
+	If Config.FameSpreadRestrictions == False || SpreadingFromUndefinedLocation == True
 		TotalLocations = DefaultLocations + CustomLocations
 		While PossibleLocationIndex < TotalLocations
 			If DefaultLocationIndex < DefaultLocations
@@ -1876,12 +2392,7 @@ Function SpreadFame(String SpreadFromLocation)
 	
 	;Roll Target location index based on number of total locations
 	While TargetLocationValid == False
-		If Config.FameSpreadRestrictions == True && SpreadFromLocation == "Skaal Village" && TotalLocations == 1
-			TargetLocationIndex = 0
-			TargetLocationValid = True
-		Else
-			TargetLocationIndex = Utility.RandomInt(0, (TotalLocations - 1))
-		EndIf
+		TargetLocationIndex = Utility.RandomInt(0, (TotalLocations - 1))
 		
 		;Debug.Trace("SLSF Reloaded - Target Location Roll (Index): " + TargetLocationIndex)
 		;Debug.Trace("SLSF Reloaded - Target Location: " + PossibleSpreadTargets[TargetLocationIndex])

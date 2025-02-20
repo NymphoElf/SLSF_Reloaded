@@ -9,8 +9,22 @@ Location[] Property MajorLocations Auto
 Location[] Property MinorLocations Auto
 Location[] Property CustomLocationRef Auto
 
+Location Property SolstheimLocation Auto
+
 String[] Property DefaultLocation Auto ;Size 21
 String[] Property CustomLocation Auto ;Size 21 | "---" by Default
+
+String[] Property WhiterunLocationList Auto
+String[] Property WinterholdLocationList Auto
+String[] Property EastmarchLocationList Auto
+String[] Property RiftLocationList Auto
+String[] Property ReachLocationList Auto
+String[] Property FalkreathLocationList Auto
+String[] Property PaleLocationList Auto
+String[] Property HaafingarLocationList Auto
+String[] Property HjaalmarchLocationList Auto
+String[] Property SolstheimLocationList Auto
+String[] Property UndefinedLocationList Auto
 
 Keyword[] Property ExcludedLocations Auto ;NordicRuin, FalmerHive, HagravenNest, Cave, AnimalDen, DwarvenRuin, ForswornCamp
 Keyword[] Property OverrideExcludedLocation Auto ;BanditCamp, VampireLiar, WarlockLair, MilitaryFort, MilitaryCamp
@@ -221,31 +235,38 @@ EndFunction
 
 ;Filter Dungeons by Keywords - Dungeons should not be valid Fame locations
 Bool Function IsLocationExcluded(Location LocationRef)
-	Int ExcludedKeywordIndex = 0
-	Int OverrideKeywordIndex = 0
+	Int KeywordIndex = 0
+	Bool PotentialExclusion = False
 	Bool ValidExclusion = False
 	Bool ExclusionOverridden = False
 	
-	While ExcludedKeywordIndex < ExcludedLocations.Length && ValidExclusion == False && ExclusionOverridden == False
-		If LocationRef.HasKeyword(ExcludedLocations[ExcludedKeywordIndex])
-			While OverrideKeywordIndex < OverrideExcludedLocation.Length && ExclusionOverridden == False
-				If LocationRef.HasKeyword(OverrideExcludedLocation[OverrideKeywordIndex])
-					ValidExclusion = False
-					ExclusionOverridden = True
-				Else
-					ValidExclusion = True
-				EndIf
-				OverrideKeywordIndex += 1
-			EndWhile
+	While KeywordIndex < ExcludedLocations.Length && PotentialExclusion == False
+		If LocationRef.HasKeyword(ExcludedLocations[KeywordIndex])
+			PotentialExclusion = True
 		EndIf
-		ExcludedKeywordIndex += 1
+		KeywordIndex += 1
 	EndWhile
+	
+	KeywordIndex = 0
+	If PotentialExclusion == True
+		While KeywordIndex < OverrideExcludedLocation.Length && ExclusionOverridden == False
+			If LocationRef.HasKeyword(OverrideExcludedLocation[KeywordIndex])
+				ExclusionOverridden = True
+			EndIf
+			KeywordIndex += 1
+		EndWhile
+	EndIf
+	
+	If PotentialExclusion == True && ExclusionOverridden == False
+		ValidExclusion = True
+	EndIf
 	
 	return ValidExclusion
 EndFunction
 
 Function RegisterCustomLocation()
-	String LocationToRegister = FetchLocationName(CurrentLocation)
+	Location LocationRef = CurrentLocation
+	String LocationToRegister = FetchLocationName(LocationRef)
 	
 	Debug.Notification("$CustomLocationRegisterStartMSG")
 	
@@ -262,21 +283,174 @@ Function RegisterCustomLocation()
 	
 	If EmptyIndex >= 0 && EmptyIndex < CustomLocation.Length
 		CustomLocation[EmptyIndex] = LocationToRegister
-		CustomLocationRef[EmptyIndex] = CurrentLocation
+		CustomLocationRef[EmptyIndex] = LocationRef
 	Else
 		EmptyIndex = CustomLocation.Find("-EMPTY-")
 		If EmptyIndex >= 0 && EmptyIndex < CustomLocation.Length
 			CustomLocation[EmptyIndex] = LocationToRegister
-			CustomLocationRef[EmptyIndex] = CurrentLocation
+			CustomLocationRef[EmptyIndex] = LocationRef
 		Else
 			Debug.MessageBox("SLSF Reloaded ERROR - Empty Location Index not found despite other checks allowing registration. Location Registration Failed.")
 			return
 		EndIf
 	EndIf
 	
+	AddToLocationList(LocationRef)
+	
 	Debug.Notification("$CustomLocationRegisterCompleteMSG")
 	
 	UpdateCustomLocationCount()
+EndFunction
+
+Function AddToLocationList(Location LocationRef)
+	String LocationName = FetchLocationName(LocationRef)
+	Int ListIndex = 0
+	
+	If MajorLocations[0].IsChild(LocationRef) == True
+		ListIndex = WhiterunLocationList.Find("---")
+		If ListIndex >= 0
+			WhiterunLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Whiterun Location List is FULL. This should not be possible!")
+		EndIf
+	ElseIf MajorLocations[1].IsChild(LocationRef)
+		ListIndex = WinterholdLocationList.Find("---")
+		If ListIndex >= 0
+			WinterholdLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Winterhold Location List is FULL. This should not be possible!")
+		EndIf
+	ElseIf MajorLocations[2].IsChild(LocationRef)
+		ListIndex = EastmarchLocationList.Find("---")
+		If ListIndex >= 0
+			EastmarchLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Eastmarch Location List is FULL. This should not be possible!")
+		EndIf
+	ElseIf MajorLocations[3].IsChild(LocationRef)
+		ListIndex = HaafingarLocationList.Find("---")
+		If ListIndex >= 0
+			HaafingarLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Haafingar Location List is FULL. This should not be possible!")
+		EndIf
+	ElseIf MajorLocations[4].IsChild(LocationRef)
+		ListIndex = RiftLocationList.Find("---")
+		If ListIndex >= 0
+			RiftLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Rift Location List is FULL. This should not be possible!")
+		EndIf
+	ElseIf MajorLocations[5].IsChild(LocationRef)
+		ListIndex = ReachLocationList.Find("---")
+		If ListIndex >= 0
+			ReachLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Reach Location List is FULL. This should not be possible!")
+		EndIf
+	ElseIf MajorLocations[6].IsChild(LocationRef)
+		ListIndex = HjaalmarchLocationList.Find("---")
+		If ListIndex >= 0
+			HjaalmarchLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Hjaalmarch Location List is FULL. This should not be possible!")
+		EndIf
+	ElseIf MajorLocations[7].IsChild(LocationRef)
+		ListIndex = PaleLocationList.Find("---")
+		If ListIndex >= 0
+			PaleLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Pale Location List is FULL. This should not be possible!")
+		EndIf
+	ElseIf MajorLocations[8].IsChild(LocationRef)
+		ListIndex = FalkreathLocationList.Find("---")
+		If ListIndex >= 0
+			FalkreathLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Falkreath Location List is FULL. This should not be possible!")
+		EndIf
+	ElseIf SolstheimLocation.IsChild(LocationRef)
+		ListIndex = SolstheimLocationList.Find("---")
+		If ListIndex >= 0
+			SolstheimLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Solstheim Location List is FULL. This should not be possible!")
+		EndIf
+	Else
+		ListIndex = UndefinedLocationList.Find("---")
+		If ListIndex >= 0
+			UndefinedLocationList[ListIndex] = LocationName
+		Else
+			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Undefined Location List is FULL. This should not be possible!")
+		EndIf
+	EndIf
+EndFunction
+
+Function RemoveFromLocationList(String FameLocation)
+	Int ListIndex = 0
+	String EmptyString = "---"
+	
+	ListIndex = WhiterunLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		WhiterunLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	ListIndex = WinterholdLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		WinterholdLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	ListIndex = EastmarchLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		EastmarchLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	ListIndex = HaafingarLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		HaafingarLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	ListIndex = HjaalmarchLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		HjaalmarchLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	ListIndex = PaleLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		PaleLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	ListIndex = RiftLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		RiftLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	ListIndex = ReachLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		ReachLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	ListIndex = FalkreathLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		FalkreathLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	ListIndex = UndefinedLocationList.Find(FameLocation)
+	If ListIndex >= 0
+		UndefinedLocationList[ListIndex] = EmptyString
+		return
+	EndIf
+	
+	Debug.MessageBox("SLSF Reloaded ERROR: Location " + FameLocation + " could not be found in any Location Lists.")
 EndFunction
 
 Function UnregisterCustomLocation(Int LocationIndexToUnregister)
@@ -379,6 +553,8 @@ Function UnregisterCustomLocation(Int LocationIndexToUnregister)
 		LocationIndex += 1
 	EndWhile
 	
+	RemoveFromLocationList(UnregisteredLocation)
+	
 	UpdateCustomLocationCount()
 	
 	Debug.Notification("$CustomLocationUnregisterCompleteMSG")
@@ -391,6 +567,11 @@ Function RegisterCustomLocationExternal(String LocationToRegister, Location Loca
 	
 	If CustomLocationsFull == True
 		Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location List is Full.")
+		return
+	EndIf
+	
+	If IsLocationExcluded(LocationRefToRegister) == True
+		Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location is EXCLUDED.")
 		return
 	EndIf
 	
