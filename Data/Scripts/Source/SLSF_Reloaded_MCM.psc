@@ -1153,15 +1153,15 @@ Event OnPageReset(String page)
 				
 				If VisibilityManager.IsBodyTattooVisible(TattooIndex) == True
 					If VisibilityManager.BodyTattooExcluded[TattooIndex] == False
-						AddTextOption(SlotNumber, "$Yes")
+						AddTextOption(SlotNumber + " - " + VisibilityManager.BodyTattooSubcategory[TattooIndex], "$Yes")
 					Else
-						AddTextOption(SlotNumber, "$YesExcluded")
+						AddTextOption(SlotNumber + " - " + VisibilityManager.BodyTattooSubcategory[TattooIndex], "$YesExcluded")
 					EndIf
 				Else
 					If VisibilityManager.BodyTattooApplied[TattooIndex] == True && VisibilityManager.BodyTattooExcluded[TattooIndex] == False
-						AddTextOption(SlotNumber, "$No")
+						AddTextOption(SlotNumber + " - " + VisibilityManager.BodyTattooSubcategory[TattooIndex], "$No")
 					ElseIf VisibilityManager.BodyTattooApplied[TattooIndex] == True && VisibilityManager.BodyTattooExcluded[TattooIndex] == True
-						AddTextOption(SlotNumber, "$NoExcluded")
+						AddTextOption(SlotNumber + " - " + VisibilityManager.BodyTattooSubcategory[TattooIndex], "$NoExcluded")
 					Else
 						AddTextOption(SlotNumber, "$NoUnused")
 					EndIf
@@ -1796,110 +1796,6 @@ Event OnOptionSelect(Int Option)
 			FameForbiddenByLover[24] = False
 		EndIf
 		SetToggleOptionValue(Option, FameForbiddenByLover[24])
-	EndIf
-EndEvent
-
-Event OnOptionHightlight(Int Option)
-	If Option == OptionID[0]
-		SetInfoText("$FriendForbidWhoreTooltip")
-	ElseIf Option == OptionID[1]
-		SetInfoText("$FriendForbidSlutTooltip")
-	ElseIf Option == OptionID[2]
-		SetInfoText("$FriendForbidExhibitionistTooltip")
-	ElseIf Option == OptionID[3]
-		SetInfoText("$FriendForbidOralTooltip")
-	ElseIf Option == OptionID[4]
-		SetInfoText("$FriendForbidAnalTooltip")
-	ElseIf Option == OptionID[5]
-		SetInfoText("$FriendForbidNastyTooltip")
-	ElseIf Option == OptionID[6]
-		SetInfoText("$FriendForbidPregnantTooltip")
-	ElseIf Option == OptionID[7]
-		SetInfoText("$FriendForbidDominantTooltip")
-	ElseIf Option == OptionID[8]
-		SetInfoText("$FriendForbidSubmissiveTooltip")
-	ElseIf Option == OptionID[9]
-		SetInfoText("$FriendForbidSadistTooltip")
-	ElseIf Option == OptionID[10]
-		SetInfoText("$FriendForbidMasochistTooltip")
-	ElseIf Option == OptionID[11]
-		SetInfoText("$FriendForbidGentleTooltip")
-	ElseIf Option == OptionID[12]
-		SetInfoText("$FriendForbidLikesMenTooltip")
-	ElseIf Option == OptionID[13]
-		SetInfoText("$FriendForbidLikesWomenTooltip")
-	ElseIf Option == OptionID[14]
-		SetInfoText("$FriendForbidLikesOrcTooltip")
-	ElseIf Option == OptionID[15]
-		SetInfoText("$FriendForbidLikesKhajiitTooltip")
-	ElseIf Option == OptionID[16]
-		SetInfoText("$FriendForbidLikesArgonianTooltip")
-	ElseIf Option == OptionID[17]
-		SetInfoText("$FriendForbidBestialityTooltip")
-	ElseIf Option == OptionID[18]
-		SetInfoText("$FriendForbidGroupTooltip")
-	ElseIf Option == OptionID[19]
-		SetInfoText("$FriendForbidBoundTooltip")
-	ElseIf Option == OptionID[20]
-		SetInfoText("$FriendForbidTattooTooltip")
-	ElseIf Option == OptionID[21]
-		SetInfoText("$FriendForbidCumDumpTooltip")
-	ElseIf Option == OptionID[22]
-		SetInfoText("$FriendForbidUnfaithfulTooltip")
-	ElseIf Option == OptionID[23]
-		SetInfoText("$FriendForbidCuckTooltip")
-	ElseIf Option == OptionID[24]
-		SetInfoText("$FriendForbidAirheadTooltip")
-	ElseIf Option == OptionID[25]
-		SetInfoText("$LoverForbidWhoreTooltip")
-	ElseIf Option == OptionID[26]
-		SetInfoText("$LoverForbidSlutTooltip")
-	ElseIf Option == OptionID[27]
-		SetInfoText("$LoverForbidExhibitionistTooltip")
-	ElseIf Option == OptionID[28]
-		SetInfoText("$LoverForbidOralTooltip")
-	ElseIf Option == OptionID[29]
-		SetInfoText("$LoverForbidAnalTooltip")
-	ElseIf Option == OptionID[30]
-		SetInfoText("$LoverForbidNastyTooltip")
-	ElseIf Option == OptionID[31]
-		SetInfoText("$LoverForbidPregnantTooltip")
-	ElseIf Option == OptionID[32]
-		SetInfoText("$LoverForbidDominantTooltip")
-	ElseIf Option == OptionID[33]
-		SetInfoText("$LoverForbidSubmissiveTooltip")
-	ElseIf Option == OptionID[34]
-		SetInfoText("$LoverForbidSadistTooltip")
-	ElseIf Option == OptionID[35]
-		SetInfoText("$LoverForbidMasochistTooltip")
-	ElseIf Option == OptionID[36]
-		SetInfoText("$LoverForbidGentleTooltip")
-	ElseIf Option == OptionID[37]
-		SetInfoText("$LoverForbidLikesMenTooltip")
-	ElseIf Option == OptionID[38]
-		SetInfoText("$LoverForbidLikesWomenTooltip")
-	ElseIf Option == OptionID[39]
-		SetInfoText("$LoverForbidLikesOrcTooltip")
-	ElseIf Option == OptionID[40]
-		SetInfoText("$LoverForbidLikesKhajiitTooltip")
-	ElseIf Option == OptionID[41]
-		SetInfoText("$LoverForbidLikesArgonianTooltip")
-	ElseIf Option == OptionID[42]
-		SetInfoText("$LoverForbidBestialityTooltip")
-	ElseIf Option == OptionID[43]
-		SetInfoText("$LoverForbidGroupTooltip")
-	ElseIf Option == OptionID[44]
-		SetInfoText("$LoverForbidBoundTooltip")
-	ElseIf Option == OptionID[45]
-		SetInfoText("$LoverForbidTattooTooltip")
-	ElseIf Option == OptionID[46]
-		SetInfoText("$LoverForbidCumDumpTooltip")
-	ElseIf Option == OptionID[47]
-		SetInfoText("$LoverForbidUnfaithfulTooltip")
-	ElseIf Option == OptionID[48]
-		SetInfoText("$LoverForbidCuckTooltip")
-	ElseIf Option == OptionID[49]
-		SetInfoText("$LoverForbidAirheadTooltip")
 	EndIf
 EndEvent
 
@@ -2779,13 +2675,15 @@ EndState
 State SLSF_Reloaded_BodySlotSubcategoryState
 	Event OnMenuOpenST()
 		Int StartIndex = 0
-		String[] Texts = New String[5]
+		String[] Texts = New String[7]
 		
 		Texts[0] = "$NoneText"
 		Texts[1] = "$ChestArea"
 		Texts[2] = "$PelvisArea"
 		Texts[3] = "$AssArea"
 		Texts[4] = "$BackArea"
+		Texts[5] = "$ThighArea"
+		Texts[6] = "$CalvesArea"
 		
 		SetMenuDialogOptions(Texts)
 		SetMenuDialogStartIndex(StartIndex)
@@ -2793,14 +2691,16 @@ State SLSF_Reloaded_BodySlotSubcategoryState
 	EndEvent
 	
 	Event OnMenuAcceptST(Int AcceptedIndex)
-		String[] Texts = New String[5]
-		String[] TranslatedText = New String[5]
+		String[] Texts = New String[7]
+		String[] TranslatedText = New String[7]
 		
 		Texts[0] = "$NoneText"
 		Texts[1] = "$ChestArea"
 		Texts[2] = "$PelvisArea"
 		Texts[3] = "$AssArea"
 		Texts[4] = "$BackArea"
+		Texts[5] = "$ThighArea"
+		Texts[6] = "$CalvesArea"
 		
 		;We need an english return for the Visibility Manager to function properly
 		TranslatedText[0] = "-NONE-"
@@ -2808,6 +2708,8 @@ State SLSF_Reloaded_BodySlotSubcategoryState
 		TranslatedText[2] = "Pelvis"
 		TranslatedText[3] = "Ass"
 		TranslatedText[4] = "Back"
+		TranslatedText[5] = "Thigh"
+		TranslatedText[6] = "Calves"
 		
 		SetMenuOptionValueST(Texts[AcceptedIndex], False, "SLSF_Reloaded_BodySlotSubcategoryState")
 		VisibilityManager.BodyTattooSubcategory[BodyTattooIndex] = TranslatedText[AcceptedIndex]

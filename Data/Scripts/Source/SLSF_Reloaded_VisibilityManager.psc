@@ -401,10 +401,30 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 							return True
 						EndIf
 					EndIf
+				Else
+					If PlayerRef.GetEquippedArmorInSlot(46) != None 
+						If PlayerRef.GetEquippedArmorInSlot(46).HasKeyword(Mods.SLS_BikiniArmor) && (PlayerRef.GetEquippedArmorInSlot(47) == None || PlayerRef.GetEquippedArmorInSlot(47).HasKeyword(SLSF_Reloaded_DoesNotCoverBack))
+							return True
+						EndIf
+					ElseIf PlayerRef.GetEquippedArmorInSlot(47) == None || PlayerRef.GetEquippedArmorInSlot(47).HasKeyword(SLSF_Reloaded_DoesNotCoverBack)
+						return True
+					EndIf
 				EndIf
 			Else
 				return False
 			EndIf
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Thigh"
+			If PlayerRef.GetEquippedArmorInSlot(53) != None
+				If !PlayerRef.GetEquippedArmorInSlot(53).HasKeyword(Mods.SLS_BikiniArmor)
+					return False
+				EndIf
+			EndIf
+			return True
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Calves"
+			If PlayerRef.GetEquippedArmorInSlot(37) != None || PlayerRef.GetEquippedArmorInSlot(54) != None
+				return False
+			EndIf
+			return True
 		Else
 			Debug.MessageBox("SLSF Reloaded - ERROR: Body Tattoo Subcategory is invalid.")
 		EndIf

@@ -779,27 +779,25 @@ TOO MANY LOCATIONS WILL BOG DOWN THE SCRIPT!
 /;
 
 ;Pass a Location Form value to this event
-Event OnExternalLocationRegister(Form LocationToRegister)
-	Location LocationForm = LocationToRegister as Location
-	If LocationForm == None
+Event OnExternalLocationRegister(Location LocationToRegister)
+	If LocationToRegister == None
 		;Debug.Trace("SLSF Reloaded - ExternalLocationRegister - Location is NONE.")
 		return
 	Else
-		String LocationName = LocationManager.FetchLocationName(LocationForm)
+		String LocationName = LocationManager.FetchLocationName(LocationToRegister)
 		If LocationManager.LocationCanBeRegistered(LocationName, True) == True
-			LocationManager.RegisterCustomLocationExternal(LocationName, LocationForm)
+			LocationManager.RegisterCustomLocationExternal(LocationName, LocationToRegister)
 		EndIf
 	EndIf
 EndEvent
 
 ;The following events are similar to above, but remove the location instead
-Event OnExternalLocationUnregister(Form LocationToUnregister)
-	Location LocationForm = LocationToUnregister as Location
-	If LocationForm == None
+Event OnExternalLocationUnregister(Location LocationToUnregister)
+	If LocationToUnregister == None
 		;Debug.Trace("SLSF Reloaded - ExternalLocationUnregister - Location is NONE.")
 		return
 	Else
-		String LocationName = LocationManager.FetchLocationName(LocationForm)
+		String LocationName = LocationManager.FetchLocationName(LocationToUnregister)
 		LocationManager.UnregisterCustomLocationExternal(LocationName)
 	EndIf
 EndEvent

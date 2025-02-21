@@ -180,7 +180,7 @@ Function OverwriteLegacyFame()
 				Debug.Trace("SLSF Reloaded - Legacy Overwrite: Debug Int List: Returned Value of Set Int = " + DebugInt)
 			EndIf
 			
-			If FameValue > 0 && DebugInt == 0 && ResetLegacyWarningDisplayed == False
+			If FameValue != DebugInt && ResetLegacyWarningDisplayed == False
 				Debug.MessageBox("SLSF Reloaded WARNING: Your Fame did not properly overwrite. You must reset Legacy SLSF Papyrus Storage. Legacy Overwrite will not work until you do!")
 				Utility.Wait(0.5)
 				Debug.MessageBox("SLSF Reloaded MESSAGE: Reset Legacy SLSF Papyrus Storage in Legacy SLSF's MCM, then Save and Quit to Desktop. Then load your game.")
