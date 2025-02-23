@@ -4,6 +4,13 @@ SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DataManager Property DataManager Auto
+SLSF_Reloaded_PlayerScript Property PlayerScript Auto
+
+FavorJarlsMakeFriendsScript Property ThaneScript Auto
+
+Quest Property DLC2StoneCleanse Auto
+
+Faction Property OrcFriends Auto
 
 Bool Property IsAnonymous Auto
 
@@ -19,6 +26,8 @@ Float[] Property CustomLocationRecognitionTime Auto
 
 Bool[] Property DefaultLocationLocalAnonymityFlag Auto
 Bool[] Property CustomLocationLocalAnonymityFlag Auto
+Bool[] Property DefaultLocationLocalAnonymityStartedAsTrue Auto
+Bool[] Property CustomLocationLocalAnonymityStartedAsTrue Auto
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 
@@ -140,20 +149,30 @@ Function CheckRecognitionTimeIncrease(String FameLocation)
 			EndIf
 			return
 		Else
-			If DefaultLocationLocalAnonymityFlag[LocationIndex] == True
+			If DefaultLocationLocalAnonymityFlag[LocationIndex] == True || DefaultLocationLocalAnonymityStartedAsTrue[LocationIndex] == True
 				DefaultLocationLocalAnonymityFlag[LocationIndex] = False ;Can't be Anonymous
+				DefaultLocationLocalAnonymityStartedAsTrue[LocationIndex] = False
 				If Config.EnableTracing == True
 					Debug.Trace("SLSF Reloaded - Anonymity for " + LocationManager.DefaultLocation[LocationIndex] + " has been lost.")
 				EndIf
-			EndIf
-			
-			DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] + TimeSpentInLocation
-			If DefaultLocationRecognitionTime[LocationIndex] > 365
-				DefaultLocationRecognitionTime[LocationIndex] = 365
-			EndIf
-			
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+				
+				DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] + (TimeSpentInLocation - 0.125)
+				If DefaultLocationRecognitionTime[LocationIndex] > 365
+					DefaultLocationRecognitionTime[LocationIndex] = 365
+				EndIf
+				
+				If Config.EnableTracing == True
+					Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+				EndIf
+			Else
+				DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] + TimeSpentInLocation
+				If DefaultLocationRecognitionTime[LocationIndex] > 365
+					DefaultLocationRecognitionTime[LocationIndex] = 365
+				EndIf
+				
+				If Config.EnableTracing == True
+					Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+				EndIf
 			EndIf
 		EndIf
 		return
@@ -168,20 +187,30 @@ Function CheckRecognitionTimeIncrease(String FameLocation)
 				EndIf
 				return
 			Else
-				If CustomLocationLocalAnonymityFlag[LocationIndex] == True
+				If CustomLocationLocalAnonymityFlag[LocationIndex] == True || CustomLocationLocalAnonymityStartedAsTrue[LocationIndex] == True
 					CustomLocationLocalAnonymityFlag[LocationIndex] = False
+					CustomLocationLocalAnonymityStartedAsTrue[LocationIndex] = False
 					If Config.EnableTracing == True
 						Debug.Trace("SLSF Reloaded - Anonymity for " + LocationManager.CustomLocation[LocationIndex] + " has been lost.")
 					EndIf
-				EndIf
-				
-				CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] + TimeSpentInLocation
-				If CustomLocationRecognitionTime[LocationIndex] > 365
-					CustomLocationRecognitionTime[LocationIndex] = 365
-				EndIf
-				
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+					
+					CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] + (TimeSpentInLocation - 0.125)
+					If CustomLocationRecognitionTime[LocationIndex] > 365
+						CustomLocationRecognitionTime[LocationIndex] = 365
+					EndIf
+					
+					If Config.EnableTracing == True
+						Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+					EndIf
+				Else
+					CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] + TimeSpentInLocation
+					If CustomLocationRecognitionTime[LocationIndex] > 365
+						CustomLocationRecognitionTime[LocationIndex] = 365
+					EndIf
+					
+					If Config.EnableTracing == True
+						Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+					EndIf
 				EndIf
 			EndIf
 			return
@@ -198,10 +227,11 @@ Function CheckRecognitionTimeDecay(String FameLocation)
 	
 	If LocationIndex >= 0
 		TimeSinceLastVisit = DefaultLocationLastEnterTime[LocationIndex] - DefaultLocationLastExitTime[LocationIndex]
-		If TimeSinceLastVisit > DefaultLocationRecognitionTime[LocationIndex]
+		If TimeSinceLastVisit > DefaultLocationRecognitionTime[LocationIndex] && DefaultLocationLocalAnonymityFlag[LocationIndex] == False
 			DefaultLocationLocalAnonymityFlag[LocationIndex] = True ;Can be Anonymous
+			DefaultLocationLocalAnonymityStartedAsTrue[LocationIndex] = True
 			;Decay Recognition
-			DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - DefaultLocationRecognitionTime[LocationIndex]) as Int
+			DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - DefaultLocationRecognitionTime[LocationIndex])
 			If DefaultLocationRecognitionTime[LocationIndex] < 7
 				DefaultLocationRecognitionTime[LocationIndex] = 7
 			EndIf
@@ -210,6 +240,16 @@ Function CheckRecognitionTimeDecay(String FameLocation)
 				Debug.Trace("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
 				Debug.Trace("SLSF Reloaded - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
 			EndIf
+		ElseIf DefaultLocationLocalAnonymityFlag[LocationIndex] == True
+			DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - DefaultLocationRecognitionTime[LocationIndex])
+			If DefaultLocationRecognitionTime[LocationIndex] < 7
+				DefaultLocationRecognitionTime[LocationIndex] = 7
+			EndIf
+			
+			If Config.EnableTracing == True
+				Debug.Trace("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+				Debug.Trace("SLSF Reloaded - Anonymity for " + FameLocation + " was already possible.")
+			EndIf
 		EndIf
 		return
 	ElseIf SLSF_Reloaded_CustomLocationCount.GetValue() as Int > 0
@@ -217,10 +257,11 @@ Function CheckRecognitionTimeDecay(String FameLocation)
 		
 		If LocationIndex >= 0
 			TimeSinceLastVisit = CustomLocationLastEnterTime[LocationIndex] - CustomLocationLastExitTime[LocationIndex]
-			If TimeSinceLastVisit > CustomLocationRecognitionTime[LocationIndex]
+			If TimeSinceLastVisit > CustomLocationRecognitionTime[LocationIndex] && CustomLocationLocalAnonymityFlag[LocationIndex] == False
 				CustomLocationLocalAnonymityFlag[LocationIndex] = True ;Can be Anonymous
+				CustomLocationLocalAnonymityStartedAsTrue[LocationIndex] = True
 				;Decay Recognition
-				CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - CustomLocationRecognitionTime[LocationIndex]) as Int
+				CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - CustomLocationRecognitionTime[LocationIndex])
 				If CustomLocationRecognitionTime[LocationIndex] < 7
 					CustomLocationRecognitionTime[LocationIndex] = 7
 				EndIf
@@ -228,6 +269,16 @@ Function CheckRecognitionTimeDecay(String FameLocation)
 				If Config.EnableTracing == True
 					Debug.Trace("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
 					Debug.Trace("SLSF Reloaded - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
+				EndIf
+			ElseIf CustomLocationLocalAnonymityFlag[LocationIndex] == True
+				CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - CustomLocationRecognitionTime[LocationIndex])
+				If CustomLocationRecognitionTime[LocationIndex] < 7
+					CustomLocationRecognitionTime[LocationIndex] = 7
+				EndIf
+				
+				If Config.EnableTracing == True
+					Debug.Trace("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+					Debug.Trace("SLSF Reloaded - Anonymity for " + FameLocation + " was already possible.")
 				EndIf
 			EndIf
 		EndIf
@@ -275,16 +326,69 @@ EndFunction
 
 Function CheckAnonymityStatus(Int LocationIndex, Bool IsDefaultLocation)
 	If IsDefaultLocation == True
-		If DefaultLocationLocalAnonymityFlag[LocationIndex] == True && DataManager.DefaultLocationDynamicAnonymityFlag[LocationIndex] == True
+		If Config.ThanesCantBeAnonymous == True && ThaneStatus(LocationManager.DefaultLocation[LocationIndex]) == True
+			IsAnonymous = False
+		ElseIf DefaultLocationLocalAnonymityFlag[LocationIndex] == True && DataManager.DefaultLocationDynamicAnonymityFlag[LocationIndex] == True
 			IsAnonymous = True
 		Else
 			IsAnonymous = False
 		EndIf
 	Else
-		If CustomLocationLocalAnonymityFlag[LocationIndex] == True && DataManager.CustomLocationDynamicAnonymityFlag[LocationIndex] == True
+		If Config.ThanesCantBeAnonymous == True && ThaneStatus(LocationManager.CustomLocation[LocationIndex]) == True
+			IsAnonymous = False
+		ElseIf CustomLocationLocalAnonymityFlag[LocationIndex] == True && DataManager.CustomLocationDynamicAnonymityFlag[LocationIndex] == True
 			IsAnonymous = True
 		Else
 			IsAnonymous = False
 		EndIf
 	EndIf
+EndFunction
+
+Bool Function ThaneStatus(String FameLocation)
+	If FameLocation == "Whiterun" || FameLocation == "Riverwood" || FameLocation == "Rorikstead" || LocationManager.WhiterunLocationList.Find(FameLocation) >= 0
+		If ThaneScript.WhiterunImpGetOutofJail > 0 || ThaneScript.WhiterunSonsGetOutofJail > 0
+			return True
+		EndIf
+	ElseIf FameLocation == "Winterhold" || LocationManager.WinterholdLocationList.Find(FameLocation) >= 0
+		If ThaneScript.WinterholdImpGetOutofJail > 0 || ThaneScript.WinterholdSonsGetOutofJail > 0
+			return True
+		EndIf
+	ElseIf FameLocation == "Windhelm" || LocationManager.EastmarchLocationList.Find(FameLocation) >= 0
+		If ThaneScript.EastmarchImpGetOutofJail > 0 || ThaneScript.EastmarchSonsGetOutofJail > 0
+			return True
+		EndIf
+	ElseIf FameLocation == "Solitdue" || FameLocation == "Dragon Bridge" || LocationManager.HaafingarLocationList.Find(FameLocation) >= 0
+		If ThaneScript.HaafingarImpGetOutofJail > 0 || ThaneScript.HaafingarSonsGetOutofJail > 0
+			return True
+		EndIf
+	ElseIf FameLocation == "Morthal" || LocationManager.HjaalmarchLocationList.Find(FameLocation) >= 0
+		If ThaneScript.HjaalmarchImpGetOutofJail > 0 || ThaneScript.HjaalmarchSonsGetOutofJail > 0
+			return True
+		EndIf
+	ElseIf FameLocation == "Dawnstar" || LocationManager.PaleLocationList.Find(FameLocation) >= 0
+		If ThaneScript.PaleImpGetOutofJail > 0 || ThaneScript.PaleSonsGetOutofJail > 0
+			return True
+		EndIf
+	ElseIf FameLocation == "Riften" || FameLocation == "Ivarstead" || FameLocation == "Shor's Stone" || LocationManager.RiftLocationList.Find(FameLocation) >= 0
+		If ThaneScript.RiftImpGetOutofJail > 0 || ThaneScript.RiftSonsGetOutofJail > 0
+			return True
+		EndIf
+	ElseIf FameLocation == "Markarth" || FameLocation == "Karthwasten" || LocationManager.ReachLocationList.Find(FameLocation) >= 0
+		If ThaneScript.ReachImpGetOutofJail > 0 || ThaneScript.ReachSonsGetOutofJail > 0
+			return True
+		EndIf
+	ElseIf FameLocation == "Falkreath" || LocationManager.FalkreathLocationList.Find(FameLocation) >= 0
+		If ThaneScript.FalkreathImpGetOutofJail > 0 || ThaneScript.FalkreathSonsGetOutofJail > 0
+			return True
+		EndIf
+	ElseIf FameLocation == "Raven Rock" || FameLocation == "Skaal Village" || LocationManager.SolstheimLocationList.Find(FameLocation) >= 0
+		If DLC2StoneCleanse.IsCompleted()
+			return True
+		EndIf
+	ElseIf FameLocation == "Narzulbur" || FameLocation == "Mor Khazgur" || FameLocation == "Largashbur" || FameLocation == "Dushnikh Yal"
+		If PlayerScript.PlayerRef.IsInFaction(OrcFriends)
+			return True
+		EndIf
+	EndIf
+	return False
 EndFunction

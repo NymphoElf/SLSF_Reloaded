@@ -46,6 +46,7 @@ Bool Property LoversBetrayFromHighFame Auto Hidden
 Bool Property TattooLimitUnlocked Auto Hidden
 Bool Property TattooLimitChanged Auto Hidden
 Bool Property FameSpreadRestrictions Auto Hidden
+Bool Property ThanesCantBeAnonymous Auto Hidden
 
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
@@ -158,6 +159,7 @@ Function SetDefaults()
 	PlayerIsAnonymous = False
 	AnonymityEnabled = True
 	DynamicAnonymity = False
+	ThanesCantBeAnonymous = True
 	AllowLikeFameWhenRaped = False
 	AllowBestialityWhenRaped = False
 	VictimsAreMasochist = False
@@ -731,11 +733,18 @@ Event OnPageReset(String page)
 		AddToggleOptionST("SLSF_Reloaded_SubmissiveDefaultState", "$SubOnly", SubmissiveDefault, GetDisabledOptionFlagIf(DominantDefault == True))
 		AddToggleOptionST("SLSF_Reloaded_DominantDefaultState", "$DomOnly", DominantDefault, GetDisabledOptionFlagIf(SubmissiveDefault == True))
 		
+		AddHeaderOption("$AnonymityHeader")
+		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "$PlayerAnonymous", AnonymityEnabled, 0)
+		AddToggleOptionST("SLSF_Reloaded_DynamicAnonymityState", "$UseDynamicAnonymity", DynamicAnonymity, GetDisabledOptionFlagIf(AnonymityEnabled == False))
+		AddSliderOptionST("SLSF_Reloaded_DynamicAnonymityCutoffState", "$DynamicAnonymityCutoff", DynamicAnonymityFameCutoff, "{0}", GetDisabledOptionFlagIf(DynamicAnonymity == False))
+		AddToggleOptionST("SLSF_Reloaded_ThaneAnonymityState", "$NoThaneAnonymity", ThanesCantBeAnonymous, GetDisabledOptionFlagIf(DynamicAnonymity == False))
+		
+		SetCursorPosition(1)
+		
 		AddHeaderOption("$CommentSettingsHeader")
 		AddSliderOptionST("SLSF_Reloaded_CommentChanceState", "$CommentChance", SLSF_Reloaded_CommentFrequency.GetValue(), "{0}%", GetDisabledOptionFlagIf(Mods.IsFameCommentsInstalled == False))
 		AddToggleOptionST("SLSF_Reloaded_DisableNakedCommentsWhilePWState", "$NoCommentWhilePW", DisableNakedCommentsWhilePW, GetDisabledOptionFlagIf(Mods.IsPWInstalled == False))
 		
-		SetCursorPosition(1)
 		AddHeaderOption("$NotificationHeader")
 		AddToggleOptionST("SLSF_Reloaded_NotifyFameIncreaseState", "$NotifyIncrease", NotifyFameIncrease, 0)
 		AddToggleOptionST("SLSF_Reloaded_NotifyFameDecayState", "$NotifyDecay", NotifyFameDecay, 0)
@@ -743,9 +752,6 @@ Event OnPageReset(String page)
 		
 	ElseIf (page == "$FameSettingsPage")
 		AddHeaderOption("$FameGainSettingsHeader")
-		AddToggleOptionST("SLSF_Reloaded_PlayerAnonymousState", "$PlayerAnonymous", AnonymityEnabled, 0)
-		AddToggleOptionST("SLSF_Reloaded_DynamicAnonymityState", "$UseDynamicAnonymity", DynamicAnonymity, GetDisabledOptionFlagIf(AnonymityEnabled == False))
-		AddSliderOptionST("SLSF_Reloaded_DynamicAnonymityCutoffState", "$DynamicAnonymityCutoff", DynamicAnonymityFameCutoff, "{0}", GetDisabledOptionFlagIf(AnonymityEnabled == False))
 		AddToggleOptionST("SLSF_Reloaded_ForeplayFameState", "$ForeplayBonus", AllowForeplayFame, 0)
 		AddToggleOptionST("SLSF_Reloaded_AllowLikeFameWhenRapedState", "$LikeFameWhenRaped", AllowLikeFameWhenRaped, 0)
 		AddToggleOptionST("SLSF_Reloaded_AllowBestialityWhenRapedState", "$BestialityWhenRaped", AllowBestialityWhenRaped, 0)
@@ -1153,15 +1159,15 @@ Event OnPageReset(String page)
 				
 				If VisibilityManager.IsBodyTattooVisible(TattooIndex) == True
 					If VisibilityManager.BodyTattooExcluded[TattooIndex] == False
-						AddTextOption(SlotNumber + " - " + VisibilityManager.BodyTattooSubcategory[TattooIndex], "$Yes")
+						AddTextOption(SlotNumber, "$Yes")
 					Else
-						AddTextOption(SlotNumber + " - " + VisibilityManager.BodyTattooSubcategory[TattooIndex], "$YesExcluded")
+						AddTextOption(SlotNumber, "$YesExcluded")
 					EndIf
 				Else
 					If VisibilityManager.BodyTattooApplied[TattooIndex] == True && VisibilityManager.BodyTattooExcluded[TattooIndex] == False
-						AddTextOption(SlotNumber + " - " + VisibilityManager.BodyTattooSubcategory[TattooIndex], "$No")
+						AddTextOption(SlotNumber, "$No")
 					ElseIf VisibilityManager.BodyTattooApplied[TattooIndex] == True && VisibilityManager.BodyTattooExcluded[TattooIndex] == True
-						AddTextOption(SlotNumber + " - " + VisibilityManager.BodyTattooSubcategory[TattooIndex], "$NoExcluded")
+						AddTextOption(SlotNumber, "$NoExcluded")
 					Else
 						AddTextOption(SlotNumber, "$NoUnused")
 					EndIf
@@ -1799,6 +1805,22 @@ Event OnOptionSelect(Int Option)
 	EndIf
 EndEvent
 
+State SLSF_Reloaded_ThaneAnonymityState
+	Event OnSelectST()
+		If ThanesCantBeAnonymous == False
+			ThanesCantBeAnonymous = True
+		Else
+			ThanesCantBeAnonymous = False
+		EndIf
+		
+		SetToggleOptionValueST(ThanesCantBeAnonymous, False, "SLSF_Reloaded_ThaneAnonymityState")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$ThaneAnonymityInfo")
+	EndEvent
+EndState
+
 State SLSF_Reloaded_FameSpreadRestrictionState
 	Event OnSelectST()
 		If FameSpreadRestrictions == True
@@ -1883,8 +1905,8 @@ EndState
 State SLSF_Reloaded_BodyTattooLimitState
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(BodyTattooLimit)
-		SetSliderDialogDefaultValue(6)
-		SetSliderDialogRange(1,40)
+		SetSliderDialogDefaultValue(20)
+		SetSliderDialogRange(20,40)
 		SetSliderDialogInterval(1)
 	EndEvent
 	
@@ -1895,7 +1917,7 @@ State SLSF_Reloaded_BodyTattooLimitState
 	EndEvent
 	
 	Event OnDefaultST()
-		BodyTattooLimit = 6
+		BodyTattooLimit = 20
 		SetSliderOptionValueST(BodyTattooLimit, "{0}", False, "SLSF_Reloaded_BodyTattooLimitState")
 		TattooLimitChanged = True
 	EndEvent
@@ -1908,8 +1930,8 @@ EndState
 State SLSF_Reloaded_FaceTattooLimitState
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(FaceTattooLimit)
-		SetSliderDialogDefaultValue(3)
-		SetSliderDialogRange(1,20)
+		SetSliderDialogDefaultValue(10)
+		SetSliderDialogRange(10,20)
 		SetSliderDialogInterval(1)
 	EndEvent
 	
@@ -1920,7 +1942,7 @@ State SLSF_Reloaded_FaceTattooLimitState
 	EndEvent
 	
 	Event OnDefaultST()
-		FaceTattooLimit = 3
+		FaceTattooLimit = 10
 		SetSliderOptionValueST(FaceTattooLimit, "{0}", False, "SLSF_Reloaded_FaceTattooLimitState")
 		TattooLimitChanged = True
 	EndEvent
@@ -1933,8 +1955,8 @@ EndState
 State SLSF_Reloaded_HandTattooLimitState
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(HandTattooLimit)
-		SetSliderDialogDefaultValue(3)
-		SetSliderDialogRange(1,20)
+		SetSliderDialogDefaultValue(10)
+		SetSliderDialogRange(10,20)
 		SetSliderDialogInterval(1)
 	EndEvent
 	
@@ -1945,7 +1967,7 @@ State SLSF_Reloaded_HandTattooLimitState
 	EndEvent
 	
 	Event OnDefaultST()
-		HandTattooLimit = 3
+		HandTattooLimit = 10
 		SetSliderOptionValueST(HandTattooLimit, "{0}", False, "SLSF_Reloaded_HandTattooLimitState")
 		TattooLimitChanged = True
 	EndEvent
@@ -1958,8 +1980,8 @@ EndState
 State SLSF_Reloaded_FootTattooLimitState
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(FootTattooLimit)
-		SetSliderDialogDefaultValue(3)
-		SetSliderDialogRange(1,20)
+		SetSliderDialogDefaultValue(10)
+		SetSliderDialogRange(10,20)
 		SetSliderDialogInterval(1)
 	EndEvent
 	
@@ -1970,7 +1992,7 @@ State SLSF_Reloaded_FootTattooLimitState
 	EndEvent
 	
 	Event OnDefaultST()
-		FootTattooLimit = 3
+		FootTattooLimit = 10
 		SetSliderOptionValueST(FootTattooLimit, "{0}", False, "SLSF_Reloaded_FootTattooLimitState")
 		TattooLimitChanged = True
 	EndEvent

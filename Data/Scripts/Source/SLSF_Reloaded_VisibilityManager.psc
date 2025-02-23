@@ -414,10 +414,8 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 				return False
 			EndIf
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Thigh"
-			If PlayerRef.GetEquippedArmorInSlot(53) != None
-				If !PlayerRef.GetEquippedArmorInSlot(53).HasKeyword(Mods.SLS_BikiniArmor)
-					return False
-				EndIf
+			If PlayerRef.GetEquippedArmorInSlot(53) != None || (PlayerRef.GetEquippedArmorInSlot(32) != None && !PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor))
+				return False
 			EndIf
 			return True
 		ElseIf BodyTattooSubcategory[SlotNumber] == "Calves"
