@@ -176,9 +176,9 @@ MaxFame       = YOU MUST MANUALLY DEFINE A MAXIMUM FAME VALUE THAT YOUR EVENT CA
 ==HOW TO WRITE YOUR MOD EVENT PROPERLY==
 Example:
 
-Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendSlutFameGain") ;This should ALWAYS be the first line for each event
-ModEvent.PushString(EventHandle, "Whiterun") ;Our Location Name
-ModEvent.PushString(EventHandle, "Slut") ;Our Category - If applicable
+Int EventHandle = ModEvent.Create("SLSF_Reloaded_SendFameGain") ;ModEvent.Create should ALWAYS be the first line for each event
+ModEvent.PushString(EventHandle, "Slut") ;Our Category
+ModEvent.PushString(EventHandle, "Whiterun") ;Our Location Name (in English)
 ModEvent.PushInt(EventHandle, 0) ;The minimum fame the player should have
 ModEvent.PushInt(EventHandle, 100) ;The maximum fame the player is allowed from this event
 ModEvent.Send(EventHandle) ;Sends the data from our "ModEvent.Push" lines. This should ALWAYS be the last line for each event
