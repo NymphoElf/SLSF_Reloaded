@@ -86,8 +86,12 @@ GlobalVariable Property CheatGlobal Auto
 GlobalVariable Property CuckGlobal Auto
 GlobalVariable Property AirheadGlobal Auto
 
-Bool Property SLSFCFameTypesCleared Auto Hidden
+Bool Property CumDumpFameCleared Auto Hidden
+Bool Property CuckFameCleared Auto Hidden
+Bool Property UnfaithfulFameCleared Auto Hidden
 Bool Property AirheadFameCleared Auto Hidden
+
+Bool Property SLSFCFameTypesCleared Auto Hidden ;DEPRECATED
 
 Event OnInit()
 	Startup()
@@ -190,27 +194,40 @@ Function UpdateFame(Int CountdownChange)
 		LocationIndex += 1
 	EndWhile
 	
-	If Mods.IsFameCommentsInstalled == False && SLSFCFameTypesCleared == False
-		WipeFameComments()
-		SLSFCFameTypesCleared = True
-	ElseIf Mods.IsFameCommentsInstalled == True
-		SLSFCFameTypesCleared = False
+	If Mods.IsFHUInstalled == False && CumDumpFameCleared == False && Data.DisplayFameFlags[0] == False
+		WipeCumDumpFame()
+		CumDumpFameCleared = True
+	ElseIf Mods.IsFHUInstalled == True || Data.DisplayFameFlags[0] == True
+		CumDumpFameCleared = False
 	EndIf
 	
-	If Mods.IsBimbosInstalled == False && AirheadFameCleared == False
-		WipeBimbos()
+	If Mods.IsFameCommentsInstalled == False && CuckFameCleared == False && Data.DisplayFameFlags[1] == False
+		WipeCuckFame()
+		CuckFameCleared = True
+	ElseIf Mods.IsFameCommentsInstalled == True || Data.DisplayFameFlags[1] == True
+		CuckFameCleared = False
+	EndIf
+	
+	If Mods.IsFameCommentsInstalled == False && UnfaithfulFameCleared == False && Data.DisplayFameFlags[2] == False
+		WipeUnfaithfulFame()
+		UnfaithfulFameCleared = True
+	ElseIf Mods.IsFameCommentsInstalled == True || Data.DisplayFameFlags[2] == True
+		UnfaithfulFameCleared = False
+	EndIf
+	
+	If Mods.IsBimbosInstalled == False && AirheadFameCleared == False && Data.DisplayFameFlags[3] == False
+		WipeAirheadFame()
 		AirheadFameCleared = True
-	ElseIf Mods.IsBimbosInstalled == True
+	ElseIf Mods.IsBimbosInstalled == True || Data.DisplayFameFlags[3] == True
 		AirheadFameCleared = False
 	EndIf
 	
 	Data.FameCheck()
 EndFunction
 
-Function WipeFameComments()
+Function WipeCuckFame()
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
-		Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Unfaithful", 0)
 		Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Cuck", 0)
 		LocationIndex += 1
 	EndWhile
@@ -218,13 +235,27 @@ Function WipeFameComments()
 	LocationIndex = 0
 	
 	While LocationIndex < SLSF_Reloaded_CustomLocationCount.GetValue()
-		Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Unfaithful", 0)
 		Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Cuck", 0)
 		LocationIndex += 1
 	EndWhile
 EndFunction
 
-Function WipeBimbos()
+Function WipeUnfaithfulFame()
+	Int LocationIndex = 0
+	While LocationIndex < LocationManager.DefaultLocation.Length
+		Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Unfaithful", 0)
+		LocationIndex += 1
+	EndWhile
+	
+	LocationIndex = 0
+	
+	While LocationIndex < SLSF_Reloaded_CustomLocationCount.GetValue()
+		Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Unfaithful", 0)
+		LocationIndex += 1
+	EndWhile
+EndFunction
+
+Function WipeAirheadFame()
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Airhead", 0)
@@ -235,6 +266,21 @@ Function WipeBimbos()
 	
 	While LocationIndex < SLSF_Reloaded_CustomLocationCount.GetValue()
 		Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Airhead", 0)
+		LocationIndex += 1
+	EndWhile
+EndFunction
+
+Function WipeCumDumpFame()
+	Int LocationIndex = 0
+	While LocationIndex < LocationManager.DefaultLocation.Length
+		Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], "Cum Dump", 0)
+		LocationIndex += 1
+	EndWhile
+	
+	LocationIndex = 0
+	
+	While LocationIndex < SLSF_Reloaded_CustomLocationCount.GetValue()
+		Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], "Cum Dump", 0)
 		LocationIndex += 1
 	EndWhile
 EndFunction
@@ -564,6 +610,7 @@ Bool Function CanGainBoundFame(String FameLocation)
 	VisibilityManager.CheckBondage()
 	
 	Int BondagePoints = 0
+	Int BondageFame = Data.GetFameValue(FameLocation, "Bound")
 	
 	If VisibilityManager.DD_CollarVisible == True && Config.AllowCollarBoundFame == True
 		BondagePoints += 1
@@ -605,21 +652,21 @@ Bool Function CanGainBoundFame(String FameLocation)
 		If IsHeavilyBound.GetValue() == 1 || BondagePoints > 8
 			return True
 		ElseIf IsLightlyBound.GetValue() == 1
-			If BondagePoints == 1 && Data.GetFameValue(FameLocation, "Bound") < 15
+			If BondagePoints == 1 && BondageFame < 15
 				return True
-			ElseIf BondagePoints == 2 && Data.GetFameValue(FameLocation, "Bound") < 30
+			ElseIf BondagePoints == 2 && BondageFame < 30
 				return True
-			ElseIf BondagePoints == 3 && Data.GetFameValue(FameLocation, "Bound") < 45
+			ElseIf BondagePoints == 3 && BondageFame < 45
 				return True
-			ElseIf BondagePoints == 4 && Data.GetFameValue(FameLocation, "Bound") < 60
+			ElseIf BondagePoints == 4 && BondageFame < 60
 				return True
-			ElseIf BondagePoints == 5 && Data.GetFameValue(FameLocation, "Bound") < 75
+			ElseIf BondagePoints == 5 && BondageFame < 75
 				return True
-			ElseIf BondagePoints == 6 && Data.GetFameValue(FameLocation, "Bound") < 90
+			ElseIf BondagePoints == 6 && BondageFame < 90
 				return True
-			ElseIf BondagePoints == 7 && Data.GetFameValue(FameLocation, "Bound") < 105
+			ElseIf BondagePoints == 7 && BondageFame < 105
 				return True
-			ElseIf BondagePoints == 8 && Data.GetFameValue(FameLocation, "Bound") < 120
+			ElseIf BondagePoints == 8 && BondageFame < 120
 				return True
 			EndIf
 		EndIf

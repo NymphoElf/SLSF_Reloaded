@@ -449,6 +449,16 @@ Bool Function IsBodyTattooVisible(Int SlotNumber)
 					return True
 				EndIf
 			EndIf
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Thigh"
+			If PlayerRef.GetEquippedArmorInSlot(53) != None || PlayerRef.GetEquippedArmorInSlot(32) != None
+				return False
+			EndIf
+			return True
+		ElseIf BodyTattooSubcategory[SlotNumber] == "Calves"
+			If PlayerRef.GetEquippedArmorInSlot(37) != None || PlayerRef.GetEquippedArmorInSlot(54) != None
+				return False
+			EndIf
+			return True
 		Else
 			Debug.MessageBox("SLSF Reloaded - ERROR: Body Tattoo Subcategory is invalid.")
 		EndIf

@@ -697,11 +697,11 @@ Event OnPageReset(String page)
 		AddTextOption("$SadistFame", Data.GetFameValue(DataLocation, "Sadist") as String)
 		AddTextOption("$MasochistFame", Data.GetFameValue(DataLocation, "Masochist") as String)
 		
-		If Mods.IsFameCommentsInstalled == True
+		If Mods.IsFameCommentsInstalled == True || Data.DisplayFameFlags[2] == True
 			AddTextOption("$UnfaithfulFame", Data.GetFameValue(DataLocation, "Unfaithful") as String)
 		EndIf
 		
-		If Mods.IsBimbosInstalled == True
+		If Mods.IsBimbosInstalled == True || Data.DisplayFameFlags[3] == True
 			AddTextOption("$AirheadFame", Data.GetFameValue(DataLocation, "Airhead") as String)
 		EndIf
 		
@@ -717,11 +717,11 @@ Event OnPageReset(String page)
 		AddTextOption("$BoundFame", Data.GetFameValue(DataLocation, "Bound") as String)
 		AddTextOption("$TattooFame", Data.GetFameValue(DataLocation, "Tattoo") as String)
 		
-		If Mods.IsFHUInstalled == True
+		If Mods.IsFHUInstalled == True || Data.DisplayFameFlags[0] == True
 			AddTextOption("$CumDumpFame", Data.GetFameValue(DataLocation, "Cum Dump") as String)
 		EndIf
 		
-		If Mods.IsFameCommentsInstalled == True
+		If Mods.IsFameCommentsInstalled == True || Data.DisplayFameFlags[1] == True
 			AddTextOption("$CuckFame", Data.GetFameValue(DataLocation, "Cuck") as String)
 		EndIf
 	
@@ -822,16 +822,19 @@ Event OnPageReset(String page)
 		AddSliderOptionST("SLSF_Reloaded_BoundMultiplierState", "$BndMult", FameCategoryMultiplier[19], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		AddSliderOptionST("SLSF_Reloaded_TattooMultiplierState", "$TatMult", FameCategoryMultiplier[20], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		
-		If Mods.IsFHUInstalled == True
+		If Mods.IsFHUInstalled == True || Data.DisplayFameFlags[0] == True
 			AddSliderOptionST("SLSF_Reloaded_CumDumpMultiplierState", "$DmpMult", FameCategoryMultiplier[21], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		EndIf
 		
-		If Mods.IsFameCommentsInstalled == True
+		If Mods.IsFameCommentsInstalled == True || Data.DisplayFameFlags[2] == True
 			AddSliderOptionST("SLSF_Reloaded_UnfaithfulMultiplierState", "$UnfMult", FameCategoryMultiplier[22], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
+		EndIf
+		
+		If Mods.IsFameCommentsInstalled == True || Data.DisplayFameFlags[1] == True
 			AddSliderOptionST("SLSF_Reloaded_CuckMultiplierState", "$CukMult", FameCategoryMultiplier[23], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		EndIf
 		
-		If Mods.IsBimbosInstalled == True
+		If Mods.IsBimbosInstalled == True || Data.DisplayFameFlags[3] == True
 			AddSliderOptionST("SLSF_Reloaded_AirheadMultiplierState", "$AirMult", FameCategoryMultiplier[24], "{1}", GetDisabledOptionFlagIf(UseGlobalFameMultiplier == True))
 		EndIf
 		

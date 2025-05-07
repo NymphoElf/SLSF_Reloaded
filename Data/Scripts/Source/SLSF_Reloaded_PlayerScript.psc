@@ -11,10 +11,13 @@ SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
 SLSF_Reloaded_DynamicAnonymity Property DynamicAnonymityScript Auto
 SLSF_Reloaded_SexAnimationAnalyzer Property AnimationAnalyzer Auto
+SLSF_Reloaded_UpdateManager Property UpdateManager Auto
 
 Actor Property PlayerRef Auto
 
 Bool Property WaitingOnVisibilityManager Auto Hidden
+
+Float Property LastModVersion Auto Hidden
 
 Spell Property NPCScanSpell Auto
 
@@ -44,6 +47,8 @@ Event OnPlayerLoadGame()
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
 	RegisterForMenu("Sleep/Wait Menu")
+	
+	UpdateManager.CheckModUpdate(LastModVersion)
 	
 	Debug.Trace("SLSF Reloaded - Player Script: Load Game Complete")
 EndEvent

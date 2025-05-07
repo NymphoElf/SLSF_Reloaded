@@ -129,6 +129,13 @@ Bool[] Property CuckFlags Auto Hidden
 Bool[] Property AirheadFlags Auto Hidden
 Bool[] Property SexWorkerFlags Auto Hidden
 
+Bool[] Property DisplayFameFlags Auto Hidden ;0 = Cum Dump, 1 = Cuck, 2 = Unfaithful, 3 = Airhead
+
+Bool[] Property EnableCumDumpFlags Auto Hidden
+Bool[] Property EnableCuckFlags Auto Hidden
+Bool[] Property EnableUnfaithfulFlags Auto Hidden
+Bool[] Property EnableAirheadFlags Auto Hidden
+
 Event OnInit()
 	SetDefaults()
 EndEvent
@@ -166,6 +173,12 @@ Function SetDefaults()
 	CuckFlags = New Bool[100]
 	AirheadFlags = New Bool[100]
 	SexWorkerFlags = New Bool[100]
+	
+	DisplayFameFlags = New Bool[4]
+	EnableCumDumpFlags = New Bool[100]
+	EnableCuckFlags = New Bool[100]
+	EnableUnfaithfulFlags = New Bool[100]
+	EnableAirheadFlags = New Bool[100]
 	
 	Int ExternalModIndex = 0
 	While ExternalModIndex < ExternalMods.Length
@@ -1552,7 +1565,14 @@ Function UnregisterExternalMod(String ModName)
 		AirheadFlags[ModIndex] = False
 		;WhoreEventFlags[ModIndex] = False
 		SexWorkerFlags[ModIndex] = False
+		
+		EnableCumDumpFlags[ModIndex] = False
+		EnableCuckFlags[ModIndex] = False
+		EnableUnfaithfulFlags[ModIndex] = False
+		EnableAirheadFlags[ModIndex] = False
 	EndIf
+	
+	CheckFlags()
 EndFunction
 
 Bool Function GetModFlagState(String ModName, String FlagName)
@@ -1751,6 +1771,14 @@ Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
 		AirheadFlags[ModIndex] = FlagValue
 	ElseIf FlagName == "Sex Worker"
 		SexWorkerFlags[ModIndex] = FlagValue
+	ElseIf FlagName == "EnableCumDump"
+		EnableCumDumpFlags[ModIndex] = FlagValue
+	ElseIf FlagName == "EnableCuck"
+		EnableCuckFlags[ModIndex] = FlagValue
+	ElseIf FlagName == "EnableUnfaithful"
+		EnableUnfaithfulFlags[ModIndex] = FlagValue
+	ElseIf FlagName == "EnableAirhead"
+		EnableAirheadFlags[ModIndex] = FlagValue
 	Else
 		Debug.MessageBox("SLSF Reloaded - ERROR: External mod category " + FlagName + " is not valid!")
 	EndIf
@@ -1794,6 +1822,11 @@ Function CheckFlags()
 	Int UnfaithfulFlagIndex = UnfaithfulFlags.Find(True)
 	Int CuckFlagIndex = CuckFlags.Find(True)
 	Int AirheadFlagIndex = AirheadFlags.Find(True)
+	
+	Int EnableCumDumpIndex = EnableCumDumpFlags.Find(True)
+	Int EnableCuckIndex = EnableCuckFlags.Find(True)
+	Int EnableUnfaithfulIndex = EnableUnfaithfulFlags.Find(True)
+	Int EnableAirheadIndex = EnableAirheadFlags.Find(True)
 	
 	If WhoreFlagIndex < 0
 		ExternalFlags[0] = False
@@ -1943,6 +1976,31 @@ Function CheckFlags()
 		ExternalFlags[24] = False
 	Else
 		ExternalFlags[24] = True
+	EndIf
+	
+	;===Fame Display Override Flags===
+	If EnableCumDumpIndex < 0
+		DisplayFameFlags[0] = False
+	Else
+		DisplayFameFlags[1] = True
+	EndIf
+	
+	If EnableCuckIndex < 0
+		DisplayFameFlags[1] = False
+	Else
+		DisplayFameFlags[1] = True
+	EndIf
+	
+	If EnableUnfaithfulIndex < 0
+		DisplayFameFlags[2] = False
+	Else
+		DisplayFameFlags[2] = True
+	EndIf
+	
+	If EnableAirheadIndex < 0
+		DisplayFameFlags[3] = False
+	Else
+		DisplayFameFlags[3] = True
 	EndIf
 EndFunction
 

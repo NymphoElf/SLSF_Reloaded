@@ -5,6 +5,7 @@ SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_PlayerScript Property PlayerScript Auto
+SLSF_Reloaded_DynamicAnonymity Property Anonymity Auto
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 
@@ -70,9 +71,11 @@ Function RegisterExternalEvents()
 	RegisterForModEvent("SLSF_Reloaded_SetAirheadFlag", "OnExternalAirheadFlag")
 	RegisterForModEvent("SLSF_Reloaded_SetWhoreEventFlag", "OnExternalWhoreEventFlag") ;DEPRECATED - Use Sex Woker flag instead
 	RegisterForModEvent("SLSF_Reloaded_SetSexWorkerFlag", "OnExternalSexWorkerFlag") ;Used specifically for checking if a Sexlab Event should give Whore fame
+	RegisterForModEvent("SLSF_Reloaded_EnableFameType", "OnEnableFameType")
 	
 	;DATA LISTENERS
 	RegisterForModEvent("SLSF_Reloaded_RequestLocation", "OnRequestLocation")
+	RegisterForModEvent("SLSF_Reloaded_RequestRecognitionTime", "OnRequestRecognitionTime")
 	RegisterForModEvent("SLSF_Reloaded_RequestFame", "OnRequestFame")
 	RegisterForModEvent("SLSF_Reloaded_RequestCumVisibility", "OnRequestCumVisibility")
 	RegisterForModEvent("SLSF_Reloaded_RequestFlagState", "OnRequestFlagState")
@@ -850,7 +853,8 @@ EndEvent
 ========FLAG LISTENERS========
 ==============================
 These listeners allow you to manually set Fame flags, which will enable the periodic check
-to increase fame based on whatever you decide.
+to increase fame based on whatever you decide. They also allow you to re-enable certain fame
+types if your mod requires them via the 'SLSF_Reloaded_EnableFameType' ModEvent
 
 In order to prevent conflicts, these flags are filtered by plugin name, with a maximum of 100 different plugins that can set flags.
 
@@ -876,6 +880,14 @@ Example (disable Slut Flag):
 Int EventHandle = ModEvent.Create("SLSF_Reloaded_SetSlutFlag")
 ModEvent.PushString("SLSF Reloaded.esp")
 ModEvent.PushBool(False)
+ModEvent.Send(EventHandle)
+
+Example (enable Cum Dump fame even if the user doesn't have Fill Her Up installed):
+
+Int EventHandle = ModEvent.Create("SLSF_Reloaded_EnableFameType")
+ModEvent.PushString("Cum Dump")
+ModEvent.PushString("SLSF Reloaded.esp")
+ModEvent.PushBool(True)
 ModEvent.Send(EventHandle)
 /;
 
@@ -990,6 +1002,18 @@ Event OnExternalSexWorkerFlag(String ModName, Bool Flag)
 	Data.SetExternalFlags(ModName, "Sex Worker", Flag)
 EndEvent
 
+Event OnEnableFameType(String FameType, String ModName, Bool Flag)
+	If FameType == "Cum Dump"
+		Data.SetExternalFlags(ModName, "EnableCumDump", Flag)
+	ElseIf FameType == "Cuck"
+		Data.SetExternalFlags(ModName, "EnableCuck", Flag)
+	ElseIf FameType == "Unfaithful"
+		Data.SetExternalFlags(ModName, "EnableUnfaithful", Flag)
+	ElseIf FameType == "Airhead"
+		Data.SetExternalFlags(ModName, "EnableAirhead", Flag)
+	EndIf
+EndEvent
+
 ;/
 ==============================
 ========DATA LISTENERS========
@@ -1013,6 +1037,32 @@ Event OnRequestLocation(Bool Strict)
 	
 	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRequestedLocation")
 	ModEvent.PushString(EventHandle, LocationToReturn)
+	ModEvent.Send(EventHandle)
+EndEvent
+
+Event OnRequestRecognitionTime(String FameLocation)
+	Float RecognitionTime = 0.0
+	
+	If FameLocation == "Current"
+		FameLocation = LocationManager.CurrentLocationName()
+	EndIf
+	
+	Int LocationIndex = LocationManager.DefaultLocation.Find(FameLocation)
+	
+	If LocationIndex >= 0
+		RecognitionTime = Anonymity.DefaultLocationRecognitionTime[LocationIndex]
+	Else
+		LocationIndex = LocationManager.CustomLocation.Find(FameLocation)
+		If LocationIndex >= 0
+			RecognitionTime = Anonymity.CustomLocationRecognitionTime[LocationIndex]
+		Else
+			Debug.Trace("SLSF Reloaded - Location " + FameLocation + " does not exist or was not registered as a Custom Location")
+			return
+		EndIf
+	EndIf
+	
+	Int EventHandle = ModEvent.Create("SLSF_Reloaded_ReturnRecognitionTime")
+	ModEvent.PushFloat(EventHandle, RecognitionTime)
 	ModEvent.Send(EventHandle)
 EndEvent
 

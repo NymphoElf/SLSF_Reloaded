@@ -22,9 +22,23 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 		return
 	EndIf
 	
+	If akTarget.IsDead()
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " (" + akTarget.GetName() + ") is Dead")
+		EndIf
+		return
+	EndIf
+	
+	If akTarget.IsInCombat()
+		If Config.EnableTracing == True
+			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " (" + akTarget.GetName() + ") is in Combat")
+		EndIf
+		return
+	EndIf
+	
 	If Sexlab.IsActorActive(akTarget) == True
 		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " is active in Sexlab")
+			Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " (" + akTarget.GetName() + ") is active in Sexlab")
 		EndIf
 		return
 	EndIf
@@ -35,18 +49,18 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 		EndIf
 		If !akTarget.HasLOS(PlayerRef)
 			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " does NOT have LOS.")
+				Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " (" + akTarget.GetName() + ") does NOT have LOS.")
 			EndIf
 			If akTarget.GetDistance(PlayerRef) > Config.MinimumNPCLOSDistance
 				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " is beyond Minimum LOS Distance: " + Config.MinimumNPCLOSDistance)
-					Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " distance is: " + akTarget.GetDistance(PlayerRef))
+					Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " (" + akTarget.GetName() + ") is beyond Minimum LOS Distance: " + Config.MinimumNPCLOSDistance)
+					Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " (" + akTarget.GetName() + ") distance is: " + akTarget.GetDistance(PlayerRef))
 				EndIf
 				return
 			EndIf
 		ElseIf !PlayerRef.IsDetectedBy(akTarget)
 			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " DOES have LOS but is not detecting player.")
+				Debug.Trace("SLSF Reloaded NPC Scanner - Target " + akTarget + " (" + akTarget.GetName() + ") DOES have LOS but is not detecting player.")
 			EndIf
 			return
 		EndIf
