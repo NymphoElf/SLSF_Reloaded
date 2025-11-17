@@ -11,13 +11,11 @@ SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
 SLSF_Reloaded_DynamicAnonymity Property DynamicAnonymityScript Auto
 SLSF_Reloaded_SexAnimationAnalyzer Property AnimationAnalyzer Auto
-SLSF_Reloaded_UpdateManager Property UpdateManager Auto
+SLSF_Reloaded_Logger Property Logger Auto
 
 Actor Property PlayerRef Auto
 
-Bool Property WaitingOnVisibilityManager Auto Hidden
-
-Float Property LastModVersion Auto Hidden
+Bool Property WaitingOnVisibilityManager = False Auto Hidden
 
 Spell Property NPCScanSpell Auto
 
@@ -32,12 +30,21 @@ Event OnInit()
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
 	RegisterForMenu("Sleep/Wait Menu")
-	WaitingOnVisibilityManager = False
+	RegisterForMenu("RaceSex Menu")
 	
-	Debug.Trace("SLSF Reloaded - Player Script Initialized")
+	Logger.Log("SLSF Reloaded - Player Script Initialized", True)
 EndEvent
 
 Event OnPlayerLoadGame()
+	ActorBase PlayerBase = PlayerRef.GetActorBase()
+	String PlayerName = PlayerBase.GetName()
+	
+	If Logger.LogName == "" || Logger.LogName == "?"
+		Logger.LogName = PlayerName
+		Logger.DuplicateCheck()
+	EndIf
+	Logger.Log("===LOAD GAME===")
+	
 	Mods.CheckInstalledMods()
 	Listener.RegisterExternalEvents()
 	Data.CleanExternalModList()
@@ -46,65 +53,58 @@ Event OnPlayerLoadGame()
 	RegisterForModEvent("HookAnimationStart", "OnSexlabAnimationStart")
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
-	RegisterForMenu("Sleep/Wait Menu")
 	
-	UpdateManager.CheckModUpdate(LastModVersion)
-	
-	Debug.Trace("SLSF Reloaded - Player Script: Load Game Complete")
+	Logger.Log("SLSF Reloaded - Player Script: Load Game Complete", True)
 EndEvent
 
-Event OnMenuClose(String MenuName) ;We only registered the Sleep/Wait Menu, so that's the only one we'll capture with this event
-	Float TimeDifference = Utility.GetCurrentGameTime() - TimeManager.LastCheckedTime
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Sleep/Wait Menu Closed")
-		Debug.Trace("SLSF Reloaded - Sleep/Wait Menu Time Check. Curent Game Time is: " + Utility.GetCurrentGameTime())
-		Debug.Trace("SLSF Reloaded - Sleep/Wait Menu Time Check. TimeManager Last Checked Time is: " + TimeManager.LastCheckedTime)
-		Debug.Trace("SLSF Reloaded - Sleep/Wait Menu Time Check. Difference is: " + TimeDifference)
+Event OnMenuClose(String MenuName)
+	If MenuName == "RaceSex Menu"
+		ActorBase PlayerBase = PlayerRef.GetActorBase()
+		String PlayerName = PlayerBase.GetName()
+		
+		Logger.LogName = PlayerName
+		Logger.DuplicateCheck()
+		Logger.Log("===MAMMAERIES AND LACTATION LOG START===")
+		Logger.Log("===PLAYER NAME: " + PlayerName + " ===")
 	EndIf
-	If TimeDifference >= 0.0199 ;~0.0199 is the time amount for an in-game half-hour
-		If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Sleep/Wait Menu tiggers TimeManager")
+	
+	If MenuName == "Sleep/Wait Menu"
+		Float TimeDifference = Utility.GetCurrentGameTime() - TimeManager.LastCheckedTime
+		Logger.Log("SLSF Reloaded - Sleep/Wait Menu Closed")
+		Logger.Log("SLSF Reloaded - Sleep/Wait Menu Time Check. Curent Game Time is: " + Utility.GetCurrentGameTime())
+		Logger.Log("SLSF Reloaded - Sleep/Wait Menu Time Check. TimeManager Last Checked Time is: " + TimeManager.LastCheckedTime)
+		Logger.Log("SLSF Reloaded - Sleep/Wait Menu Time Check. Difference is: " + TimeDifference)
+		If TimeDifference >= 0.0199 ;~0.0199 is the time amount for an in-game half-hour
+			If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
+				Logger.Log("SLSF Reloaded - Sleep/Wait Menu tiggers TimeManager")
+				TimeManager.PeriodicFameTimer()
 			EndIf
-			TimeManager.PeriodicFameTimer()
 		EndIf
 	EndIf
 EndEvent
 
 Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Sexlab Animation started")
-	EndIf
+	Logger.Log("SLSF Reloaded - Sexlab Animation started")
 	If hasPlayer == True
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Sexlab Animation has player")
-		EndIf
+		Logger.Log("SLSF Reloaded - Sexlab Animation has player")
 		AnimationAnalyzer.SexSceneEnded = False
 		AnimationAnalyzer.AnimationAnalyze(threadID)
 	EndIf
 EndEvent
 
 Event OnSexlabForeplayEnd(Int threadID, Bool hasPlayer)
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Foreplay Animation ended")
-	EndIf
+	Logger.Log("SLSF Reloaded - Foreplay Animation ended")
 	If hasPlayer == True
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Foreplay Animation has player")
-		EndIf
+		Logger.Log("SLSF Reloaded - Foreplay Animation has player")
 		AnimationAnalyzer.SexSceneEnded = False
 		AnimationAnalyzer.AnimationAnalyze(threadID)
 	EndIf
 EndEvent
 
 Event OnSexlabAnimationEnd(Int threadID, Bool hasPlayer)
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Sexlab Animation ended")
-	EndIf
+	Logger.Log("SLSF Reloaded - Sexlab Animation ended")
 	If hasPlayer == True
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Sexlab Animation has player")
-		EndIf
+		Logger.Log("SLSF Reloaded - Sexlab Animation has player")
 		AnimationAnalyzer.SexSceneEnded = True
 	EndIf
 EndEvent
@@ -119,18 +119,12 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 EndEvent
 
 Event OnUpdateGameTime()
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime started.")
-	EndIf
+	Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime started.")
 	If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is not already running. Calling TimeManager.")
-		EndIf
+		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is not already running. Calling TimeManager.")
 		TimeManager.PeriodicFameTimer()
 	Else
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is already running. Skipped TimeManager call.")
-		EndIf
+		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is already running. Skipped TimeManager call.")
 	EndIf
 	
 	Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
@@ -143,14 +137,10 @@ Event OnUpdateGameTime()
 	SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
 	
 	If Config.AllowLegacyOverwrite == True
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is TRUE")
-		EndIf
+		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is TRUE")
 		LegacyOverwrite.OverwriteLegacyFame()
 	Else
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is FALSE")
-		EndIf
+		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is FALSE")
 	EndIf
 EndEvent
 
@@ -161,14 +151,10 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		ObjectName = akBaseObject.GetName()
 	EndIf
 	
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - PlayerScript OnObjectEquipped: ObjectName is: " + ObjectName)
-	EndIf
+	Logger.Log("SLSF Reloaded - PlayerScript OnObjectEquipped: ObjectName is: " + ObjectName)
 	
 	If (akBaseObject == none || ObjectName == "")
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - PlayerScript OnObjectEquipped: Object is Null or has blank name. Event terminated.")
-		EndIf
+		Logger.Log("SLSF Reloaded - PlayerScript OnObjectEquipped: Object is Null or has blank name. Event terminated.")
 		return
 	ElseIf (ObjectName == "Skooma" || ObjectName == "Kordir's Skooma" || ObjectName == "Redwater Skooma" || ObjectName == "Double-Distilled Skooma")
 		Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
@@ -181,9 +167,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
 	EndIf
 	
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - PlayerScript OnObjectEquipped: Register VisibilityManager for Single Update")
-	EndIf
+	Logger.Log("SLSF Reloaded - PlayerScript OnObjectEquipped: Register VisibilityManager for Single Update")
 	
 	If VisibilityManager.UpdateRunning == False
 		WaitingOnVisibilityManager = False
@@ -192,15 +176,11 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		If WaitingOnVisibilityManager == False
 			While VisibilityManager.UpdateRunning == True
 				WaitingOnVisibilityManager = True
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - OnObjectEquipped: Waiting on previous VisibilityManager Update to finish")
-				EndIf
+				Logger.Log("SLSF Reloaded - OnObjectEquipped: Waiting on previous VisibilityManager Update to finish")
 				Utility.Wait(5.0) ;Wait 5 seconds to let the VisibilityManager Update Finish before starting a new one
 			EndWhile
 			
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - OnObjectEquipped: Previous VisibilityManager Update finished. Register VisibilityManager for Single Update")
-			EndIf
+			Logger.Log("SLSF Reloaded - OnObjectEquipped: Previous VisibilityManager Update finished. Register VisibilityManager for Single Update")
 			
 			VisibilityManager.RegisterForSingleUpdate(0.1)
 			WaitingOnVisibilityManager = False
@@ -215,14 +195,10 @@ Event OnObjectUnequipped(Form akBaseObject, ObjectReference akReference)
 		ObjectName = akBaseObject.GetName()
 	EndIf
 	
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - PlayerScript OnObjectUnequipped: Object name is: " + ObjectName)
-	EndIf
+	Logger.Log("SLSF Reloaded - PlayerScript OnObjectUnequipped: Object name is: " + ObjectName)
 	
 	If (akBaseObject == none || akBaseObject.GetName() == "")
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - PlayerScript OnObjectUnequipped: Object is Null or has blank name. Event terminated.")
-		EndIf
+		Logger.Log("SLSF Reloaded - PlayerScript OnObjectUnequipped: Object is Null or has blank name. Event terminated.")
 		return
 	EndIf
 	
@@ -233,15 +209,11 @@ Event OnObjectUnequipped(Form akBaseObject, ObjectReference akReference)
 		If WaitingOnVisibilityManager == False
 			While VisibilityManager.UpdateRunning == True
 				WaitingOnVisibilityManager = True
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - OnObjectUnequipped: Waiting on previous VisibilityManager Update to finish")
-				EndIf
+				Logger.Log("SLSF Reloaded - OnObjectUnequipped: Waiting on previous VisibilityManager Update to finish")
 				Utility.Wait(5.0) ;Wait 5 seconds to let the VisibilityManager Update Finish before starting a new one
 			EndWhile
 			
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - OnObjectUnequipped: Previous VisibilityManager Update finished. Register VisibilityManager for Single Update")
-			EndIf
+			Logger.Log("SLSF Reloaded - OnObjectUnequipped: Previous VisibilityManager Update finished. Register VisibilityManager for Single Update")
 			
 			VisibilityManager.RegisterForSingleUpdate(0.1)
 			WaitingOnVisibilityManager = False

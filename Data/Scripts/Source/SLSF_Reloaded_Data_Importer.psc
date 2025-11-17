@@ -8,6 +8,7 @@ SLSF_Reloaded_FameManager Property FameManager Auto
 SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
 SLSF_Reloaded_Data_Exporter Property DataExporter Auto
+SLSF_Reloaded_Logger Property Logger Auto
 
 GlobalVariable Property CustomLocations Auto
 
@@ -54,9 +55,9 @@ Function ImportData(String FileName)
 		Location LocationReference = GetFormValue("SLSF_Reloaded/" + FileName + " SLSF Reloaded Data", "Location_Form_" + LocationIndex) as Location
 		
 		If LocationManager.CustomLocation.Find(LocationString) >= 0
-			Debug.Trace("Location " + LocationString + " is already registered. Skipping registration.")
+			Logger.Log("Location " + LocationString + " is already registered. Skipping registration.", True)
 		ElseIf LocationManager.CustomLocationRef.Find(LocationReference) >= 0
-			Debug.Trace("Location Reference for " + LocationString + " is already registered.  Skipping registration.")
+			Logger.Log("Location Reference for " + LocationString + " is already registered.  Skipping registration.", True)
 		Else
 			LocationManager.RegisterCustomLocationExternal(LocationString, LocationReference)
 			
@@ -71,13 +72,13 @@ Function ImportData(String FileName)
 		String ModString = GetStringValue("SLSF_Reloaded/" + FileName + " SLSF Reloaded Data", "ModIndex[" + ModIndex + "]")
 		
 		If DataManager.IsModRegistered(ModString)
-			Debug.Trace("Mod " + ModString + " is already registered. Skipping registration.")
+			Logger.Log("Mod " + ModString + " is already registered. Skipping registration.", True)
 		Else
 			If Game.GetModByName(ModString) != 255
 				DataManager.RegisterExternalMod(ModString)
 				ModFlagsCanBeImported = True
 			Else
-				Debug.Trace("Mod " + ModString + " does not exist or is not loaded! " + ModString + " not Imported!")
+				Logger.Log("Mod " + ModString + " does not exist or is not loaded! " + ModString + " not Imported!", True)
 			EndIf
 		EndIf
 		

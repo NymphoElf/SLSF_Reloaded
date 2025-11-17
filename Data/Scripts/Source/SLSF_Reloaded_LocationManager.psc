@@ -3,6 +3,7 @@ ScriptName SLSF_Reloaded_LocationManager extends Quest
 SLSF_Reloaded_FameManager Property FameManager Auto
 SLSF_Reloaded_DataManager Property DataManager Auto
 SLSF_Reloaded_DynamicAnonymity Property DynamicAnonymityScript Auto
+SLSF_Reloaded_Logger Property Logger Auto
 
 Location Property CurrentLocation Auto Hidden
 Location[] Property MajorLocations Auto
@@ -100,7 +101,7 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 		EndIf
 	Else
 		If CustomLocationsFull == True
-			Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot Register " + LocationToRegister + ". Custom Location List is Full.")
+			Logger.Log("SLSF Reloaded (External Mod Event) - Cannot Register " + LocationToRegister + ". Custom Location List is Full.", True)
 			return False
 		EndIf
 		
@@ -108,11 +109,11 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 			If IsLocationValid(LocationToRegister) == False
 				return True
 			Else
-				Debug.Trace("SLSF Reloaded (External Mod Event) - Location is already registered.")
+				Logger.Log("SLSF Reloaded (External Mod Event) - Location is already registered.", True)
 				return False
 			EndIf
 		Else
-			Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot register " + LocationToRegister + ". Location is invalid.")
+			Logger.Log("SLSF Reloaded (External Mod Event) - Cannot register " + LocationToRegister + ". Location is invalid.", True)
 			return False
 		EndIf
 	EndIf
@@ -566,12 +567,12 @@ Function RegisterCustomLocationExternal(String LocationToRegister, Location Loca
 	Bool EmptyIndexFound = False
 	
 	If CustomLocationsFull == True
-		Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location List is Full.")
+		Logger.Log("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location List is Full.", True)
 		return
 	EndIf
 	
 	If IsLocationExcluded(LocationRefToRegister) == True
-		Debug.Trace("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location is EXCLUDED.")
+		Logger.Log("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location is EXCLUDED.", True)
 		return
 	EndIf
 	
@@ -581,7 +582,7 @@ Function RegisterCustomLocationExternal(String LocationToRegister, Location Loca
 		CustomLocation[EmptyIndex] = LocationToRegister
 		CustomLocationRef[EmptyIndex] = LocationRefToRegister
 	Else
-		Debug.Trace("SLSF Reloaded (External Mod Event) ERROR - Empty Location Index not found despite other checks allowing registration. Location Registration Failed.")
+		Logger.Log("SLSF Reloaded (External Mod Event) ERROR - Empty Location Index not found despite other checks allowing registration. Location Registration Failed.", True)
 		return
 	EndIf
 	
@@ -604,7 +605,7 @@ Function UnregisterCustomLocationExternal(String LocationToUnregister)
 	EndWhile
 	
 	If LocationFound == False
-		Debug.Trace("SLSF Reloaded - UnregisterCustomLocationExternal - Could not find " + LocationToUnregister + " to Unregister.")
+		Logger.Log("SLSF Reloaded - UnregisterCustomLocationExternal - Could not find " + LocationToUnregister + " to Unregister.")
 	Else
 		Debug.Notification("$CustomLocationUnregisterCompleteMSG")
 	EndIf

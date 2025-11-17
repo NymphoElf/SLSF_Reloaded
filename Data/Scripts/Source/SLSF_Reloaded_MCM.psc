@@ -11,109 +11,111 @@ SLSF_Reloaded_Data_Exporter Property DataExporter Auto
 SLSF_Reloaded_Data_Importer Property DataImporter Auto
 SLSF_Reloaded_Uninstall Property Uninstaller Auto
 
-Bool Property NPCNeedsLOS Auto Hidden
-Bool Property ReduceFameAtNight Auto Hidden
-Bool Property NotifyFameIncrease Auto Hidden
-Bool Property NotifyFameDecay Auto Hidden
-Bool Property NotifyFameSpread Auto Hidden
-Bool Property PlayerIsAnonymous Auto Hidden
-Bool Property AnonymityEnabled Auto Hidden
-Bool Property DynamicAnonymity Auto Hidden
-Bool Property RegisterLocationTrigger Auto Hidden
-Bool Property RegisterLocationConfirm Auto Hidden
-Bool Property UnregisterLocationTrigger Auto Hidden
-Bool Property UnregisterLocationConfirm Auto Hidden
-Bool Property ClearAllFameTrigger Auto Hidden
-Bool Property ClearAllFameConfirm Auto Hidden
-Bool Property AllowForeplayFame Auto Hidden
-Bool Property SubmissiveDefault Auto Hidden
-Bool Property DominantDefault Auto Hidden
-Bool Property UseGlobalFameMultiplier Auto Hidden
-Bool Property AllowLikeFameWhenRaped Auto Hidden
-Bool Property AllowBestialityWhenRaped Auto Hidden
-Bool Property VictimsAreMasochist Auto Hidden
-Bool Property EnableTracing Auto Hidden
-Bool Property AllowSLSCursedCollarBoundFame Auto Hidden
-Bool Property AllowCollarBoundFame Auto Hidden
-Bool Property AllowLegacyOverwrite Auto Hidden
-Bool Property DisableNakedCommentsWhilePW Auto Hidden
-Bool Property ExportData Auto Hidden
-Bool Property ImportData Auto Hidden
-Bool Property ArmUninstall Auto Hidden
-Bool Property ConfirmUninstall Auto Hidden
-Bool Property FriendsBetrayFromHighFame Auto Hidden
-Bool Property LoversBetrayFromHighFame Auto Hidden
-Bool Property TattooLimitUnlocked Auto Hidden
+Bool Property NPCNeedsLOS = True Auto Hidden
+Bool Property ReduceFameAtNight = True Auto Hidden
+Bool Property NotifyFameIncrease = False Auto Hidden
+Bool Property NotifyFameDecay = False Auto Hidden
+Bool Property NotifyFameSpread = False Auto Hidden
+Bool Property PlayerIsAnonymous = False Auto Hidden
+Bool Property AnonymityEnabled = True Auto Hidden
+Bool Property DynamicAnonymity = False Auto Hidden
+Bool Property RegisterLocationTrigger = False Auto Hidden
+Bool Property RegisterLocationConfirm = False Auto Hidden
+Bool Property UnregisterLocationTrigger = False Auto Hidden
+Bool Property UnregisterLocationConfirm = False Auto Hidden
+Bool Property ClearAllFameTrigger = False Auto Hidden
+Bool Property ClearAllFameConfirm = False Auto Hidden
+Bool Property AllowForeplayFame = True Auto Hidden
+Bool Property SubmissiveDefault = False Auto Hidden
+Bool Property DominantDefault = False Auto Hidden
+Bool Property UseGlobalFameMultiplier = True Auto Hidden
+Bool Property AllowLikeFameWhenRaped = False Auto Hidden
+Bool Property AllowBestialityWhenRaped = False Auto Hidden
+Bool Property VictimsAreMasochist = False Auto Hidden
+Bool Property Logging = False Auto Hidden
+Bool Property AllowSLSCursedCollarBoundFame = False Auto Hidden
+Bool Property AllowCollarBoundFame = False Auto Hidden
+Bool Property AllowLegacyOverwrite = False Auto Hidden
+Bool Property DisableNakedCommentsWhilePW = False Auto Hidden
+Bool Property ExportData = False Auto Hidden
+Bool Property ImportData = False Auto Hidden
+Bool Property ArmUninstall = False Auto Hidden
+Bool Property ConfirmUninstall = False Auto Hidden
+Bool Property FriendsBetrayFromHighFame = True Auto Hidden
+Bool Property LoversBetrayFromHighFame = True Auto Hidden
+Bool Property TattooLimitUnlocked = False Auto Hidden
 Bool Property TattooLimitChanged Auto Hidden
-Bool Property FameSpreadRestrictions Auto Hidden
-Bool Property ThanesCantBeAnonymous Auto Hidden
+Bool Property FameSpreadRestrictions = False Auto Hidden
+Bool Property ThanesCantBeAnonymous = True Auto Hidden
+Bool Property AddToMainLog = False Auto Hidden
 
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
 Bool[] Property FameForbiddenByFriend Auto
 Bool[] Property FameForbiddenByLover Auto
 
-Float Property NightStart Auto Hidden
-Float Property NightEnd Auto Hidden
-Float Property FailedSpreadIncrease Auto Hidden
-Float Property SuccessfulSpreadReduction Auto Hidden
-Float Property MinimumFameToSpread Auto Hidden
-Float Property MaximumSpreadCategories Auto Hidden
-Float Property MaximumSpreadPercentage Auto Hidden
-Float Property DecayTimeNeeded Auto Hidden
-Float Property SpreadTimeNeeded Auto Hidden
-Float Property FameChanceByEnemy Auto Hidden
-Float Property FameChanceByNeutral Auto Hidden
-Float Property FameChanceByFriend Auto Hidden
-Float Property SexFameChanceByFriend Auto Hidden
-Float Property FameChanceByLover Auto Hidden
-Float Property SexFameChanceByLover Auto Hidden
-Float Property MinimumNPCLOSDistance Auto Hidden
-Float Property FameChangeMultiplier Auto Hidden
-Float[] Property FameCategoryMultiplier Auto
-Float Property CumDumpFHUReq Auto Hidden
+Float Property MinimumNPCLOSDistance = 160.0 Auto Hidden
+Float Property FameChangeMultiplier = 1.0 Auto Hidden
+Float Property CumDumpFHUReq = 2.0 Auto Hidden
 
-Int Property BodyTattooSlots Auto Hidden
-Int Property FaceTattooSlots Auto Hidden
-Int Property HandTattooSlots Auto Hidden
-Int Property FootTattooSlots Auto Hidden
-Int Property BodyTattooIndex Auto Hidden
-Int Property FaceTattooIndex Auto Hidden
-Int Property HandTattooIndex Auto Hidden
-Int Property FootTattooIndex Auto Hidden
-Int Property BodyTattooLimit Auto Hidden
-Int Property FaceTattooLimit Auto Hidden
-Int Property HandTattooLimit Auto Hidden
-Int Property FootTattooLimit Auto Hidden
+Float[] Property FameCategoryMultiplier Auto
+
+Int Property NightStart = 22 Auto Hidden
+Int Property NightEnd = 6 Auto Hidden
+Int Property FailedSpreadIncrease = 10 Auto Hidden
+Int Property SuccessfulSpreadReduction = 10 Auto Hidden
+Int Property MinimumFameToSpread = 30 Auto Hidden
+Int Property MaximumSpreadCategories = 5 Auto Hidden
+Int Property MaximumSpreadPercentage = 30 Auto Hidden
+Int Property DecayTimeNeeded = 24 Auto Hidden
+Int Property SpreadTimeNeeded = 48 Auto Hidden
+Int Property FameChanceByEnemy = 100 Auto Hidden
+Int Property FameChanceByNeutral = 75 Auto Hidden
+Int Property FameChanceByFriend = 50 Auto Hidden
+Int Property SexFameChanceByFriend = 50 Auto Hidden
+Int Property FameChanceByLover = 25 Auto Hidden
+Int Property SexFameChanceByLover = 25 Auto Hidden
+Int Property BodyTattooSlots = 1 Auto Hidden
+Int Property FaceTattooSlots = 1 Auto Hidden
+Int Property HandTattooSlots = 1 Auto Hidden
+Int Property FootTattooSlots = 1 Auto Hidden
+Int Property BodyTattooIndex = 0 Auto Hidden
+Int Property FaceTattooIndex = 0 Auto Hidden
+Int Property HandTattooIndex = 0 Auto Hidden
+Int Property FootTattooIndex = 0 Auto Hidden
+Int Property BodyTattooLimit = 6 Auto Hidden
+Int Property FaceTattooLimit = 3 Auto Hidden
+Int Property HandTattooLimit = 3 Auto Hidden
+Int Property FootTattooLimit = 3 Auto Hidden
 Int[] Property DefaultLocationSpreadChance Auto
 Int[] Property CustomLocationSpreadChance Auto
-Int Property MaxVLowFameGain Auto Hidden
-Int Property MaxLowFameGain Auto Hidden
-Int Property MaxMedFameGain Auto Hidden
-Int Property MaxHighFameGain Auto Hidden
-Int Property MaxVHighFameGain Auto Hidden
-Int Property MaxVLowFameDecay Auto Hidden
-Int Property MaxLowFameDecay Auto Hidden
-Int Property MaxMedFameDecay Auto Hidden
-Int Property MaxHighFameDecay Auto Hidden
-Int Property MaxVHighFameDecay Auto Hidden
-Int Property LocationDetailsIndex Auto Hidden
-Int Property FriendBetrayChance Auto Hidden
-Int Property FriendHighFameThreshold Auto Hidden
-Int Property LoverBetrayChance Auto Hidden
-Int Property LoverHighFameThreshold Auto Hidden
-Int Property DynamicAnonymityFameCutoff Auto Hidden
+Int Property MaxVLowFameGain = 10 Auto Hidden
+Int Property MaxLowFameGain = 8 Auto Hidden
+Int Property MaxMedFameGain = 6 Auto Hidden
+Int Property MaxHighFameGain = 4 Auto Hidden
+Int Property MaxVHighFameGain = 2 Auto Hidden
+Int Property MaxVLowFameDecay = 5 Auto Hidden
+Int Property MaxLowFameDecay = 4 Auto Hidden
+Int Property MaxMedFameDecay = 3 Auto Hidden
+Int Property MaxHighFameDecay = 2 Auto Hidden
+Int Property MaxVHighFameDecay = 1 Auto Hidden
+Int Property LocationDetailsIndex = 0 Auto Hidden
+Int Property FriendBetrayChance = 50 Auto Hidden
+Int Property FriendHighFameThreshold = 0 Auto Hidden
+Int Property LoverBetrayChance = 25 Auto Hidden
+Int Property LoverHighFameThreshold = 50 Auto Hidden
+Int Property DynamicAnonymityFameCutoff = 50 Auto Hidden
+Int Property UnregisterLocationIndex = 0 Auto Hidden
 
 Int[] Property OptionID Auto Hidden
 
 String Property TattooStatusSelect Auto Hidden
 
 ;Registration Variables
-String Property LocationDetailsSelected Auto Hidden
-String Property UnregisterLocationSelection Auto Hidden
-Int Property UnregisterLocationIndex Auto Hidden
+String Property LocationDetailsSelected = "" Auto Hidden
+String Property UnregisterLocationSelection = "" Auto Hidden
 
-String Property ExportName Auto Hidden
+String Property ExportName = "" Auto Hidden
 
 GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 GlobalVariable Property SLSF_Reloaded_CommentFrequency Auto
@@ -151,72 +153,11 @@ Function InstallMCM()
 EndFunction
 
 Function SetDefaults()
-	NPCNeedsLOS = True
-	ReduceFameAtNight = True
-	NotifyFameIncrease = False
-	NotifyFameDecay = False
-	NotifyFameSpread = False
-	PlayerIsAnonymous = False
-	AnonymityEnabled = True
-	DynamicAnonymity = False
-	ThanesCantBeAnonymous = True
-	AllowLikeFameWhenRaped = False
-	AllowBestialityWhenRaped = False
-	VictimsAreMasochist = False
-	AllowSLSCursedCollarBoundFame = False
-	AllowCollarBoundFame = False
-	
 	If Mods.IsLegacySLSFInstalled == True
 		AllowLegacyOverwrite = True
-	Else
-		AllowLegacyOverwrite = False
 	EndIf
 	
-	NightStart = 22
-	NightEnd = 6
-	FailedSpreadIncrease = 10
-	SuccessfulSpreadReduction = 10
-	MinimumFameToSpread = 30
-	MaximumSpreadCategories = 5
-	MaximumSpreadPercentage = 30
-	DecayTimeNeeded = 24
-	SpreadTimeNeeded = 48
-	FameChanceByEnemy = 100
-	FameChanceByNeutral = 75
-	FameChanceByFriend = 50
-	SexFameChanceByFriend = 50
-	FameChanceByLover = 25
-	SexFameChanceByLover = 25
-	DynamicAnonymityFameCutoff = 50
-	FameSpreadRestrictions = False
-	
 	TattooStatusSelect = "$BodyArea"
-	BodyTattooIndex = 0
-	FaceTattooIndex = 0
-	HandTattooIndex = 0
-	FootTattooIndex = 0
-	TattooLimitUnlocked = False
-	BodyTattooLimit = 6
-	Facetattoolimit = 3
-	HandTattooLimit = 3
-	FootTattooLimit = 3
-	
-	MaxVLowFameGain = 10
-	MaxLowFameGain = 8
-	MaxMedFameGain = 6
-	MaxHighFameGain = 4
-	MaxVHighFameGain = 2
-	MaxVLowFameDecay = 5
-	MaxLowFameDecay = 4
-	MaxMedFameDecay = 3
-	MaxHighFameDecay = 2
-	MaxVHighFameDecay = 1
-	FriendBetrayChance = 50
-	LoverBetrayChance = 25
-	
-	UseGlobalFameMultiplier = True
-	FameChangeMultiplier = 1.0
-	CumDumpFHUReq = 2.0
 	
 	Int TypeIndex = 0
 	While TypeIndex < FameCategoryMultiplier.Length
@@ -224,35 +165,9 @@ Function SetDefaults()
 		TypeIndex += 1
 	EndWhile
 	
-	MinimumNPCLOSDistance = 160.0
-	
-	RegisterLocationTrigger = False
-	RegisterLocationConfirm = False
-	UnregisterLocationTrigger = False
-	UnregisterLocationConfirm = False
-	
-	UnregisterLocationSelection = ""
-	
-	ClearAllFameConfirm = False
-	ClearAllFameTrigger = False
-	
 	LocationDetailsSelected = LocationManager.MajorLocations[0].GetName()
-	AllowForeplayFame = True
-	EnableTracing = False
 	
 	SLSF_Reloaded_CommentFrequency.SetValue(50)
-	
-	ExportData = False
-	ImportData = False
-	ExportName = ""
-	
-	ArmUninstall = False
-	ConfirmUninstall = False
-	
-	FriendsBetrayFromHighFame = True
-	LoversBetrayFromHighFame = True
-	FriendHighFameThreshold = 0
-	LoverHighFameThreshold = 50
 EndFunction
 
 Int Function PullFameSpreadChance(String LocationName)
@@ -1358,7 +1273,8 @@ Event OnPageReset(String page)
 		
 		SetCursorPosition(1)
 		AddHeaderOption("$DebuggingHeader")
-		AddToggleOptionST("SLSF_Reloaded_EnableTraceState", "$EnableTrace", EnableTracing, 0)
+		AddToggleOptionST("SLSF_Reloaded_EnableLoggingState", "$EnableLogging", Logging, 0)
+		AddToggleOptionST("SLSF_Reloaded_AddToMainLogState", "$AddToMainLog", AddToMainLog, 0)
 		
 		AddHeaderOption("$TattooLimit")
 		AddToggleOptionST("SLSF_Reloaded_UnlockTattooLimitState", "$UnlockTattooLimit", TattooLimitUnlocked, 0)
@@ -2540,15 +2456,15 @@ State SLSF_Reloaded_FHUThresholdState
 	EndEvent
 EndState
 
-State SLSF_Reloaded_EnableTraceState
+State SLSF_Reloaded_EnableLoggingState
 	Event OnSelectST()
-		If EnableTracing == False
-			EnableTracing = True
+		If Logging == False
+			Logging = True
 		Else
-			EnableTracing = False
+			Logging = False
 		EndIf
 		
-		SetToggleOptionValueST(EnableTracing, False, "SLSF_Reloaded_EnableTraceState")
+		SetToggleOptionValueST(Logging, False, "SLSF_Reloaded_EnableLoggingState")
 	EndEvent
 EndState
 
@@ -3234,7 +3150,7 @@ State SLSF_Reloaded_NightStartState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		NightStart = value
+		NightStart = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_NightStartState")
 	EndEvent
 	
@@ -3253,7 +3169,7 @@ State SLSF_Reloaded_NightEndState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		NightEnd = value
+		NightEnd = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_NightEndState")
 	EndEvent
 	
@@ -3272,7 +3188,7 @@ State SLSF_Reloaded_FailedSpreadIncreaseState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		FailedSpreadIncrease = value
+		FailedSpreadIncrease = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_FailedSpreadIncreaseState")
 	EndEvent
 	
@@ -3295,7 +3211,7 @@ State SLSF_Reloaded_SuccessfulSpreadDecreaseState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		SuccessfulSpreadReduction = value
+		SuccessfulSpreadReduction = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_SuccessfulSpreadDecreaseState")
 	EndEvent
 	
@@ -3318,7 +3234,7 @@ State SLSF_Reloaded_MinimumFameToSpreadState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		MinimumFameToSpread = value
+		MinimumFameToSpread = value as Int
 		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_MinimumFameToSpreadState")
 	EndEvent
 	
@@ -3341,7 +3257,7 @@ State SLSF_Reloaded_MaximumSpreadCategoriesState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		MaximumSpreadCategories = value
+		MaximumSpreadCategories = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_MaximumSpreadCategoriesState")
 	EndEvent
 	
@@ -3364,7 +3280,7 @@ State SLSF_Reloaded_MaximumSpreadPercentageState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		MaximumSpreadPercentage = value
+		MaximumSpreadPercentage = value as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_MaximumSpreadPercentageState")
 	EndEvent
 	
@@ -3387,7 +3303,7 @@ State SLSF_Reloaded_DecayTimeNeededState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		DecayTimeNeeded = value * 2
+		DecayTimeNeeded = (value * 2) as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_DecayTimeNeededState")
 	EndEvent
 	
@@ -3406,7 +3322,7 @@ State SLSF_Reloaded_SpreadTimeNeededState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		SpreadTimeNeeded = value * 2
+		SpreadTimeNeeded = (value * 2) as Int
 		SetSliderOptionValueST(value, "{0}", False, "SLSF_Reloaded_SpreadTimeNeededState")
 	EndEvent
 	
@@ -3459,7 +3375,7 @@ State SLSF_Reloaded_FameChanceByEnemyState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		FameChanceByEnemy = value
+		FameChanceByEnemy = value as Int
 		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_FameChanceByEnemyState")
 	EndEvent
 	
@@ -3482,7 +3398,7 @@ State SLSF_Reloaded_FameChanceByNeutralState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		FameChanceByNeutral = value
+		FameChanceByNeutral = value as Int
 		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_FameChanceByNeutralState")
 	EndEvent
 	
@@ -3505,7 +3421,7 @@ State SLSF_Reloaded_FameChanceByFriendState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		FameChanceByFriend = value
+		FameChanceByFriend = value as Int
 		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_FameChanceByFriendState")
 	EndEvent
 	
@@ -3528,7 +3444,7 @@ State SLSF_Reloaded_SexFameChanceByFriendState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		SexFameChanceByFriend = value
+		SexFameChanceByFriend = value as Int
 		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_SexFameChanceByFriendState")
 	EndEvent
 	
@@ -3551,7 +3467,7 @@ State SLSF_Reloaded_FameChanceByLoverState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		FameChanceByLover = value
+		FameChanceByLover = value as Int
 		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_FameChanceByLoverState")
 	EndEvent
 	
@@ -3574,7 +3490,7 @@ State SLSF_Reloaded_SexFameChanceByLoverState
 	EndEvent
 	
 	Event OnSliderAcceptST(float value)
-		SexFameChanceByLover = value
+		SexFameChanceByLover = value as Int
 		SetSliderOptionValueST(value, "{0}%", False, "SLSF_Reloaded_SexFameChanceByLoverState")
 	EndEvent
 	

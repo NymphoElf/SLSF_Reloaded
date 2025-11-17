@@ -3,6 +3,7 @@ ScriptName SLSF_Reloaded_DataManager extends Quest
 SLSF_Reloaded_FameManager Property FameManager Auto
 SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_MCM Property Config Auto
+SLSF_Reloaded_Logger Property Logger Auto
 
 Int[] Property WhiterunFame Auto
 Int[] Property WindhelmFame Auto
@@ -1459,9 +1460,7 @@ Bool Function GetExternalFlags(String FlagName)
 	ElseIf FlagName == "Airhead"
 		return ExternalFlags[24]
 	Else
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded Get External Flags: Flag Name " + FlagName + " not found.")
-		EndIf
+		Logger.Log("SLSF Reloaded Get External Flags: Flag Name " + FlagName + " not found.")
 		return False
 	EndIf
 EndFunction
@@ -1484,15 +1483,11 @@ Function RegisterExternalMod(String ModName)
 		If EmptyModIndex >= 0
 			ExternalMods[EmptyModIndex] = ModName
 		Else
-			If Config.EnableTracing == True
-				Debug.Trace("Cannot Add " + ModName + " to External Mod List. External Mod List full.")
-			EndIf
+			Logger.Log("Cannot Add " + ModName + " to External Mod List. External Mod List full.")
 			return
 		EndIf
 	Else
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded External Mod Register: Mod " + ModName + " already registered. Skipping register function...")
-		EndIf
+		Logger.Log("SLSF Reloaded External Mod Register: Mod " + ModName + " already registered. Skipping register function...")
 	EndIf
 EndFunction
 
@@ -1532,9 +1527,7 @@ Function UnregisterExternalMod(String ModName)
 	Int ModIndex = ExternalMods.Find(ModName)
 	
 	If ModIndex < 0
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded External Mod Unregister Error: Mod " + ModName + " not found in External Mod List. Mod unregister skipped...")
-		EndIf
+		Logger.Log("SLSF Reloaded External Mod Unregister Error: Mod " + ModName + " not found in External Mod List. Mod unregister skipped...")
 		return
 	Else
 		ExternalMods[ModIndex] = "-EMPTY-"
@@ -1579,9 +1572,7 @@ Bool Function GetModFlagState(String ModName, String FlagName)
 	Int ModIndex = ExternalMods.Find(ModName)
 	
 	If ModIndex < 0
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded Get Mod Flag State: Mod " + ModName + " not found.")
-		EndIf
+		Logger.Log("SLSF Reloaded Get Mod Flag State: Mod " + ModName + " not found.")
 		return False
 	EndIf
 	
@@ -1638,9 +1629,7 @@ Bool Function GetModFlagState(String ModName, String FlagName)
 	ElseIf FlagName == "Whore Event" || FlagName == "Sex Worker"
 		return SexWorkerFlags[ModIndex]
 	Else
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded Get Mod Flag State: Flag Name " + FlagName + " not found.")
-		EndIf
+		Logger.Log("SLSF Reloaded Get Mod Flag State: Flag Name " + FlagName + " not found.")
 		return False
 	EndIf
 EndFunction
@@ -2009,13 +1998,9 @@ Function FameOverviewCheck()
 	Int TypeIndex = 0
 	Bool HasFameInLocation = False
 	While LocationIndex < LocationManager.DefaultLocation.Length
-		If Config.EnableTracing == True
-			Debug.Trace("FameOverviewCheck - Location: " + LocationManager.DefaultLocation[LocationIndex])
-		EndIf
+		Logger.Log("FameOverviewCheck - Location: " + LocationManager.DefaultLocation[LocationIndex])
 		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
-			If Config.EnableTracing == True
-				Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
-			EndIf
+			Logger.Log("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
 			If GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
 				HasFameInLocation = True
 				Config.HasFameAtDefaultLocation[LocationIndex] = True
@@ -2037,14 +2022,9 @@ Function FameOverviewCheck()
 	HasFameInLocation = False
 	
 	While LocationIndex < LocationManager.CustomLocation.Length
-		If Config.EnableTracing == True
-			Debug.Trace("FameOverviewCheck - Location: " + LocationManager.CustomLocation[LocationIndex])
-		EndIf
-		
+		Logger.Log("FameOverviewCheck - Location: " + LocationManager.CustomLocation[LocationIndex])
 		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
-			If Config.EnableTracing == True
-				Debug.Trace("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
-			EndIf
+			Logger.Log("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
 			If GetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
 				HasFameInLocation = True
 				Config.HasFameAtCustomLocation[LocationIndex] = True

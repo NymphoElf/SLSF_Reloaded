@@ -9,6 +9,7 @@ SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_MCM Property Config Auto
 SexlabFramework Property Sexlab Auto
 SLSF_Reloaded_LegacyOverwrite Property LegacyOverwrite Auto
+SLSF_Reloaded_Logger Property Logger Auto
 
 Bool[] Property DefaultLocationCanDecay Auto 
 Bool[] Property CustomLocationCanDecay Auto 
@@ -145,14 +146,10 @@ Function UpdateFame(Int CountdownChange)
 	;Multiply Fame Gains by the number of times NPC Scanning should have happened normally
 	GainIterationMultiplier = CountdownChange
 	
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded Fame Manager - Anonymous Status: " + VisibilityManager.IsPlayerAnonymous())
-	EndIf
+	Logger.Log("SLSF Reloaded Fame Manager - Anonymous Status: " + VisibilityManager.IsPlayerAnonymous())
 	
 	If VisibilityManager.IsPlayerAnonymous() == False
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded Fame Manager - Run NPC Detect")
-		EndIf
+		Logger.Log("SLSF Reloaded Fame Manager - Run NPC Detect")
 		PlayerScript.RunNPCDetect()
 	EndIf
 	
@@ -747,20 +744,16 @@ EndFunction
 
 Function FameGainRoll(String FameLocation, Bool CalledExternally = False, Bool FameFromFriend = False, Bool FameFromLover = False)
 	If LocationManager.IsLocationValid(FameLocation) == False
-		If Config.EnableTracing == True
-			If CalledExternally == True
-				Debug.Trace("SLSF Reloaded - External FameGainRoll - Location is Invalid")
-			Else
-				Debug.Trace("SLSF Reloaded - FameGainRoll Function - Location is Invalid")
-			EndIf
+		If CalledExternally == True
+			Logger.Log("SLSF Reloaded - External FameGainRoll - Location is Invalid")
+		Else
+			Logger.Log("SLSF Reloaded - FameGainRoll Function - Location is Invalid")
 		EndIf
 		return
 	EndIf
 	
 	If VisibilityManager.IsPlayerAnonymous() == True
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - FameGainRoll Function - Player is Anonymous")
-		EndIf
+		Logger.Log("SLSF Reloaded - FameGainRoll Function - Player is Anonymous")
 		return
 	EndIf
 	
@@ -1227,9 +1220,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False, Bool F
 	EndIf
 	
 	If PossibleFameCount == 0
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - FameGainRoll Function - PossibleFameCount is Zero")
-		EndIf
+		Logger.Log("SLSF Reloaded - FameGainRoll Function - PossibleFameCount is Zero")
 		return ;If none of the above categories are possible, end function
 	EndIf
 
@@ -1356,7 +1347,7 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 		If LocationIndex < 0
 			;Still could not find Location Index. Location must not exist.
 			Debug.MessageBox("SLSF Reloaded - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!")
-			Debug.Trace("SLSF Reloaded - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!")
+			Logger.Log("SLSF Reloaded - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!", True)
 			return
 		Else
 			CustomLocationCanDecay[LocationIndex] = False
@@ -1546,9 +1537,7 @@ Function SpreadFameRoll()
 				SpreadFame(LocationManager.DefaultLocation[LocationIndex])
 				Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 			ElseIf SpreadChance > 100 || SpreadChance < 0
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
-				EndIf
+				Logger.Log("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
 				Config.DefaultLocationSpreadChance[LocationIndex] = 30
 			Else
 				FameSpreadRoll = Utility.RandomInt(1, 100)
@@ -1583,7 +1572,7 @@ Function SpreadFameRoll()
 				SpreadFame(LocationManager.CustomLocation[LocationIndex])
 				Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 			ElseIf SpreadChance > 100 || SpreadChance < 0
-				Debug.Trace("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+				Logger.Log("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
 				Config.CustomLocationSpreadChance[LocationIndex] = 30
 			Else
 				FameSpreadRoll = Utility.RandomInt(1, 100)
@@ -1608,9 +1597,7 @@ Function SpreadFameRoll()
 EndFunction
 
 Function SpreadFame(String SpreadFromLocation)
-	If Config.EnableTracing == True
-		Debug.Trace("Fame Spread From: " + SpreadFromLocation)
-	EndIf
+	Logger.Log("Fame Spread From: " + SpreadFromLocation)
 	
 	;Grab all fame values above the configured threshold from the source Location. If none exist, cancel fame spread operation
 	Int SpreadableFame = 0
@@ -1622,26 +1609,20 @@ Function SpreadFame(String SpreadFromLocation)
 	While PossibleFameSpreadIndex < FameType.Length
 		SpreadableFame = Data.GetFameValue(SpreadFromLocation, FameType[PossibleFameSpreadIndex])
 		
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Checking " + FameType[PossibleFameSpreadIndex] + " Fame. Fame Value is: " + SpreadableFame)
-			Debug.Trace("SLSF Reloaded - Fame value requirement is: " + Config.MinimumFameToSpread)
-		EndIf
+		Logger.Log("SLSF Reloaded - Checking " + FameType[PossibleFameSpreadIndex] + " Fame. Fame Value is: " + SpreadableFame)
+		Logger.Log("SLSF Reloaded - Fame value requirement is: " + Config.MinimumFameToSpread)
 		
 		If SpreadableFame >= Config.MinimumFameToSpread
 			PossibleFameSpreadCategories += 1
 			PossibleCategoryList[(PossibleFameSpreadCategories - 1)] = FameType[PossibleFameSpreadIndex]
 			
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Possible Spread Category: " + PossibleCategoryList[(PossibleFameSpreadCategories - 1)] + " added to list.")
-			EndIf
+			Logger.Log("SLSF Reloaded - Possible Spread Category: " + PossibleCategoryList[(PossibleFameSpreadCategories - 1)] + " added to list.")
 		EndIf
 		PossibleFameSpreadIndex += 1
 	EndWhile
 	
 	If PossibleFameSpreadCategories == 0
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - No Spreadable Categories found for " + SpreadFromLocation + ". Fame Spread Skipped.")
-		EndIf
+		Logger.Log("SLSF Reloaded - No Spreadable Categories found for " + SpreadFromLocation + ". Fame Spread Skipped.")
 		return
 	EndIf
 	
@@ -1664,9 +1645,7 @@ Function SpreadFame(String SpreadFromLocation)
 	
 	If Config.FameSpreadRestrictions == True
 	
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Fame Spread Restrictions Enabled")
-		EndIf
+		Logger.Log("SLSF Reloaded - Fame Spread Restrictions Enabled")
 		
 		If SpreadFromLocation == "Whiterun"
 			
@@ -2210,9 +2189,7 @@ Function SpreadFame(String SpreadFromLocation)
 			
 			TotalLocations = PossibleLocationIndex
 		Else
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Spreading Fame From Custom Location")
-			EndIf
+			Logger.Log("SLSF Reloaded - Spreading Fame From Custom Location")
 			
 			If LocationManager.WhiterunLocationList.Find(SpreadFromLocation) >= 0
 				PossibleSpreadTargets[0] = "Whiterun"
@@ -2435,9 +2412,7 @@ Function SpreadFame(String SpreadFromLocation)
 			Else
 				SpreadingFromUndefinedLocation = True
 				
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Custom Location is UNDEFINED. Falling back to default Fame Spread method")
-				EndIf
+				Logger.Log("SLSF Reloaded - Custom Location is UNDEFINED. Falling back to default Fame Spread method")
 			EndIf
 		EndIf
 	EndIf
@@ -2452,9 +2427,7 @@ Function SpreadFame(String SpreadFromLocation)
 				PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.CustomLocation[CustomLocationIndex]
 				CustomLocationIndex += 1
 			EndIf
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - PossibleSpreadTargets[" + PossibleLocationIndex + "]: " + PossibleSpreadTargets[PossibleLocationIndex])
-			EndIf
+			Logger.Log("SLSF Reloaded - PossibleSpreadTargets[" + PossibleLocationIndex + "]: " + PossibleSpreadTargets[PossibleLocationIndex])
 			PossibleLocationIndex += 1
 		EndWhile
 	EndIf
@@ -2463,53 +2436,36 @@ Function SpreadFame(String SpreadFromLocation)
 	While TargetLocationValid == False
 		TargetLocationIndex = Utility.RandomInt(0, (TotalLocations - 1))
 		
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Target Location Roll (Index): " + TargetLocationIndex)
-			Debug.Trace("SLSF Reloaded - Target Location: " + PossibleSpreadTargets[TargetLocationIndex])
-		EndIf
+		Logger.Log("SLSF Reloaded - Target Location Roll (Index): " + TargetLocationIndex)
+		Logger.Log("SLSF Reloaded - Target Location: " + PossibleSpreadTargets[TargetLocationIndex])
 		
 		If SpreadFromLocation != PossibleSpreadTargets[TargetLocationIndex] ;ensure we are not trying to spread to the original location
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Target Location Valid!")
-			EndIf
+			Logger.Log("SLSF Reloaded - Target Location Valid!")
 			TargetLocationValid = True
 		Else
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Target Location NOT Valid. Rolling again...")
-			EndIf
+			Logger.Log("SLSF Reloaded - Target Location NOT Valid. Rolling again...")
 		EndIf
 	EndWhile
 	
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
-	EndIf
+	Logger.Log("SLSF Reloaded - Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
 	
 	;When valid target is found, randomize how many fame categories are spread and by how much, based on config values.
 	Int NumberOfCategoriesToSpread = 0
 	;Float CategorySpreadPercentage = 0.0
 	
 	If Config.MaximumSpreadCategories > 1 && PossibleFameSpreadCategories > 1
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - More than 1 category can be spread.")
-		EndIf
-		
+		Logger.Log("SLSF Reloaded - More than 1 category can be spread.")
 		If Config.MaximumSpreadCategories < PossibleFameSpreadCategories
 			NumberOfCategoriesToSpread = Utility.RandomInt(1, (Config.MaximumSpreadCategories as Int))
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - More categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
-				Debug.Trace("SLSF Reloaded - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
-			EndIf
+			Logger.Log("SLSF Reloaded - More categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
+			Logger.Log("SLSF Reloaded - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
 		Else
 			NumberOfCategoriesToSpread = Utility.RandomInt(1, PossibleFameSpreadCategories)
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Fewer or equal categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
-				Debug.Trace("SLSF Reloaded - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
-			EndIf
+			Logger.Log("SLSF Reloaded - Fewer or equal categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
+			Logger.Log("SLSF Reloaded - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
 		EndIf
 	Else
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Only 1 category can be spread. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
-		EndIf
+		Logger.Log("SLSF Reloaded - Only 1 category can be spread. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
 		NumberOfCategoriesToSpread = 1
 	EndIf
 	
@@ -2521,9 +2477,7 @@ Function SpreadFame(String SpreadFromLocation)
 	Int CategoryRoll = 0
 	
 	If PossibleFameSpreadCategories == 1
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Only 1 possible fame spread category: " + PossibleCategoryList[0])
-		EndIf
+		Logger.Log("SLSF Reloaded - Only 1 possible fame spread category: " + PossibleCategoryList[0])
 		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[0])
 		
 		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[0])
@@ -2535,15 +2489,11 @@ Function SpreadFame(String SpreadFromLocation)
 			NewFame = 150
 		EndIf
 		
-		If Config.EnableTracing == True
-			Debug.Trace("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
-		EndIf
+		Logger.Log("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
 		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[0], NewFame)
 	ElseIf NumberOfCategoriesToSpread == 1
 		CategoryRoll = Utility.RandomInt(0, (PossibleFameSpreadCategories - 1))
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Only chose to spread 1 category. Chose: " + PossibleCategoryList[CategoryRoll] + " from the possible list.")
-		EndIf
+		Logger.Log("SLSF Reloaded - Only chose to spread 1 category. Chose: " + PossibleCategoryList[CategoryRoll] + " from the possible list.")
 		
 		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll])
 		
@@ -2555,14 +2505,10 @@ Function SpreadFame(String SpreadFromLocation)
 			NewFame = 150
 		EndIf
 		
-		If Config.EnableTracing == True
-			Debug.Trace("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
-		EndIf
+		Logger.Log("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
 		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
 	ElseIf NumberOfCategoriesToSpread == Config.MaximumSpreadCategories
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Chose to spread maximum possible categories. Maximum is: " + Config.MaximumSpreadCategories)
-		EndIf
+		Logger.Log("SLSF Reloaded - Chose to spread maximum possible categories. Maximum is: " + Config.MaximumSpreadCategories)
 		
 		Int TimesRolled = 0
 		Bool FirstRoll = True
@@ -2601,9 +2547,7 @@ Function SpreadFame(String SpreadFromLocation)
 					NewFame = 150
 				EndIf
 				
-				If Config.EnableTracing == True
-					Debug.Trace("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
-				EndIf
+				Logger.Log("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
 				Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
 				
 				SuccessfulFameSpreads += 1
@@ -2649,9 +2593,7 @@ Function SpreadFame(String SpreadFromLocation)
 					NewFame = 150
 				EndIf
 				
-				If Config.EnableTracing == True
-					Debug.Trace("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
-				EndIf
+				Logger.Log("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
 				Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
 				
 				SuccessfulFameSpreads += 1
@@ -2687,31 +2629,21 @@ EndFunction
 
 Int Function CalculateFameSpread(Float FromFame, Float TargetFame) ;These must be floats for calculation purposes
 	Int MaxRoll = (Config.MaximumSpreadPercentage as Int) / 10 ;Result should be 1, 2, 3, 4, or 5
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded Fame Spread Calculation - Max Roll is: " + MaxRoll)
-	EndIf
+	Logger.Log("SLSF Reloaded Fame Spread Calculation - Max Roll is: " + MaxRoll)
 	Int SpreadRoll = 1
 	
 	If MaxRoll > 1 ;If MaxRoll is 1, then roll doesn't matter
 		SpreadRoll = Utility.RandomInt(1, MaxRoll)
 	EndIf
 	
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded Fame Spread Calculation - Spread Roll is: " + SpreadRoll)
-	EndIf
+	Logger.Log("SLSF Reloaded Fame Spread Calculation - Spread Roll is: " + SpreadRoll)
 	
 	Float Percentage = ((SpreadRoll as Float) / 10) ;Result should be 0.1, 0.2, 0.3, 0.4, or 0.5 (10%, 20%, 30%, 40%, or 50%) based on roll. Must cast SpreadRoll as Float for calculation purposes
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded Fame Spread Calculation - Percentage is: " + Percentage)
-	EndIf
+	Logger.Log("SLSF Reloaded Fame Spread Calculation - Percentage is: " + Percentage)
 	Float SpreadValue = (FromFame * Percentage) ;Result should be a percentage of fame from the spreading location. Minimum should be 1
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded Fame Spread Calculation - From Fame is: " + FromFame + ". Spread Value is: " + SpreadValue)
-	EndIf
+	Logger.Log("SLSF Reloaded Fame Spread Calculation - From Fame is: " + FromFame + ". Spread Value is: " + SpreadValue)
 	Int FinalFame = (TargetFame + SpreadValue) as Int
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded Fame Spread Calculation - Target Fame is: " + TargetFame + ". Final Fame is: " + FinalFame)
-	EndIf
+	Logger.Log("SLSF Reloaded Fame Spread Calculation - Target Fame is: " + TargetFame + ". Final Fame is: " + FinalFame)
 	
 	return FinalFame
 EndFunction
@@ -2726,7 +2658,7 @@ Function ClearFame(String LocationToClear)
 		Data.SetFameValue(LocationToClear, FameType[TypeIndex], 0)
 		TypeIndex += 1
 	EndWhile
-	Debug.Trace(LocationToClear + " fame has been cleared.")
+	Logger.Log(LocationToClear + " fame has been cleared.")
 EndFunction
 
 Function ClearAllFame()

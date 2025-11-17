@@ -5,6 +5,7 @@ SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DataManager Property DataManager Auto
 SLSF_Reloaded_PlayerScript Property PlayerScript Auto
+SLSF_Reloaded_Logger Property Logger Auto
 
 FavorJarlsMakeFriendsScript Property ThaneScript Auto
 
@@ -33,14 +34,12 @@ GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 
 Event OnInit()
 	RegisterForUpdateGameTime(1.0)
-	Debug.Trace("SLSF Reloaded - Dynamic Anonymity Script Initialized")
+	Logger.Log("SLSF Reloaded - Dynamic Anonymity Script Initialized", True)
 EndEvent
 
 Event OnUpdateGameTime()
 	If Config.DynamicAnonymity == False
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Dynamic Anonymity is disabled")
-		EndIf
+		Logger.Log("SLSF Reloaded - Dynamic Anonymity is disabled")
 		return
 	EndIf
 	
@@ -69,9 +68,7 @@ Function CompareLocations(Location OldLocation, Location NewLocation)
 	String NewFameLocation = LocationManager.GetFameLocation(NewLocation)
 	Float CurrentGameTime = Utility.GetCurrentGameTime()
 	
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Dynamic Anonymity: Comparing Locations. Old Location: " + OldFameLocation + ". New Location: " + NewFameLocation)
-	EndIf
+	Logger.Log("SLSF Reloaded - Dynamic Anonymity: Comparing Locations. Old Location: " + OldFameLocation + ". New Location: " + NewFameLocation)
 	
 	If OldFameLocation != "Null" && OldFameLocation != NewFameLocation
 		SetLastExitTime(OldFameLocation, CurrentGameTime)
@@ -89,9 +86,7 @@ Function SetLastExitTime(String FameLocation, Float GameTime)
 	
 	If LocationIndex >= 0
 		DefaultLocationLastExitTime[LocationIndex] = GameTime
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Last Exit Time for " + FameLocation + " set to " + GameTime)
-		EndIf
+		Logger.Log("SLSF Reloaded - Last Exit Time for " + FameLocation + " set to " + GameTime)
 		return
 	EndIf
 	
@@ -100,9 +95,7 @@ Function SetLastExitTime(String FameLocation, Float GameTime)
 		
 		If LocationIndex >= 0
 			CustomLocationLastExitTime[LocationIndex] = GameTime
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Last Exit Time for " + FameLocation + " set to " + GameTime)
-			EndIf
+			Logger.Log("SLSF Reloaded - Last Exit Time for " + FameLocation + " set to " + GameTime)
 			return
 		EndIf
 	EndIf
@@ -115,9 +108,7 @@ Function SetLastEnterTime(String FameLocation, Float GameTime)
 	
 	If LocationIndex >= 0
 		DefaultLocationLastEnterTime[LocationIndex] = GameTime
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Last Enter Time for " + FameLocation + " set to " + GameTime)
-		EndIf
+		Logger.Log("SLSF Reloaded - Last Enter Time for " + FameLocation + " set to " + GameTime)
 		return
 	EndIf
 	
@@ -126,9 +117,7 @@ Function SetLastEnterTime(String FameLocation, Float GameTime)
 		
 		If LocationIndex >= 0
 			CustomLocationLastEnterTime[LocationIndex] = GameTime
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Last Enter Time for " + FameLocation + " set to " + GameTime)
-			EndIf
+			Logger.Log("SLSF Reloaded - Last Enter Time for " + FameLocation + " set to " + GameTime)
 			return
 		EndIf
 	EndIf
@@ -144,35 +133,27 @@ Function CheckRecognitionTimeIncrease(String FameLocation)
 	If LocationIndex >= 0
 		TimeSpentInLocation = DefaultLocationLastExitTime[LocationIndex] - DefaultLocationLastEnterTime[LocationIndex]
 		If TimeSpentInLocation < 0.125 && DefaultLocationLocalAnonymityFlag[LocationIndex] == True
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Time Spent in " + FameLocation + " is too short. No Recognition Increase.")
-			EndIf
+			Logger.Log("SLSF Reloaded - Time Spent in " + FameLocation + " is too short. No Recognition Increase.")
 			return
 		Else
 			If DefaultLocationLocalAnonymityFlag[LocationIndex] == True || DefaultLocationLocalAnonymityStartedAsTrue[LocationIndex] == True
 				DefaultLocationLocalAnonymityFlag[LocationIndex] = False ;Can't be Anonymous
 				DefaultLocationLocalAnonymityStartedAsTrue[LocationIndex] = False
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Anonymity for " + LocationManager.DefaultLocation[LocationIndex] + " has been lost.")
-				EndIf
+				Logger.Log("SLSF Reloaded - Anonymity for " + LocationManager.DefaultLocation[LocationIndex] + " has been lost.")
 				
 				DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] + (TimeSpentInLocation - 0.125)
 				If DefaultLocationRecognitionTime[LocationIndex] > 365
 					DefaultLocationRecognitionTime[LocationIndex] = 365
 				EndIf
 				
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
-				EndIf
+				Logger.Log("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
 			Else
 				DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] + TimeSpentInLocation
 				If DefaultLocationRecognitionTime[LocationIndex] > 365
 					DefaultLocationRecognitionTime[LocationIndex] = 365
 				EndIf
 				
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
-				EndIf
+				Logger.Log("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
 			EndIf
 		EndIf
 		return
@@ -182,35 +163,27 @@ Function CheckRecognitionTimeIncrease(String FameLocation)
 		If LocationIndex >= 0
 			TimeSpentInLocation = CustomLocationLastExitTime[LocationIndex] - CustomLocationLastEnterTime[LocationIndex]
 			If TimeSpentInLocation < 0.125 && CustomLocationLocalAnonymityFlag[LocationIndex] == True
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Time Spent in " + FameLocation + " is too short. No Recognition Increase.")
-				EndIf
+				Logger.Log("SLSF Reloaded - Time Spent in " + FameLocation + " is too short. No Recognition Increase.")
 				return
 			Else
 				If CustomLocationLocalAnonymityFlag[LocationIndex] == True || CustomLocationLocalAnonymityStartedAsTrue[LocationIndex] == True
 					CustomLocationLocalAnonymityFlag[LocationIndex] = False
 					CustomLocationLocalAnonymityStartedAsTrue[LocationIndex] = False
-					If Config.EnableTracing == True
-						Debug.Trace("SLSF Reloaded - Anonymity for " + LocationManager.CustomLocation[LocationIndex] + " has been lost.")
-					EndIf
+					Logger.Log("SLSF Reloaded - Anonymity for " + LocationManager.CustomLocation[LocationIndex] + " has been lost.")
 					
 					CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] + (TimeSpentInLocation - 0.125)
 					If CustomLocationRecognitionTime[LocationIndex] > 365
 						CustomLocationRecognitionTime[LocationIndex] = 365
 					EndIf
 					
-					If Config.EnableTracing == True
-						Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
-					EndIf
+					Logger.Log("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
 				Else
 					CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] + TimeSpentInLocation
 					If CustomLocationRecognitionTime[LocationIndex] > 365
 						CustomLocationRecognitionTime[LocationIndex] = 365
 					EndIf
 					
-					If Config.EnableTracing == True
-						Debug.Trace("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
-					EndIf
+					Logger.Log("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
 				EndIf
 			EndIf
 			return
@@ -236,20 +209,16 @@ Function CheckRecognitionTimeDecay(String FameLocation)
 				DefaultLocationRecognitionTime[LocationIndex] = 7
 			EndIf
 			
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
-				Debug.Trace("SLSF Reloaded - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
-			EndIf
+			Logger.Log("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+			Logger.Log("SLSF Reloaded - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
 		ElseIf DefaultLocationLocalAnonymityFlag[LocationIndex] == True
 			DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - DefaultLocationRecognitionTime[LocationIndex])
 			If DefaultLocationRecognitionTime[LocationIndex] < 7
 				DefaultLocationRecognitionTime[LocationIndex] = 7
 			EndIf
 			
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
-				Debug.Trace("SLSF Reloaded - Anonymity for " + FameLocation + " was already possible.")
-			EndIf
+			Logger.Log("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+			Logger.Log("SLSF Reloaded - Anonymity for " + FameLocation + " was already possible.")
 		EndIf
 		return
 	ElseIf SLSF_Reloaded_CustomLocationCount.GetValue() as Int > 0
@@ -266,20 +235,16 @@ Function CheckRecognitionTimeDecay(String FameLocation)
 					CustomLocationRecognitionTime[LocationIndex] = 7
 				EndIf
 				
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
-					Debug.Trace("SLSF Reloaded - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
-				EndIf
+				Logger.Log("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+				Logger.Log("SLSF Reloaded - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
 			ElseIf CustomLocationLocalAnonymityFlag[LocationIndex] == True
 				CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - CustomLocationRecognitionTime[LocationIndex])
 				If CustomLocationRecognitionTime[LocationIndex] < 7
 					CustomLocationRecognitionTime[LocationIndex] = 7
 				EndIf
 				
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
-					Debug.Trace("SLSF Reloaded - Anonymity for " + FameLocation + " was already possible.")
-				EndIf
+				Logger.Log("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+				Logger.Log("SLSF Reloaded - Anonymity for " + FameLocation + " was already possible.")
 			EndIf
 		EndIf
 		return
@@ -292,16 +257,12 @@ Function UpdateCurrentLocationAnonymity(Int LocationIndex, Float GameTime, Bool 
 	If IsDefaultLocation == True
 		If GameTime - DefaultLocationLastEnterTime[LocationIndex] >= 0.125
 			DefaultLocationLocalAnonymityFlag[LocationIndex] = False ;Can't be Anonymous
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Anonymity for " + LocationManager.DefaultLocation[LocationIndex] + " has been lost.")
-			EndIf
+			Logger.Log("SLSF Reloaded - Anonymity for " + LocationManager.DefaultLocation[LocationIndex] + " has been lost.")
 		EndIf
 	Else
 		If GameTime - CustomLocationLastEnterTime[LocationIndex] >= 0.125
 			CustomLocationLocalAnonymityFlag[LocationIndex] = False ;Can't be Anonymous
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Anonymity for " + LocationManager.CustomLocation[LocationIndex] + " has been lost.")
-			EndIf
+			Logger.Log("SLSF Reloaded - Anonymity for " + LocationManager.CustomLocation[LocationIndex] + " has been lost.")
 		EndIf
 	EndIf
 EndFunction

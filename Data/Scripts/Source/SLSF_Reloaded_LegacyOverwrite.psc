@@ -4,6 +4,7 @@ SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_LocationManager Property LocationManager Auto
+SLSF_Reloaded_Logger Property Logger Auto
 
 Function OverwriteLegacyFame()
 	Bool ResetLegacyWarningDisplayed = False
@@ -18,9 +19,7 @@ Function OverwriteLegacyFame()
 	String LegacyString = "-EMPTY-" ;The Storage Util string we need to set for overwriting Legacy SLSF
 	
 	String PlayerLocation = LocationManager.CurrentLocationName()
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Legacy Overwrite: Grabbed Player Location is " + PlayerLocation)
-	EndIf
+	Logger.Log("SLSF Reloaded - Legacy Overwrite: Grabbed Player Location is " + PlayerLocation)
 	If	PlayerLocation == "Haafingar"
 		PlayerLocation = "Solitude"
 	ElseIf PlayerLocation == "Eastmarch"
@@ -33,9 +32,7 @@ Function OverwriteLegacyFame()
 		PlayerLocation = "Riften"
 	EndIf
 	
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Legacy Overwrite: Converted Player Location is " + PlayerLocation)
-	EndIf
+	Logger.Log("SLSF Reloaded - Legacy Overwrite: Converted Player Location is " + PlayerLocation)
 	
 	While LocationIndex < 24
 		If LocationIndex == 0
@@ -147,38 +144,28 @@ Function OverwriteLegacyFame()
 				LegacyString = "SLSF.LocationsFame.PC.Whore"
 			EndIf
 			
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Legacy Overwrite: Fame Type = " + FameType)
-			EndIf
+			Logger.Log("SLSF Reloaded - Legacy Overwrite: Fame Type = " + FameType)
 			
 			If LocationIndex == 21 || LocationIndex == 20 || LocationIndex == 15 || FameIndex == 16
 				FameValue = 0
-				If Config.EnableTracing == True
-					If FameIndex == 16
-						Debug.Trace("SLSF Reloaded - Legacy Overwrite: Unused Legacy Fame (Skooma). Returning Fame Value of 0.")
-					Else
-						Debug.Trace("SLSF Reloaded - Legacy Overwrite: Unused Legacy Location. Returning Fame Value of 0.")
-					EndIf
+				If FameIndex == 16
+					Logger.Log("SLSF Reloaded - Legacy Overwrite: Unused Legacy Fame (Skooma). Returning Fame Value of 0.")
+				Else
+					Logger.Log("SLSF Reloaded - Legacy Overwrite: Unused Legacy Location. Returning Fame Value of 0.")
 				EndIf
 			Else
 				FameValue = Data.GetFameValue(LocationName, FameType)
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Legacy Overwrite: Location = " + LocationName)
-					Debug.Trace("SLSF Reloaded - Legacy Overwrite: Grabbed Fame Value = " + FameValue)
-				EndIf
+				Logger.Log("SLSF Reloaded - Legacy Overwrite: Location = " + LocationName)
+				Logger.Log("SLSF Reloaded - Legacy Overwrite: Grabbed Fame Value = " + FameValue)
 			EndIf
 			
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Legacy Overwrite: IntListSet: Legacy String = " + LegacyString)
-				Debug.Trace("SLSF Reloaded - Legacy Overwrite: IntListSet: LocationIndex = " + LocationIndex + " (Location Name Comparison = " + LocationName +")")
-				Debug.Trace("SLSF Reloaded - Legacy Overwrite: IntListSet: Fame Value = " + FameValue)
-			EndIf
+			Logger.Log("SLSF Reloaded - Legacy Overwrite: IntListSet: Legacy String = " + LegacyString)
+			Logger.Log("SLSF Reloaded - Legacy Overwrite: IntListSet: LocationIndex = " + LocationIndex + " (Location Name Comparison = " + LocationName +")")
+			Logger.Log("SLSF Reloaded - Legacy Overwrite: IntListSet: Fame Value = " + FameValue)
 			StorageUtil.IntListSet(None, LegacyString, LocationIndex, FameValue)
 			
 			Int DebugInt = StorageUtil.IntListGet(None, LegacyString, LocationIndex)
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Legacy Overwrite: Debug Int List: Returned Value of Set Int = " + DebugInt)
-			EndIf
+			Logger.Log("SLSF Reloaded - Legacy Overwrite: Debug Int List: Returned Value of Set Int = " + DebugInt)
 			
 			If FameValue != DebugInt && ResetLegacyWarningDisplayed == False
 				Debug.MessageBox("SLSF Reloaded WARNING: Your Fame did not properly overwrite. You must reset Legacy SLSF Papyrus Storage. Legacy Overwrite will not work until you do!")

@@ -9,6 +9,7 @@ SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
+SLSF_Reloaded_Logger Property Logger Auto
 
 Actor Property PlayerRef Auto
 
@@ -19,22 +20,16 @@ Race[] Property KhajiitRace Auto
 Race[] Property ArgonianRace Auto
 
 Function AnimationAnalyze(Int threadID)
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Animation Analyze started")
-	EndIf
+	Logger.Log("SLSF Reloaded - Animation Analyze started")
 	If VisibilityManager.IsPlayerAnonymous() == True
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Animation Analyze: Player is Anonymous. Analyze Stopped.")
-		EndIf
+		Logger.Log("SLSF Reloaded - Animation Analyze: Player is Anonymous. Analyze Stopped.")
 		return
 	EndIf
 	
 	String PlayerLocation = LocationManager.CurrentLocationName()
 	
 	If LocationManager.IsLocationValid(PlayerLocation) == False
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Animation Analyze: Location is Invalid. Analyze Stopped.")
-		EndIf
+		Logger.Log("SLSF Reloaded - Animation Analyze: Location is Invalid. Analyze Stopped.")
 		return
 	EndIf
 	
@@ -44,16 +39,12 @@ Function AnimationAnalyze(Int threadID)
 	Utility.Wait(10.0) ;Give the player a short time to change the animation (or cancel it) if needed before grabbing information about the animation. Tried to account for possible starting lag as well.
 	
 	If SexSceneEnded == True
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Animation Analyze: 'SexSceneEnded' detected as TRUE. Analyze Stopped.")
-		EndIf
+		Logger.Log("SLSF Reloaded - Animation Analyze: 'SexSceneEnded' detected as TRUE. Analyze Stopped.")
 		return
 	EndIf
 	
 	If PlayerController.Animation.HasTag("BodySearch")
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Animation Analyze: Detected BodySearch animation. Analyze Stopped.")
-		EndIf
+		Logger.Log("SLSF Reloaded - Animation Analyze: Detected BodySearch animation. Analyze Stopped.")
 		return ;Ignore BodySearch Animations
 	EndIf
 	
@@ -62,9 +53,7 @@ Function AnimationAnalyze(Int threadID)
 	If PlayerController.Animation.HasTag("LeadIn") && Config.AllowForeplayFame == True
 		Foreplay = True
 	ElseIf PlayerController.Animation.HasTag("LeadIn") && Config.AllowForeplayFame == False
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Animation Analyze: Detected LeadIn animation and AllowForeplayFame is FALSE. Analyze Stopped.")
-		EndIf
+		Logger.Log("SLSF Reloaded - Animation Analyze: Detected LeadIn animation and AllowForeplayFame is FALSE. Analyze Stopped.")
 		return
 	EndIf
 	
@@ -89,9 +78,7 @@ Function AnimationAnalyze(Int threadID)
 	Bool GainedMasochistFame = False
 	
 	If Actors.Length > 1
-		If Config.EnableTracing == True
-			Debug.Trace("SLSF Reloaded - Animation Analyze: Actor Length is more than 1")
-		EndIf
+		Logger.Log("SLSF Reloaded - Animation Analyze: Actor Length is more than 1")
 		Int PartnerIndex = 0
 		Int KissAndTellRoll = Utility.RandomInt(1,100)
 		Int FriendKissAndTell = Config.SexFameChanceByFriend as Int
@@ -99,37 +86,25 @@ Function AnimationAnalyze(Int threadID)
 		Bool StopPartnerCheck = False
 		
 		While PartnerIndex < Actors.Length && StopPartnerCheck == False
-			If Config.EnableTracing == True
-				Debug.Trace("SLSF Reloaded - Animation Analyze: PartnerIndex is " + PartnerIndex)
-			EndIf
+			Logger.Log("SLSF Reloaded - Animation Analyze: PartnerIndex is " + PartnerIndex)
 			If Actors[PartnerIndex] != PlayerRef
 				PartnerRelationship = Actors[PartnerIndex].GetRelationshipRank(PlayerRef)
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Animation Analyze: Checked partner relationship is " + PartnerRelationship)
-				EndIf
+				Logger.Log("SLSF Reloaded - Animation Analyze: Checked partner relationship is " + PartnerRelationship)
 				If PartnerRelationship < 1
 					StopPartnerCheck = True
 					AllPartnersAreFriends = False
 					AllPartnersAreLovers = False
-					If Config.EnableTracing == True
-						Debug.Trace("SLSF Reloaded - Animation Analyze: At least one partner is not a Friend or Lover. Partner Check will end.")
-					EndIf
+					Logger.Log("SLSF Reloaded - Animation Analyze: At least one partner is not a Friend or Lover. Partner Check will end.")
 				ElseIf PartnerRelationship > 0 && PartnerRelationship < 4
 					AllPartnersAreFriends = True
 					AllPartnersAreLovers = False
-					If Config.EnableTracing == True
-						Debug.Trace("SLSF Reloaded - Animation Analyze: Currently all partners are at least FRIEND")
-					EndIf
+					Logger.Log("SLSF Reloaded - Animation Analyze: Currently all partners are at least FRIEND")
 				ElseIf PartnerRelationship > 3 && AllPartnersAreFriends == False
 					AllPartnersAreLovers = True
-					If Config.EnableTracing == True
-						Debug.Trace("SLSF Reloaded - Animation Analyze: Currently all partners are LOVER")
-					EndIf
+					Logger.Log("SLSF Reloaded - Animation Analyze: Currently all partners are LOVER")
 				EndIf
 			Else
-				If Config.EnableTracing == True
-					Debug.Trace("SLSF Reloaded - Animation Analyze: Partner index is PLAYER. Relationship check skipped.")
-				EndIf
+				Logger.Log("SLSF Reloaded - Animation Analyze: Partner index is PLAYER. Relationship check skipped.")
 			EndIf
 			PartnerIndex += 1
 		EndWhile
@@ -499,7 +474,5 @@ Function AnimationAnalyze(Int threadID)
 	EndIf
 	
 	Data.FameCheck()
-	If Config.EnableTracing == True
-		Debug.Trace("SLSF Reloaded - Animation Analyze finished.")
-	EndIf
+	Logger.Log("SLSF Reloaded - Animation Analyze finished.")
 EndFunction

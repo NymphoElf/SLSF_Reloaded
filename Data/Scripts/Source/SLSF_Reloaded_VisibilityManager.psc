@@ -3,6 +3,7 @@ ScriptName SLSF_Reloaded_VisibilityManager extends Quest
 SLSF_Reloaded_ModIntegration Property Mods Auto
 SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DynamicAnonymity Property DynamicAnonymityScript Auto
+SLSF_Reloaded_Logger Property Logger Auto
 
 SexlabFramework Property Sexlab Auto
 
@@ -155,7 +156,7 @@ Event OnUpdate()
 	UpdateRunning = True
 	
 	If Config.TattooLimitUnlocked == True
-		Debug.Trace("SLSF RELOADED TATTOO LIMIT IS UNLOCKED!!! STACK DUMP REPORTS ARE NOW INVALID!!!")
+		Logger.Log("SLSF RELOADED TATTOO LIMIT IS UNLOCKED!!! STACK DUMP REPORTS ARE NOW INVALID!!!", True)
 	EndIf
 	
 	If IsOralCumVisible() == True
