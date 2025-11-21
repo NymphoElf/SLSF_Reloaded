@@ -5,7 +5,7 @@ SexlabFramework Property Sexlab Auto
 SLSF_Reloaded_VisibilityManager Property VisibilityManager Auto
 SLSF_Reloaded_LocationManager Property LocationManager Auto
 SLSF_Reloaded_FameManager Property FameManager Auto
-SLSF_Reloaded_PlayerScript Property PlayerScript Auto
+;SLSF_Reloaded_PlayerScript Property PlayerScript Auto
 SLSF_Reloaded_MCM Property Config Auto
 SLSF_Reloaded_DataManager Property Data Auto
 SLSF_Reloaded_ModIntegration Property Mods Auto
@@ -18,6 +18,10 @@ Bool Property SexSceneEnded Auto Hidden
 Race[] Property OrcRace Auto
 Race[] Property KhajiitRace Auto
 Race[] Property ArgonianRace Auto
+
+GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
+
+Spell Property NPCScanSpell Auto
 
 Function AnimationAnalyze(Int threadID)
 	Logger.Log("SLSF Reloaded - Animation Analyze started")
@@ -469,7 +473,8 @@ Function AnimationAnalyze(Int threadID)
 		EndIf
 	Else
 		If LocationManager.IsLocationValid(LocationManager.CurrentLocationName()) == True
-			PlayerScript.RunNPCDetect()
+			SLSF_Reloaded_NPCScanSucess.SetValue(0)
+			NPCScanSpell.Cast(PlayerRef)
 		EndIf
 	EndIf
 	
