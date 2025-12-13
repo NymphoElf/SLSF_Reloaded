@@ -26,6 +26,7 @@ Bool Property DD_HarnessVisible Auto Hidden
 Bool Property DD_CollarVisible Auto Hidden
 Bool Property IsWearingUnhideable Auto Hidden
 Bool Property UpdateRunning Auto Hidden
+Bool Property CountingBodyTats Auto Hidden
 
 String[] Property BodyTattooSubcategory Auto Hidden ;Filled by MCM settings | Chest, Pelvis, Ass, Back, None
 String[] Property BodyTattooExtraFameType Auto Hidden ;Filled by MCM settings
@@ -152,7 +153,7 @@ Function UpdateTattooSlots()
 	EndIf
 EndFunction
 
-Event OnUpdate()
+Function FullUpdate()
 	UpdateRunning = True
 	
 	If Config.TattooLimitUnlocked == True
@@ -181,8 +182,10 @@ Event OnUpdate()
 	CountVisibleTattoos()
 	CheckBondage()
 	
+	Utility.Wait(1.0)
+	
 	UpdateRunning = False
-EndEvent
+EndFunction
 
 Bool Function IsPlayerAnonymous()
 	If Config.AnonymityEnabled == False
@@ -304,15 +307,19 @@ Int Function CountVisibleTattoos()
 		VisibleBodyTats = 0
 		return 0
 	EndIf
+	Int VisibleTattoos = CountBodyTattoos() + CountHandTattoos() + CountFaceTattoos() + CountFootTattoos()
+	return VisibleTattoos
+EndFunction
+
+Int Function CountBodyTattoos()
+	CountingBodyTats = True
 	
 	VisibleBodyTats = 0
-	Int VisibleTattoos = 0
 	Int SlotIndex = 0
 	
 	While SlotIndex < Config.BodyTattooSlots
 		If IsBodyTattooVisible(SlotIndex) == True
 			BodyTattooVisible[SlotIndex] = True
-			VisibleTattoos += 1
 			VisibleBodyTats += 1
 		Else
 			BodyTattooVisible[SlotIndex] = False
@@ -320,7 +327,15 @@ Int Function CountVisibleTattoos()
 		SlotIndex += 1
 	EndWhile
 	
-	SlotIndex = 0
+	CountingBodyTats = False
+	
+	return VisibleBodyTats
+EndFunction
+
+Int Function CountHandTattoos()
+	Int VisibleTattoos = 0
+	Int SlotIndex = 0
+	
 	While SlotIndex < Config.HandTattooSlots
 		If IsHandTattooVisible(SlotIndex) == True
 			HandTattooVisible[SlotIndex] = True
@@ -331,7 +346,13 @@ Int Function CountVisibleTattoos()
 		SlotIndex += 1
 	EndWhile
 	
-	SlotIndex = 0
+	return VisibleTattoos
+EndFunction
+
+Int Function CountFaceTattoos()
+	Int VisibleTattoos = 0
+	Int SlotIndex = 0
+	
 	While SlotIndex < Config.FaceTattooSlots
 		If IsFaceTattooVisible(SlotIndex) == True
 			FaceTattooVisible[SlotIndex] = True
@@ -342,7 +363,13 @@ Int Function CountVisibleTattoos()
 		SlotIndex += 1
 	EndWhile
 	
-	SlotIndex = 0
+	return VisibleTattoos
+EndFunction
+
+Int Function CountFootTattoos()
+	Int VisibleTattoos = 0
+	Int SlotIndex = 0
+	
 	While SlotIndex < Config.FootTattooSlots
 		If IsFootTattooVisible(SlotIndex) == True
 			FootTattooVisible[SlotIndex] = True

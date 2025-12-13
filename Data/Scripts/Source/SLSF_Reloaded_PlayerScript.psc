@@ -24,7 +24,6 @@ GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
 GlobalVariable Property SLSF_Reloaded_Skooma Auto
 
 Event OnInit()
-	RegisterForUpdateGameTime(0.5)
 	Mods.CheckInstalledMods()
 	RegisterForModEvent("HookAnimationStart", "OnSexlabAnimationStart")
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
@@ -54,7 +53,17 @@ Event OnPlayerLoadGame()
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
 	
+	If Mods.IsANDInstalled == True
+		RegisterForModEvent("AdvancedNudityDetectionUpdate", "OnANDUpdate")
+	EndIf
+	
 	Logger.Log("SLSF Reloaded - Player Script: Load Game Complete", True)
+EndEvent
+
+Event OnANDUpdate()
+	If VisibilityManager.UpdateRunning == False && VisibilityManager.CountingBodyTats == False
+		VisibilityManager.CountBodyTattoos()
+	EndIf
 EndEvent
 
 Event OnMenuClose(String MenuName)
@@ -118,32 +127,6 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	FameManager.UpdateGlobals()
 EndEvent
 
-Event OnUpdateGameTime()
-	Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime started.")
-	If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
-		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is not already running. Calling TimeManager.")
-		TimeManager.PeriodicFameTimer()
-	Else
-		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is already running. Skipped TimeManager call.")
-	EndIf
-	
-	Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
-	Int NewSkoomaValue = OldSkoomaValue - 2
-	
-	If NewSkoomaValue < 0
-		NewSkoomaValue = 0
-	EndIf
-	
-	SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
-	
-	If Config.AllowLegacyOverwrite == True
-		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is TRUE")
-		LegacyOverwrite.OverwriteLegacyFame()
-	Else
-		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is FALSE")
-	EndIf
-EndEvent
-
 Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 	String ObjectName = ""
 	
@@ -167,24 +150,8 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
 	EndIf
 	
-	Logger.Log("SLSF Reloaded - PlayerScript OnObjectEquipped: Register VisibilityManager for Single Update")
-	
 	If VisibilityManager.UpdateRunning == False
-		WaitingOnVisibilityManager = False
-		VisibilityManager.RegisterForSingleUpdate(0.1)
-	Else
-		If WaitingOnVisibilityManager == False
-			While VisibilityManager.UpdateRunning == True
-				WaitingOnVisibilityManager = True
-				Logger.Log("SLSF Reloaded - OnObjectEquipped: Waiting on previous VisibilityManager Update to finish")
-				Utility.Wait(5.0) ;Wait 5 seconds to let the VisibilityManager Update Finish before starting a new one
-			EndWhile
-			
-			Logger.Log("SLSF Reloaded - OnObjectEquipped: Previous VisibilityManager Update finished. Register VisibilityManager for Single Update")
-			
-			VisibilityManager.RegisterForSingleUpdate(0.1)
-			WaitingOnVisibilityManager = False
-		EndIf
+		VisibilityManager.FullUpdate()
 	EndIf
 EndEvent
 
@@ -203,21 +170,7 @@ Event OnObjectUnequipped(Form akBaseObject, ObjectReference akReference)
 	EndIf
 	
 	If VisibilityManager.UpdateRunning == False
-		WaitingOnVisibilityManager = False
-		VisibilityManager.RegisterForSingleUpdate(0.1)
-	Else
-		If WaitingOnVisibilityManager == False
-			While VisibilityManager.UpdateRunning == True
-				WaitingOnVisibilityManager = True
-				Logger.Log("SLSF Reloaded - OnObjectUnequipped: Waiting on previous VisibilityManager Update to finish")
-				Utility.Wait(5.0) ;Wait 5 seconds to let the VisibilityManager Update Finish before starting a new one
-			EndWhile
-			
-			Logger.Log("SLSF Reloaded - OnObjectUnequipped: Previous VisibilityManager Update finished. Register VisibilityManager for Single Update")
-			
-			VisibilityManager.RegisterForSingleUpdate(0.1)
-			WaitingOnVisibilityManager = False
-		EndIf
+		VisibilityManager.FullUpdate()
 	EndIf
 EndEvent
 

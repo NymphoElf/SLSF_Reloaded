@@ -91,7 +91,6 @@ GlobalVariable Property SLSF_CurrentFamePCLocation_Sub_Slave Auto Hidden
 GlobalVariable Property SLSF_CurrentFamePCLocation_Whore Auto Hidden
 
 Function CheckInstalledMods()
-	
 	If Game.GetModByName("Advanced Nudity Detection.esp") != 255
 		IsANDInstalled = True
 		AND_Nude = Game.GetFormFromFile(0x831, "Advanced Nudity Detection.esp") as Faction
