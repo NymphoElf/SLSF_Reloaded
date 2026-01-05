@@ -24,7 +24,14 @@ GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
 GlobalVariable Property SLSF_Reloaded_Skooma Auto
 
 Event OnInit()
+	Startup()
+EndEvent
+
+Function Startup()
+	RegisterForUpdateGameTime(0.5)
+	
 	Mods.CheckInstalledMods()
+	
 	RegisterForModEvent("HookAnimationStart", "OnSexlabAnimationStart")
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
@@ -32,7 +39,7 @@ Event OnInit()
 	RegisterForMenu("RaceSex Menu")
 	
 	Logger.Log("SLSF Reloaded - Player Script Initialized", True)
-EndEvent
+EndFunction
 
 Event OnPlayerLoadGame()
 	ActorBase PlayerBase = PlayerRef.GetActorBase()
@@ -125,6 +132,32 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 		DynamicAnonymityScript.GetAnonymity(akNewLoc)
 	EndIf
 	FameManager.UpdateGlobals()
+EndEvent
+
+Event OnUpdateGameTime()
+	Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime started.")
+	If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
+		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is not already running. Calling TimeManager.")
+		TimeManager.PeriodicFameTimer()
+	Else
+		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is already running. Skipped TimeManager call.")
+	EndIf
+	
+	Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
+	Int NewSkoomaValue = OldSkoomaValue - 2
+	
+	If NewSkoomaValue < 0
+		NewSkoomaValue = 0
+	EndIf
+	
+	SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
+	
+	If Config.AllowLegacyOverwrite == True
+		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is TRUE")
+		LegacyOverwrite.OverwriteLegacyFame()
+	Else
+		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is FALSE")
+	EndIf
 EndEvent
 
 Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
