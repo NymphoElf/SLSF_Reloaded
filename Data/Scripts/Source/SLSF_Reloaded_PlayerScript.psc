@@ -28,20 +28,25 @@ Event OnInit()
 EndEvent
 
 Function Startup()
-	RegisterForUpdateGameTime(0.5)
+	;RegisterForUpdateGameTime(0.5)
 	
 	Mods.CheckInstalledMods()
 	
 	RegisterForModEvent("HookAnimationStart", "OnSexlabAnimationStart")
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
-	RegisterForMenu("Sleep/Wait Menu")
-	RegisterForMenu("RaceSex Menu")
+	;RegisterForMenu("Sleep/Wait Menu")
+	;RegisterForMenu("RaceSex Menu")
 	
-	Logger.Log("SLSF Reloaded - Player Script Initialized", True)
+	If Mods.IsANDInstalled == True
+		RegisterForModEvent("AdvancedNudityDetectionUpdate", "OnANDUpdate")
+	EndIf
+	
+	SLSF_Reloaded_Logger.Log("<Player Script> [Startup] - Player Script Initialized", Logger.CRITICAL)
 EndFunction
 
 Event OnPlayerLoadGame()
+	;/
 	ActorBase PlayerBase = PlayerRef.GetActorBase()
 	String PlayerName = PlayerBase.GetName()
 	
@@ -49,7 +54,8 @@ Event OnPlayerLoadGame()
 		Logger.LogName = PlayerName
 		Logger.DuplicateCheck()
 	EndIf
-	Logger.Log("===LOAD GAME===")
+	SLSF_Reloaded_Logger.Log("===LOAD GAME===")
+	/;
 	
 	Mods.CheckInstalledMods()
 	Listener.RegisterExternalEvents()
@@ -64,7 +70,7 @@ Event OnPlayerLoadGame()
 		RegisterForModEvent("AdvancedNudityDetectionUpdate", "OnANDUpdate")
 	EndIf
 	
-	Logger.Log("SLSF Reloaded - Player Script: Load Game Complete", True)
+	SLSF_Reloaded_Logger.Log("<Player Script> [OnPlayerLoadGame] - Load Game Complete", Logger.CRITICAL)
 EndEvent
 
 Event OnANDUpdate()
@@ -73,60 +79,65 @@ Event OnANDUpdate()
 	EndIf
 EndEvent
 
+;/
 Event OnMenuClose(String MenuName)
+	
 	If MenuName == "RaceSex Menu"
 		ActorBase PlayerBase = PlayerRef.GetActorBase()
 		String PlayerName = PlayerBase.GetName()
 		
 		Logger.LogName = PlayerName
 		Logger.DuplicateCheck()
-		Logger.Log("===MAMMAERIES AND LACTATION LOG START===")
-		Logger.Log("===PLAYER NAME: " + PlayerName + " ===")
+		SLSF_Reloaded_Logger.Log("===SEXLAB SEXUAL FAME RELOADED LOG START===")
+		SLSF_Reloaded_Logger.Log("===PLAYER NAME: " + PlayerName + " ===")
 	EndIf
+	
 	
 	If MenuName == "Sleep/Wait Menu"
 		Float TimeDifference = Utility.GetCurrentGameTime() - TimeManager.LastCheckedTime
-		Logger.Log("SLSF Reloaded - Sleep/Wait Menu Closed")
-		Logger.Log("SLSF Reloaded - Sleep/Wait Menu Time Check. Curent Game Time is: " + Utility.GetCurrentGameTime())
-		Logger.Log("SLSF Reloaded - Sleep/Wait Menu Time Check. TimeManager Last Checked Time is: " + TimeManager.LastCheckedTime)
-		Logger.Log("SLSF Reloaded - Sleep/Wait Menu Time Check. Difference is: " + TimeDifference)
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu Closed")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu Time Check. Curent Game Time is: " + Utility.GetCurrentGameTime())
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu Time Check. TimeManager Last Checked Time is: " + TimeManager.LastCheckedTime)
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu Time Check. Difference is: " + TimeDifference)
 		If TimeDifference >= 0.0199 ;~0.0199 is the time amount for an in-game half-hour
 			If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
-				Logger.Log("SLSF Reloaded - Sleep/Wait Menu tiggers TimeManager")
+				SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu tiggers TimeManager")
 				TimeManager.PeriodicFameTimer()
 			EndIf
 		EndIf
 	EndIf
 EndEvent
+/;
 
 Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
-	Logger.Log("SLSF Reloaded - Sexlab Animation started")
+	SLSF_Reloaded_Logger.Log("<Player Script> [OnSexlabAnimationStart] - Sexlab Animation started")
 	If hasPlayer == True
-		Logger.Log("SLSF Reloaded - Sexlab Animation has player")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnSexlabAnimationStart] - Sexlab Animation has player")
 		AnimationAnalyzer.SexSceneEnded = False
 		AnimationAnalyzer.AnimationAnalyze(threadID)
 	EndIf
 EndEvent
 
 Event OnSexlabForeplayEnd(Int threadID, Bool hasPlayer)
-	Logger.Log("SLSF Reloaded - Foreplay Animation ended")
+	SLSF_Reloaded_Logger.Log("<Player Script> [OnSexlabForeplayEnd] - Foreplay Animation ended")
 	If hasPlayer == True
-		Logger.Log("SLSF Reloaded - Foreplay Animation has player")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnSexlabForeplayEnd] - Foreplay Animation has player")
 		AnimationAnalyzer.SexSceneEnded = False
 		AnimationAnalyzer.AnimationAnalyze(threadID)
 	EndIf
 EndEvent
 
 Event OnSexlabAnimationEnd(Int threadID, Bool hasPlayer)
-	Logger.Log("SLSF Reloaded - Sexlab Animation ended")
+	SLSF_Reloaded_Logger.Log("<Player Script> [OnSexlabAnimationEnd] - Sexlab Animation ended")
 	If hasPlayer == True
-		Logger.Log("SLSF Reloaded - Sexlab Animation has player")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnSexlabAnimationEnd] - Sexlab Animation has player")
 		AnimationAnalyzer.SexSceneEnded = True
 	EndIf
 EndEvent
 
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	LocationManager.CurrentLocation = akNewLoc
+	SLSF_Reloaded_Logger.Log("<Player Script> [OnLocationChange] - Player changed locations! Old Location = " + akOldLoc + " | New Location = " + akNewLoc)
 	If Config.DynamicAnonymity == True
 		DynamicAnonymityScript.CompareLocations(akOldLoc, akNewLoc)
 		DynamicAnonymityScript.GetAnonymity(akNewLoc)
@@ -134,13 +145,14 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	FameManager.UpdateGlobals()
 EndEvent
 
+;/
 Event OnUpdateGameTime()
-	Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime started.")
+	SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - START")
 	If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
-		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is not already running. Calling TimeManager.")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - TimeManager is not already running. Calling TimeManager.")
 		TimeManager.PeriodicFameTimer()
 	Else
-		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: TimeManager is already running. Skipped TimeManager call.")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - TimeManager is already running. Skipped TimeManager call.")
 	EndIf
 	
 	Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
@@ -153,12 +165,14 @@ Event OnUpdateGameTime()
 	SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
 	
 	If Config.AllowLegacyOverwrite == True
-		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is TRUE")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - AllowLegacyOverwrite is TRUE")
 		LegacyOverwrite.OverwriteLegacyFame()
 	Else
-		Logger.Log("SLSF Reloaded - PlayerScript UpdateGameTime: AllowLegacyOverwrite is FALSE")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - AllowLegacyOverwrite is FALSE")
 	EndIf
+	SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - END")
 EndEvent
+/;
 
 Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 	String ObjectName = ""
@@ -167,10 +181,10 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		ObjectName = akBaseObject.GetName()
 	EndIf
 	
-	Logger.Log("SLSF Reloaded - PlayerScript OnObjectEquipped: ObjectName is: " + ObjectName)
+	SLSF_Reloaded_Logger.Log("<Player Script> [OnObjectEquipped] - ObjectName is: " + ObjectName)
 	
 	If (akBaseObject == none || ObjectName == "")
-		Logger.Log("SLSF Reloaded - PlayerScript OnObjectEquipped: Object is Null or has blank name. Event terminated.")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnObjectEquipped] - Object is Null or has blank name. Event terminated.")
 		return
 	ElseIf (ObjectName == "Skooma" || ObjectName == "Kordir's Skooma" || ObjectName == "Redwater Skooma" || ObjectName == "Double-Distilled Skooma")
 		Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
@@ -195,10 +209,10 @@ Event OnObjectUnequipped(Form akBaseObject, ObjectReference akReference)
 		ObjectName = akBaseObject.GetName()
 	EndIf
 	
-	Logger.Log("SLSF Reloaded - PlayerScript OnObjectUnequipped: Object name is: " + ObjectName)
+	SLSF_Reloaded_Logger.Log("<Player Script> [OnObjectUnequipped] - Object name is: " + ObjectName)
 	
 	If (akBaseObject == none || akBaseObject.GetName() == "")
-		Logger.Log("SLSF Reloaded - PlayerScript OnObjectUnequipped: Object is Null or has blank name. Event terminated.")
+		SLSF_Reloaded_Logger.Log("<Player Script> [OnObjectUnequipped] - Object is Null or has blank name. Event terminated.")
 		return
 	EndIf
 	

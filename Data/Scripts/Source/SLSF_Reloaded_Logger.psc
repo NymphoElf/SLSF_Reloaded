@@ -1,16 +1,28 @@
 ScriptName SLSF_Reloaded_Logger extends Quest
 
-Import MiscUtil
-Import PO3_SKSEFunctions
+;Import MiscUtil
+;Import PO3_SKSEFunctions
 
-SLSF_Reloaded_MCM Property Config Auto
+;SLSF_Reloaded_MCM Property Config Auto
 
+;/
 Int Property DuplicateNumber = 0 Auto Hidden
 
 String Property LogName = "?" Auto Hidden
 String Property LogPath = "Data/NymphoElf/SLSF Reloaded Logs/" AutoReadOnly
 String Property Ext = ".txt" AutoReadOnly
+/;
 
+Int Property WARNING = 1 AutoReadOnly
+Int Property ERROR = 2 AutoReadOnly
+Int Property CRITICAL = 3 AutoReadOnly
+
+Function Log(String LogString, Int Severity = 0) global native
+
+Function EnableLogging(Bool EnableLogging) global native
+
+Function SetLogLevel(Int LogLevel) global native
+;/
 Function DuplicateCheck()
 	Bool FreshNameFound = False
 	String FileName = ""
@@ -26,7 +38,7 @@ EndFunction
 
 Function Log(String LogString, Bool ForceToMainLog = False)
 	If Config.AddToMainLog == True || ForceToMainLog == True
-		Debug.Trace("[SEXLAB SEXUAL FAME RELOADED] - " + LogString)
+		Debug.Trace("{SEXLAB SEXUAL FAME RELOADED} - " + LogString)
 	EndIf
 	
 	If Config.Logging == False
@@ -80,3 +92,4 @@ Function Log(String LogString, Bool ForceToMainLog = False)
 	String FileName = LogPath + LogName + " " + DuplicateNumber + Ext
 	WriteToFile(FileName, "[" + SystemTime + "] - " + LogString + "\n", True)
 EndFunction
+/;

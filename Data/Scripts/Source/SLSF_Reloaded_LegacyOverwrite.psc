@@ -19,7 +19,7 @@ Function OverwriteLegacyFame()
 	String LegacyString = "-EMPTY-" ;The Storage Util string we need to set for overwriting Legacy SLSF
 	
 	String PlayerLocation = LocationManager.CurrentLocationName()
-	Logger.Log("SLSF Reloaded - Legacy Overwrite: Grabbed Player Location is " + PlayerLocation)
+	SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: Grabbed Player Location is " + PlayerLocation)
 	If	PlayerLocation == "Haafingar"
 		PlayerLocation = "Solitude"
 	ElseIf PlayerLocation == "Eastmarch"
@@ -32,7 +32,7 @@ Function OverwriteLegacyFame()
 		PlayerLocation = "Riften"
 	EndIf
 	
-	Logger.Log("SLSF Reloaded - Legacy Overwrite: Converted Player Location is " + PlayerLocation)
+	SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: Converted Player Location is " + PlayerLocation)
 	
 	While LocationIndex < 24
 		If LocationIndex == 0
@@ -144,28 +144,28 @@ Function OverwriteLegacyFame()
 				LegacyString = "SLSF.LocationsFame.PC.Whore"
 			EndIf
 			
-			Logger.Log("SLSF Reloaded - Legacy Overwrite: Fame Type = " + FameType)
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: Fame Type = " + FameType)
 			
 			If LocationIndex == 21 || LocationIndex == 20 || LocationIndex == 15 || FameIndex == 16
 				FameValue = 0
 				If FameIndex == 16
-					Logger.Log("SLSF Reloaded - Legacy Overwrite: Unused Legacy Fame (Skooma). Returning Fame Value of 0.")
+					SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: Unused Legacy Fame (Skooma). Returning Fame Value of 0.")
 				Else
-					Logger.Log("SLSF Reloaded - Legacy Overwrite: Unused Legacy Location. Returning Fame Value of 0.")
+					SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: Unused Legacy Location. Returning Fame Value of 0.")
 				EndIf
 			Else
 				FameValue = Data.GetFameValue(LocationName, FameType)
-				Logger.Log("SLSF Reloaded - Legacy Overwrite: Location = " + LocationName)
-				Logger.Log("SLSF Reloaded - Legacy Overwrite: Grabbed Fame Value = " + FameValue)
+				SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: Location = " + LocationName)
+				SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: Grabbed Fame Value = " + FameValue)
 			EndIf
 			
-			Logger.Log("SLSF Reloaded - Legacy Overwrite: IntListSet: Legacy String = " + LegacyString)
-			Logger.Log("SLSF Reloaded - Legacy Overwrite: IntListSet: LocationIndex = " + LocationIndex + " (Location Name Comparison = " + LocationName +")")
-			Logger.Log("SLSF Reloaded - Legacy Overwrite: IntListSet: Fame Value = " + FameValue)
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: IntListSet: Legacy String = " + LegacyString)
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: IntListSet: LocationIndex = " + LocationIndex + " (Location Name Comparison = " + LocationName +")")
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: IntListSet: Fame Value = " + FameValue)
 			StorageUtil.IntListSet(None, LegacyString, LocationIndex, FameValue)
 			
 			Int DebugInt = StorageUtil.IntListGet(None, LegacyString, LocationIndex)
-			Logger.Log("SLSF Reloaded - Legacy Overwrite: Debug Int List: Returned Value of Set Int = " + DebugInt)
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded - Legacy Overwrite: Debug Int List: Returned Value of Set Int = " + DebugInt)
 			
 			If FameValue != DebugInt && ResetLegacyWarningDisplayed == False
 				Debug.MessageBox("SLSF Reloaded WARNING: Your Fame did not properly overwrite. You must reset Legacy SLSF Papyrus Storage. Legacy Overwrite will not work until you do!")

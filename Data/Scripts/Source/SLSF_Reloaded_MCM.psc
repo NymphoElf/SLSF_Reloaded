@@ -47,7 +47,8 @@ Bool Property TattooLimitUnlocked = False Auto Hidden
 Bool Property TattooLimitChanged Auto Hidden
 Bool Property FameSpreadRestrictions = False Auto Hidden
 Bool Property ThanesCantBeAnonymous = True Auto Hidden
-Bool Property AddToMainLog = False Auto Hidden
+
+Bool Property UserIsModAuthor = False Auto Hidden
 
 Bool[] Property HasFameAtDefaultLocation Auto
 Bool[] Property HasFameAtCustomLocation Auto
@@ -106,6 +107,7 @@ Int Property LoverBetrayChance = 25 Auto Hidden
 Int Property LoverHighFameThreshold = 50 Auto Hidden
 Int Property DynamicAnonymityFameCutoff = 50 Auto Hidden
 Int Property UnregisterLocationIndex = 0 Auto Hidden
+Int Property LoggingLevel = 1 Auto Hidden
 
 Int[] Property OptionID Auto Hidden
 
@@ -126,11 +128,19 @@ Event OnConfigInit()
 	Utility.Wait(1.0)
 	Debug.Notification("$MCMInitializingMSG")
 	RegisterForSingleUpdate(1)
+	SLSF_Reloaded_Logger.Log("<MCM> [OnConfigInit] - MCM Initialized!", 3)
 EndEvent
 
 Event OnUpdate()
 	InstallMCM()
 	SetDefaults()
+	
+	Logging = Utility.GetINIBool("bEnableLogging:Papyrus")
+	If Logging == True
+		LoggingLevel = 0
+		SLSF_Reloaded_Logger.SetLogLevel(LoggingLevel)
+	EndIf
+	
 	Debug.Notification("$MCMReadyMSG")
 EndEvent
 
@@ -1249,18 +1259,22 @@ Event OnPageReset(String page)
 		EndWhile
 		
 	ElseIf (page == "$RegisteredModsPage")
-		Int PageFillIndex = 0
-		Int ModCount = Data.CountExternalMods()
-		;String MaxString = "$MaximumText"
-		AddTextOption("$ModNumberText", ModCount + "/" + Data.ExternalMods.Length)
-		AddHeaderOption("$RegisteredModHeader")
-		While PageFillIndex < ModCount
-			If PageFillIndex == (Data.ExternalMods.Length / 2)
-				SetCursorPosition(5)
-			EndIf
-			AddTextOption(Data.ExternalMods[PageFillIndex], "")
-			PageFillIndex += 1
-		EndWhile
+		If UserIsModAuthor == False
+			AddTextOption("Ignore this page!", None)
+		Else
+			Int PageFillIndex = 0
+			Int ModCount = Data.CountExternalMods()
+			;String MaxString = "$MaximumText"
+			AddTextOption("$ModNumberText", ModCount + "/" + Data.ExternalMods.Length)
+			AddHeaderOption("$RegisteredModHeader")
+			While PageFillIndex < ModCount
+				If PageFillIndex == (Data.ExternalMods.Length / 2)
+					SetCursorPosition(5)
+				EndIf
+				AddTextOption(Data.ExternalMods[PageFillIndex], "")
+				PageFillIndex += 1
+			EndWhile
+		EndIf
 	ElseIf (page == "$MiscPage")
 		AddHeaderOption("$ImportExportHeader")
 		AddInputOptionST("SLSF_Reloaded_ExportNameState", "$ExportName", ExportName, 0)
@@ -1274,7 +1288,8 @@ Event OnPageReset(String page)
 		SetCursorPosition(1)
 		AddHeaderOption("$DebuggingHeader")
 		AddToggleOptionST("SLSF_Reloaded_EnableLoggingState", "$EnableLogging", Logging, 0)
-		AddToggleOptionST("SLSF_Reloaded_AddToMainLogState", "$AddToMainLog", AddToMainLog, 0)
+		AddSliderOptionST("SLSF_Reloaded_SetLoggingLevel_State", "$LoggingLevelText", LoggingLevel, "{0}", GetDisabledOptionFlagIf(Logging == False))
+		AddToggleOptionST("SLSF_Reloaded_UserIsModAuthorState", "$IAmAModAuthor", UserIsModAuthor, 0)
 		
 		AddHeaderOption("$TattooLimit")
 		AddToggleOptionST("SLSF_Reloaded_UnlockTattooLimitState", "$UnlockTattooLimit", TattooLimitUnlocked, 0)
@@ -2458,13 +2473,40 @@ EndState
 
 State SLSF_Reloaded_EnableLoggingState
 	Event OnSelectST()
-		If Logging == False
-			Logging = True
-		Else
-			Logging = False
-		EndIf
-		
+		Logging = !Logging
+		SLSF_Reloaded_Logger.EnableLogging(Logging)
 		SetToggleOptionValueST(Logging, False, "SLSF_Reloaded_EnableLoggingState")
+		ForcePageReset()
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$LoggingInfoText")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_SetLoggingLevel_State
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(LoggingLevel)
+		SetSliderDialogDefaultValue(1)
+		SetSliderDialogInterval(1)
+		SetSliderDialogRange(0,2)
+	EndEvent
+	
+	Event OnSliderAcceptST(Float Value)
+		LoggingLevel = Value as Int
+		SLSF_Reloaded_Logger.SetLogLevel(LoggingLevel)
+		SetSliderOptionValueST(LoggingLevel, "{0}", False, "SLSF_Reloaded_SetLoggingLevel_State")
+	EndEvent
+	
+	Event OnHighlightST()
+		SetInfoText("$LoggingLevelInfoText")
+	EndEvent
+EndState
+
+State SLSF_Reloaded_UserIsModAuthorState
+	Event OnSelectST()
+		UserIsModAuthor = !UserIsModAuthor
+		SetToggleOptionValueST(UserIsModAuthor, False, "SLSF_Reloaded_UserIsModAuthorState")
 	EndEvent
 EndState
 

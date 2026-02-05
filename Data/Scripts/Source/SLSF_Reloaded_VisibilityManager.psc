@@ -50,6 +50,13 @@ Actor Property PlayerRef Auto
 GlobalVariable Property OralCumGlobal Auto
 GlobalVariable Property AnalCumGlobal Auto
 GlobalVariable Property VaginalCumGlobal Auto
+
+GlobalVariable Property OralCumCountGlobal Auto ;Visible Only
+GlobalVariable Property AnalCumCountGlobal Auto ;Visible Only
+GlobalVariable Property VaginalCumCountGlobal Auto ;Visible Only
+
+GlobalVariable Property TotalCumCountGlobal Auto ;Visible Only
+
 GlobalVariable Property IsVisiblyBound Auto
 GlobalVariable Property IsHeavilyBound Auto
 GlobalVariable Property IsLightlyBound Auto
@@ -157,26 +164,34 @@ Function FullUpdate()
 	UpdateRunning = True
 	
 	If Config.TattooLimitUnlocked == True
-		Logger.Log("SLSF RELOADED TATTOO LIMIT IS UNLOCKED!!! STACK DUMP REPORTS ARE NOW INVALID!!!", True)
+		SLSF_Reloaded_Logger.Log("<Visibility Manager> [FullUpdate] - SLSF RELOADED TATTOO LIMIT IS UNLOCKED!!! STACK DUMP REPORTS ARE NOW INVALID!!!", Logger.CRITICAL)
 	EndIf
 	
 	If IsOralCumVisible() == True
 		OralCumGlobal.SetValue(1)
+		OralCumCountGlobal.SetValue(CountVisibleOralCum())
 	Else
 		OralCumGlobal.SetValue(0)
+		OralCumCountGlobal.SetValue(0)
 	EndIf
 	
 	If IsAssCumVisible() == True
 		AnalCumGlobal.SetValue(1)
+		AnalCumCountGlobal.SetValue(CountVisibleAssCum())
 	Else
 		AnalCumGlobal.SetValue(0)
+		AnalCumCountGlobal.SetValue(0)
 	EndIf
 	
 	If IsVaginalCumVisible() == True
 		VaginalCumGlobal.SetValue(1)
+		VaginalCumCountGlobal.SetValue(CountVisibleVaginalCum())
 	Else
 		VaginalCumGlobal.SetValue(0)
+		VaginalCumCountGlobal.SetValue(0)
 	EndIf
+	
+	TotalCumCountGlobal.SetValue(OralCumCountGlobal.GetValue() + AnalCumCountGlobal.GetValue() + VaginalCumCountGlobal.GetValue())
 	
 	CheckAppliedTattoos()
 	CountVisibleTattoos()
@@ -600,6 +615,36 @@ Bool Function IsAssCumVisible()
 	return False
 EndFunction
 
+Int Function CountVisibleAssCum()
+	If Mods.IsSLACSInstalled == True
+		If Mods.IsANDInstalled == True
+			If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
+				return Mods.SLACS.CountCumAnal(PlayerRef)
+			EndIf
+		ElseIf Mods.IsSLSInstalled == True && PlayerRef.GetEquippedArmorInSlot(32) != None
+			If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
+				return Mods.SLACS.CountCumAnal(PlayerRef)
+			EndIf
+		ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
+			return Mods.SLACS.CountCumAnal(PlayerRef)
+		EndIf
+	Else
+		If Mods.IsANDInstalled == True
+			If PlayerRef.GetFactionRank(Mods.AND_Ass) == 1
+				return Sexlab.CountCumAnal(PlayerRef)
+			EndIf
+		ElseIf Mods.IsSLSInstalled == True && PlayerRef.GetEquippedArmorInSlot(32) != None
+			If PlayerRef.GetEquippedArmorInSlot(32).HasKeyword(Mods.SLS_BikiniArmor)
+				return Sexlab.CountCumAnal(PlayerRef)
+			EndIf
+		ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
+			return Sexlab.CountCumAnal(PlayerRef)
+		EndIf
+	EndIf
+	
+	return 0
+EndFunction
+
 Bool Function IsVaginalCumVisible()
 	If PlayerRef.GetActorBase().GetSex() == 0 ;Exclude Males
 		return False
@@ -630,19 +675,45 @@ Bool Function IsVaginalCumVisible()
 	return False
 EndFunction
 
+Int Function CountVisibleVaginalCum()
+	If PlayerRef.GetActorBase().GetSex() == 0 ;Exclude Males
+		return 0
+	EndIf
+	
+	If Mods.IsSLACSInstalled == True
+		If Mods.IsANDInstalled == True
+			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
+				return Mods.SLACS.CountCumVaginal(PlayerRef)
+			EndIf
+		ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
+			return Mods.SLACS.CountCumVaginal(PlayerRef)
+		EndIf
+	Else
+		If Mods.IsANDInstalled == True
+			If PlayerRef.GetFactionRank(Mods.AND_Genitals) == 1
+				return Sexlab.CountCumVaginal(PlayerRef)
+			EndIf
+		ElseIf PlayerRef.GetEquippedArmorInSlot(32) == None
+			return Sexlab.CountCumVaginal(PlayerRef)
+		EndIf
+	EndIf
+	
+	return 0
+EndFunction
+
 Bool Function IsOralCumVisible()
+	If PlayerRef.WornHasKeyword(SLSF_Reloaded_HidesIdentity)
+		return False
+	EndIf
+	
+	If Mods.IsDDInstalled == True
+		If PlayerRef.WornHasKeyword(Mods.DD_Hood)
+			return False
+		EndIf
+	EndIf
+	
 	If Mods.IsSLACSInstalled == True
 		If Mods.SLACS.CountCumOral(PlayerRef) > 0
-			If PlayerRef.WornHasKeyword(SLSF_Reloaded_HidesIdentity)
-				return False
-			EndIf
-			
-			If Mods.IsDDInstalled == True
-				If PlayerRef.WornHasKeyword(Mods.DD_Hood)
-					return False
-				EndIf
-			EndIf
-			
 			If PlayerRef.GetEquippedArmorInSlot(31) != None
 				If PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(SLSF_Reloaded_DoesNotHideIdentity)
 					return True
@@ -654,16 +725,6 @@ Bool Function IsOralCumVisible()
 		EndIf
 	Else
 		If Sexlab.CountCumOral(PlayerRef) > 0
-			If PlayerRef.WornHasKeyword(SLSF_Reloaded_HidesIdentity)
-				return False
-			EndIf
-			
-			If Mods.IsDDInstalled == True
-				If PlayerRef.WornHasKeyword(Mods.DD_Hood)
-					return False
-				EndIf
-			EndIf
-			
 			If PlayerRef.GetEquippedArmorInSlot(31) != None
 				If PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(SLSF_Reloaded_DoesNotHideIdentity)
 					return True
@@ -676,6 +737,40 @@ Bool Function IsOralCumVisible()
 	EndIf
 
 	return False
+EndFunction
+
+Int Function CountVisibleOralCum()
+	If PlayerRef.WornHasKeyword(SLSF_Reloaded_HidesIdentity)
+		return 0
+	EndIf
+	
+	If Mods.IsDDInstalled == True
+		If PlayerRef.WornHasKeyword(Mods.DD_Hood)
+			return 0
+		EndIf
+	EndIf
+	
+	If Mods.IsSLACSInstalled == True
+		If PlayerRef.GetEquippedArmorInSlot(31) != None
+			If PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(SLSF_Reloaded_DoesNotHideIdentity)
+				return Mods.SLACS.CountCumOral(PlayerRef)
+			Else
+				return 0
+			EndIf
+		EndIf
+		return Mods.SLACS.CountCumOral(PlayerRef)
+	Else
+		If PlayerRef.GetEquippedArmorInSlot(31) != None
+			If PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(Mods.SLS_BikiniArmor) || PlayerRef.GetEquippedArmorInSlot(31).HasKeyword(SLSF_Reloaded_DoesNotHideIdentity)
+				return Sexlab.CountCumOral(PlayerRef)
+			Else
+				return 0
+			EndIf
+		EndIf
+		return Sexlab.CountCumOral(PlayerRef)
+	EndIf
+
+	return 0
 EndFunction
 
 Function CheckBondage()

@@ -449,6 +449,7 @@ Int Function GetFameValue(String LocationName, String FameCategory)
 	
 	If FameIndex < 0
 		Debug.MessageBox("SLSF Reloaded - Error: Fame Category " + FameCategory + " invalid")
+		SLSF_Reloaded_Logger.Log("<Data Manager> [GetFameValue] - ERROR: Fame Category " + FameCategory + " invalid")
 		return 0
 	EndIf
 	
@@ -539,7 +540,8 @@ Int Function GetFameValue(String LocationName, String FameCategory)
 		ElseIf CustomLocationIndex == 20
 			return CustomLocation21Fame[FameIndex]
 		Else
-			Debug.MessageBox("SLSF Reloaded - ERROR: Fame Value for " + LocationName + " not found!")
+			Debug.MessageBox("SLSF Reloaded - ERROR: " + FameCategory + " Fame Value for " + LocationName + " not found!")
+			SLSF_Reloaded_Logger.Log("<Data Manager> [GetFameValue] - ERROR: " + FameCategory + " Fame Value for " + LocationName + " not found!")
 		EndIf
 	EndIf
 	return 0
@@ -1460,7 +1462,7 @@ Bool Function GetExternalFlags(String FlagName)
 	ElseIf FlagName == "Airhead"
 		return ExternalFlags[24]
 	Else
-		Logger.Log("SLSF Reloaded Get External Flags: Flag Name " + FlagName + " not found.")
+		SLSF_Reloaded_Logger.Log("<Data Manager> [GetExternalFlags] - Flag Name " + FlagName + " not found.")
 		return False
 	EndIf
 EndFunction
@@ -1475,7 +1477,8 @@ Function RegisterExternalMod(String ModName)
 	EndIf
 	
 	If PluginFound == False
-		Debug.MessageBox("SLSF Reloaded External Mod Register Error: Plugin " + ModName + " not found. Mod not registered!")
+		;Debug.MessageBox("SLSF Reloaded External Mod Register Error: Plugin " + ModName + " not found. Mod not registered!")
+		SLSF_Reloaded_Logger.Log("<Data Manager> [RegisterExternalMod] - Plugin " + ModName + " not found. Mod not registered!")
 		return
 	EndIf
 	
@@ -1483,11 +1486,11 @@ Function RegisterExternalMod(String ModName)
 		If EmptyModIndex >= 0
 			ExternalMods[EmptyModIndex] = ModName
 		Else
-			Logger.Log("Cannot Add " + ModName + " to External Mod List. External Mod List full.")
+			SLSF_Reloaded_Logger.Log("<Data Manager> [RegisterExternalMod] - Cannot Add " + ModName + " to External Mod List. External Mod List full.")
 			return
 		EndIf
 	Else
-		Logger.Log("SLSF Reloaded External Mod Register: Mod " + ModName + " already registered. Skipping register function...")
+		SLSF_Reloaded_Logger.Log("<Data Manager> [RegisterExternalMod] - Mod " + ModName + " already registered. Skipping register function...")
 	EndIf
 EndFunction
 
@@ -1527,7 +1530,7 @@ Function UnregisterExternalMod(String ModName)
 	Int ModIndex = ExternalMods.Find(ModName)
 	
 	If ModIndex < 0
-		Logger.Log("SLSF Reloaded External Mod Unregister Error: Mod " + ModName + " not found in External Mod List. Mod unregister skipped...")
+		SLSF_Reloaded_Logger.Log("<Data Manager> [UnregisterExternalMod] - Mod " + ModName + " not found in External Mod List. Mod unregister skipped...")
 		return
 	Else
 		ExternalMods[ModIndex] = "-EMPTY-"
@@ -1572,7 +1575,7 @@ Bool Function GetModFlagState(String ModName, String FlagName)
 	Int ModIndex = ExternalMods.Find(ModName)
 	
 	If ModIndex < 0
-		Logger.Log("SLSF Reloaded Get Mod Flag State: Mod " + ModName + " not found.")
+		SLSF_Reloaded_Logger.Log("<Data Manager> [GetModFlagState] - Mod " + ModName + " not found.")
 		return False
 	EndIf
 	
@@ -1629,7 +1632,7 @@ Bool Function GetModFlagState(String ModName, String FlagName)
 	ElseIf FlagName == "Whore Event" || FlagName == "Sex Worker"
 		return SexWorkerFlags[ModIndex]
 	Else
-		Logger.Log("SLSF Reloaded Get Mod Flag State: Flag Name " + FlagName + " not found.")
+		SLSF_Reloaded_Logger.Log("<Data Manager> [GetModFlagState] - Flag Name " + FlagName + " not found.")
 		return False
 	EndIf
 EndFunction
@@ -1695,16 +1698,17 @@ Bool Function IsModRegistered(String ModName)
 	
 	If ModIndex < 0
 		return False
-	Else
-		return True
 	EndIf
+	
+	return True
 EndFunction
 
 Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
 	Int ModIndex = ExternalMods.Find(ModName)
 	
 	If ModIndex < 0
-		Debug.MessageBox("SLSF Reloaded External Flags Error: Cannot Set " + FlagName + " for " + ModName + ". " + ModName + " is not Registered with SLSF Reloaded.")
+		;Debug.MessageBox("SLSF Reloaded External Flags Error: Cannot Set " + FlagName + " for " + ModName + ". " + ModName + " is not Registered with SLSF Reloaded.")
+		SLSF_Reloaded_Logger.Log("<Data Manager> [SetExternalFlags] - Cannot Set " + FlagName + " for " + ModName + ". " + ModName + " is not Registered with SLSF Reloaded.")
 		return
 	EndIf
 	
@@ -1769,7 +1773,8 @@ Function SetExternalFlags(String ModName, String FlagName, Bool FlagValue)
 	ElseIf FlagName == "EnableAirhead"
 		EnableAirheadFlags[ModIndex] = FlagValue
 	Else
-		Debug.MessageBox("SLSF Reloaded - ERROR: External mod category " + FlagName + " is not valid!")
+		;Debug.MessageBox("SLSF Reloaded - ERROR: External mod category " + FlagName + " is not valid!")
+		SLSF_Reloaded_Logger.Log("<Data Manager> [SetExternalFlags] - External mod category " + FlagName + " is not valid!")
 	EndIf
 	
 	CheckFlags()
@@ -1998,10 +2003,11 @@ Function FameOverviewCheck()
 	Int TypeIndex = 0
 	Bool HasFameInLocation = False
 	While LocationIndex < LocationManager.DefaultLocation.Length
-		Logger.Log("FameOverviewCheck - Location: " + LocationManager.DefaultLocation[LocationIndex])
+		SLSF_Reloaded_Logger.Log("<Data Manager> [FameOverviewCheck] - Location: " + LocationManager.DefaultLocation[LocationIndex])
 		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
-			Logger.Log("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
+			SLSF_Reloaded_Logger.Log("<Data Manager> [FameOverviewCheck] - Fame Type: " + FameManager.FameType[TypeIndex])
 			If GetFameValue(LocationManager.DefaultLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
+				SLSF_Reloaded_Logger.Log("<Data Manager> [FameOverviewCheck] - Found Fame at this DEFAULT location!")
 				HasFameInLocation = True
 				Config.HasFameAtDefaultLocation[LocationIndex] = True
 			EndIf
@@ -2009,6 +2015,7 @@ Function FameOverviewCheck()
 		EndWhile
 		
 		If HasFameInLocation == False
+			SLSF_Reloaded_Logger.Log("<Data Manager> [FameOverviewCheck] - No Fame at this DEFAULT location...")
 			Config.HasFameAtDefaultLocation[LocationIndex] = False
 		EndIf
 		
@@ -2021,11 +2028,12 @@ Function FameOverviewCheck()
 	TypeIndex = 0
 	HasFameInLocation = False
 	
-	While LocationIndex < LocationManager.CustomLocation.Length
-		Logger.Log("FameOverviewCheck - Location: " + LocationManager.CustomLocation[LocationIndex])
+	While LocationIndex < LocationManager.SLSF_Reloaded_CustomLocationCount.GetValue() ;LocationManager.CustomLocation.Length
+		SLSF_Reloaded_Logger.Log("<Data Manager> [FameOverviewCheck] - Location: " + LocationManager.CustomLocation[LocationIndex])
 		While TypeIndex < FameManager.FameType.Length && HasFameInLocation == False
-			Logger.Log("FameOverviewCheck - Fame Type: " + FameManager.FameType[TypeIndex])
+			SLSF_Reloaded_Logger.Log("<Data Manager> [FameOverviewCheck] - Fame Type: " + FameManager.FameType[TypeIndex])
 			If GetFameValue(LocationManager.CustomLocation[LocationIndex], FameManager.FameType[TypeIndex]) > 0
+				SLSF_Reloaded_Logger.Log("<Data Manager> [FameOverviewCheck] - Found Fame at this CUSTOM location!")
 				HasFameInLocation = True
 				Config.HasFameAtCustomLocation[LocationIndex] = True
 			EndIf
@@ -2033,6 +2041,7 @@ Function FameOverviewCheck()
 		EndWhile
 		
 		If HasFameInLocation == False
+			SLSF_Reloaded_Logger.Log("<Data Manager> [FameOverviewCheck] - No Fame at this CUSTOM location...")
 			Config.HasFameAtCustomLocation[LocationIndex] = False
 		EndIf
 		

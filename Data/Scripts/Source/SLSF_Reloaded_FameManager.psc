@@ -21,7 +21,7 @@ Int[] Property CustomLocationDecayPauseTimer Auto
 Int Property DecayCountdown Auto Hidden
 Int Property SpreadCountdown Auto Hidden
 Int Property GainIterationMultiplier Auto Hidden
-Int Property DecayIterationMultiplier Auto Hidden
+;Int Property DecayIterationMultiplier Auto Hidden
 
 Keyword Property SLSF_Reloaded_NipplePiercing Auto
 Keyword Property SLSF_Reloaded_VaginalPiercing Auto
@@ -117,11 +117,14 @@ Function Startup()
 	DecayCountdown = 24
 	SpreadCountdown = 48
 	GainIterationMultiplier = 1
-	DecayIterationMultiplier = 1
+	;DecayIterationMultiplier = 1
+	
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [Startup] - Fame Manager Initialized!", Logger.CRITICAL)
 EndFunction
 
-Function UpdateFame(Int CountdownChange)
+Function UpdateFame(Int UpdateMultiplier = 1)
 	;Update countdown timers
+	;/
 	DecayCountdown -= CountdownChange
 	SpreadCountdown -= CountdownChange
 	
@@ -132,24 +135,25 @@ Function UpdateFame(Int CountdownChange)
 	EndWhile
 	
 	If DecayIterations >= 1
-		DecayIterationMultiplier = DecayIterations
-		DecayFame()
-	Else
-		DecayIterationMultiplier = 1
+		;DecayIterationMultiplier = DecayIterations
+		DecayFame(DecayIterations)
+	;Else
+	;	DecayIterationMultiplier = 1
 	EndIf
 	
 	If SpreadCountdown <= 0
 		SpreadCountdown += (Config.SpreadTimeNeeded) as Int ;Increase spread timer by time needed. Maintains carry-over time
 		SpreadFameRoll()
 	EndIf
+	/;
 	
 	;Multiply Fame Gains by the number of times NPC Scanning should have happened normally
-	GainIterationMultiplier = CountdownChange
+	GainIterationMultiplier = UpdateMultiplier
 	
-	Logger.Log("SLSF Reloaded Fame Manager - Anonymous Status: " + VisibilityManager.IsPlayerAnonymous())
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [UpdateFame] - Anonymous Status: " + VisibilityManager.IsPlayerAnonymous())
 	
 	If VisibilityManager.IsPlayerAnonymous() == False
-		Logger.Log("SLSF Reloaded Fame Manager - Run NPC Detect")
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [UpdateFame] - Run NPC Detect")
 		PlayerScript.RunNPCDetect()
 	EndIf
 	
@@ -158,16 +162,16 @@ Function UpdateFame(Int CountdownChange)
 		GainIterationMultiplier = 1
 	EndIf
 	
-	If DecayIterationMultiplier != 1
-		DecayIterationMultiplier = 1
-	EndIf
+	;If DecayIterationMultiplier != 1
+	;	DecayIterationMultiplier = 1
+	;EndIf
 	
 	;Update Individual Decay Pause Timers
 	Int LocationIndex = 0
 	While LocationIndex < LocationManager.DefaultLocation.Length
 		If DefaultLocationDecayPauseTimer[LocationIndex] > 0 && DefaultLocationCanDecay[LocationIndex] == False
 			Int CurrentDecayTimer = DefaultLocationDecayPauseTimer[LocationIndex]
-			Int NewDecayTimer = (CurrentDecayTimer - CountdownChange) as Int
+			Int NewDecayTimer = (CurrentDecayTimer - UpdateMultiplier) as Int
 			DefaultLocationDecayPauseTimer[LocationIndex] = NewDecayTimer
 		EndIf
 		If DefaultLocationDecayPauseTimer[LocationIndex] <= 0
@@ -181,7 +185,7 @@ Function UpdateFame(Int CountdownChange)
 	While LocationIndex < SLSF_Reloaded_CustomLocationCount.GetValue()
 		If CustomLocationDecayPauseTimer[LocationIndex] > 0 && CustomLocationCanDecay[LocationIndex] == False
 			Int CurrentDecayTimer = CustomLocationDecayPauseTimer[LocationIndex]
-			Int NewDecayTimer = (CurrentDecayTimer - CountdownChange) as Int
+			Int NewDecayTimer = (CurrentDecayTimer - UpdateMultiplier) as Int
 			CustomLocationDecayPauseTimer[LocationIndex] = NewDecayTimer
 		EndIf
 		If CustomLocationDecayPauseTimer[LocationIndex] <= 0
@@ -745,15 +749,15 @@ EndFunction
 Function FameGainRoll(String FameLocation, Bool CalledExternally = False, Bool FameFromFriend = False, Bool FameFromLover = False)
 	If LocationManager.IsLocationValid(FameLocation) == False
 		If CalledExternally == True
-			Logger.Log("SLSF Reloaded - External FameGainRoll - Location is Invalid")
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [FameGainRoll] - External FameGainRoll - Location is Invalid", Logger.WARNING)
 		Else
-			Logger.Log("SLSF Reloaded - FameGainRoll Function - Location is Invalid")
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [FameGainRoll] - Location is Invalid", Logger.WARNING)
 		EndIf
 		return
 	EndIf
 	
 	If VisibilityManager.IsPlayerAnonymous() == True
-		Logger.Log("SLSF Reloaded - FameGainRoll Function - Player is Anonymous")
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [FameGainRoll] - Player is Anonymous")
 		return
 	EndIf
 	
@@ -1220,7 +1224,7 @@ Function FameGainRoll(String FameLocation, Bool CalledExternally = False, Bool F
 	EndIf
 	
 	If PossibleFameCount == 0
-		Logger.Log("SLSF Reloaded - FameGainRoll Function - PossibleFameCount is Zero")
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [FameGainRoll] - PossibleFameCount is Zero")
 		return ;If none of the above categories are possible, end function
 	EndIf
 
@@ -1345,9 +1349,9 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 		LocationIndex = LocationManager.CustomLocation.Find(LocationName)
 		
 		If LocationIndex < 0
-			;Still could not find Location Index. Location must not exist.
+			;Still could not find Location Index. Location must not exist. This is a problem because a non-existant location was somehow passed to this function.
 			Debug.MessageBox("SLSF Reloaded - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!")
-			Logger.Log("SLSF Reloaded - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!", True)
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [GainFame] - ERROR: Could not find " + LocationName + " in Default or Custom Location lists!", Logger.ERROR)
 			return
 		Else
 			CustomLocationCanDecay[LocationIndex] = False
@@ -1367,7 +1371,7 @@ Function GainFame(String Category, String LocationName, Bool IsForeplay)
 	EndIf
 EndFunction
 
-Function DecayFame()
+Function DecayFame(Int DecayMultiplier = 1)
 	Int FameDecay = 0
 	Int LocationIndex = 0
 	Int TypeIndex = 0
@@ -1393,7 +1397,7 @@ Function DecayFame()
 				
 				If PreviousFame > 0
 					If PreviousFame >= 100
-						FameDecay = ((Utility.RandomInt(DecayVeryHigh,-1)* FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayVeryHigh,-1)* FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1401,7 +1405,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					ElseIf PreviousFame >= 75
-						FameDecay = ((Utility.RandomInt(DecayHigh,-1) * FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayHigh,-1) * FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1409,7 +1413,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					ElseIf PreviousFame >= 50
-						FameDecay = ((Utility.RandomInt(DecayMedium,-1) * FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayMedium,-1) * FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1417,7 +1421,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					ElseIf PreviousFame >= 25
-						FameDecay = ((Utility.RandomInt(DecayLow,-1) * FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayLow,-1) * FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1425,7 +1429,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.DefaultLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					Else
-						FameDecay = ((Utility.RandomInt(DecayVeryLow,-1) * FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((Utility.RandomInt(DecayVeryLow,-1) * FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1461,7 +1465,7 @@ Function DecayFame()
 				
 				If PreviousFame > 0
 					If PreviousFame >= 100
-						FameDecay = ((-1 * FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((-1 * FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1469,7 +1473,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					ElseIf PreviousFame >= 75
-						FameDecay = ((Utility.RandomInt(-2,-1) * FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((Utility.RandomInt(-2,-1) * FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1477,7 +1481,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					ElseIf PreviousFame >= 50
-						FameDecay = ((Utility.RandomInt(-3,-1) * FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((Utility.RandomInt(-3,-1) * FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1485,7 +1489,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					ElseIf PreviousFame >= 25
-						FameDecay = ((Utility.RandomInt(-4,-1) * FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((Utility.RandomInt(-4,-1) * FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1493,7 +1497,7 @@ Function DecayFame()
 						Data.SetFameValue(LocationManager.CustomLocation[LocationIndex], FameType[TypeIndex], NewFame)
 						DecayNotificationMakesSense = True
 					Else
-						FameDecay = ((Utility.RandomInt(-5,-1) * FameMultiplier) as Int) * DecayIterationMultiplier
+						FameDecay = ((Utility.RandomInt(-5,-1) * FameMultiplier) as Int) * DecayMultiplier
 						If FameDecay > -1
 							FameDecay = -1
 						EndIf
@@ -1537,7 +1541,7 @@ Function SpreadFameRoll()
 				SpreadFame(LocationManager.DefaultLocation[LocationIndex])
 				Config.DefaultLocationSpreadChance[LocationIndex] = (Config.DefaultLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 			ElseIf SpreadChance > 100 || SpreadChance < 0
-				Logger.Log("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+				SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFameRoll] WARNING - Fame Spread Chance for " + LocationManager.DefaultLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.", Logger.WARNING)
 				Config.DefaultLocationSpreadChance[LocationIndex] = 30
 			Else
 				FameSpreadRoll = Utility.RandomInt(1, 100)
@@ -1572,7 +1576,7 @@ Function SpreadFameRoll()
 				SpreadFame(LocationManager.CustomLocation[LocationIndex])
 				Config.CustomLocationSpreadChance[LocationIndex] = (Config.CustomLocationSpreadChance[LocationIndex] - Config.SuccessfulSpreadReduction) as Int
 			ElseIf SpreadChance > 100 || SpreadChance < 0
-				Logger.Log("SLSF Reloaded: WARNING - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.")
+				SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFameRoll] WARNING - Fame Spread Chance for " + LocationManager.CustomLocation[LocationIndex] + " is outside valid range (0-100). It will be reset to 30.", Logger.WARNING)
 				Config.CustomLocationSpreadChance[LocationIndex] = 30
 			Else
 				FameSpreadRoll = Utility.RandomInt(1, 100)
@@ -1597,7 +1601,7 @@ Function SpreadFameRoll()
 EndFunction
 
 Function SpreadFame(String SpreadFromLocation)
-	Logger.Log("Fame Spread From: " + SpreadFromLocation)
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Fame Spread From: " + SpreadFromLocation)
 	
 	;Grab all fame values above the configured threshold from the source Location. If none exist, cancel fame spread operation
 	Int SpreadableFame = 0
@@ -1609,20 +1613,20 @@ Function SpreadFame(String SpreadFromLocation)
 	While PossibleFameSpreadIndex < FameType.Length
 		SpreadableFame = Data.GetFameValue(SpreadFromLocation, FameType[PossibleFameSpreadIndex])
 		
-		Logger.Log("SLSF Reloaded - Checking " + FameType[PossibleFameSpreadIndex] + " Fame. Fame Value is: " + SpreadableFame)
-		Logger.Log("SLSF Reloaded - Fame value requirement is: " + Config.MinimumFameToSpread)
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Checking " + FameType[PossibleFameSpreadIndex] + " Fame. Fame Value is: " + SpreadableFame)
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Fame value requirement is: " + Config.MinimumFameToSpread)
 		
 		If SpreadableFame >= Config.MinimumFameToSpread
 			PossibleFameSpreadCategories += 1
 			PossibleCategoryList[(PossibleFameSpreadCategories - 1)] = FameType[PossibleFameSpreadIndex]
 			
-			Logger.Log("SLSF Reloaded - Possible Spread Category: " + PossibleCategoryList[(PossibleFameSpreadCategories - 1)] + " added to list.")
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Possible Spread Category: " + PossibleCategoryList[(PossibleFameSpreadCategories - 1)] + " added to list.")
 		EndIf
 		PossibleFameSpreadIndex += 1
 	EndWhile
 	
 	If PossibleFameSpreadCategories == 0
-		Logger.Log("SLSF Reloaded - No Spreadable Categories found for " + SpreadFromLocation + ". Fame Spread Skipped.")
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] WARNING - No Spreadable Categories found for " + SpreadFromLocation + ". Fame Spread Skipped.", Logger.WARNING)
 		return
 	EndIf
 	
@@ -1645,7 +1649,7 @@ Function SpreadFame(String SpreadFromLocation)
 	
 	If Config.FameSpreadRestrictions == True
 	
-		Logger.Log("SLSF Reloaded - Fame Spread Restrictions Enabled")
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Fame Spread Restrictions Enabled")
 		
 		If SpreadFromLocation == "Whiterun"
 			
@@ -2189,7 +2193,7 @@ Function SpreadFame(String SpreadFromLocation)
 			
 			TotalLocations = PossibleLocationIndex
 		Else
-			Logger.Log("SLSF Reloaded - Spreading Fame From Custom Location")
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Spreading Fame From Custom Location")
 			
 			If LocationManager.WhiterunLocationList.Find(SpreadFromLocation) >= 0
 				PossibleSpreadTargets[0] = "Whiterun"
@@ -2412,7 +2416,7 @@ Function SpreadFame(String SpreadFromLocation)
 			Else
 				SpreadingFromUndefinedLocation = True
 				
-				Logger.Log("SLSF Reloaded - Custom Location is UNDEFINED. Falling back to default Fame Spread method")
+				SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Custom Location " + SpreadFromLocation + " is UNDEFINED. Falling back to default Fame Spread method", Logger.WARNING)
 			EndIf
 		EndIf
 	EndIf
@@ -2427,7 +2431,7 @@ Function SpreadFame(String SpreadFromLocation)
 				PossibleSpreadTargets[PossibleLocationIndex] = LocationManager.CustomLocation[CustomLocationIndex]
 				CustomLocationIndex += 1
 			EndIf
-			Logger.Log("SLSF Reloaded - PossibleSpreadTargets[" + PossibleLocationIndex + "]: " + PossibleSpreadTargets[PossibleLocationIndex])
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - PossibleSpreadTargets[" + PossibleLocationIndex + "]: " + PossibleSpreadTargets[PossibleLocationIndex])
 			PossibleLocationIndex += 1
 		EndWhile
 	EndIf
@@ -2436,36 +2440,36 @@ Function SpreadFame(String SpreadFromLocation)
 	While TargetLocationValid == False
 		TargetLocationIndex = Utility.RandomInt(0, (TotalLocations - 1))
 		
-		Logger.Log("SLSF Reloaded - Target Location Roll (Index): " + TargetLocationIndex)
-		Logger.Log("SLSF Reloaded - Target Location: " + PossibleSpreadTargets[TargetLocationIndex])
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Target Location Roll (Index): " + TargetLocationIndex)
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Target Location: " + PossibleSpreadTargets[TargetLocationIndex])
 		
 		If SpreadFromLocation != PossibleSpreadTargets[TargetLocationIndex] ;ensure we are not trying to spread to the original location
-			Logger.Log("SLSF Reloaded - Target Location Valid!")
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Target Location Valid!")
 			TargetLocationValid = True
 		Else
-			Logger.Log("SLSF Reloaded - Target Location NOT Valid. Rolling again...")
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Target Location NOT Valid. Rolling again...")
 		EndIf
 	EndWhile
 	
-	Logger.Log("SLSF Reloaded - Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Fame Spread Target: " + PossibleSpreadTargets[TargetLocationIndex])
 	
 	;When valid target is found, randomize how many fame categories are spread and by how much, based on config values.
 	Int NumberOfCategoriesToSpread = 0
 	;Float CategorySpreadPercentage = 0.0
 	
 	If Config.MaximumSpreadCategories > 1 && PossibleFameSpreadCategories > 1
-		Logger.Log("SLSF Reloaded - More than 1 category can be spread.")
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - More than 1 category can be spread.")
 		If Config.MaximumSpreadCategories < PossibleFameSpreadCategories
 			NumberOfCategoriesToSpread = Utility.RandomInt(1, (Config.MaximumSpreadCategories as Int))
-			Logger.Log("SLSF Reloaded - More categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
-			Logger.Log("SLSF Reloaded - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - More categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
 		Else
 			NumberOfCategoriesToSpread = Utility.RandomInt(1, PossibleFameSpreadCategories)
-			Logger.Log("SLSF Reloaded - Fewer or equal categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
-			Logger.Log("SLSF Reloaded - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Fewer or equal categories can be spread than allowed. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
+			SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Chose to spread " + NumberOfCategoriesToSpread + " categories.")
 		EndIf
 	Else
-		Logger.Log("SLSF Reloaded - Only 1 category can be spread. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Only 1 category can be spread. Allowed: " + Config.MaximumSpreadCategories + ". Possible: " + PossibleFameSpreadCategories)
 		NumberOfCategoriesToSpread = 1
 	EndIf
 	
@@ -2477,7 +2481,7 @@ Function SpreadFame(String SpreadFromLocation)
 	Int CategoryRoll = 0
 	
 	If PossibleFameSpreadCategories == 1
-		Logger.Log("SLSF Reloaded - Only 1 possible fame spread category: " + PossibleCategoryList[0])
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Only 1 possible fame spread category: " + PossibleCategoryList[0])
 		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[0])
 		
 		FromFameValue = Data.GetFameValue(SpreadFromLocation, PossibleCategoryList[0])
@@ -2489,11 +2493,11 @@ Function SpreadFame(String SpreadFromLocation)
 			NewFame = 150
 		EndIf
 		
-		Logger.Log("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Set Fame: Location = " + PossibleSpreadTargets[TargetLocationIndex] + " | Category = " + PossibleCategoryList[CategoryRoll] + " | Value = " + NewFame)
 		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[0], NewFame)
 	ElseIf NumberOfCategoriesToSpread == 1
 		CategoryRoll = Utility.RandomInt(0, (PossibleFameSpreadCategories - 1))
-		Logger.Log("SLSF Reloaded - Only chose to spread 1 category. Chose: " + PossibleCategoryList[CategoryRoll] + " from the possible list.")
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Only chose to spread 1 category. Chose: " + PossibleCategoryList[CategoryRoll] + " from the possible list.")
 		
 		TargetFameValue = Data.GetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll])
 		
@@ -2505,10 +2509,10 @@ Function SpreadFame(String SpreadFromLocation)
 			NewFame = 150
 		EndIf
 		
-		Logger.Log("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Set Fame: Location = " + PossibleSpreadTargets[TargetLocationIndex] + " | Category = " + PossibleCategoryList[CategoryRoll] + " | Value = " + NewFame)
 		Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
 	ElseIf NumberOfCategoriesToSpread == Config.MaximumSpreadCategories
-		Logger.Log("SLSF Reloaded - Chose to spread maximum possible categories. Maximum is: " + Config.MaximumSpreadCategories)
+		SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Chose to spread maximum possible categories. Maximum is: " + Config.MaximumSpreadCategories)
 		
 		Int TimesRolled = 0
 		Bool FirstRoll = True
@@ -2547,7 +2551,7 @@ Function SpreadFame(String SpreadFromLocation)
 					NewFame = 150
 				EndIf
 				
-				Logger.Log("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
+				SLSF_Reloaded_Logger.Log("<Fame Manager> [SpreadFame] - Set Fame: Location = " + PossibleSpreadTargets[TargetLocationIndex] + " | Category = " + PossibleCategoryList[CategoryRoll] + " | Value = " + NewFame)
 				Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
 				
 				SuccessfulFameSpreads += 1
@@ -2593,7 +2597,7 @@ Function SpreadFame(String SpreadFromLocation)
 					NewFame = 150
 				EndIf
 				
-				Logger.Log("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
+				SLSF_Reloaded_Logger.Log("Set Fame: " + PossibleSpreadTargets[TargetLocationIndex] + ", " + PossibleCategoryList[CategoryRoll] + ", " + NewFame)
 				Data.SetFameValue(PossibleSpreadTargets[TargetLocationIndex], PossibleCategoryList[CategoryRoll], NewFame)
 				
 				SuccessfulFameSpreads += 1
@@ -2629,21 +2633,21 @@ EndFunction
 
 Int Function CalculateFameSpread(Float FromFame, Float TargetFame) ;These must be floats for calculation purposes
 	Int MaxRoll = (Config.MaximumSpreadPercentage as Int) / 10 ;Result should be 1, 2, 3, 4, or 5
-	Logger.Log("SLSF Reloaded Fame Spread Calculation - Max Roll is: " + MaxRoll)
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [CalculateFameSpread] - Max Roll is: " + MaxRoll)
 	Int SpreadRoll = 1
 	
 	If MaxRoll > 1 ;If MaxRoll is 1, then roll doesn't matter
 		SpreadRoll = Utility.RandomInt(1, MaxRoll)
 	EndIf
 	
-	Logger.Log("SLSF Reloaded Fame Spread Calculation - Spread Roll is: " + SpreadRoll)
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [CalculateFameSpread] - Spread Roll is: " + SpreadRoll)
 	
 	Float Percentage = ((SpreadRoll as Float) / 10) ;Result should be 0.1, 0.2, 0.3, 0.4, or 0.5 (10%, 20%, 30%, 40%, or 50%) based on roll. Must cast SpreadRoll as Float for calculation purposes
-	Logger.Log("SLSF Reloaded Fame Spread Calculation - Percentage is: " + Percentage)
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [CalculateFameSpread] - Percentage is: " + Percentage)
 	Float SpreadValue = (FromFame * Percentage) ;Result should be a percentage of fame from the spreading location. Minimum should be 1
-	Logger.Log("SLSF Reloaded Fame Spread Calculation - From Fame is: " + FromFame + ". Spread Value is: " + SpreadValue)
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [CalculateFameSpread] - From Fame is: " + FromFame + ". Spread Value is: " + SpreadValue)
 	Int FinalFame = (TargetFame + SpreadValue) as Int
-	Logger.Log("SLSF Reloaded Fame Spread Calculation - Target Fame is: " + TargetFame + ". Final Fame is: " + FinalFame)
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [CalculateFameSpread] - Target Fame is: " + TargetFame + ". Final Fame is: " + FinalFame)
 	
 	return FinalFame
 EndFunction
@@ -2658,7 +2662,7 @@ Function ClearFame(String LocationToClear)
 		Data.SetFameValue(LocationToClear, FameType[TypeIndex], 0)
 		TypeIndex += 1
 	EndWhile
-	Logger.Log(LocationToClear + " fame has been cleared.")
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [ClearFame] - " + LocationToClear + " fame has been cleared.")
 EndFunction
 
 Function ClearAllFame()
@@ -2715,7 +2719,8 @@ Function ClearAllFame()
 		LegacyOverwrite.OverwriteLegacyFame()
 	EndIf
 	
-	Debug.MessageBox("All fame has been cleared.")
+	SLSF_Reloaded_Logger.Log("<Fame Manager> [ClearAllFame] - All fame has been cleared.")
+	Debug.MessageBox("SLSFR - All fame has been cleared.")
 EndFunction
 
 Function UpdateGlobals()

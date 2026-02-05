@@ -34,12 +34,12 @@ GlobalVariable Property SLSF_Reloaded_CustomLocationCount Auto
 
 Event OnInit()
 	RegisterForUpdateGameTime(1.0)
-	Logger.Log("SLSF Reloaded - Dynamic Anonymity Script Initialized", True)
+	SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [OnInit] - Dynamic Anonymity Script Initialized", Logger.CRITICAL)
 EndEvent
 
 Event OnUpdateGameTime()
 	If Config.DynamicAnonymity == False
-		Logger.Log("SLSF Reloaded - Dynamic Anonymity is disabled")
+		SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [OnUpdateGameTime] - Dynamic Anonymity is disabled")
 		return
 	EndIf
 	
@@ -68,7 +68,7 @@ Function CompareLocations(Location OldLocation, Location NewLocation)
 	String NewFameLocation = LocationManager.GetFameLocation(NewLocation)
 	Float CurrentGameTime = Utility.GetCurrentGameTime()
 	
-	Logger.Log("SLSF Reloaded - Dynamic Anonymity: Comparing Locations. Old Location: " + OldFameLocation + ". New Location: " + NewFameLocation)
+	SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CompareLocations] - Comparing Locations. Old Location: " + OldFameLocation + ". New Location: " + NewFameLocation)
 	
 	If OldFameLocation != "Null" && OldFameLocation != NewFameLocation
 		SetLastExitTime(OldFameLocation, CurrentGameTime)
@@ -86,7 +86,7 @@ Function SetLastExitTime(String FameLocation, Float GameTime)
 	
 	If LocationIndex >= 0
 		DefaultLocationLastExitTime[LocationIndex] = GameTime
-		Logger.Log("SLSF Reloaded - Last Exit Time for " + FameLocation + " set to " + GameTime)
+		SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [SetLastExitTime] - Last Exit Time for " + FameLocation + " set to " + GameTime)
 		return
 	EndIf
 	
@@ -95,12 +95,13 @@ Function SetLastExitTime(String FameLocation, Float GameTime)
 		
 		If LocationIndex >= 0
 			CustomLocationLastExitTime[LocationIndex] = GameTime
-			Logger.Log("SLSF Reloaded - Last Exit Time for " + FameLocation + " set to " + GameTime)
+			SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [SetLastExitTime] - Last Exit Time for " + FameLocation + " set to " + GameTime)
 			return
 		EndIf
 	EndIf
 	
 	Debug.Messagebox("SLSF Reloaded - Dynamic Anonymity SetLastExitTime Fame Location ERROR. Could not find Fame Location: " + FameLocation)
+	SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [SetLastExitTime] ERROR - Could not find Fame Location: " + FameLocation)
 EndFunction
 
 Function SetLastEnterTime(String FameLocation, Float GameTime)
@@ -108,7 +109,7 @@ Function SetLastEnterTime(String FameLocation, Float GameTime)
 	
 	If LocationIndex >= 0
 		DefaultLocationLastEnterTime[LocationIndex] = GameTime
-		Logger.Log("SLSF Reloaded - Last Enter Time for " + FameLocation + " set to " + GameTime)
+		SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [SetLastEnterTime] - Last Enter Time for " + FameLocation + " set to " + GameTime)
 		return
 	EndIf
 	
@@ -117,12 +118,13 @@ Function SetLastEnterTime(String FameLocation, Float GameTime)
 		
 		If LocationIndex >= 0
 			CustomLocationLastEnterTime[LocationIndex] = GameTime
-			Logger.Log("SLSF Reloaded - Last Enter Time for " + FameLocation + " set to " + GameTime)
+			SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [SetLastEnterTime] - Last Enter Time for " + FameLocation + " set to " + GameTime)
 			return
 		EndIf
 	EndIf
 	
 	Debug.Messagebox("SLSF Reloaded - Dynamic Anonymity SetLastEnterTime Fame Location ERROR. Could not find Fame Location: " + FameLocation)
+	SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [SetLastEnterTime] ERROR - Could not find Fame Location: " + FameLocation)
 EndFunction
 
 ;NOTE - Check Recognition Time Increase when player EXITS a location
@@ -133,27 +135,27 @@ Function CheckRecognitionTimeIncrease(String FameLocation)
 	If LocationIndex >= 0
 		TimeSpentInLocation = DefaultLocationLastExitTime[LocationIndex] - DefaultLocationLastEnterTime[LocationIndex]
 		If TimeSpentInLocation < 0.125 && DefaultLocationLocalAnonymityFlag[LocationIndex] == True
-			Logger.Log("SLSF Reloaded - Time Spent in " + FameLocation + " is too short. No Recognition Increase.")
+			SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeIncrease] - Time Spent in " + FameLocation + " is too short. No Recognition Increase.")
 			return
 		Else
 			If DefaultLocationLocalAnonymityFlag[LocationIndex] == True || DefaultLocationLocalAnonymityStartedAsTrue[LocationIndex] == True
 				DefaultLocationLocalAnonymityFlag[LocationIndex] = False ;Can't be Anonymous
 				DefaultLocationLocalAnonymityStartedAsTrue[LocationIndex] = False
-				Logger.Log("SLSF Reloaded - Anonymity for " + LocationManager.DefaultLocation[LocationIndex] + " has been lost.")
+				SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeIncrease] - Anonymity for " + LocationManager.DefaultLocation[LocationIndex] + " has been lost.")
 				
 				DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] + (TimeSpentInLocation - 0.125)
 				If DefaultLocationRecognitionTime[LocationIndex] > 365
 					DefaultLocationRecognitionTime[LocationIndex] = 365
 				EndIf
 				
-				Logger.Log("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+				SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeIncrease] - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
 			Else
 				DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] + TimeSpentInLocation
 				If DefaultLocationRecognitionTime[LocationIndex] > 365
 					DefaultLocationRecognitionTime[LocationIndex] = 365
 				EndIf
 				
-				Logger.Log("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+				SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeIncrease] - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
 			EndIf
 		EndIf
 		return
@@ -163,27 +165,27 @@ Function CheckRecognitionTimeIncrease(String FameLocation)
 		If LocationIndex >= 0
 			TimeSpentInLocation = CustomLocationLastExitTime[LocationIndex] - CustomLocationLastEnterTime[LocationIndex]
 			If TimeSpentInLocation < 0.125 && CustomLocationLocalAnonymityFlag[LocationIndex] == True
-				Logger.Log("SLSF Reloaded - Time Spent in " + FameLocation + " is too short. No Recognition Increase.")
+				SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeIncrease] - Time Spent in " + FameLocation + " is too short. No Recognition Increase.")
 				return
 			Else
 				If CustomLocationLocalAnonymityFlag[LocationIndex] == True || CustomLocationLocalAnonymityStartedAsTrue[LocationIndex] == True
 					CustomLocationLocalAnonymityFlag[LocationIndex] = False
 					CustomLocationLocalAnonymityStartedAsTrue[LocationIndex] = False
-					Logger.Log("SLSF Reloaded - Anonymity for " + LocationManager.CustomLocation[LocationIndex] + " has been lost.")
+					SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeIncrease] - Anonymity for " + LocationManager.CustomLocation[LocationIndex] + " has been lost.")
 					
 					CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] + (TimeSpentInLocation - 0.125)
 					If CustomLocationRecognitionTime[LocationIndex] > 365
 						CustomLocationRecognitionTime[LocationIndex] = 365
 					EndIf
 					
-					Logger.Log("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+					SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeIncrease] - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
 				Else
 					CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] + TimeSpentInLocation
 					If CustomLocationRecognitionTime[LocationIndex] > 365
 						CustomLocationRecognitionTime[LocationIndex] = 365
 					EndIf
 					
-					Logger.Log("SLSF Reloaded - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+					SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeIncrease] - Recognition time INCREASED! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
 				EndIf
 			EndIf
 			return
@@ -191,6 +193,7 @@ Function CheckRecognitionTimeIncrease(String FameLocation)
 	EndIf
 	
 	Debug.Messagebox("SLSF Reloaded - Dynamic Anonymity CheckRecognitionTimeIncrease Fame Location ERROR. Could not find Fame Location: " + FameLocation)
+	SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeIncrease] ERROR - Could not find Fame Location: " + FameLocation)
 EndFunction
 
 ;NOTE - Check Recognition Time Decay when player ENTERS a location
@@ -209,16 +212,16 @@ Function CheckRecognitionTimeDecay(String FameLocation)
 				DefaultLocationRecognitionTime[LocationIndex] = 7
 			EndIf
 			
-			Logger.Log("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
-			Logger.Log("SLSF Reloaded - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
+			SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeDecay] - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+			SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeDecay] - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
 		ElseIf DefaultLocationLocalAnonymityFlag[LocationIndex] == True
 			DefaultLocationRecognitionTime[LocationIndex] = DefaultLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - DefaultLocationRecognitionTime[LocationIndex])
 			If DefaultLocationRecognitionTime[LocationIndex] < 7
 				DefaultLocationRecognitionTime[LocationIndex] = 7
 			EndIf
 			
-			Logger.Log("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
-			Logger.Log("SLSF Reloaded - Anonymity for " + FameLocation + " was already possible.")
+			SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeDecay] - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + DefaultLocationRecognitionTime[LocationIndex])
+			SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeDecay] - Anonymity for " + FameLocation + " was already possible.")
 		EndIf
 		return
 	ElseIf SLSF_Reloaded_CustomLocationCount.GetValue() as Int > 0
@@ -235,34 +238,35 @@ Function CheckRecognitionTimeDecay(String FameLocation)
 					CustomLocationRecognitionTime[LocationIndex] = 7
 				EndIf
 				
-				Logger.Log("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
-				Logger.Log("SLSF Reloaded - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
+				SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeDecay] - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+				SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeDecay] - Anonymity for " + FameLocation + " is now possible if their fame is low enough.")
 			ElseIf CustomLocationLocalAnonymityFlag[LocationIndex] == True
 				CustomLocationRecognitionTime[LocationIndex] = CustomLocationRecognitionTime[LocationIndex] - (TimeSinceLastVisit - CustomLocationRecognitionTime[LocationIndex])
 				If CustomLocationRecognitionTime[LocationIndex] < 7
 					CustomLocationRecognitionTime[LocationIndex] = 7
 				EndIf
 				
-				Logger.Log("SLSF Reloaded - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
-				Logger.Log("SLSF Reloaded - Anonymity for " + FameLocation + " was already possible.")
+				SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeDecay] - Recognition time DECAY! Recognition Time for " + FameLocation + " is now " + CustomLocationRecognitionTime[LocationIndex])
+				SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeDecay] - Anonymity for " + FameLocation + " was already possible.")
 			EndIf
 		EndIf
 		return
 	EndIf
 	
 	Debug.Messagebox("SLSF Reloaded - Dynamic Anonymity CheckRecognitionTimeDecay Fame Location ERROR. Could not find Fame Location: " + FameLocation)
+	SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [CheckRecognitionTimeDecay] ERROR - Could not find Fame Location: " + FameLocation)
 EndFunction
 
 Function UpdateCurrentLocationAnonymity(Int LocationIndex, Float GameTime, Bool IsDefaultLocation)
 	If IsDefaultLocation == True
 		If GameTime - DefaultLocationLastEnterTime[LocationIndex] >= 0.125
 			DefaultLocationLocalAnonymityFlag[LocationIndex] = False ;Can't be Anonymous
-			Logger.Log("SLSF Reloaded - Anonymity for " + LocationManager.DefaultLocation[LocationIndex] + " has been lost.")
+			SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [UpdateCurrentLocationAnonymity] - Anonymity for " + LocationManager.DefaultLocation[LocationIndex] + " has been lost.")
 		EndIf
 	Else
 		If GameTime - CustomLocationLastEnterTime[LocationIndex] >= 0.125
 			CustomLocationLocalAnonymityFlag[LocationIndex] = False ;Can't be Anonymous
-			Logger.Log("SLSF Reloaded - Anonymity for " + LocationManager.CustomLocation[LocationIndex] + " has been lost.")
+			SLSF_Reloaded_Logger.Log("<Dynamic Anonymity> [UpdateCurrentLocationAnonymity] - Anonymity for " + LocationManager.CustomLocation[LocationIndex] + " has been lost.")
 		EndIf
 	EndIf
 EndFunction

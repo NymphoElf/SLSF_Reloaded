@@ -101,7 +101,7 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 		EndIf
 	Else
 		If CustomLocationsFull == True
-			Logger.Log("SLSF Reloaded (External Mod Event) - Cannot Register " + LocationToRegister + ". Custom Location List is Full.", True)
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded (External Mod Event) - Cannot Register " + LocationToRegister + ". Custom Location List is Full.", Logger.CRITICAL)
 			return False
 		EndIf
 		
@@ -109,11 +109,11 @@ Bool Function LocationCanBeRegistered(String LocationToRegister, Bool ExternalRe
 			If IsLocationValid(LocationToRegister) == False
 				return True
 			Else
-				Logger.Log("SLSF Reloaded (External Mod Event) - Location is already registered.", True)
+				SLSF_Reloaded_Logger.Log("SLSF Reloaded (External Mod Event) - Location is already registered.", Logger.CRITICAL)
 				return False
 			EndIf
 		Else
-			Logger.Log("SLSF Reloaded (External Mod Event) - Cannot register " + LocationToRegister + ". Location is invalid.", True)
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded (External Mod Event) - Cannot register " + LocationToRegister + ". Location is invalid.", Logger.CRITICAL)
 			return False
 		EndIf
 	EndIf
@@ -312,6 +312,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			WhiterunLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Whiterun Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Whiterun Location List is FULL. This should not be possible!")
 		EndIf
 	ElseIf MajorLocations[1].IsChild(LocationRef)
@@ -319,6 +320,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			WinterholdLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Winterhold Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Winterhold Location List is FULL. This should not be possible!")
 		EndIf
 	ElseIf MajorLocations[2].IsChild(LocationRef)
@@ -326,6 +328,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			EastmarchLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Eastmarch Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Eastmarch Location List is FULL. This should not be possible!")
 		EndIf
 	ElseIf MajorLocations[3].IsChild(LocationRef)
@@ -333,6 +336,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			HaafingarLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Haafingar Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Haafingar Location List is FULL. This should not be possible!")
 		EndIf
 	ElseIf MajorLocations[4].IsChild(LocationRef)
@@ -340,6 +344,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			RiftLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Rift Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Rift Location List is FULL. This should not be possible!")
 		EndIf
 	ElseIf MajorLocations[5].IsChild(LocationRef)
@@ -347,6 +352,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			ReachLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Reach Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Reach Location List is FULL. This should not be possible!")
 		EndIf
 	ElseIf MajorLocations[6].IsChild(LocationRef)
@@ -354,6 +360,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			HjaalmarchLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Hjaalmarch Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Hjaalmarch Location List is FULL. This should not be possible!")
 		EndIf
 	ElseIf MajorLocations[7].IsChild(LocationRef)
@@ -361,6 +368,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			PaleLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Pale Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Pale Location List is FULL. This should not be possible!")
 		EndIf
 	ElseIf MajorLocations[8].IsChild(LocationRef)
@@ -368,6 +376,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			FalkreathLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Falkreath Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Falkreath Location List is FULL. This should not be possible!")
 		EndIf
 	ElseIf SolstheimLocation.IsChild(LocationRef)
@@ -375,6 +384,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			SolstheimLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Solstheim Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Solstheim Location List is FULL. This should not be possible!")
 		EndIf
 	Else
@@ -382,6 +392,7 @@ Function AddToLocationList(Location LocationRef)
 		If ListIndex >= 0
 			UndefinedLocationList[ListIndex] = LocationName
 		Else
+			SLSF_Reloaded_Logger.Log("SLSF Reloaded CRITICAL ERROR: Undefined Location List is FULL. This should not be possible!", Logger.CRITICAL)
 			Debug.MessageBox("SLSF Reloaded CRITICAL ERROR: Undefined Location List is FULL. This should not be possible!")
 		EndIf
 	EndIf
@@ -567,12 +578,12 @@ Function RegisterCustomLocationExternal(String LocationToRegister, Location Loca
 	Bool EmptyIndexFound = False
 	
 	If CustomLocationsFull == True
-		Logger.Log("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location List is Full.", True)
+		SLSF_Reloaded_Logger.Log("<Location Manager> [RegisterCustomLocationExternal] - Cannot Register Custom Location. Custom Location List is Full.", Logger.CRITICAL)
 		return
 	EndIf
 	
 	If IsLocationExcluded(LocationRefToRegister) == True
-		Logger.Log("SLSF Reloaded (External Mod Event) - Cannot Register Custom Location. Custom Location is EXCLUDED.", True)
+		SLSF_Reloaded_Logger.Log("<Location Manager> [RegisterCustomLocationExternal] - Cannot Register Custom Location. Custom Location is EXCLUDED.", Logger.CRITICAL)
 		return
 	EndIf
 	
@@ -582,7 +593,7 @@ Function RegisterCustomLocationExternal(String LocationToRegister, Location Loca
 		CustomLocation[EmptyIndex] = LocationToRegister
 		CustomLocationRef[EmptyIndex] = LocationRefToRegister
 	Else
-		Logger.Log("SLSF Reloaded (External Mod Event) ERROR - Empty Location Index not found despite other checks allowing registration. Location Registration Failed.", True)
+		SLSF_Reloaded_Logger.Log("<Location Manager> [RegisterCustomLocationExternal] ERROR - Empty Location Index not found despite other checks allowing registration. Location Registration Failed.", Logger.CRITICAL)
 		return
 	EndIf
 	
@@ -605,7 +616,7 @@ Function UnregisterCustomLocationExternal(String LocationToUnregister)
 	EndWhile
 	
 	If LocationFound == False
-		Logger.Log("SLSF Reloaded - UnregisterCustomLocationExternal - Could not find " + LocationToUnregister + " to Unregister.")
+		SLSF_Reloaded_Logger.Log("<Location Manager> [UnregisterCustomLocationExternal] - UnregisterCustomLocationExternal - Could not find " + LocationToUnregister + " to Unregister.")
 	Else
 		Debug.Notification("$CustomLocationUnregisterCompleteMSG")
 	EndIf
