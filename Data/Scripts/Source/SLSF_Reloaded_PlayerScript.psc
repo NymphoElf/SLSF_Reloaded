@@ -19,8 +19,8 @@ Bool Property WaitingOnVisibilityManager = False Auto Hidden
 
 Spell Property NPCScanSpell Auto
 
+GlobalVariable Property SLSF_AllowComment Auto
 GlobalVariable Property SLSF_Reloaded_NPCScanSucess Auto
-
 GlobalVariable Property SLSF_Reloaded_Skooma Auto
 
 Event OnInit()
@@ -28,15 +28,11 @@ Event OnInit()
 EndEvent
 
 Function Startup()
-	;RegisterForUpdateGameTime(0.5)
-	
 	Mods.CheckInstalledMods()
 	
 	RegisterForModEvent("HookAnimationStart", "OnSexlabAnimationStart")
 	RegisterForModEvent("HookLeadInEnd", "OnSexlabForeplayEnd")
 	RegisterForModEvent("HookAnimationEnd", "OnSexlabAnimationEnd")
-	;RegisterForMenu("Sleep/Wait Menu")
-	;RegisterForMenu("RaceSex Menu")
 	
 	If Mods.IsANDInstalled == True
 		RegisterForModEvent("AdvancedNudityDetectionUpdate", "OnANDUpdate")
@@ -46,17 +42,6 @@ Function Startup()
 EndFunction
 
 Event OnPlayerLoadGame()
-	;/
-	ActorBase PlayerBase = PlayerRef.GetActorBase()
-	String PlayerName = PlayerBase.GetName()
-	
-	If Logger.LogName == "" || Logger.LogName == "?"
-		Logger.LogName = PlayerName
-		Logger.DuplicateCheck()
-	EndIf
-	SLSF_Reloaded_Logger.Log("===LOAD GAME===")
-	/;
-	
 	Mods.CheckInstalledMods()
 	Listener.RegisterExternalEvents()
 	Data.CleanExternalModList()
@@ -79,35 +64,11 @@ Event OnANDUpdate()
 	EndIf
 EndEvent
 
-;/
-Event OnMenuClose(String MenuName)
-	
-	If MenuName == "RaceSex Menu"
-		ActorBase PlayerBase = PlayerRef.GetActorBase()
-		String PlayerName = PlayerBase.GetName()
-		
-		Logger.LogName = PlayerName
-		Logger.DuplicateCheck()
-		SLSF_Reloaded_Logger.Log("===SEXLAB SEXUAL FAME RELOADED LOG START===")
-		SLSF_Reloaded_Logger.Log("===PLAYER NAME: " + PlayerName + " ===")
-	EndIf
-	
-	
-	If MenuName == "Sleep/Wait Menu"
-		Float TimeDifference = Utility.GetCurrentGameTime() - TimeManager.LastCheckedTime
-		SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu Closed")
-		SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu Time Check. Curent Game Time is: " + Utility.GetCurrentGameTime())
-		SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu Time Check. TimeManager Last Checked Time is: " + TimeManager.LastCheckedTime)
-		SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu Time Check. Difference is: " + TimeDifference)
-		If TimeDifference >= 0.0199 ;~0.0199 is the time amount for an in-game half-hour
-			If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
-				SLSF_Reloaded_Logger.Log("<Player Script> [OnMenuClose] - Sleep/Wait Menu tiggers TimeManager")
-				TimeManager.PeriodicFameTimer()
-			EndIf
-		EndIf
+Event OnCombatStateChanged(Actor CombatTarget, Int CombatState)
+	If CombatTarget == PlayerRef && CombatState != 0
+		SLSF_AllowComment.SetValue(0)
 	EndIf
 EndEvent
-/;
 
 Event OnSexlabAnimationStart(Int threadID, Bool hasPlayer)
 	SLSF_Reloaded_Logger.Log("<Player Script> [OnSexlabAnimationStart] - Sexlab Animation started")
@@ -144,35 +105,6 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	EndIf
 	FameManager.UpdateGlobals()
 EndEvent
-
-;/
-Event OnUpdateGameTime()
-	SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - START")
-	If TimeManager.TimeManagerRunning == False ;Prevent double-up of Periodic Fame Update
-		SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - TimeManager is not already running. Calling TimeManager.")
-		TimeManager.PeriodicFameTimer()
-	Else
-		SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - TimeManager is already running. Skipped TimeManager call.")
-	EndIf
-	
-	Int OldSkoomaValue = SLSF_Reloaded_Skooma.GetValue() as Int
-	Int NewSkoomaValue = OldSkoomaValue - 2
-	
-	If NewSkoomaValue < 0
-		NewSkoomaValue = 0
-	EndIf
-	
-	SLSF_Reloaded_Skooma.SetValue(NewSkoomaValue)
-	
-	If Config.AllowLegacyOverwrite == True
-		SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - AllowLegacyOverwrite is TRUE")
-		LegacyOverwrite.OverwriteLegacyFame()
-	Else
-		SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - AllowLegacyOverwrite is FALSE")
-	EndIf
-	SLSF_Reloaded_Logger.Log("<Player Script> [OnUpdateGameTime] - END")
-EndEvent
-/;
 
 Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 	String ObjectName = ""
